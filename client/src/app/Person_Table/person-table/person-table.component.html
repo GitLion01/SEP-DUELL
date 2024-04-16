@@ -1,0 +1,40 @@
+<div class="card my-5">
+  <div class="card-body">
+    <div class="SearchYear">
+      <label>Suche zwischen Jahren</label>
+      <input name="yearMin" [(ngModel)]="searchMin" id="yearMin" type="number">
+      <input name="yearMax" [(ngModel)]="searchMax" id="yearMax" type="number">
+      <button (click)="findPerson(searchMin,searchMax)">Suche</button>
+    </div>
+    <div class="SearchCity">
+      <label>Suche nach Stadt</label>
+      <input name="searchCity" [(ngModel)]="searchCity" id="searchCity" type="text" placeholder="Stadt">
+      <button (click)="searchByCity(searchCity)">Suchen</button>
+    </div>
+    <button (click)="reset()">Reset</button>
+    <table class="table table-bordered table-striped">
+      <thead class="thead-dark">
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Vorname</th>
+        <th scope="col">Nachname</th>
+        <th scope="col">Geburtsjahr</th>
+        <th scope="col">Stadt</th>
+        <th scope="col">Straße</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let person of persons">
+        <td>{{ person.id }}</td>
+        <td>{{ person.firstName }}</td>
+        <td>{{ person.lastName }}</td>
+        <td>{{person.yearOfBirth}}</td>
+        <td>{{person.adresse.city}}</td>
+        <td>{{person.adresse.street}}</td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
