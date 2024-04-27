@@ -1,15 +1,15 @@
 import React, { Component } from 'react';
 
 
-class RegisterPage extends Component {
+class SuccessfulLog extends Component {
     state = {  } 
     render() { 
         return (
             <div>
-                <h1>Register Page</h1> 
+                <h1>Succesful Log In</h1>
             </div>
         );
     }
 }
  
-export default RegisterPage;
+export default SuccessfulLog;

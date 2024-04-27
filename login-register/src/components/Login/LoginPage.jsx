@@ -17,7 +17,9 @@ class LoginPage extends React.Component {
             <label htmlFor="password">Passwort:</label>
             <input type="password" id="password" name="password" />
           </div>
+          <Link to="/startseite">
           <button type="submit">Anmelden</button>
+          </Link>
           </form>
           <div className="register-link"> 
             <p>Noch kein Account?</p>
