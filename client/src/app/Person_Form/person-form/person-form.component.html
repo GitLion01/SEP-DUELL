@@ -1,0 +1,54 @@
+
+<h1>Personen Hinzufügen</h1>
+<div class="card-body">
+  <form (ngSubmit)="onSubmit()" #studentForm="ngForm">
+    <div class="form-group">
+      <label for="firstname">Vor Name</label>
+      <input type="text" [(ngModel)]="person.firstName"
+             class="form-control"
+             id="firstname"
+             name="firstname"
+             placeholder="Vorname"
+             required #firstname="ngModel">
+    </div>
+    <div class="form-group">
+      <label for="lastname">Nachname</label>
+      <input type="text" [(ngModel)]="person.lastName"
+             class="form-control"
+             id="lastname"
+             name="lastname"
+             placeholder="Nachname"
+             required #lastname="ngModel">
+    </div>
+    <div class="form-group">
+      <label for="year">Geburtsjahr</label>
+      <input type="number" [(ngModel)]="person.yearOfBirth"
+             class="form-control"
+             id="year"
+             name="year"
+             placeholder="YYYY"
+             required #lastname="ngModel">
+    </div>
+    <div class="form-group">
+      <label for="city">Stadt</label>
+      <input type="text" [(ngModel)]="person.adresse.city"
+             class="form-control"
+             id="city"
+             name="city"
+             placeholder="Stadt"
+             required #street="ngModel">
+    </div>
+    <div class="form-group">
+      <label for="street">Straße</label>
+      <input type="text" [(ngModel)]="person.adresse.street"
+             class="form-control"
+             id="street"
+             name="street"
+             placeholder="Straße und Hausnummer eingeben"
+             required #street="ngModel">
+    </div>
+    <button type="submit" [disabled]="!studentForm.form.valid"
+            class="btn btn-info">Submit</button>
+  </form>
+
+</div>
