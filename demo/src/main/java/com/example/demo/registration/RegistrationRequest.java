@@ -1,4 +1,4 @@
-package com.example.demo.Login;
+package com.example.demo.registration;
 
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -17,7 +17,7 @@ public class RegistrationRequest {
     private final String email;
     private final String password;
     private Date dateOfBirth;
-    private Boolean isAdmin;
     private byte[] image;
+
 
 }
