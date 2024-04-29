@@ -38,35 +38,25 @@ public class UserAccount implements UserDetails {
     private byte[] image;
     @Enumerated(EnumType.STRING)
     private UserRole role;
-    private Boolean locked;
-    private boolean enabled;
+    private Boolean locked = false;
+    private boolean enabled = false;
 
 
     public UserAccount(String firstName,
                        String lastName,
-                       String username,
                        String email,
                        String password,
-                       Date dateOfBirth,
-                       Integer leaderboardPoints,
-                       Integer sepCoins,
-                       byte[] image,
-                       UserRole role,
-                       Boolean locked,
-                       boolean enabled) {
+                       UserRole role) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.username = username;
         this.email = email;
         this.password = password;
-        this.dateOfBirth = dateOfBirth;
-        this.leaderboardPoints = leaderboardPoints;
-        this.sepCoins = sepCoins;
-        this.image = image;
         this.role = role;
-        this.locked = locked;
-        this.enabled = enabled;
+
     }
+
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
