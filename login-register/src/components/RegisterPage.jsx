@@ -2,14 +2,14 @@ import React, { Component } from 'react';
 
 
 class RegisterPage extends Component {
-    state = {  } 
-    render() { 
+    state = {  }
+    render() {
         return (
             <div>
-                <h1>Register Page</h1> 
+                <h1>Register Page</h1>
             </div>
         );
     }
 }
- 
+
 export default RegisterPage;
