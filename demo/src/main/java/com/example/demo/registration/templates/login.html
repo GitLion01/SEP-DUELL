@@ -1,6 +1,7 @@
 <html>
 
-  <div class="row justify-content-center">
+<body>
+<div class="row justify-content-center">
     <div class="col-12 col-sm-10 col-md-12 col-lg-12 col-xl-10">
         <div class="user-form-card">
             <div class="user-form-title">
@@ -8,7 +9,7 @@
                 <p>Use your credentials to access</p>
             </div>
             <div class="user-form-group">
-                <form class="user-form" method="post" action="{% url '/registration' %}">
+                <form class="user-form" method="post" action="/registration">
                     <div class="form-group">
                         <input type="text" class="form-control" name="email" placeholder="Enter your email">
                     </div>
@@ -37,4 +38,8 @@
     </div>
 </div>
 
+</body>
+<script>
+    fetch("https://jsonplaceholder.typicode.com/users").then(res => {return res.json();})
+</script>
 </html>
