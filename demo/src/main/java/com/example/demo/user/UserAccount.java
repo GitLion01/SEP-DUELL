@@ -45,11 +45,13 @@ public class UserAccount implements UserDetails {
     public UserAccount(String firstName,
                        String lastName,
                        Date dateOfBirth,
+                       String username,
                        String email,
                        String password,
                        UserRole role) {
         this.firstName = firstName;
         this.lastName = lastName;
+        this.dateOfBirth = dateOfBirth;
         this.username = username;
         this.email = email;
         this.password = password;
