@@ -5,9 +5,23 @@ import { Link  } from 'react-router-dom';
 
 
 class LoginPage extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      username: "Max", // Initialisieren Sie den Zustand mit leeren Zeichenketten
+      password: '123' // Initialisieren Sie den Zustand mit leeren Zeichenketten
+    };
+  }
+
+  handleChange = (event) => {
+    this.setState({
+      [event.target.name]: event.target.value
+    });
+  };
 
 
-  /*handleSubmit = async (event) => {
+
+  handleSubmit = async (event) => {
     event.preventDefault();
     const { username, password } = this.state;
 
@@ -30,7 +44,7 @@ class LoginPage extends React.Component {
       console.error('Fehler bei der Anmeldung:', error.message);
       // Hier kannst du eine Fehlermeldung für den Benutzer anzeigen
     }
-  };*/
+  };
 
 
 
@@ -38,31 +52,41 @@ class LoginPage extends React.Component {
 
   render() {
     return (
-      <div>
-        <h1>Login</h1>
-        <form>
-          <div>
-            <label htmlFor="username">Benutzername:</label>
-            <input type="text" id="username" name="username" />
-          </div>
-          <div>
-            <label htmlFor="password">Passwort:</label>
-            <input type="password" id="password" name="password" />
-          </div>
-          <Link to="/startseite">
-          <button type="submit">Anmelden</button>
-          </Link>
+        <div>
+          <h1>Login</h1>
+          <form onSubmit={this.handleSubmit}>
+            <div>
+              <label htmlFor="username">Benutzername:</label>
+              <input
+                  type="text"
+                  id="username"
+                  name="username"
+                  value={this.state.username}
+                  onChange={this.handleChange}
+              />
+            </div>
+            <div>
+              <label htmlFor="password">Passwort:</label>
+              <input
+                  type="password"
+                  id="password"
+                  name="password"
+                  value={this.state.password}
+                  onChange={this.handleChange}
+              />
+            </div>
+            <button type="submit">Anmelden</button>
           </form>
-          <div className="register-link"> 
+          <div className="register-link">
             <p>Noch kein Account?</p>
-          <Link to="/register">
-          <button type="button">Registrieren</button>
-          </Link>
-          <Link to="/2fa">
-          <button type="button">2FA</button>
-          </Link>
+            <Link to="/registration">
+              <button type="button">Registrieren</button>
+            </Link>
+            <Link to="/2fa">
+              <button type="button">2FA</button>
+            </Link>
+          </div>
         </div>
-      </div>
     );
   }
 }

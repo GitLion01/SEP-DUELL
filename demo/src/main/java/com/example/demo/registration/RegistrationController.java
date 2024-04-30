@@ -19,6 +19,7 @@ public class RegistrationController {
     private final UserAccountRepository userAccountRepository;
 
     @PostMapping
+    @CrossOrigin
     public String register(@RequestBody RegistrationRequest request) {
         return registrationService.register(request);
     }
@@ -26,6 +27,11 @@ public class RegistrationController {
     @GetMapping(path = "/users")
     public List<UserAccount> findAll() {
         return userAccountRepository.findAll();
+    }
+
+    @GetMapping
+    public String getStatus(){
+        return "Registration Service is up and running but no one knows why or how";
     }
 
 }

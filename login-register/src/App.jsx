@@ -11,7 +11,7 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/registration" element={<RegisterPage />} />
         <Route path="/startseite" element={<SuccesfulLog/>} /> {/* Die Namen der Seiten müssen groß geschrieben werden, damit das klappt*/}
         <Route path="/2fa" element={<TwoFaktorAuthenfication/>} />
       </Routes>
