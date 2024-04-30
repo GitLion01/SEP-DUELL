@@ -8,8 +8,8 @@ class LoginPage extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      username: "Max", // Initialisieren Sie den Zustand mit leeren Zeichenketten
-      password: '123' // Initialisieren Sie den Zustand mit leeren Zeichenketten
+      username: "", // Initialisieren Sie den Zustand mit leeren Zeichenketten
+      password: '' // Initialisieren Sie den Zustand mit leeren Zeichenketten
     };
   }
 
