@@ -44,6 +44,7 @@ public class UserAccount implements UserDetails {
 
     public UserAccount(String firstName,
                        String lastName,
+                       Date dateOfBirth,
                        String email,
                        String password,
                        UserRole role) {

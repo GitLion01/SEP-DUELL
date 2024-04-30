@@ -1,23 +1,31 @@
 package com.example.demo.registration;
 
+import com.example.demo.user.UserAccount;
+import com.example.demo.user.UserAccountRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping(path = "/registration")
+@CrossOrigin
 @AllArgsConstructor
 public class RegistrationController {
 
 
     private final RegistrationService registrationService;
+    private final UserAccountRepository userAccountRepository;
 
     @PostMapping
     public String register(@RequestBody RegistrationRequest request) {
         return registrationService.register(request);
+    }
+
+    @GetMapping(path = "/users")
+    public List<UserAccount> findAll() {
+        return userAccountRepository.findAll();
     }
 
 }

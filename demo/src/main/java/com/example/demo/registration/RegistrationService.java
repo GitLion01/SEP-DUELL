@@ -7,6 +7,8 @@ import com.example.demo.user.UserRole;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @AllArgsConstructor
 @Service
 public class RegistrationService {
@@ -20,6 +22,8 @@ public class RegistrationService {
         if(!isValidemail) {
             throw new IllegalStateException("Invalid email");
         }
-        return userAccountService.signUpUser(new UserAccount(request.getFirstName(), request.getLastName(), request.getEmail(), request.getPassword(), UserRole.USER));
+        return userAccountService.signUpUser(new UserAccount(request.getFirstName(), request.getLastName(), request.getDateOfBirth(), request.getEmail(), request.getPassword(), UserRole.USER));
     }
+
+
 }
