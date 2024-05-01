@@ -12,7 +12,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.List;
 
 @Getter
 @Setter
@@ -39,7 +38,7 @@ public class UserAccount implements UserDetails {
     @Enumerated(EnumType.STRING)
     private UserRole role;
     private Boolean locked = false;
-    private boolean enabled = false;
+    private Boolean enabled = false;
 
 
     public UserAccount(String firstName,
