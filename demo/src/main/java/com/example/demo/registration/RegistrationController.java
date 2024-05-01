@@ -3,7 +3,6 @@ package com.example.demo.registration;
 import com.example.demo.user.UserAccount;
 import com.example.demo.user.UserAccountRepository;
 import lombok.AllArgsConstructor;
-import org.springframework.context.annotation.Bean;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,7 +18,7 @@ public class RegistrationController {
     private final UserAccountRepository userAccountRepository;
 
     @PostMapping
-    @CrossOrigin
+   /* @CrossOrigin*/
     public String register(@RequestBody RegistrationRequest request) {
         return registrationService.register(request);
     }
