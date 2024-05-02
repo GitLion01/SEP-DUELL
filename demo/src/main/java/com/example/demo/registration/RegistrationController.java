@@ -28,9 +28,9 @@ public class RegistrationController {
         return userAccountRepository.findAll();
     }
 
-    @GetMapping
+   /* @GetMapping
     public String getStatus(){
         return "Registration Service is up and running but no one knows why or how";
-    }
+    }*/
 
 }
