@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import './TwoFaktorAuthenfication.css';
+import './TwoFactorAuthentication.css';
 
 class TwoFaktorAuthenfication extends Component {
     state = {
