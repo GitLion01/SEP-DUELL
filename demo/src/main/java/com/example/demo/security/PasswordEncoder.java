@@ -1,9 +1,8 @@
-/*package com.example.demo.security;
+package com.example.demo.security;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-
+import org.springframework.context.annotation.Bean;                                 //ö
+import org.springframework.context.annotation.Configuration;                //ö
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;            //ö
 
 @Configuration
 public class PasswordEncoder {
@@ -12,4 +11,4 @@ public class PasswordEncoder {
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
         return new BCryptPasswordEncoder();
     }
-}*/
+}

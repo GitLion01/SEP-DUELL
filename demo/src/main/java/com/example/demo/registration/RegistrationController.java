@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping(path = "/registration")
+@RequestMapping(path = "/api/v1/registration")
 @CrossOrigin
 @AllArgsConstructor
 public class RegistrationController {
@@ -28,9 +28,15 @@ public class RegistrationController {
         return userAccountRepository.findAll();
     }
 
-   /* @GetMapping
-    public String getStatus(){
-        return "Registration Service is up and running but no one knows why or how";
-    }*/
+    @GetMapping
+    public String getStatus() {
+        // Hier kannst du eine Methode aus deinem RegistrationService aufrufen, die den gewünschten Status zurückgibt
+        // Zum Beispiel könnte diese Methode prüfen, ob der Service verfügbar ist oder andere relevante Informationen zurückgeben
+        return "Registration service is up and running!";
+    }
 
+    @GetMapping(path = "confirm")
+    public String confirm(@RequestParam("token") String token) {
+        return registrationService.confirmToken(token);
+    }
 }
