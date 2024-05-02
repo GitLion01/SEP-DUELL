@@ -26,7 +26,7 @@ public class UserAccountService implements UserDetailsService {
         return userAccountRepository.findAll();
     }
 
-    public String signUpUser(UserAccount userAccount) {
+    public String signUpUser(UserAccount userAccount) throws IllegalStateException {
         boolean userExists = userAccountRepository.findByEmail(userAccount.getEmail()).isPresent();
 
         if(userExists) {
