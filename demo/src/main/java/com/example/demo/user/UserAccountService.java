@@ -15,7 +15,7 @@ public class UserAccountService implements UserDetailsService {
 
     private final UserAccountRepository userAccountRepository;
     private final static String USER_NOT_FOUND_MESSAGE = "User not found";
-    private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    /*private final BCryptPasswordEncoder bCryptPasswordEncoder;*/
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
