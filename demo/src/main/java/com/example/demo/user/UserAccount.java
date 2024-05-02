@@ -35,10 +35,10 @@ public class UserAccount implements UserDetails {
     private Integer sepCoins = 500;
     @Lob
     private byte[] image;
-    /*@Enumerated(EnumType.STRING)
+    @Enumerated(EnumType.STRING)
     private UserRole role;
     private Boolean locked = false;
-    private Boolean enabled = false;*/
+    private Boolean enabled = false;
 
 
     public UserAccount(String firstName,
@@ -60,13 +60,13 @@ public class UserAccount implements UserDetails {
 
 
 
-   /* @Override
+    @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         SimpleGrantedAuthority authority = new SimpleGrantedAuthority(role.name());
         return Collections.singletonList(authority);
-    }*/
+    }
 
-    /*@Override
+    @Override
     public String getPassword() {
         return this.password;
     }
@@ -74,9 +74,9 @@ public class UserAccount implements UserDetails {
     @Override
     public String getUsername() {
         return this.username;
-    }*/
+    }
 
-   /* @Override
+    @Override
     public boolean isAccountNonExpired() {
         return true;
     }
@@ -84,15 +84,15 @@ public class UserAccount implements UserDetails {
     @Override
     public boolean isAccountNonLocked() {
         return !this.locked;
-    }*/
+    }
 
     @Override
     public boolean isCredentialsNonExpired() {
         return true;
     }
 
-    /*@Override
+    @Override
     public boolean isEnabled() {
         return this.enabled;
-    }*/
+    }
 }

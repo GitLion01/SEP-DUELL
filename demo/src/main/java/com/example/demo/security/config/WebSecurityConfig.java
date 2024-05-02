@@ -2,6 +2,7 @@ package com.example.demo.security.config;
 
 import com.example.demo.user.UserAccountService;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -19,7 +20,8 @@ public class WebSecurityConfig {
 
 
     private final UserAccountService userAccountService;
-    private final BCryptPasswordEncoder bCryptPasswordEncoder;
+
+
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
