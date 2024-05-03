@@ -41,13 +41,15 @@ public class UserAccount implements UserDetails {
     private Boolean enabled = false;
 
 
-    public UserAccount(String firstName,
+    public UserAccount(byte[] image,
+                       String firstName,
                        String lastName,
                        Date dateOfBirth,
                        String username,
                        String email,
                        String password,
                        UserRole role) {
+        this.image = image;
         this.firstName = firstName;
         this.lastName = lastName;
         this.dateOfBirth = dateOfBirth;

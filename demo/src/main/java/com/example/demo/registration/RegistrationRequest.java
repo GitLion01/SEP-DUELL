@@ -1,5 +1,6 @@
 package com.example.demo.registration;
 
+import com.example.demo.user.UserRole;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -19,6 +20,7 @@ public class RegistrationRequest {
     private final String password;
     private Date dateOfBirth;
     private byte[] image;
+    private UserRole role;
 
 
 }
