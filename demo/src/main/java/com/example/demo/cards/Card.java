@@ -21,7 +21,6 @@ public class Card {
     private Integer attackPoints;
     private Integer defensePoints;
     private String description;
-    @Lob
     private byte[] image;
     private Rarity rarity;
 

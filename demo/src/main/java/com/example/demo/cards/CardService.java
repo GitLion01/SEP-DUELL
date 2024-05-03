@@ -4,6 +4,9 @@ package com.example.demo.cards;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Optional;
+
 @Service
 public class CardService {
 
@@ -11,9 +14,9 @@ public class CardService {
     private CardRepository cardRepository;
 
     public String addCard(CardRequest request) throws IllegalStateException{
-        boolean cardExists = cardRepository.findByName(request.getName()).isPresent();
+        boolean cardExists = cardRepository.findByName(request.getName()).isEmpty();
 
-        if(cardExists) {
+        if(!cardExists) {
             throw new IllegalStateException("card already exists");
         }
 
@@ -29,17 +32,15 @@ public class CardService {
         return "card added";
     }
 
-    public String deleteCard(CardRequest request)throws IllegalStateException{
-        boolean exists = cardRepository.findByName(request.getName()).isPresent();
-        if(!exists) {
-            throw new IllegalStateException("card does not exists");
+    public String deleteCard(String name) throws IllegalStateException {
+        Optional<Card> optionalCard = cardRepository.findByName(name);
+        if (optionalCard.isEmpty()) {
+            throw new IllegalStateException("Card does not exist");
         }
-        for(Card card : cardRepository.findAll()) {
-            if(card.getName().equals(request.getName())) {
-                cardRepository.delete(card);
-            }
-        }
-        return "card deleted";
+        Card card = optionalCard.get();
+        cardRepository.delete(card);
+        return "Card deleted";
     }
+
 
 }

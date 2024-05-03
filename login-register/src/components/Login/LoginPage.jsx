@@ -26,7 +26,7 @@ class LoginPage extends React.Component {
     const { username, password } = this.state;
 
     try {
-      await fetch('http://localhost:5432/registration', {
+      await fetch('http://localhost:5432/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
