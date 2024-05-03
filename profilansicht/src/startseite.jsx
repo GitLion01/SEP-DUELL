@@ -1,13 +1,13 @@
 import React, { Component } from 'react';
 
-
-class Button extends Component {
+class Startseite extends Component {
     state = {  } 
     render() { 
         return (
-            <button>Zurück</button>
+            <h1>Startseite</h1>
+
         );
     }
 }
  
-export default Button;
+export default Startseite;
