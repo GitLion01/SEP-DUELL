@@ -26,13 +26,14 @@ class LoginPage extends React.Component {
     const { username, password } = this.state;
 
     try {
-      const response = await fetch('http://localhost:5432/registration', {
+      await fetch('http://localhost:5432/registration', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ username: username, password: password })
       });
+
       // Hier kannst du die Weiterleitung oder andere Aktionen nach erfolgreicher Anmeldung durchführen
       console.log('Anmeldung erfolgreich');
     } catch (error) {
