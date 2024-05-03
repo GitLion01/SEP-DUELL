@@ -17,4 +17,6 @@ public class CardController {
         return cardService.addCard(request);
     }
 
+    @GetMapping()
+    public String deleteCard(@RequestBody CardRequest request) {return cardService.deleteCard(request);}
 }

@@ -29,6 +29,17 @@ public class CardService {
         return "card added";
     }
 
-
+    public String deleteCard(CardRequest request)throws IllegalStateException{
+        boolean exists = cardRepository.findByName(request.getName()).isPresent();
+        if(!exists) {
+            throw new IllegalStateException("card does not exists");
+        }
+        for(Card card : cardRepository.findAll()) {
+            if(card.getName().equals(request.getName())) {
+                cardRepository.delete(card);
+            }
+        }
+        return "card deleted";
+    }
 
 }
