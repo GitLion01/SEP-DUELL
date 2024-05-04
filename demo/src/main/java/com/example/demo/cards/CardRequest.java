@@ -1,6 +1,4 @@
 package com.example.demo.cards;
-
-import jakarta.persistence.Lob;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
