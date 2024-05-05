@@ -1,11 +1,37 @@
-/* App.css */
 
 .deck-container {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  justify-content: flex-start;
   align-items: center;
+  padding-top: 50px;
   height: 100vh;
-  background-color: #007bff; /* Blau leuchtender Hintergrund */
+  background-color: white; /* Changed background color to a darker shade */
+  color: #1b1616; /* Changed text color to white */
+}
+
+h1 {
+
+  font-family: Arial, sans-serif;
+  color: rgb(19, 71, 19); /* Changed headline color to gold */
+  margin-bottom: 20px;
+  font-weight: bolder;
+}
+
+.instruction {
+  margin-bottom: 20px;
+  border: 2px solid #56616d;
+  padding: 10px;
+  background-color: #82878d; /* Changed background color of instruction */
+}
+
+label {
+  color: #FFF; /* Changed text color of the label to white */
+}
+
+select {
+  background-color: #807d7d; /* Changed background color of select to a darker shade */
+  color: #FFF; /* Changed text color of select to white */
 }
 
 .card {
@@ -15,6 +41,5 @@
   margin: 5px;
   display: inline-block;
   cursor: pointer;
+  background-color: #4CAF50;
 }
-
-  

@@ -1,4 +1,3 @@
-// App.jsx
 
 import React, { useState } from 'react';
 import './Deckbearbeiten.css';
@@ -30,10 +29,11 @@ function DeckEditor() {
 
   return (
     <div className="deck-container">
-      <div className="card-selector">
+      <h1>DECK BEARBEITEN</h1>
+      <div className="instruction">
         <label htmlFor="card-select">Wählen Sie eine Karte:</label>
         <select id="card-select" onChange={handleSelectChange} value={selectedCard || ''}>
-          <option value="">Bitte wählen...</option>
+          <option value="">Bitte wählen Sie eine Karte</option>
           {['A', 'K', 'Q', 'J', '10'].map((card, index) => (
             <option key={index} value={card}>
               {card}
