@@ -1,9 +1,5 @@
 import React, { Component } from 'react';
-<<<<<<<< HEAD:login-register/src/components/2FA/TwoFactorAuthentication.jsx
 import './TwoFactorAuthentication.css';
-========
-import './TwoFaktorAuthentication.css';
->>>>>>>> e0f55ea (Enes Profilansicht hinzugefügt, App.jsx und .css-Dateien angepasst/überarbeitet):login-register/src/components/2FA/TwoFaktorAuthentication.jsx
 
 class TwoFaktorAuthenfication extends Component {
     state = {
