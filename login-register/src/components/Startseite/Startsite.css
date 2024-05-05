@@ -1,7 +1,7 @@
 
 .App {
     text-align: center;
-    background-image: url('C:\Users\alhan\Downloads\H2.2.jpg');
+    
     background-size: cover; /* Das Bild wird so skaliert, dass es den gesamten Hintergrund bedeckt */
     background-position: center; /* Das Bild wird zentriert positioniert */
   }
