@@ -1,7 +1,8 @@
 import React from 'react';
 import './LoginPage.css';
-import { Link, Navigate } from 'react-router-dom'; // Redirect durch Navigate ersetzen
+import { Link, Navigate } from 'react-router-dom';
 import axiosInstance from '../../api/axios'; // Richtiges Importieren der Axios-Klasse
+
 
 class LoginPage extends React.Component {
   constructor(props) {
@@ -53,8 +54,14 @@ class LoginPage extends React.Component {
       return <Navigate to="/2FA/TwoFactorAuthentication" />;
     }
 
+    // Redirect durch Navigate ersetzen
+    if (this.state.redirectToHome) {
+      return <Navigate to="/2FA/TwoFactorAuthentication" />;
+    }
+
     return (
-      <div>
+      <body className='login__body'>
+      <div className='login'>
         <h1>Login</h1>
         <form onSubmit={this.handleSubmit}>
           <div>
@@ -86,6 +93,7 @@ class LoginPage extends React.Component {
           </Link>
         </div>
       </div>
+      </body>
     );
   }
 }
