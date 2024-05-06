@@ -1,0 +1,62 @@
+
+.App {
+    text-align: center;
+    
+    background-size: cover; /* Das Bild wird so skaliert, dass es den gesamten Hintergrund bedeckt */
+    background-position: center; /* Das Bild wird zentriert positioniert */
+  }
+  
+  header {
+    color: white;
+    padding: 20px;
+  }
+  
+  main {
+    display: flex;
+    justify-content: center; /* Zentriert den Inhalt horizontal */
+    align-items: center; /* Zentriert den Inhalt vertikal */
+    height: calc(100vh - 180px); /* Berechnet die Höhe des Inhaltsbereichs des Bildschirms */
+  }
+  
+  .centered-content {
+    display: flex;
+    flex-direction: column; /* Anordnung des Inhalts in einer Spalte */
+  }
+  
+  section {
+    flex: 1;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin: 0 10px;
+    background-color: rgb(1, 1, 29, 0.7);
+    
+  }
+  
+  footer {
+  background-color: rgb(1, 1, 17);
+    color: white;
+    padding: 15px;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+  }
+  
+  footer nav ul {
+    padding: 0;
+  }
+  
+  footer nav ul li {
+    display: inline;
+    margin-right: 10px;
+  }
+  
+  footer nav ul li a {
+    color: white;
+    text-decoration: none;
+  }
+  
+  .deck, .friends {
+    margin-bottom: 20px;
+  }
+  

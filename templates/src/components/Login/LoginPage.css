@@ -1,0 +1,75 @@
+/* Setzt den Hintergrund auf Schwarz */
+.login__body {
+  margin: 0; /* Setzt den Außenabstand auf 0 */
+  padding: 0; /* Setzt den Innenabstand auf 0 */
+  display: flex; /* Verwendet Flexbox-Layout */
+  justify-content: center; /* Zentriert den Inhalt horizontal */
+  align-items: center; /* Zentriert den Inhalt vertikal */
+  height: 100vh; /* Setzt die Höhe des Body auf 100% der Bildschirmhöhe */
+  background-color: #000000; /* Hintergrundfarbe des Body auf Schwarz setzen */
+  color: #000000; /* Textfarbe auf Weiß setzen */
+}
+
+/* Stil für den Container des Login-Formulars */
+.login {
+  display: block;
+  width: 320px; /* Breite des Formularcontainers */
+  min-height: 400px;
+  border-radius: 50px;
+  padding: 100px; /* Innenabstand des Formulars */
+  background-color: #ffffff; /* Hintergrundfarbe des Formulars auf Dunkelgrau setzen */
+  box-sizing: border-box;
+
+}
+
+/* Stil für Label */
+.login label {
+  display: block; /* Label wird als Blockelement dargestellt */
+  margin-bottom: 5px; /* Abstand unterhalb des Labels */
+  color: #000000; /* Textfarbe des Labels auf Weiß setzen */
+  font-size: 15px;
+}
+
+/* Stil für Input-Felder */
+.login input {
+  width: 100%; /* Füllt die Breite des Containers aus */
+  padding: 8px; /* Innenabstand des Input-Feldes */
+  border: 1px solid #ccc; /* Rahmen um das Input-Feld */
+  border-radius: 3px; /* Abrundung der Ecken des Input-Feldes */
+  background-color: #444444; /* Hintergrundfarbe des Input-Feldes auf Dunkelgrau setzen */
+  color: #ffffff; /* Textfarbe des Input-Feldes auf Weiß setzen */
+  margin-bottom: 5px;
+}
+
+/* Stil für Button */
+.login button {
+  font-size: 14px;   
+  font-weight: 600; 
+  width: 110%; /* Füllt die Breite des Containers aus */
+  padding: 10px; /* Innenabstand des Buttons */
+  margin-top: 15px; /* Abstand nach oben */
+  margin-bottom: 10px;
+  border: none; /* Kein Rahmen um den Button */
+  border-radius: 50px; /* Abrundung der Ecken des Buttons */
+  background-color: #e100ff; /* Hintergrundfarbe des Buttons auf Blau setzen */
+  color: #ffffff; /* Textfarbe des Buttons auf Weiß setzen */
+  cursor: pointer; /* Zeiger bei Mausüberfahren des Buttons */
+}
+
+/* Stil für Button bei Hover */
+.login button:hover {
+  background-color: #b108b1; /* Ändern der Hintergrundfarbe beim Hovern */
+}
+.register-link {
+  text-align: center; /* Zentriert den Inhalt horizontal */
+}
+
+.register-link p {
+  margin-bottom: 5px; /* Abstand unter dem Text */
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.register-link button {
+  margin: 0 auto; /* Zentriert den Button horizontal */
+}
