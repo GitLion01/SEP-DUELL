@@ -32,15 +32,20 @@ public class CardService {
         return "card added";
     }
 
-    public String deleteCard(String name) throws IllegalStateException {
+    public void deleteCard(String name) throws IllegalStateException {
         Optional<Card> optionalCard = cardRepository.findByName(name);
         if (optionalCard.isEmpty()) {
             throw new IllegalStateException("Card does not exist");
         }
         Card card = optionalCard.get();
         cardRepository.delete(card);
-        return "Card deleted";
     }
 
+    public String deleteMultipleCards(List<String> names) throws IllegalStateException {
+        for (String name : names) {
+            deleteCard(name);
+        }
+        return "Cards deleted";
+    }
 
 }

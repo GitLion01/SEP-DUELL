@@ -21,10 +21,14 @@ public class CardController {
         return cardService.addCard(request);
     }
 
-    @DeleteMapping(path = "/delete/{name}")
-    public ResponseEntity<String> deleteCard(@PathVariable String name) {
-        String message = cardService.deleteCard(name);
-        return ResponseEntity.ok(message);
+    @PostMapping(path = "/delete")
+    public ResponseEntity<String> deleteCard(@RequestBody List<String> names) {
+        if (!names.isEmpty()) {
+            String message = cardService.deleteMultipleCards(names);
+            return ResponseEntity.ok(message);
+        } else {
+            return ResponseEntity.badRequest().body("At least one card name is required.");
+        }
     }
 
     @GetMapping
