@@ -5,7 +5,7 @@ services:
   app:
     container_name: springboot-postgresql
     image: springboot-postgresql
-    build: ./demo #build in diesem Ordner
+    build: ./ #build in diesem Ordner
     ports:
       - "8080:8080"
     depends_on:
