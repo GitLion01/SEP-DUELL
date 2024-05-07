@@ -24,7 +24,6 @@ public class Card {
     private byte[] image;
     private Rarity rarity;
 
-
     public Card(String name,
                 Integer attackPoints,
                 Integer defensePoints,

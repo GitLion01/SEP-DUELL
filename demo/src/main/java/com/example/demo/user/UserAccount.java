@@ -1,5 +1,5 @@
 package com.example.demo.user;
-
+import com.example.demo.cards.Card;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -9,9 +9,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
+import java.util.*;
 
 @Getter
 @Setter
@@ -19,8 +17,6 @@ import java.util.Date;
 @NoArgsConstructor
 @Entity
 public class UserAccount implements UserDetails {
-
-
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -57,9 +53,14 @@ public class UserAccount implements UserDetails {
         this.role = role;
 
     }
-
-
-
+    /*
+    public void addCard(Card card) {
+        cards.add(card);
+    }
+    public void removeCard(Card card) {
+        cards.remove(card);
+    }
+*/
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         SimpleGrantedAuthority authority = new SimpleGrantedAuthority(role.name());
