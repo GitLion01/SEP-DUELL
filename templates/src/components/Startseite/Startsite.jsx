@@ -15,9 +15,15 @@ class Startseite extends Component {
               <h2>Mein Kartendeck</h2>
               {/* Hier könnten die Karten des Spielers angezeigt werden */}
             </section>
-            <section className="friends">
+            <section className="meinprofil">
               <h2>Meine Freunde</h2>
               {/* Hier könnten die Freunde des Spielers angezeigt werden */}
+              <nav>
+            <ul>
+              <li><a href="/profil">Mein Profil</a></li>
+              {/* Weitere Navigationslinks könnten hier hinzugefügt werden */}
+            </ul>
+          </nav>
             </section>
           </div>
         </main>

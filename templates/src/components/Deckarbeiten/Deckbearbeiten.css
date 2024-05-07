@@ -10,7 +10,8 @@
   color: #1b1616; /* Changed text color to white */
 }
 
-h1 {
+
+.deck-container h1 {
 
   font-family: Arial, sans-serif;
   color: rgb(19, 71, 19); /* Changed headline color to gold */

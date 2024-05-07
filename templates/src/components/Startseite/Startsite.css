@@ -1,15 +1,18 @@
 
 .App {
     text-align: center;
-    
+    background-image: url('/public/img/Startseitehintergrund.jpg');
     background-size: cover; /* Das Bild wird so skaliert, dass es den gesamten Hintergrund bedeckt */
     background-position: center; /* Das Bild wird zentriert positioniert */
   }
   
   header {
+    
     color: white;
     padding: 20px;
   }
+
+  
   
   main {
     display: flex;
@@ -56,7 +59,7 @@
     text-decoration: none;
   }
   
-  .deck, .friends {
+  .deck, .meinprofil {
     margin-bottom: 20px;
   }
   
