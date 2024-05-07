@@ -14,7 +14,7 @@ public class ConfirmationTokenService {
     private final ConfirmationTokenRepository confirmationTokenRepository;
 
     public String generateToken(UserAccount userAccount, TokenPurpose purpose) {
-        String token = UUID.randomUUID().toString().replace("-", "").substring(0, 8);;
+        String token = UUID.randomUUID().toString().replace("-", "").substring(0, 6);;
         ConfirmationToken confirmationToken = new ConfirmationToken(
                 token,
                 LocalDateTime.now(),

