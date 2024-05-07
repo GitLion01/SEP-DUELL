@@ -3,7 +3,7 @@ FROM node:17-alpine
 #subfolder
 WORKDIR /app
 
-#copy the package.json file into the image and with (.) copy it to the folder app
+#copy the package.json file into the image ,and with (.) copy it to the folder app
 COPY package.json .
 
 RUN npm install
