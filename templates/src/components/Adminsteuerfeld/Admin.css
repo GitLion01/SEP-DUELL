@@ -3,6 +3,9 @@
     text-align: center;
 
 }
+.AdminPanel input {
+    width: 20%;
+}
 
 .AdminPanel button {
     width: 10%;

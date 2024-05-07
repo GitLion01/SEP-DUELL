@@ -24,7 +24,7 @@ class TwoFaktorAuthenfication extends Component {
         event.preventDefault(); // Verhindert das Standardverhalten des Formulars (Seite neu laden)
         
         try {
-            const response = await axiosInstance.post('/verify-pin', { // POST-Anfrage an die Backend-Route '/verify-pin' senden
+            const response = await axiosInstance.post('/login/verify', { // POST-Anfrage an die Backend-Route '/verify-pin' senden
                 pincode: this.state.pincode // PIN-Code als Teil des Datenobjekts senden
             });
 

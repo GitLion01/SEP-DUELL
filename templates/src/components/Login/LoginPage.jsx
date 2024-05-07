@@ -24,7 +24,7 @@ class LoginPage extends React.Component { // Definieren der LoginPage-Klasse als
     const { username, password } = this.state; // Extrahieren von Benutzername und Passwort aus dem Zustand
 
     try { // Versuch, die Anmeldung durchzuführen
-      const response = await axiosInstance.post('/registration', { // Senden der Anmeldeinformationen an den Server
+      const response = await axiosInstance.post('/login', { // Senden der Anmeldeinformationen an den Server
         username, password
       });
 

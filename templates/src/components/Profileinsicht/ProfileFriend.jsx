@@ -1,4 +1,4 @@
-import './Profile.css'; // Importiere CSS-Module
+import './ProfileFriend.css'; // Importiere CSS-Module
 import React, { Component } from 'react';
 
 
