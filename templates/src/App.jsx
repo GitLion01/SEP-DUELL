@@ -6,6 +6,7 @@ import Profile from './components/Profileinsicht/Profile';
 import Register from './components/Registrierung/Register.jsx' 
 import Startseite from './components/Startseite/Startsite.jsx';
 import DeckEditor from './components/Deckarbeiten/DeckEditor.jsx';
+import AdminPanel from './components/Adminsteuerfeld/Admin.jsx';
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
         <Route path="/2fa" element={<TwoFaktorAuthenfication/>} />
         <Route path="/profile" element={<Profile/>} />
         <Route path='/deckbearbeiten' element = {<DeckEditor/>} /> 
+        <Route path='/admin' element = {<AdminPanel/>} /> 
       </Routes>
     </Router>
   );

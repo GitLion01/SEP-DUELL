@@ -1,9 +1,15 @@
 import React, { Component } from 'react';
 import './TwoFactorAuthentication.css';
+import axiosInstance from '../../api/axios';
+import { Link, Navigate } from 'react-router-dom'; // Importieren von Link und Navigate für die Navigation
+
 
 class TwoFaktorAuthenfication extends Component {
     state = {
-        pincode: '' // Zustand für den PIN-Code
+        pincode: '', // Zustand für den PIN-Code
+        isPinCodeCorrect: false, 
+        errorMessage: '' 
+
     };
     
     // Funktion zum Aktualisieren des PIN-Codes
@@ -14,15 +20,32 @@ class TwoFaktorAuthenfication extends Component {
     };
     
     // Funktion zum Überprüfen des PIN-Codes
-    handleSubmit = (e) => { // Funktion zum Behandeln des Formularabsendens
-        e.preventDefault(); // Verhindert das Standardverhalten des Formulars (Seite neu laden)
-        // Hier kannst du die Überprüfung des PIN-Codes durchführen, z.B. eine API-Anfrage senden
-        console.log('PIN-Code:', this.state.pincode); // Ausgabe des aktuellen PIN-Codes in der Konsole
+    handleSubmit = async (event) => { // Funktion zum Behandeln des Formularabsendens
+        event.preventDefault(); // Verhindert das Standardverhalten des Formulars (Seite neu laden)
+        
+        try {
+            const response = await axiosInstance.post('/verify-pin', { // POST-Anfrage an die Backend-Route '/verify-pin' senden
+                pincode: this.state.pincode // PIN-Code als Teil des Datenobjekts senden
+            });
+
+            console.log('Antwort vom Server:', response.data); // Ausgabe der Antwort des Servers in der Konsole
+            // Hier könntest du entsprechend auf die Antwort des Servers reagieren, z.B. eine Weiterleitung oder eine Benachrichtigung anzeigen
+            if (response.data.isPinCodeCorrect) {
+                this.setState({ isPinCodeCorrect: true }); // PIN-Code ist korrekt
+            } else {
+                this.setState({ errorMessage: 'Falscher PIN-Code' }); // Fehlermeldung anzeigen
+            }
+        } catch (error) {
+            console.error('Fehler beim Überprüfen des PIN-Codes:', error.message); // Ausgabe eines Fehlers in der Konsole
+            // Hier könntest du auf einen Fehler beim Überprüfen des PIN-Codes reagieren, z.B. eine Fehlermeldung anzeigen
+        }
     };
 
     render() {
         const isPincodeComplete = this.state.pincode.length === 6;
-
+        if (this.state.isPinCodeCorrect) {
+            return <Navigate to="/startseite" />; 
+        }
         return (
             <div className="TwoFact">
                 <form id="form">
