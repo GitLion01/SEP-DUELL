@@ -3,12 +3,14 @@ import './Register.css'; // Importiere das Styling für diese Komponente
 
 
 
+
 // Definiere die Register-Komponente und render die Registrierung-Komponente
 class Register extends Component {
   render() { // Definiere die render-Methode
     return <Registrierung />; // Rendere die Registrierung-Komponente innerhalb von Register
   }
 }
+
 
 
 
@@ -56,6 +58,8 @@ class Registrierung extends React.Component {
         throw new Error('Registrierung fehlgeschlagen');
       }
 
+
+      window.location.href = '/';
       console.log('Registrierung erfolgreich'); // Logge eine Erfolgsmeldung
       // Hier könntest du zur Login-Seite weiterleiten oder andere Aktionen nach erfolgreicher Registrierung durchführen
     } catch (error) {

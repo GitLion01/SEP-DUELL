@@ -1,11 +1,14 @@
 package com.example.demo.cards;
 
 
+import com.example.demo.decks.Deck;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.List;
 
 @Entity
 @Getter
@@ -16,13 +19,16 @@ public class Card {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer Id;
+    private Long Id;
     private String name;
     private Integer attackPoints;
     private Integer defensePoints;
     private String description;
     private byte[] image;
     private Rarity rarity;
+    @ManyToMany(mappedBy = "cards")
+    private List<Deck> decks;
+
 
 
     public Card(String name,

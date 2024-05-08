@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @AllArgsConstructor
@@ -56,5 +57,25 @@ public class UserAccountService implements UserDetailsService {
     }
     public int enableAppUser(String email) {
         return userAccountRepository.enableAppUser(email);
+    }
+
+
+    public int countDecksByUserId(Long userId) {
+        return userAccountRepository.countDecksByUserId(userId);
+    }
+
+    public Long getUserIdByEmail(String email) {
+        try {
+            Optional<UserAccount> userAccountOptional = userAccountRepository.findByEmail(email);
+            if (userAccountOptional.isPresent()) {
+                return userAccountOptional.get().getId();
+            }
+            // Handle case when user with given email is not found
+            return null;
+        } catch (Exception e) {
+            // Handle any exceptions
+            e.getMessage();
+            return null;
+        }
     }
 }

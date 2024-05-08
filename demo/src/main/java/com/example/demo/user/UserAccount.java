@@ -1,5 +1,6 @@
 package com.example.demo.user;
 
+import com.example.demo.decks.Deck;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -9,9 +10,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
+import java.util.*;
 
 @Getter
 @Setter
@@ -24,7 +23,7 @@ public class UserAccount implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
     private String firstName;
     private String lastName;
     private String username;
@@ -39,6 +38,8 @@ public class UserAccount implements UserDetails {
     private UserRole role;
     private Boolean locked = false;
     private Boolean enabled = false;
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Deck> decks = new ArrayList<>();
 
 
     public UserAccount(byte[] image,

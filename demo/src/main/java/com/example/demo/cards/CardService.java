@@ -4,6 +4,7 @@ package com.example.demo.cards;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.BufferedReader;
@@ -16,9 +17,13 @@ import java.util.*;
 @Service
 public class CardService {
 
-    @Autowired
-    private CardRepository cardRepository;
 
+    private final CardRepository cardRepository;
+
+    @Autowired
+    public CardService(CardRepository cardRepository) {
+        this.cardRepository = cardRepository;
+    }
 
 
     public String addCards(List<CardRequest> requests) {
@@ -62,6 +67,8 @@ public class CardService {
         cardRepository.delete(card);
         return "Card deleted";
     }
+
+
 
 
 
