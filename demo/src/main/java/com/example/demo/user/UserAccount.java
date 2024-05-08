@@ -1,5 +1,4 @@
 package com.example.demo.user;
-import com.example.demo.cards.Card;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -36,6 +35,20 @@ public class UserAccount implements UserDetails {
     private Boolean locked = false;
     private Boolean enabled = false;
 
+    @Getter
+    @ManyToMany
+    @JoinTable(
+            name = "friendship",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "friend_id"))
+    private List<UserAccount> friends=new ArrayList<>();
+
+    @ManyToMany
+    @JoinTable(
+            name = "friend_requests",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "friend_requests"))
+    private List<UserAccount> friendRequests=new ArrayList<>();
 
     public UserAccount(String firstName,
                        String lastName,
@@ -53,14 +66,34 @@ public class UserAccount implements UserDetails {
         this.role = role;
 
     }
-    /*
-    public void addCard(Card card) {
-        cards.add(card);
+
+    public void addFriend(UserAccount friend) {
+        friends.add(friend);
+        friend.getFriends().add(this);
     }
-    public void removeCard(Card card) {
-        cards.remove(card);
+
+    public void removeFriend(UserAccount friend) {
+        friends.remove(friend);
+        friend.getFriends().remove(this);
     }
-*/
+
+    public void addFriendRequest(UserAccount requester) {
+        friendRequests.add(requester);
+    }
+
+    public void removeFriendRequest(UserAccount requester) {
+        friendRequests.remove(requester);
+    }
+
+    public void acceptFriendRequest(UserAccount requester) {
+        removeFriendRequest(requester);
+        addFriend(requester);
+    }
+
+    public void declineFriendRequest(UserAccount requester) {
+        removeFriendRequest(requester);
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         SimpleGrantedAuthority authority = new SimpleGrantedAuthority(role.name());
