@@ -2,7 +2,7 @@ import './Profile.css'; // Importiere CSS-Module
 import React, { Component } from 'react';
 
 
-class Profile extends Component {
+class ProfileFriends extends Component {
   // Definiere den initialen Zustand mit userData als null
   state = {
     userData: null
@@ -47,4 +47,4 @@ class Profile extends Component {
     );
   }
 } 
-export default Profile;
+export default ProfileFriends;

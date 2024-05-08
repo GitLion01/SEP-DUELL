@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import Axios from 'axios';
 import './Profile.css';
 
 // Profil-Seite
 
 function Profile() {
+  const { id } = useParams();
   let [profilePicture, setProfilePicture] = useState('');
   const [username, setUsername] = useState('');
   const [vorname, setVorname] = useState('');
@@ -21,14 +22,14 @@ function Profile() {
   
   // Benutzerdaten von der API abrufen
   useEffect(() => {
-    Axios.get('http://localhost:8080/api/profile')
+    Axios.get(`http://localhost:8080/profile/${id}`)
       .then(response => {
         const userData = response.data;
         setUserdata(response.data);
         setProfilePicture(userData.profilePicture);
         setUsername(userData.username);
-        setVorname(userData.vorname);
-        setNachname(userData.nachname);
+        setVorname(userData.firstName);
+        setNachname(userData.lastName);
         setEmail(userData.email);
         setPassword(userData.password);
         setDateOfBirth(userData.geburtsdatum);
@@ -42,7 +43,7 @@ function Profile() {
         console.error(error);
         setError('Ein Fehler ist aufgetreten')
       });
-  }, []);
+  }, [id]);
 
 
   // Update SEP-Coins wenn der Wert von SEP-Coins geändert wird
@@ -70,7 +71,7 @@ function Profile() {
         const file = event.target.files[0];
         const formData = new FormData();
         formData.append('file', file);
-        Axios.post('http://localhost:8080/api/profile-picture', formData)
+        Axios.post('http://localhost:8080/profile-picture', formData)
         .then(response => {
             console.log('Profile picture uploaded successfully');
             setProfilePicture(response.data.profilePicture);

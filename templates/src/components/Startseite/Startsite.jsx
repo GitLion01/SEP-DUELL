@@ -24,7 +24,7 @@ class Startseite extends Component {
         <footer>
           <nav>
             <ul>
-              <li><a href="/profil">Mein Profil</a></li>
+              <li><a href="/profile">Mein Profil</a></li>
               {/* Weitere Navigationslinks könnten hier hinzugefügt werden */}
             </ul>
           </nav>
