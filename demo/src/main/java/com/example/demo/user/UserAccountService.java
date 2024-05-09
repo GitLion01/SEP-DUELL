@@ -24,9 +24,17 @@ public class UserAccountService implements UserDetailsService {
     private final ConfirmationTokenService confirmationTokenService;
 
     @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        return userAccountRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException(USER_NOT_FOUND_MESSAGE));
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        return userAccountRepository.findByEmail(username).orElseThrow(() -> new UsernameNotFoundException(USER_NOT_FOUND_MESSAGE));
     }
+
+    /*public UserAccount findByUsername(String username) {
+        return userAccountRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException(USER_NOT_FOUND_MESSAGE));
+    }*/
+    public boolean isUsernameTaken(String username) {
+        return userAccountRepository.existsByUsername(username);
+    }
+
 
     public List<UserAccount> findAll() {
         return userAccountRepository.findAll();
@@ -61,8 +69,14 @@ public class UserAccountService implements UserDetailsService {
 
 
     public int countDecksByUserId(Long userId) {
-        return userAccountRepository.countDecksByUserId(userId);
+        try {
+            return userAccountRepository.countDecksByUserId(userId);
+        } catch (Exception e) {
+            System.out.println("Fehler beim Zählen der Decks für den Benutzer mit der ID " + userId + ": " + e.getMessage());
+            return 0; // oder eine andere geeignete Aktion, z. B. einen Standardwert zurückgeben
+        }
     }
+
 
     public Long getUserIdByEmail(String email) {
         try {

@@ -26,8 +26,8 @@ public class Card {
     private String description;
     private byte[] image;
     private Rarity rarity;
-    @ManyToMany(mappedBy = "cards")
-    private List<Deck> decks;
+    @ManyToOne
+    private Deck decks;
 
 
 

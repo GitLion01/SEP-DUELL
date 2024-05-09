@@ -4,10 +4,12 @@ import com.example.demo.cards.Card;
 import com.example.demo.cards.CardRepository;
 import com.example.demo.cards.CardService;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -20,14 +22,15 @@ import java.util.Optional;
 public class DeckController {
 
     private final DeckRepository deckRepository;
+    @Autowired
     private final DeckService deckService;
     private final CardRepository cardRepository;
 
 
-    // TODO: Check via frontend
+    // TODO: Check via frontend (throws NullPointerException because no User)
     @PostMapping(path = "/create")
-    public String createDeck(@RequestBody DeckRequest request){
-        return deckService.createDeck(request);
+    public String createDeck(@RequestBody DeckRequest request/*, Principal principal*/) {
+        return deckService.createDeck(request/*, principal*/);
     }
 
     @PutMapping("/updateName/{oldName}/{newName}") //Decknamen dürfen keine Leerzeichen enthalten
@@ -42,9 +45,11 @@ public class DeckController {
         return deckService.removeCards(deckName, cardsToRemove);
     }
 
-    // TODO: Check
+
     @PutMapping("/addCards")
-    public String addCardsToDeck(@RequestParam String deckName, @RequestBody List<Card> cardsToAdd) {
+    public String addCardsToDeck(@RequestBody Map<String, Object> requestBody) {
+        String deckName = (String) requestBody.get("deckName");
+        List<String> cardsToAdd = (List<String>) requestBody.get("cardsToAdd");
         return deckService.addCardsToDeck(deckName, cardsToAdd);
     }
 
@@ -54,8 +59,8 @@ public class DeckController {
         return deckService.replaceCardsInDeck(deckName, request.getCardsToRemove(), request.getCardsToAdd());
     }
 
-    // TODO: Check
-    @GetMapping("/deck/{deckName}/cards")//Decknamen dürfen keine Leerzeichen enthalten
+
+    @GetMapping("/{deckName}/cards")//Decknamen dürfen keine Leerzeichen enthalten
     public List<Card> getAllCardsFromDeck(@PathVariable String deckName) {
         return deckService.getAllCardsFromDeck(deckName);
     }

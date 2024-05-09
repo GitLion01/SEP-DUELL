@@ -14,7 +14,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import java.security.Principal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -65,14 +67,11 @@ public class DeckService{
     }
 
 
-    public String createDeck(@RequestBody DeckRequest request) {
+    public String createDeck(@RequestBody DeckRequest request/*, Principal principal*/) {
 
-        // TODO: muss mit frontend getestet werden
+        // TODO: implementation in frontend
         // Check if the user already has 3 decks
-        int userDeckCount = userAccountService.countDecksByUserId(userAccount.getId());
-        if (userDeckCount >= 3) {
-            return "Error: Maximum of 3 decks allowed per user";
-        }
+
         // check if deck with this name alredy exists
         String deckName = request.getName();
         if (!isDeckNameAvailable(deckName)) {
@@ -99,8 +98,14 @@ public class DeckService{
         // Create and save the deck if all cards were found
         if (!cards.isEmpty()) {
             Deck deck = new Deck();
-            deck.setName(request.getName());
-            deck.setCards(cards);
+            // Hier ordnest du das Deck dem Benutzer zu
+           /* Optional<UserAccount> currentUser = userAccountRepository.findByEmail(principal.getName()); // Hier musst du die Methode implementieren, um den Benutzer anhand des Benutzernamens zu erhalten
+            if (currentUser.isPresent()) {*/
+                /*deck.setUser(currentUser.get());*/
+                deck.setName(request.getName());
+                deck.setCards(cards);
+            /*}*/
+
             deckRepository.save(deck);
             deckCreated = true;
         }
@@ -177,7 +182,7 @@ public class DeckService{
 
 
 
-    public String addCardsToDeck(String deckName, List<Card> cardsToAdd) {
+   /* public String addCardsToDeck(String deckName, List<Card> cardsToAdd) {
         try {
             // Überprüfe, ob alle hinzuzufügenden Karten bereits in der Datenbank vorhanden sind
             List<Card> existingCards = new ArrayList<>();
@@ -213,7 +218,45 @@ public class DeckService{
         } catch (Exception e) {
             return "Fehler beim Hinzufügen der Karten zum Deck";
         }
-    }
+    }*/
+   public String addCardsToDeck(String deckName, List<String> cardNames) {
+       try {
+           // Überprüfe, ob das Deck bereits existiert
+           Optional<Deck> optionalDeck = deckRepository.findByName(deckName);
+           if (optionalDeck.isPresent()) {
+               Deck deck = optionalDeck.get();
+               List<Card> deckCards = deck.getCards();
+               List<Card> existingCards = new ArrayList<>();
+
+               // Überprüfe, ob das Deck die maximale Anzahl von Karten erreicht hat
+               if (deckCards.size() + cardNames.size() <= 30) {
+                   // Überprüfe, ob alle hinzuzufügenden Karten bereits in der Datenbank vorhanden sind
+                   for (String cardName : cardNames) {
+                       Optional<Card> optionalCard = cardRepository.findByName(cardName);
+                       if (optionalCard.isPresent()) {
+                           existingCards.add(optionalCard.get());
+                       } else {
+                           throw new RuntimeException("Die Karte '" + cardName + "' ist nicht in der Datenbank vorhanden.");
+                       }
+                   }
+
+                   // Füge die Karten dem Deck hinzu
+                   deckCards.addAll(existingCards);
+
+                   // Speichere das aktualisierte Deck in der Datenbank
+                   deckRepository.save(deck);
+                   return "Die Karten wurden erfolgreich dem Deck hinzugefügt.";
+               } else {
+                   throw new RuntimeException("Das Deck kann maximal 30 Karten enthalten.");
+               }
+           } else {
+               throw new RuntimeException("Das Deck wurde nicht gefunden.");
+           }
+       } catch (Exception e) {
+           return "Fehler beim Hinzufügen der Karten zum Deck";
+       }
+   }
+
 
 
 
@@ -263,15 +306,22 @@ public class DeckService{
         }
     }
 
+    // TODO: Missing exception handling
     public List<Card> getAllCardsFromDeck(String deckName) {
-        Optional<Deck> optionalDeck = deckRepository.findByName(deckName);
-        if (optionalDeck.isPresent()) {
-            Deck deck = optionalDeck.get();
-            return deck.getCards();
-        } else {
-            throw new RuntimeException("Das angegebene Deck wurde nicht gefunden.");
+        try {
+            Optional<Deck> optionalDeck = deckRepository.findByName(deckName);
+            if (optionalDeck.isPresent()) {
+                Deck deck = optionalDeck.get();
+                return deck.getCards();
+            } else {
+                throw new RuntimeException("Das angegebene Deck wurde nicht gefunden.");
+            }
+        } catch (Exception e) {
+            System.out.println("Fehler beim Abrufen der Karten aus dem Deck: " + e.getMessage());
+            return Collections.emptyList(); // oder eine andere sinnvolle Aktion, z. B. eine leere Liste zurückgeben
         }
     }
+
 
 
 

@@ -12,7 +12,7 @@ import java.util.Optional;
 @Repository
 @Transactional(readOnly = true)
 public interface UserAccountRepository extends JpaRepository<UserAccount, Long> {
-
+    Optional<UserAccount> findByUsername(String username);
     Optional<UserAccount> findByEmail(String email);
 
     @Transactional
@@ -26,4 +26,5 @@ public interface UserAccountRepository extends JpaRepository<UserAccount, Long> 
     int countDecksByUserId(@Param("userId") Long userId);
 
 
+    boolean existsByUsername(String username);
 }

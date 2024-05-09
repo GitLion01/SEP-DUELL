@@ -19,7 +19,7 @@ public class Deck {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long Id;
     private String name;
-    @ManyToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL)
     @JoinTable(
             name = "deck_card",
             joinColumns = @JoinColumn(name = "deck_id"),
