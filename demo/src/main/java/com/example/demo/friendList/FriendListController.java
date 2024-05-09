@@ -18,11 +18,25 @@ public class FriendListController {
         return friendListService.getFriendList(id).orElse(null);
     }
 
-    @GetMapping
-    public String FriendshipRequest(@RequestParam int id, @RequestParam int friend_id) {
-        return friendListService.FriendshipRequest(id,friend_id);
+    @GetMapping(path ="requests/{id}")
+    public List<UserAccount> getFriendListRequests(@PathVariable int id) {
+        return friendListService.getFriendListRequests(id).orElse(null);
     }
 
-
-
+    @PostMapping(path = "/add")
+    public String FriendshipRequest(@RequestBody List<Integer> request) {
+        return friendListService.FriendshipRequest(request.get(0),request.get(1));
+    }
+    @PostMapping(path = "/accept")
+    public String FriendshipAccept(@RequestBody List<Integer> request) {
+        return friendListService.FriendshipAccept(request.get(0),request.get(1));
+    }
+    @PostMapping(path = "/reject")
+    public String FriendshipReject(@RequestBody List<Integer> request) {
+        return friendListService.FriendshipReject(request.get(0),request.get(1));
+    }
+    @PostMapping(path = "/remove")
+    public String RemoveFriend(@RequestBody List<Integer> request) {
+        return friendListService.RemoveFriend(request.get(0),request.get(1));
+    }
 }

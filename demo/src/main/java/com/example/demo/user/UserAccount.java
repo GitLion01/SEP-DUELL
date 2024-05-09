@@ -1,4 +1,5 @@
 package com.example.demo.user;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -43,9 +44,11 @@ public class UserAccount implements UserDetails {
             inverseJoinColumns = @JoinColumn(name = "friend_id"))
     private List<UserAccount> friends=new ArrayList<>();
 
+    @Getter
     @ManyToMany
     @JoinTable(
             name = "friend_requests",
+            // specify the foreign key columns in the join table.
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "friend_requests"))
     private List<UserAccount> friendRequests=new ArrayList<>();
@@ -69,12 +72,10 @@ public class UserAccount implements UserDetails {
 
     public void addFriend(UserAccount friend) {
         friends.add(friend);
-        friend.getFriends().add(this);
     }
 
     public void removeFriend(UserAccount friend) {
         friends.remove(friend);
-        friend.getFriends().remove(this);
     }
 
     public void addFriendRequest(UserAccount requester) {
@@ -85,14 +86,6 @@ public class UserAccount implements UserDetails {
         friendRequests.remove(requester);
     }
 
-    public void acceptFriendRequest(UserAccount requester) {
-        removeFriendRequest(requester);
-        addFriend(requester);
-    }
-
-    public void declineFriendRequest(UserAccount requester) {
-        removeFriendRequest(requester);
-    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
