@@ -1,9 +1,11 @@
 package com.example.demo.cards;
 
 
+import com.example.demo.user.UserAccount;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,11 +15,11 @@ public class CardService {
     @Autowired
     private CardRepository cardRepository;
 
-    public String addCard(CardRequest request) throws IllegalStateException{
-        boolean cardExists = cardRepository.findByName(request.getName()).isEmpty();
+    public String addCard(CardRequest request){
+        Optional<Card> cardExists = cardRepository.findByName(request.getName());
 
-        if(!cardExists) {
-            throw new IllegalStateException("card already exists");
+        if(cardExists.isPresent()) {
+            return "card already exists";
         }
 
         Card card = new Card(
@@ -32,16 +34,26 @@ public class CardService {
         return "card added";
     }
 
-    public void deleteCard(String name) throws IllegalStateException {
+    public void deleteCard(String name){
         Optional<Card> optionalCard = cardRepository.findByName(name);
         if (optionalCard.isEmpty()) {
-            throw new IllegalStateException("Card does not exist");
+            return;
         }
         Card card = optionalCard.get();
+
+        // Create a copy of the list of users associated with the card
+        List<UserAccount> usersCopy = new ArrayList<>(card.getUsers());
+
+        // Iterate over the copy and remove the card from each user's collection
+        for (UserAccount user : usersCopy) {
+            user.removeCard(card);
+        }
+
         cardRepository.delete(card);
     }
 
-    public String deleteMultipleCards(List<String> names) throws IllegalStateException {
+
+    public String deleteMultipleCards(List<String> names){
         for (String name : names) {
             deleteCard(name);
         }

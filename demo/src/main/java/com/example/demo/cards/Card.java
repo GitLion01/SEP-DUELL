@@ -1,11 +1,16 @@
 package com.example.demo.cards;
 
 
+import com.example.demo.user.UserAccount;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -23,6 +28,10 @@ public class Card {
     private String description;
     private byte[] image;
     private Rarity rarity;
+
+    @JsonIgnore
+    @ManyToMany(mappedBy = "cards")
+    private List<UserAccount> users = new ArrayList<>();
 
     public Card(String name,
                 Integer attackPoints,
