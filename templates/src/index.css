@@ -1,0 +1,6 @@
+body {
+    /*die auf der haupt seite verwendete schriftart und fallback schriftart */
+    font-family: 'open Sans', sans-serif; /* Verwendete Schriftart */
+    /* die hintergrundfarbe der gesamten seite */
+    background-color: black; /* Hintergrundfarbe des Body */
+  }
