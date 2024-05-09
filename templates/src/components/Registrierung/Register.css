@@ -1,81 +1,78 @@
-body {
-    /*die auf der haupt seite verwendete schriftart und fallback schriftart */
-    font-family: 'open Sans', sans-serif; /* Verwendete Schriftart */
-    /* die hintergrundfarbe der gesamten seite */
-    background-color: black; /* Hintergrundfarbe des Body */
+.AppRegister body {
+  /*die auf der haupt seite verwendete schriftart und fallback schriftart */
+  font-family: 'open Sans', sans-serif; /* Verwendete Schriftart */
+  /* die hintergrundfarbe der gesamten seite */
+  background-color: black; /* Hintergrundfarbe des Body */
 }
-  /* AUSSEHEN DES HAUPTCONTAINERS*/
-  /*DIE KLASSE CONTAINER WIRD IN DEM HTML FILE ERSTELLT  UND ES BEFINDEN SICH ALLE DINGE IN DIESEM */
-  .container {
-    width: 30%; /* Breite des Container-Elements */
-    margin: 0 auto; /* Zentrierung des Containers */
-    padding: 40px; /* Innenabstand des Containers */
-    background-color: #775dc0; /* Hintergrundfarbe des Containers */
-    border-radius: 50px; /* Abrundung der Container-Ecken */
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Schatten des Containers */
-    
-  }
-  
-  /* DIE ÜBERSCHRIFT DES CONTAINERS*/
-  h2 {
-    text-align: center; /* Zentrierung des Titels */
-    color: white;
-    margin-bottom: 45px;
-    font-weight: bolder;
-  }
-  
-  /* ALLE  EINSTELLUNGEN INNERHALB DER FORM-GROUP KLASSE */
-  .form-group {
-    margin-bottom: 15px; /* Abstand zwischen den Formularelementen */
-  
-    /*alle überschriften fett machen*/
-    /*font-weight: bold;*/
-  }
-  
-  /* DIE EINSTELLUNGEN FÜR DIE LABEL INNERHALB DES CONTAINERS*/
-  label {
-    display: block; /* Umbruch nach jedem Label */
-    margin-bottom: 4px; /* Abstand unterhalb jedes Labels */
-   /*farbe der label schrift*/
-    color: white;
-  }
+/* AUSSEHEN DES HAUPTCONTAINERS*/
+/*DIE KLASSE CONTAINER WIRD IN DEM HTML FILE ERSTELLT  UND ES BEFINDEN SICH ALLE DINGE IN DIESEM */
+.AppRegister {
+  width: 30%; /* Breite des Container-Elements */
+  margin: 0 auto; /* Zentrierung des Containers */
+  padding: 40px; /* Innenabstand des Containers */
+  background-color: #775dc0; /* Hintergrundfarbe des Containers */
+  border-radius: 50px; /* Abrundung der Container-Ecken */
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Schatten des Containers */
+ 
+}
+
+/* DIE ÜBERSCHRIFT DES CONTAINERS*/
+.AppRegister h2 {
+  text-align: center; /* Zentrierung des Titels */
+  color: white;
+  margin-bottom: 45px;
+  font-weight: bolder;
+}
+
+/* ALLE  EINSTELLUNGEN INNERHALB DER FORM-GROUP KLASSE */
+.AppRegister .form-group {
+  margin-bottom: 15px; /* Abstand zwischen den Formularelementen */
+
+  /*alle überschriften fett machen*/
+  /*font-weight: bold;*/
+}
+
+/* DIE EINSTELLUNGEN FÜR DIE LABEL INNERHALB DES CONTAINERS*/
+.AppRegister label {
+  display: block; /* Umbruch nach jedem Label */
+  margin-bottom: 4px; /* Abstand unterhalb jedes Labels */
+ /*farbe der label schrift*/
+  color: white;
+}
 
 
-  /*EINSTELLUNGEN FÜR DIE EINGABEFELDER*/
-  /*EINSTELLUNGEN ÜBER DIE AKZEPTANZ DER DATENTYPEN  BEI  EINGABEN */
-  input[type="text"],
-  input[type="date"],
-  input[type="email"],
-  input[type="password"] {
-    width: 95%; /* Vollständige Breite für Eingabefelder */
-    padding: 5px; /* Innenabstand der Eingabefelder */
-    border: 1px solid  rgb(255, 255, 255); /* Randstil für die Eingabefelder */
-    border-radius: 3px; /* Abrundung der Eingabefeld-Ecken */
-  }
-  
-  /*EINSTELLUNGEN FÜR DEN BUTTON AM ENDE DES FORMS */
-  button {
-    display: block; /* Umbruch vor dem Button */
-    width: 100%; /* Vollständige Breite für den Button */
-    padding: 10px; /* Innenabstand des Buttons */
-    color: white; /* Textfarbe des Buttons */
-    background-color: #1523a7; /* Hintergrundfarbe des Buttons */
-    border: none; /* Kein Rahmen um den Button */
-    border-radius: 60px; /* Abrundung der Button-Ecken */
-    cursor: pointer; /* Mauszeiger als Zeigefinger beim Überfahren */
-    
-    
-  }
-  
-  /*WAS PASSIERT WENN MAN MIT DER MOUSE ÜBER DEN BUTTEN GEHT*/
-  button:hover {
-    background-color: #b300aa; /* Hintergrundfarbe des Buttons bei Hover */
-  
-    box-shadow: 5px 5px 5px #1523a7;/*schatten wenn man mit der mouse über den button geht */
-  }
+/*EINSTELLUNGEN FÜR DIE EINGABEFELDER*/
+/*EINSTELLUNGEN ÜBER DIE AKZEPTANZ DER DATENTYPEN  BEI  EINGABEN */
+input[type="text"],
+input[type="date"],
+input[type="email"],
+input[type="password"] {
+  width: 95%; /* Vollständige Breite für Eingabefelder */
+  padding: 5px; /* Innenabstand der Eingabefelder */
+  border: 1px solid  rgb(255, 255, 255); /* Randstil für die Eingabefelder */
+  border-radius: 3px; /* Abrundung der Eingabefeld-Ecken */
+}
+
+/*EINSTELLUNGEN FÜR DEN BUTTON AM ENDE DES FORMS */
+.AppRegister button {
+  display: block; /* Umbruch vor dem Button */
+  width: 100%; /* Vollständige Breite für den Button */
+  padding: 10px; /* Innenabstand des Buttons */
+  color: white; /* Textfarbe des Buttons */
+  background-color: #1523a7; /* Hintergrundfarbe des Buttons */
+  border: none; /* Kein Rahmen um den Button */
+  border-radius: 60px; /* Abrundung der Button-Ecken */
+  cursor: pointer; /* Mauszeiger als Zeigefinger beim Überfahren */
+ 
+ 
+}
+
+/*WAS PASSIERT WENN MAN MIT DER MOUSE ÜBER DEN BUTTEN GEHT*/
+.AppRegister button:hover {
+  background-color: #b300aa; /* Hintergrundfarbe des Buttons bei Hover */
+
+  box-shadow: 5px 5px 5px #1523a7;/*schatten wenn man mit der mouse über den button geht */
+}
 
 
-   
-
-  
  

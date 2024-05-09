@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import './Startsite.css';
-
+ 
 class Startseite extends Component {
   constructor(props) {
     super(props);
@@ -10,12 +10,12 @@ class Startseite extends Component {
       searchTerm: '', // Zustand für die Suchanfrage
     };
   }
-
+ 
   componentDidMount() {
     // Hier rufe die Funktion zum Abrufen der Freundesliste auf
     this.fetchFriends();
   }
-
+ 
   fetchFriends = async () => {
     try {
       // Backend-Endpunkt für die Freundesliste anpassen
@@ -26,27 +26,27 @@ class Startseite extends Component {
       console.error('Error fetching friends:', error);
     }
   };
-
+ 
   handleLogout = () => {
     this.setState({ loggedIn: false });
   };
-
+ 
   handleSearch = (event) => {
     this.setState({ searchTerm: event.target.value });
   };
-
+ 
   render() {
     const { loggedIn, friends, searchTerm } = this.state;
-
+ 
     if (!loggedIn) {
       console.log("Benutzer ausgeloggt, Weiterleitung zur Login-Seite");
     }
-
+ 
     // Filtere die Freundesliste basierend auf dem Suchbegriff
     const filteredFriends = friends.filter((friend) =>
       friend.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
-
+ 
     return (
       <div className="AppStart">
         <header>
@@ -95,6 +95,5 @@ class Startseite extends Component {
     );
   }
 }
-
+ 
 export default Startseite;
-
