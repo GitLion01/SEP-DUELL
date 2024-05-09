@@ -33,7 +33,6 @@ public class UserAccount implements UserDetails {
     private Date dateOfBirth;
     private Integer leaderboardPoints = 0;
     private Integer sepCoins = 500;
-    @Lob
     private byte[] image;
     @Enumerated(EnumType.STRING)
     private UserRole role;

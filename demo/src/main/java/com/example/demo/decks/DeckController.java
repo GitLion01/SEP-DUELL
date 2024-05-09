@@ -27,10 +27,10 @@ public class DeckController {
     private final CardRepository cardRepository;
 
 
-    // TODO: Check via frontend (throws NullPointerException because no User)
+
     @PostMapping(path = "/create")
-    public String createDeck(@RequestBody DeckRequest request/*, Principal principal*/) {
-        return deckService.createDeck(request/*, principal*/);
+    public String createDeck(@RequestBody DeckRequest request) {
+        return deckService.createDeck(request);
     }
 
     @PutMapping("/updateName/{oldName}/{newName}") //Decknamen dürfen keine Leerzeichen enthalten
@@ -53,23 +53,33 @@ public class DeckController {
         return deckService.addCardsToDeck(deckName, cardsToAdd);
     }
 
-    // TODO: Check
-    @PutMapping("/replaceCards/{deckName}")
-    public String replaceCardsInDeck(@PathVariable String deckName, @RequestBody ReplaceCardsRequest request) {
-        return deckService.replaceCardsInDeck(deckName, request.getCardsToRemove(), request.getCardsToAdd());
+
+    @PutMapping("/replaceCards/{deckName}/{userID}")
+    public String replaceCardsInDeck(@PathVariable String deckName, @PathVariable Long userID, @RequestBody ReplaceCardsRequest request) {
+        return deckService.replaceCardsInDeck(deckName, userID, request.getCardsToRemove(), request.getCardsToAdd());
     }
 
 
-    @GetMapping("/{deckName}/cards")//Decknamen dürfen keine Leerzeichen enthalten
-    public List<Card> getAllCardsFromDeck(@PathVariable String deckName) {
-        return deckService.getAllCardsFromDeck(deckName);
+    @GetMapping("/cards/{deckName}/{userID}")//Decknamen dürfen keine Leerzeichen enthalten
+    public List<Card> getAllCardsFromDeck(@PathVariable Long userID, @PathVariable String deckName) {
+        return deckService.getAllCardsFromDeck(userID, deckName);
     }
+
 
     // TODO: Check via frontend
-    @GetMapping(path = "/getUserDecks")
-    public List<Deck> getUserDecks(@RequestBody String email) {
-        return deckService.getUserDecksByEmail(email);
+    @GetMapping(path = "/getUserDecks/{userID}")
+    public List<Deck> getUserDecks(@PathVariable Long userID) {
+        return deckService.getUserDecksByUserId(userID);
     }
+
+
+    @DeleteMapping("/delete")
+    public String deleteDeck(@RequestBody Map<Long, String> requestBody) {
+        Long userId = requestBody.keySet().iterator().next();
+        String deckName = requestBody.get(userId);
+        return deckService.deleteDeckByUserIdAndDeckName(userId, deckName);
+    }
+
 }
 
 

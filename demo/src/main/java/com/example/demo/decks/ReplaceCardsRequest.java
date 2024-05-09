@@ -13,7 +13,7 @@ import java.util.List;
 @EqualsAndHashCode
 @ToString
 public class ReplaceCardsRequest {
-    private List<Card> cardsToRemove;
-    private List<Card> cardsToAdd;
+    private List<String> cardsToRemove;
+    private List<String> cardsToAdd;
 
 }
