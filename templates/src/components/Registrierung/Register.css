@@ -1,9 +1,4 @@
-.AppRegister body {
-  /*die auf der haupt seite verwendete schriftart und fallback schriftart */
-  font-family: 'open Sans', sans-serif; /* Verwendete Schriftart */
-  /* die hintergrundfarbe der gesamten seite */
-  background-color: black; /* Hintergrundfarbe des Body */
-}
+
 /* AUSSEHEN DES HAUPTCONTAINERS*/
 /*DIE KLASSE CONTAINER WIRD IN DEM HTML FILE ERSTELLT  UND ES BEFINDEN SICH ALLE DINGE IN DIESEM */
 .AppRegister {

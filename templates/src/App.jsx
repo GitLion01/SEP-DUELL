@@ -8,6 +8,8 @@ import DeckEditor from './components/Deckarbeiten/DeckEditor.jsx';
 import AdminPanel from './components/Adminsteuerfeld/Admin.jsx';
 import Profile from './components/Profilansicht/Profile.jsx';
 import CreateDeck from './components/Deck-erstellen/CreateDeck.jsx';
+import './index.css';
+
 
 
 function App() {
