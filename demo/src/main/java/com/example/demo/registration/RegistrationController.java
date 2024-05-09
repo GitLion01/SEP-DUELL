@@ -33,4 +33,8 @@ public class RegistrationController {
         return "Registration Service is up and running but no one knows why or how";
     }
 
+    @GetMapping(path = "confirm")
+    public String confirm(@RequestParam("token") String token) {
+        return registrationService.confirmToken(token);
+    }
 }

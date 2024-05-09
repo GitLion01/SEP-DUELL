@@ -2,6 +2,7 @@ package com.example.demo.user;
 
 import com.example.demo.registration.token.ConfirmationToken;
 import com.example.demo.registration.token.ConfirmationTokenService;
+import com.example.demo.registration.token.TokenPurpose;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -56,10 +57,10 @@ public class UserAccountService implements UserDetailsService {
                 token,
                 LocalDateTime.now(),
                 LocalDateTime.now().plusMinutes(15),
-                userAccount
+                userAccount,
+                TokenPurpose.REGISTRATION
         );
-        confirmationTokenService.saveConfirmationToken(
-                confirmationToken);
+        confirmationTokenService.save(confirmationToken);
 
         return token;
     }

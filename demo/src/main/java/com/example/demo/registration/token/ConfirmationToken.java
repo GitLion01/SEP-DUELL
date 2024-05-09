@@ -1,6 +1,6 @@
 package com.example.demo.registration.token;
 
-import com.example.demo.user.UserAccount;
+import com.example.demo.registration.token.TokenPurpose;
 import com.example.demo.user.UserAccount;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -14,9 +14,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Entity
 public class ConfirmationToken {
-
     @SequenceGenerator(
-            name= "confirmation_token_sequence",
+            name = "confirmation_token_sequence",
             sequenceName = "confirmation_token_sequence",
             allocationSize = 1
     )
@@ -25,8 +24,6 @@ public class ConfirmationToken {
             strategy = GenerationType.SEQUENCE,
             generator = "confirmation_token_sequence"
     )
-
-
     private Long id;
 
     @Column(nullable = false)
@@ -41,19 +38,17 @@ public class ConfirmationToken {
     private LocalDateTime confirmedAt;
 
     @ManyToOne
-    @JoinColumn(
-            nullable = false,
-            name = "app_user_id"
-    )
+    @JoinColumn(nullable = false, name = "app_user_id")
     private UserAccount appUser;
 
-    public ConfirmationToken(String token,
-                             LocalDateTime createdAt,
-                             LocalDateTime expiresAt,
-                             UserAccount appUser) {
+    @Enumerated(EnumType.STRING)
+    private TokenPurpose purpose;
+
+    public ConfirmationToken(String token, LocalDateTime createdAt, LocalDateTime expiresAt, UserAccount appUser, TokenPurpose purpose) {
         this.token = token;
         this.createdAt = createdAt;
         this.expiresAt = expiresAt;
         this.appUser = appUser;
+        this.purpose = purpose;
     }
 }
