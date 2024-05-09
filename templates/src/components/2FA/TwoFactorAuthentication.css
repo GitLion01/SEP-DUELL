@@ -47,7 +47,7 @@
     min-width: 320px; /* Definiert die minimale Breite des HTML-Dokuments */
   }
   
-  body {
+  .TwoFact__body{
     background-color: #000000;
     background: -ms-linear-gradient(top left, #663faa 0%, #585fd5 100%);
     font-size: 14px; /* Definiert die Schriftgröße für den Text im Body */

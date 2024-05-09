@@ -47,6 +47,7 @@ class TwoFaktorAuthenfication extends Component {
             return <Navigate to="/startseite" />; 
         }
         return (
+            <body className='TwoFact__body'> 
             <div className="TwoFact">
                 <form id="form">
                     <h1>Zwei-Faktor-Verifizierung</h1>
@@ -67,6 +68,7 @@ class TwoFaktorAuthenfication extends Component {
                     </div>
                 </form>
             </div>
+            </body>
         );
     }
 }
