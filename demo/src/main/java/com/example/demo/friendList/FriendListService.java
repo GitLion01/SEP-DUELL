@@ -37,7 +37,6 @@ public class FriendListService {
             return Optional.empty();
     }
 
-
     public String FriendshipRequest(int id,int friend_id) {
         Optional<UserAccount> user=friendListRepository.findById(id);
         Optional<UserAccount> friend=friendListRepository.findById(friend_id);
@@ -51,6 +50,8 @@ public class FriendListService {
                 return "This user have already sent you a request";
             if(friendAccount.getFriends().contains(userAccount))
                 return "You are already friends";
+            if(id==friend_id)
+                return "You can not send a request to yourself";
             //Request must be saved in the friend account so the friend can see it and accept/decline it
             friendAccount.addFriendRequest(userAccount);
             return "Friend request sent from "+userAccount.getUsername()+" to "+friendAccount.getUsername();
