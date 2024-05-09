@@ -1,0 +1,51 @@
+.titel {
+  font-size: 3rem;
+  font-weight: 700;
+  text-align: center;
+  align-self: center;
+  color: #982b2b;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+  margin-bottom: 30px;
+}
+
+.profilbild {
+  width: 75px;
+  height: 75;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  object-fit: cover;
+  align-items: center;
+}
+
+.daten p:not(.error) {
+  font-size: large;
+  display: flex;
+  flex-direction: column;
+  align-items: baseline;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 10px;
+  margin-bottom: 15px;
+}
+
+.error {
+  color: red;
+  font-size: 1.5rem;
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.button {
+  font-size: larger;
+  display: block;
+  margin:  auto;
+  padding: 15px 25px;
+  background-color: #4CAF50;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+
