@@ -27,3 +27,7 @@ class Card extends Component {
 }
 
 export default Card;
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/Beyza

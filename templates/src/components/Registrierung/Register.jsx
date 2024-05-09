@@ -36,7 +36,6 @@ class Registrierung extends React.Component {
         password: '', // Passwort
         role: "" // Rolle (Administrator oder Benutzer)
       },
-      role: false,
     };
   }
 
@@ -83,11 +82,8 @@ class Registrierung extends React.Component {
   // Methode zur Verarbeitung der Änderung der Checkbox
   handleRoleChange = () => { // Methode für die Änderung der Rolle
     this.setState(prevState => ({
-      role:!prevState.role, // Toggle the role state
-      formData: {
         ...prevState.formData, // Aktualisiere den vorherigen Zustand der Formulardaten
-        role: prevState.role === 'ADMIN' ? 'USER' : 'ADMIN' // Ändere die Rolle
-      },
+        role: prevState.formData.role === 'ADMIN' ? 'USER' : 'ADMIN' // Ändere die Rolle
     }));
   };
 
@@ -158,12 +154,7 @@ class Registrierung extends React.Component {
             {/* Admin-Checkbox */}
             <div  className="form-group">
               <label htmlFor="role">Admin?</label>
-              <input 
-              type="checkbox" 
-              id="role" 
-              checked={this.state.role} 
-              onChange={this.handleRoleChange} 
-              />
+              <input type="checkbox" id="role" checked={this.state.role} onChange={this.handleRoleChange} />
             </div>
 
             {/* Submit-Button */}
@@ -175,4 +166,3 @@ class Registrierung extends React.Component {
 }
 
 export default Register; // Exportiere die Register-Komponente
-
