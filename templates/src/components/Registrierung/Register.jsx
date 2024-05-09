@@ -73,7 +73,7 @@ function Registrierung() {
   }
 
   return (
-    <div className="container">
+    <div className="AppRegister">
       <h2>REGISTRIERUNG</h2>
       <form onSubmit={handleSubmit}>
         <div className="form-group">
