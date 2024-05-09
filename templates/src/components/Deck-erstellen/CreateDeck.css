@@ -1,10 +1,16 @@
 /* Layout für die gesamte Seite */
+/* Layout für die gesamte Seite */
 .container {
-    display: flex;
+    display: flex; /* Geändert von block zu flex für bessere Kontrolle über die Kind-Elemente */
     flex-direction: column;
     align-items: center;
-    margin: 20px;
+    width: 100%; /* Fast die gesamte Breite der Seite */
+    min-height: 98%; /* Mindesthöhe, um fast die gesamte sichtbare Höhe einer Seite einzunehmen */
+    margin: 10px auto; /* Zentriert den Container horizontal mit einem kleinen Rand */
+    padding: 20px; /* Etwas Innenabstand hinzufügen */
+    box-sizing: border-box; /* Stellt sicher, dass Padding und Border innerhalb der Breite und Höhe enthalten sind */
 }
+
 
 /* Layout und Styling für die Deck- und Kartenbereiche */
 .cards-container {

@@ -47,7 +47,7 @@ function CreateDeck() {
     const handleAddCardToDeck = (card) => {
         if (activeDeck !== null) {
             // POST-Anfrage an das Backend, um die Karte zum Deck hinzuzufügen
-            axios.post(`http://localhost:8080/${id}/decks/${decks[activeDeck].name}/addCard`, { cardId: card.id })
+            axios.post(`http://localhost:8080/${id}/decks/${decks[activeDeck].name}/addCard`, { cardId: card.name })
                 .then(response => {
                     // Aktualisiere das lokale Deck mit der Antwort vom Server
                     setDecks(prevDecks => {
