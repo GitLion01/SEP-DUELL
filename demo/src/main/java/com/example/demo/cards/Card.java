@@ -29,8 +29,8 @@ public class Card {
     private String description;
     private byte[] image;
     private Rarity rarity;
-    @ManyToOne
-    private Deck decks;
+    @ManyToMany
+    private List<Deck> decks = new ArrayList<>();
 
 
     @JsonIgnore

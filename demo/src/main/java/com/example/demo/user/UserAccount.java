@@ -1,5 +1,6 @@
 package com.example.demo.user;
 import com.example.demo.cards.Card;
+import com.example.demo.decks.Deck;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
