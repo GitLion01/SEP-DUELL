@@ -7,7 +7,7 @@
   height: 100vh; /* Setze die Höhe auf 100% des Viewports */
 }
 
-h1 {
+.AppDeck h1 {
   padding-top: 40px;
   color: white;
   background-color: rgb(140, 140, 214);
