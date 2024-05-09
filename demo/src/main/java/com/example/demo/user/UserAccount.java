@@ -38,6 +38,9 @@ public class UserAccount implements UserDetails {
 
     @Getter
     @ManyToMany
+    /*to ignore the infinite loop occurring in the serialization ,when join the tow tables
+    /if a user accepted the friend request*/
+    @JsonIgnore
     @JoinTable(
             name = "friendship",
             joinColumns = @JoinColumn(name = "user_id"),
