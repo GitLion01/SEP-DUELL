@@ -1,6 +1,7 @@
 package com.example.demo.cards;
 
 
+import com.example.demo.decks.Deck;
 import com.example.demo.user.UserAccount;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
@@ -21,13 +22,16 @@ public class Card {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer Id;
+    private Long Id;
     private String name;
     private Integer attackPoints;
     private Integer defensePoints;
     private String description;
     private byte[] image;
     private Rarity rarity;
+    @ManyToOne
+    private Deck decks;
+
 
     @JsonIgnore
     @ManyToMany(mappedBy = "cards")

@@ -19,9 +19,11 @@ import java.util.*;
 @Entity
 public class UserAccount implements UserDetails {
 
+
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
     private String firstName;
     private String lastName;
     private String username;
@@ -36,6 +38,8 @@ public class UserAccount implements UserDetails {
     private UserRole role;
     private Boolean locked = false;
     private Boolean enabled = false;
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Deck> decks = new ArrayList<>();
 
     @ManyToMany
     /*to ignore the infinite loop occurring in the serialization ,when join the tow tables
@@ -64,13 +68,15 @@ public class UserAccount implements UserDetails {
     private List<Card> cards = new ArrayList<>();
 
 
-    public UserAccount(String firstName,
+    public UserAccount(byte[] image,
+                       String firstName,
                        String lastName,
                        Date dateOfBirth,
                        String username,
                        String email,
                        String password,
                        UserRole role) {
+        this.image = image;
         this.firstName = firstName;
         this.lastName = lastName;
         this.dateOfBirth = dateOfBirth;

@@ -24,16 +24,33 @@ public class RegistrationService {
     private final EmailSender emailSender;
 
     public String register(RegistrationRequest request) {
-        boolean isValidemail = emailValidator.test(request.getEmail());
-        if(!isValidemail) {
-            throw new IllegalStateException("Invalid email");
+        try {
+            boolean isValidemail = emailValidator.test(request.getEmail());
+            if (!isValidemail) {
+                throw new IllegalStateException("Invalid email");
+            }
+            // Überprüfen, ob der Benutzername bereits vergeben ist
+            if (userAccountService.isUsernameTaken(request.getUsername())) {
+                throw new IllegalStateException("Benutzername bereits vergeben");
+            }
+            String token = userAccountService.signUpUser(new UserAccount(
+                    request.getImage(),
+                    request.getFirstName(),
+                    request.getLastName(),
+                    request.getDateOfBirth(),
+                    request.getUsername(),
+                    request.getEmail(),
+                    request.getPassword(),
+                    request.getRole()));
+            String link = "http://localhost:8080/registration/confirm?token=" + token;
+            emailSender.send(request.getEmail(), buildEmail(request.getFirstName(), link));
+            return token;
+        } catch (Exception e) {
+            System.out.println("Fehler bei der Registrierung: " + e.getMessage());
+            return null; // oder eine andere geeignete Aktion, z. B. eine Fehlermeldung zurückgeben
         }
-        String token =  userAccountService.signUpUser(new UserAccount(request.getFirstName(), request.getLastName(), request.getDateOfBirth(), request.getUsername(), request.getEmail(), request.getPassword(), UserRole.USER));
-        String link = "http://localhost:8080/registration/confirm?token=" + token;
-        emailSender.send(request.getEmail(),
-                buildEmail(request.getFirstName(), link));
-        return token;
     }
+
 
     @Transactional
     public String confirmToken(String token) {
