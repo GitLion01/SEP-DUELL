@@ -19,7 +19,6 @@ import java.time.LocalDateTime;
 @RequestMapping("/login")
 public class LoginController {
     private final AuthenticationManager authenticationManager;
-    private final UserAccountService userAccountService;
     private final ConfirmationTokenService confirmationTokenService;
     private final EmailSender emailSender;
 
@@ -32,7 +31,6 @@ public class LoginController {
                            ConfirmationTokenService confirmationTokenService,
                            EmailSender emailSender) {
         this.authenticationManager = authenticationManager;
-        this.userAccountService = userAccountService;
         this.confirmationTokenService = confirmationTokenService;
         this.emailSender = emailSender;
     }

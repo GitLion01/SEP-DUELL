@@ -27,17 +27,16 @@ public class WebSecurityConfig {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
 
-
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         return http
-                .csrf(AbstractHttpConfigurer :: disable)
+                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(
-                            req -> req.requestMatchers("/**")
-                                      .permitAll()
-                                      .anyRequest()
-                                      .authenticated()
+                        req -> req.requestMatchers("/**")
+                                .permitAll()
+                                .anyRequest()
+                                .authenticated()
                 ).formLogin(form -> form
                         .loginPage("/login")  // Angepasste Login-Seite, kann durch eine eigene ersetzt werden
                         .loginProcessingUrl("/perform_login")  // URL, auf der die Login-Anfrage verarbeitet wird
@@ -50,8 +49,8 @@ public class WebSecurityConfig {
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/login?logout=true"))
                 .userDetailsService(userAccountService)
-                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                 .build();
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .build();
     }
 
     @Bean
