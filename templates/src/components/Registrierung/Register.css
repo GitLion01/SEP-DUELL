@@ -2,7 +2,7 @@
 /* AUSSEHEN DES HAUPTCONTAINERS*/
 /*DIE KLASSE CONTAINER WIRD IN DEM HTML FILE ERSTELLT  UND ES BEFINDEN SICH ALLE DINGE IN DIESEM */
 .AppRegister {
-
+  
   margin: 0 auto; /* Zentrierung des Containers */
   padding: 40px; /* Innenabstand des Containers */
   background-color: #775dc0; /* Hintergrundfarbe des Containers */
