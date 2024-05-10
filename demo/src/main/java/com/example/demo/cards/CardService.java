@@ -1,10 +1,11 @@
 package com.example.demo.cards;
 
 
+import com.example.demo.decks.Deck;
+import com.example.demo.decks.DeckRepository;
 import com.example.demo.user.UserAccount;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
@@ -15,17 +16,19 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+
 
 @Service
 public class CardService {
 
 
     private final CardRepository cardRepository;
+    private final DeckRepository deckRepository;
 
     @Autowired
-    public CardService(CardRepository cardRepository) {
+    public CardService(CardRepository cardRepository, DeckRepository deckRepository) {
         this.cardRepository = cardRepository;
+        this.deckRepository = deckRepository;
     }
 
 
@@ -43,7 +46,7 @@ public class CardService {
     }
 
     private void saveCard(CardRequest request) throws IllegalStateException {
-        boolean cardExists = cardRepository.findByName(request.getName()).isPresent();
+        boolean cardExists = cardRepository.existsByName(request.getName());
         if (cardExists) {
             throw new IllegalStateException("Card already exists: " + request.getName());
 }
@@ -75,13 +78,13 @@ public class CardService {
                 cardRepository.delete(card);
                 }
 
-
     public String deleteMultipleCards(List<String> names){
         for (String name : names) {
             deleteCard(name);
         }
         return "Cards deleted";
     }
+
 
 
 
@@ -110,6 +113,7 @@ public class CardService {
         }
         return cardRequests;
     }
+
 
     public String uploadAndSaveCards(MultipartFile file) {
         try {

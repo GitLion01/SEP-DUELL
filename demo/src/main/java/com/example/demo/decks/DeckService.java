@@ -67,9 +67,10 @@ public class DeckService{
     }
 
 
-    public String createDeck(@RequestBody DeckRequest request) {
+    public String createDeck(@RequestBody DeckRequest request/*, Principal principal*/) {
 
-
+        // TODO: implementation in frontend
+        // Check if the user already has 3 decks
         int userDeckCount = deckRepository.countByUserId(request.getUserID());
         if (userDeckCount >= 3) {
             return "Error: Maximum of 3 decks per user allowed";
@@ -88,11 +89,11 @@ public class DeckService{
 
         List<Card> cards = new ArrayList<>();
         boolean deckCreated = false;
-        UserAccount user = null;
+        UserAccount user = null; // Deklaration außerhalb des 'if'-Blocks
         // Check if the user exists in the database
         Optional<UserAccount> userOptional = userAccountRepository.findById(request.getUserID());
         if (userOptional.isPresent()) {
-            user = userOptional.get();
+            user = userOptional.get(); // Zuweisung innerhalb des 'if'-Blocks
             // Iterate through the card names and check if they exist in the database
             for (String cardName : cardNames) {
                 try {

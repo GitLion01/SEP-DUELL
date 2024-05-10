@@ -47,7 +47,13 @@ public class Card {
         this.name = name;
         this.attackPoints = attackPoints;
         this.defensePoints = defensePoints;
+
+        // Überprüfe, ob die Beschreibung maximal 200 Zeichen lang ist
+        if (description != null && description.length() > 200) {
+            throw new IllegalArgumentException("Description must be at most 200 characters long.");
+        }
         this.description = description;
+
         this.image = image;
         this.rarity = rarity;
     }

@@ -42,7 +42,7 @@ public class UserAccount implements UserDetails {
     private List<Deck> decks = new ArrayList<>();
 
     @ManyToMany
-    /*to ignore the infinite loop occurring in the serialization ,when join the tow tables
+    /*to ignore the infinite loop occurring in the serialization ,when join the two tables
     /if a user accepted the friend request*/
     @JsonIgnore
     @JoinTable(

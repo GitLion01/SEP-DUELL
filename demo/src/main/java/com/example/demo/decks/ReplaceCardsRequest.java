@@ -1,6 +1,6 @@
 package com.example.demo.decks;
 
-import com.example.demo.cards.Card;
+
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;

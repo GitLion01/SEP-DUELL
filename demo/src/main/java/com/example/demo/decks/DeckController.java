@@ -1,18 +1,14 @@
 package com.example.demo.decks;
 
 import com.example.demo.cards.Card;
-import com.example.demo.cards.CardRepository;
-import com.example.demo.cards.CardService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
+
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+
 
 
 @RestController
@@ -21,11 +17,11 @@ import java.util.Optional;
 @AllArgsConstructor
 public class DeckController {
 
-    private final DeckRepository deckRepository;
+
     @Autowired
     private final DeckService deckService;
-    private final CardRepository cardRepository;
-
+    @Autowired
+    private DeckRepository deckRepository;
 
 
     @PostMapping(path = "/create")
@@ -54,7 +50,7 @@ public class DeckController {
     }
 
 
-    @PutMapping("/replaceCards/{deckName}/{userID}")
+    @PutMapping("/replaceCards/{deckName}/{userID}")//Decknamen dürfen keine Leerzeichen enthalten
     public String replaceCardsInDeck(@PathVariable String deckName, @PathVariable Long userID, @RequestBody ReplaceCardsRequest request) {
         return deckService.replaceCardsInDeck(deckName, userID, request.getCardsToRemove(), request.getCardsToAdd());
     }
@@ -66,10 +62,15 @@ public class DeckController {
     }
 
 
-    // TODO: Check via frontend
+
     @GetMapping(path = "/getUserDecks/{userID}")
     public List<Deck> getUserDecks(@PathVariable Long userID) {
         return deckService.getUserDecksByUserId(userID);
+    }
+
+    @GetMapping(path = "/getAll")
+    public List<Deck> getAll() {
+        return deckRepository.findAll();
     }
 
 
