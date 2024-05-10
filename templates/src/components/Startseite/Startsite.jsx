@@ -61,7 +61,7 @@ class Startseite extends Component {
               <a href="/profile"><h2>MEIN PROFIL</h2></a>
             </section>
             <section className="meindeck">
-              <a href="/deckbearbeiten"><h2>MEIN DECK</h2></a>
+              <a href="/create-deck"><h2>MEIN DECK</h2></a>
             </section>
             <section className="freundesliste">
               <h2>MEINE FREUNDESLISTE</h2>
