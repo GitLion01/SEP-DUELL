@@ -29,6 +29,9 @@ public class UserAccountService implements UserDetailsService {
         return userAccountRepository.findByEmail(username).orElseThrow(() -> new UsernameNotFoundException(USER_NOT_FOUND_MESSAGE));
 }
 
+
+
+
     /*public UserAccount findByUsername(String username) {
         return userAccountRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException(USER_NOT_FOUND_MESSAGE));
     }*/
