@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 
+@CrossOrigin
 @RestController
 @RequestMapping("/login")
 public class LoginController {
