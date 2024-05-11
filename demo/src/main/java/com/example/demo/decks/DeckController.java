@@ -3,6 +3,8 @@ package com.example.demo.decks;
 import com.example.demo.cards.Card;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -32,9 +34,22 @@ public class DeckController {
 
 
     // TODO: UserID berücksichtigen
-    @PutMapping("/updateName/{oldName}/{newName}") //Decknamen dürfen keine Leerzeichen enthalten
+   /* @PutMapping("/updateName/{oldName}/{newName}") //Decknamen dürfen keine Leerzeichen enthalten
     public String updateDeckName(@PathVariable String oldName, @PathVariable String newName) {
         return deckService.updateDeckName(oldName, newName);
+    }*/
+    @PutMapping("/updateName/{userId}/{oldName}/{newName}")
+    public ResponseEntity<String> updateDeckName(
+            @PathVariable Long userId,
+            @PathVariable String oldName,
+            @PathVariable String newName) {
+
+        String result = deckService.updateDeckName(userId, oldName, newName);
+        if (result.contains("Fehler")) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(result);
+        } else {
+            return ResponseEntity.ok(result);
+        }
     }
 
     //TODO: UserID muss übergeben werden

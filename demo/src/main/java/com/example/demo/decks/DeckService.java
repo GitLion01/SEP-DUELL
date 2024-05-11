@@ -82,7 +82,7 @@ public class DeckService{
             return "Error: A deck with the name '" + request.getName() + "' already exists for this user";
         }
 
-        //TODO: nur wenn user ein Deck mit dem Namen hat und nicht allgemein im spiel
+
         // check if deck with this name alredy exists
        /* String deckName = request.getName();
         if (!isDeckNameAvailable(deckName)) {
@@ -150,7 +150,7 @@ public class DeckService{
     }
 
 
-    public String updateDeckName(String oldName, String newName) {
+   /* public String updateDeckName(String oldName, String newName) {
         try {
             Optional<Deck> optionalDeck = deckRepository.findByName(oldName);
             if (optionalDeck.isPresent()) {
@@ -162,6 +162,29 @@ public class DeckService{
                 throw new RuntimeException("Das Deck wurde nicht gefunden.");
             }
         } catch (RuntimeException e) {
+            return "Fehler beim Aktualisieren des Decknamens";
+        }
+    }*/
+
+    public String updateDeckName(Long userId, String oldName, String newName) {
+        try {
+            // Überprüfen, ob der Benutzer existiert
+            Optional<UserAccount> optionalUser = userAccountRepository.findById(userId);
+            if (optionalUser.isPresent()) {
+                // Überprüfen, ob das Deck existiert und dem Benutzer gehört
+                Optional<Deck> optionalDeck = deckRepository.findByNameAndUserId(oldName, userId);
+                if (optionalDeck.isPresent()) {
+                    Deck deck = optionalDeck.get();
+                    deck.setName(newName);
+                    deckRepository.save(deck);
+                    return "Deck gefunden und Name aktualisiert";
+                } else {
+                    return "Deck nicht gefunden";
+                }
+            } else {
+                return "Benutzer nicht gefunden";
+            }
+        } catch (Exception e) {
             return "Fehler beim Aktualisieren des Decknamens";
         }
     }
