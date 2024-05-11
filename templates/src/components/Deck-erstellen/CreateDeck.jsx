@@ -11,34 +11,68 @@ function CreateDeck() {
     const [deckName, setDeckName] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
     const [isEditing, setIsEditing] = useState(false);  // Zustand zum Überwachen, ob Änderungen gemacht wurden
+    const [formData, setFormData] = useState({
+        userID: id,
+        name:"",
+        cardNames:[]
+    });
+
+    const handleInputChane = (event) => {
+        const { name, value} = event.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: value // Aktualisiere den entsprechenden Wert im formData Objekt
+        }));
+    };
 
 
     // Karten von der Datenbank abrufen
     useEffect(() => {
 
         // Abrufen der Karten des Spielers
-        axios.get(`http://localhost:8080/${id}/cards`)
+        axios.get(`http://localhost:8080/cards`)
             .then(response => setMyCards(response.data))
             .catch(error => console.error('Fehler beim Abrufen der Karten:', error));
 
         // Abrufen der Decks
-        axios.get(`http://localhost:8080/${id}/decks`)
+        axios.get(`http://localhost:8080/decks/getUserDecks/${id}`)
             .then(response => setDecks(response.data))
             .catch(error => console.error('Fehler beim Abrufen der Decks:', error));
 
     }, [id]);
 
     // Neues Deck hinzufügen
-    const handleCreateNewDeck = () => {
+    const handleCreateNewDeck = async () => {
         if (decks.length >= 3) {
             setErrorMessage('Es können maximal drei Decks erstellt werden.');
-        } else if (isEditing) {
+            return;
+        }
+        if (isEditing) {
             setErrorMessage('Bitte speichern Sie die Änderungen am aktiven Deck, bevor Sie ein neues Deck erstellen.');
-        } else {
-            const newDeck = { name: `Deck ${decks.length + 1}`, cards: [] };
-            setDecks([...decks, newDeck]);
-            setActiveDeck(decks.length);
-            setDeckName(newDeck.name);
+            return;
+        }
+
+        // Erstelle neues Deck-Objekt
+        const newDeck = {
+            userID: id, //
+            name: `Deck ${decks.length + 1}`,
+            cardNames: [""]
+        };
+
+        try {
+            // Senden der Anfrage an das Backend
+            const response = await axios.post(`http://localhost:8080/decks/create`, JSON.stringify(newDeck),{
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            console.log('Deck erfolgreich erstellt', response.data);
+
+        }
+        catch (error) {
+            console.error('Fehler beim Erstellen des Decks', error);
+            setErrorMessage('Fehler beim Erstellen des Decks: ' + (error.response?.data.message || error.message));
         }
     };
     
@@ -47,7 +81,7 @@ function CreateDeck() {
     const handleAddCardToDeck = (card) => {
         if (activeDeck !== null) {
             // POST-Anfrage an das Backend, um die Karte zum Deck hinzuzufügen
-            axios.post(`http://localhost:8080/${id}/decks/${decks[activeDeck].name}/addCard`, { cardId: card.name })
+            axios.post(`http://localhost:8080/decks/addCard`, { cardId: card.name })
                 .then(response => {
                     // Aktualisiere das lokale Deck mit der Antwort vom Server
                     setDecks(prevDecks => {
@@ -100,6 +134,9 @@ function CreateDeck() {
             setErrorMessage('Der Deckname darf nicht leer sein');
             return;
         }
+
+
+
         axios.post(`http://localhost:8080/${id}/decks/`, decks[activeDeck])
             .then(() => {
                 console.log('Deck gespeichert!');
@@ -113,7 +150,7 @@ function CreateDeck() {
 
     return (
         <div className="container">
-            <h1>Deck Erstellen</h1>
+            <h1>Meine Decks</h1>
             {errorMessage && (
                 <div className="error-message" onClick={clearErrorMessage}>
                     {errorMessage}

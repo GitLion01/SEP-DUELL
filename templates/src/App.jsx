@@ -24,7 +24,7 @@ function App() {
         <Route path="/profil/:id" element={<Profile/>} /> 
         <Route path='/deckbearbeiten' element = {<DeckEditor/>} /> 
         <Route path='/admin' element = {<AdminPanel/>} /> 
-        <Route path="/create-deck" element={<CreateDeck />} />
+        <Route path="/:id/decks" element={<CreateDeck />} />
         <Route path="/freundelist" element={<Freundeliste/>} />
       </Routes>
     </Router>

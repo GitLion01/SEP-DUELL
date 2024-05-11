@@ -37,7 +37,7 @@ function Profile() {
         if (userData.role !== 'admin') {
           setSepcoins(userData.sepcoins);
           setLeaderboardPunkte(userData.leaderbordpunkte);
-        };
+        }
       })
       .catch(error => {
         console.error(error);
