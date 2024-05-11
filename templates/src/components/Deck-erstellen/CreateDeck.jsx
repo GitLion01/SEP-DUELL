@@ -11,7 +11,7 @@ function CreateDeck() {
     const [deckName, setDeckName] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
     const [isEditing, setIsEditing] = useState(false);  // Zustand zum Überwachen, ob Änderungen gemacht wurden
-    // const [updateTrigger, setUpdateTrigger] = useState(0); // Zählt, wie oft Updates notwendig waren
+    const [updateTrigger, setUpdateTrigger] = useState(0); // Zählt, wie oft Updates notwendig waren
     const [formData, setFormData] = useState({
         userID: id,
         name:"",
@@ -40,7 +40,7 @@ function CreateDeck() {
             .then(response => setDecks(response.data))
             .catch(error => console.error('Fehler beim Abrufen der Decks:', error));
 
-    }, [id /* updateTrigger */]);
+    }, [id, updateTrigger]);
 
     // Neues Deck hinzufügen
     const handleCreateNewDeck = async () => {
@@ -56,7 +56,7 @@ function CreateDeck() {
         // Erstelle neues Deck-Objekt
         const newDeck = {
             userID: id, //
-            name: `Deck ${decks.length + 2}`,
+            name: `Deck ${decks.length + 4}`,
             cardNames: []
         };
 
@@ -67,6 +67,8 @@ function CreateDeck() {
                     'Content-Type': 'application/json'
                 }
             });
+
+            setUpdateTrigger(prev => prev + 1); // Trigger die useEffect Hook, um die Decks neu zu laden
 
             console.log('Deck erfolgreich erstellt', response.data);
 
@@ -99,7 +101,7 @@ function CreateDeck() {
         axios.put(`http://localhost:8080/decks/addCards`, JSON.stringify(dataToSend))
             .then(response => {
                 console.log('Karte erfolgreich zum Deck hinzugefügt', response.data);
-                // setUpdateTrigger(prev => prev + 1); // Trigger die useEffect Hook, um die Decks neu zu laden
+                setUpdateTrigger(prev => prev + 1); // Trigger die useEffect Hook, um die Decks neu zu laden
                 setErrorMessage(''); // Klare Fehlermeldung, wenn Erfolg
             })
             .catch(error => {
