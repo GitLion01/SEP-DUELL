@@ -63,7 +63,7 @@ public class DeckController {
     public String addCardsToDeck(DeckRequest request) {
         return deckService.addCardsToDeck(request);
     }*/
-    // TODO: userID muss berücksichtigt werden -> deck not found
+
     @PutMapping("/addCards")
     public ResponseEntity<String> addCardsToDeck(@RequestBody DeckRequest request) {
 
