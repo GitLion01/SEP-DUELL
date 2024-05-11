@@ -67,15 +67,17 @@ public class DeckService{
     }
 
 
-    public String createDeck(@RequestBody DeckRequest request/*, Principal principal*/) {
+    public String createDeck(@RequestBody DeckRequest request) {
 
-        // TODO: implementation in frontend
+
+
         // Check if the user already has 3 decks
         int userDeckCount = deckRepository.countByUserId(request.getUserID());
         if (userDeckCount >= 3) {
             return "Error: Maximum of 3 decks per user allowed";
         }
 
+        //TODO: nur wenn user ein Deck mit dem Namen hat und nicht allgemein im spiel
         // check if deck with this name alredy exists
         String deckName = request.getName();
         if (!isDeckNameAvailable(deckName)) {
@@ -103,9 +105,18 @@ public class DeckService{
                     System.out.println("Card not found: " + cardName);
                 }
             }
+
+            Deck deck = new Deck();
+            deck.setUser(user); // Verwendung des 'user'-Objekts, das außerhalb des 'if'-Blocks deklariert wurde
+            deck.setName(request.getName());
+            if(!cards.isEmpty()) {
+                deck.setCards(cards);
+            }
+            deckRepository.save(deck);
+            deckCreated = true;
         }
 
-        // Create and save the deck if all cards were found
+       /* // Create and save the deck if all cards were found
         if (!cards.isEmpty()) {
             Deck deck = new Deck();
             deck.setUser(user); // Verwendung des 'user'-Objekts, das außerhalb des 'if'-Blocks deklariert wurde
@@ -114,7 +125,10 @@ public class DeckService{
 
             deckRepository.save(deck);
             deckCreated = true;
-        }
+        }*/
+
+
+
 
         // Constructing the final message
         if (deckCreated) {
@@ -187,47 +201,11 @@ public class DeckService{
 
 
 
-   /* public String addCardsToDeck(String deckName, List<Card> cardsToAdd) {
-        try {
-            // Überprüfe, ob alle hinzuzufügenden Karten bereits in der Datenbank vorhanden sind
-            List<Card> existingCards = new ArrayList<>();
-            for (Card card : cardsToAdd) {
-                Optional<Card> optionalCard = cardRepository.findByName(card.getName());
-                if (optionalCard.isPresent()) {
-                    existingCards.add(optionalCard.get());
-                } else {
-                    throw new RuntimeException("Die Karte '" + card.getName() + "' ist nicht in der Datenbank vorhanden.");
-                }
-            }
 
-            // Überprüfe, ob das Deck bereits existiert
-            Optional<Deck> optionalDeck = deckRepository.findByName(deckName);
-            if (optionalDeck.isPresent()) {
-                Deck deck = optionalDeck.get();
-                List<Card> deckCards = deck.getCards();
-
-                // Überprüfe, ob das Deck die maximale Anzahl von Karten erreicht hat
-                if (deckCards.size() + existingCards.size() <= 30) {
-                    // Füge die Karten dem Deck hinzu
-                    deckCards.addAll(existingCards);
-
-                    // Speichere das aktualisierte Deck in der Datenbank
-                    deckRepository.save(deck);
-                    return "Die Karten wurden erfolgreich dem Deck hinzugefügt.";
-                } else {
-                    throw new RuntimeException("Das Deck kann maximal 30 Karten enthalten.");
-                }
-            } else {
-                throw new RuntimeException("Das Deck wurde nicht gefunden.");
-            }
-        } catch (Exception e) {
-            return "Fehler beim Hinzufügen der Karten zum Deck";
-        }
-    }*/
-   public String addCardsToDeck(String deckName, List<String> cardNames) {
+   /*public String addCardsToDeck(DeckRequest request) {
        try {
            // Überprüfe, ob das Deck bereits existiert
-           Optional<Deck> optionalDeck = deckRepository.findByName(deckName);
+           Optional<Deck> optionalDeck = deckRepository.findByName(request.getName());
            if (optionalDeck.isPresent()) {
                Deck deck = optionalDeck.get();
                List<Card> deckCards = deck.getCards();
@@ -260,7 +238,65 @@ public class DeckService{
        } catch (Exception e) {
            return "Fehler beim Hinzufügen der Karten zum Deck";
        }
+   }*/
+
+   public String addCardsToDeck(DeckRequest request) {
+       try {
+           // Überprüfen, ob der Benutzer existiert
+           Optional<UserAccount> optionalUser = userAccountRepository.findById(request.getUserID());
+           if (optionalUser.isPresent()) {
+               UserAccount user = optionalUser.get();
+
+               // Alle Decks des Benutzers abrufen
+               /*List<Deck> userDecks = user.getDecks();*/
+
+               // Das passende Deck finden
+               /*Optional<Deck> optionalDeck = userDecks.stream()
+                       .filter(deck -> deck.getName().equals(request.getName()))
+                       .findFirst();*/
+               Optional<Deck> optionalDeck = deckRepository.findAllDecksByUserIdAndName(request.getUserID(), request.getName());
+
+
+
+
+
+               if (optionalDeck.isPresent()) {
+                   Deck deck = optionalDeck.get();
+                   List<Card> deckCards = deck.getCards();
+                   List<Card> existingCards = new ArrayList<>();
+
+                   // Überprüfen, ob das Deck die maximale Anzahl von Karten erreicht hat
+                   if (deckCards.size() + request.getCardNames().size() <= 30) {
+                       // Überprüfen, ob alle hinzuzufügenden Karten bereits in der Datenbank vorhanden sind
+                       for (String cardName : request.getCardNames()) {
+                           Optional<Card> optionalCard = cardRepository.findByName(cardName);
+                           if (optionalCard.isPresent()) {
+                               existingCards.add(optionalCard.get());
+                           } else {
+                               throw new RuntimeException("Die Karte '" + cardName + "' ist nicht in der Datenbank vorhanden.");
+                           }
+                       }
+
+                       // Füge die Karten dem Deck hinzu
+                       deckCards.addAll(existingCards);
+
+                       // Speichere das aktualisierte Deck in der Datenbank
+                       deckRepository.save(deck);
+                       return "Die Karten wurden erfolgreich dem Deck hinzugefügt.";
+                   } else {
+                       throw new RuntimeException("Das Deck kann maximal 30 Karten enthalten.");
+                   }
+               } else {
+                   throw new RuntimeException("Das Deck wurde nicht gefunden.");
+               }
+           } else {
+               throw new RuntimeException("Der Benutzer mit der angegebenen ID wurde nicht gefunden.");
+           }
+       } catch (Exception e) {
+           return "Fehler beim Hinzufügen der Karten zum Deck: " + e.getMessage();
+       }
    }
+
 
 
 

@@ -49,7 +49,7 @@ public class CardService {
         boolean cardExists = cardRepository.existsByName(request.getName());
         if (cardExists) {
             throw new IllegalStateException("Card already exists: " + request.getName());
-}
+        }
             Card card = new Card(
                     request.getName(),
                     request.getAttackPoints(),
@@ -60,7 +60,9 @@ public class CardService {
             );
             cardRepository.save(card);
 }
-            public void deleteCard(String name){
+
+
+    public void deleteCard(String name){
                 Optional<Card> optionalCard = cardRepository.findByName(name);
                 if (optionalCard.isEmpty()) {
                     return;

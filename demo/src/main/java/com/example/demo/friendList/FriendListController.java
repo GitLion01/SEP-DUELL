@@ -13,6 +13,7 @@ import java.util.Optional;
 public class FriendListController {
 
     private final FriendListService friendListService;
+
     @GetMapping(path ="/{id}")
     public List<UserAccount> getFriends(@PathVariable int id) {
         return friendListService.getFriendList(id).orElse(null);

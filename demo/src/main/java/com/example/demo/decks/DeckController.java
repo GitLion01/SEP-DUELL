@@ -29,11 +29,15 @@ public class DeckController {
         return deckService.createDeck(request);
     }
 
+
+
+    // TODO: UserID berücksichtigen
     @PutMapping("/updateName/{oldName}/{newName}") //Decknamen dürfen keine Leerzeichen enthalten
     public String updateDeckName(@PathVariable String oldName, @PathVariable String newName) {
         return deckService.updateDeckName(oldName, newName);
     }
 
+    //TODO: UserID muss übergeben werden
     @PutMapping("/removeCards")
     public String removeCardsFromDeck(@RequestBody Map<String, Object> requestBody) {
         String deckName = (String) requestBody.get("deckName");
@@ -42,11 +46,19 @@ public class DeckController {
     }
 
 
+    /*@PutMapping("/addCards")
+    public String addCardsToDeck(DeckRequest request) {
+        return deckService.addCardsToDeck(request);
+    }*/
+    // TODO: userID muss berücksichtigt werden -> deck not found
     @PutMapping("/addCards")
-    public String addCardsToDeck(@RequestBody Map<String, Object> requestBody) {
-        String deckName = (String) requestBody.get("deckName");
-        List<String> cardsToAdd = (List<String>) requestBody.get("cardsToAdd");
-        return deckService.addCardsToDeck(deckName, cardsToAdd);
+    public String addCardsToDeck(@RequestBody DeckRequest request) {
+        // Loggen der empfangenen Parameter
+        System.out.println("UserID: " + request.getUserID());
+        System.out.println("DeckName: " + request.getName());
+        System.out.println("CardNames: " + request.getCardNames());
+
+        return deckService.addCardsToDeck(request);
     }
 
 
