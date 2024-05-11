@@ -194,7 +194,7 @@ public class DeckService{
 
 
 
-    public String removeCards(String deckName, List<String> cardNamesToRemove) {
+    /*public String removeCards(String deckName, List<String> cardNamesToRemove) {
         try {
             // Finde das Deck anhand des Namens
             Optional<Deck> optionalDeck = deckRepository.findByName(deckName);
@@ -228,7 +228,49 @@ public class DeckService{
             e.printStackTrace(); // Stack-Trace ausgeben
             return "Fehler beim Entfernen der Karten aus dem Deck";
         }
+    }*/
+
+    public String removeCards(DeckRequest request) {
+        try {
+            // Überprüfe, ob der Benutzer existiert
+            Optional<UserAccount> optionalUser = userAccountRepository.findById(request.getUserID());
+            if (!optionalUser.isPresent()) {
+                throw new RuntimeException("Der Benutzer mit der angegebenen ID wurde nicht gefunden.");
+            }
+
+            // Finde das Deck anhand des Namens und der UserID
+            Optional<Deck> optionalDeck = deckRepository.findByNameAndUserId(request.getName(), request.getUserID());
+            if (optionalDeck.isPresent()) {
+                Deck deck = optionalDeck.get();
+
+                // Extrahiere die IDs der Karten, die entfernt werden sollen
+                List<Long> cardIdsToRemove = new ArrayList<>();
+                for (String cardName : request.getCardNames()) {
+                    Optional<Card> optionalCard = cardRepository.findByName(cardName);
+                    optionalCard.ifPresent(card -> {
+                        cardIdsToRemove.add(card.getId());
+                        System.out.println("Card ID to remove: " + card.getId()); // Protokollausgabe hinzufügen
+                    });
+                }
+
+                // Entferne die Karten aus dem Deck über die benannte Abfrage
+                deckRepository.deleteDeckCardsByDeckIdAndCardIds(deck.getId(), cardIdsToRemove);
+
+                // Aktualisiere die Liste der Karten im Deck
+                deck.getCards().removeIf(card -> cardIdsToRemove.contains(card.getId()));
+                deckRepository.save(deck);
+
+                return "Die Karten wurden erfolgreich aus dem Deck entfernt.";
+            } else {
+                throw new RuntimeException("Das Deck wurde nicht gefunden.");
+            }
+        } catch (Exception e) {
+            System.err.println("Fehler beim Entfernen der Karten aus dem Deck: " + e.getMessage()); // Protokollausgabe hinzufügen
+            e.getMessage(); // Stack-Trace ausgeben
+            return "Fehler beim Entfernen der Karten aus dem Deck: " + e.getMessage();
+        }
     }
+
 
 
 

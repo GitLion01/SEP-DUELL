@@ -33,7 +33,7 @@ public class DeckController {
 
 
 
-    // TODO: UserID berücksichtigen
+
    /* @PutMapping("/updateName/{oldName}/{newName}") //Decknamen dürfen keine Leerzeichen enthalten
     public String updateDeckName(@PathVariable String oldName, @PathVariable String newName) {
         return deckService.updateDeckName(oldName, newName);
@@ -52,12 +52,10 @@ public class DeckController {
         }
     }
 
-    //TODO: UserID muss übergeben werden
+
     @PutMapping("/removeCards")
-    public String removeCardsFromDeck(@RequestBody Map<String, Object> requestBody) {
-        String deckName = (String) requestBody.get("deckName");
-        List<String> cardsToRemove = (List<String>) requestBody.get("cardsToRemove");
-        return deckService.removeCards(deckName, cardsToRemove);
+    public String removeCardsFromDeck(@RequestBody DeckRequest request) {
+        return deckService.removeCards(request);
     }
 
 
