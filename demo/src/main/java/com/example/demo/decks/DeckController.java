@@ -65,13 +65,14 @@ public class DeckController {
     }*/
     // TODO: userID muss berücksichtigt werden -> deck not found
     @PutMapping("/addCards")
-    public String addCardsToDeck(@RequestBody DeckRequest request) {
-        // Loggen der empfangenen Parameter
-        System.out.println("UserID: " + request.getUserID());
-        System.out.println("DeckName: " + request.getName());
-        System.out.println("CardNames: " + request.getCardNames());
+    public ResponseEntity<String> addCardsToDeck(@RequestBody DeckRequest request) {
 
-        return deckService.addCardsToDeck(request);
+        // Aufruf des entsprechenden Service
+        String resultMessage = deckService.addCardsToDeck(request);
+
+        // Konstruieren der ResponseEntity basierend auf dem Service-Ergebnis
+        HttpStatus status = resultMessage.startsWith("Fehler") ? HttpStatus.BAD_REQUEST : HttpStatus.OK;
+        return new ResponseEntity<>(resultMessage, status);
     }
 
 
