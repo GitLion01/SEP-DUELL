@@ -15,40 +15,55 @@ class AdminPanel extends Component {
     this.fetchCards(); //Beim Laden der Komponente werden die Karten abgerufen 
   }
 
+  handleUploadClick = () => {
+    document.getElementById('csvFile').click(); // Klicken Sie auf das Dateieingabefeld, wenn der Button geklickt wird
+  };
+
   // Methode zum Abrufen der Kartendaten vom Backend
   fetchCards = async () => {
     try {
-      const response = await axiosInstance.get('/cards'); // Abrufen der Kartenliste vom Backend
-      this.setState({ cards: response.data }); // Setzen des Zustands für die Kartenliste
+      const response = await fetch('/cards'); // Abrufen der Kartenliste vom Backend
+      if (!response.ok) {
+        throw new Error('Fehler beim Abrufen der Kartendaten:', response.statusText);
+      }
+      const data = await response.json(); // Daten aus der Antwort extrahieren
+      this.setState({ cards: data }); // Setzen des Zustands für die Kartenliste
     } catch (error) { 
-      console.error('Fehler beim Abrufen der Kartendaten:', error ); 
+      console.error('Fehler beim Abrufen der Kartendaten:', error); 
     }
-
   }
+  
 
   // Methode zum Hochladen einer CSV-Datei mit Kartendaten
   handleUpload = async (event) => {
-    event.preventDefault(); // Verhindert das Standardverhalten des Formulars (Seite neu laden)
-
-    const file = event.target.files[0]; // CSV-Datei aus dem Eingabefeld erhalten
-    const formData = new FormData(); // FormData erstellen, um die Datei zu senden
-    formData.append('file', file); // Datei zum FormData hinzufügen
-
-    // Senden der Datei an das Backend
+    console.log('handleUpload wurde aufgerufen.'); // Konsolenausgabe hinzufügen
+    
+    event.preventDefault();
+  
+    // Überprüfen, ob event.target.files definiert ist
+    if (!event.target.files || event.target.files.length === 0) {
+      console.error('Keine Datei ausgewählt.');
+      return;
+    }
+  
+    const file = event.target.files[0];
+    const formData = new FormData();
+    formData.append('file', file);
+  
     try {
-      const response = await axiosInstance.post('/upload', formData, {
+      const response = await axiosInstance.post('/cards/upload', formData, {
         headers: {
-          'Content-Type': 'multipart/form-data' // Setzen des Content-Type-Headers auf multipart/form-data für den Dateiupload
+          'Content-Type': 'multipart/form-data'
         }
       });
       console.log('Datei erfolgreich hochgeladen.');
-
-      // Kartendaten im State aktualisieren
       this.setState({ cards: response.data });
     } catch (error) {
-      console.error('Fehler beim Hochladen der Datei:', error); // Behandlung von Fehlern beim Hochladen der Datei
+      console.error('Fehler beim Hochladen der Datei:', error);
     }
   };
+  
+  
 
   // Methode zum Aktualisieren des Suchbegriffs
   handleSearchChange = async (event) => {
@@ -78,69 +93,47 @@ class AdminPanel extends Component {
   }
 
   // Methode zum Hochladen eines Bildes für eine bestimmte Karte
-  handleImageUpload = async (cardId, event) => {
-    const file = event.target.files[0]; // Bild aus dem Eingabefeld erhalten
-    const formData = new FormData(); // FormData erstellen, um die Datei zu senden
-    formData.append('file', file); // Datei zum FormData hinzufügen
 
-    // Senden des Bildes an das Backend
-    try {
-      const response = await axiosInstance.post(`/upload/image/${cardId}`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data' // Setzen des Content-Type-Headers auf multipart/form-data für den Dateiupload
-        }
-      });
-      console.log(`Bild für Karte ${cardId} erfolgreich hochgeladen.`);
-
-      // Aktualisieren des Bildzustands
-      this.setState(prevState => ({
-        images: {
-          ...prevState.images,
-          [cardId]: response.data.imageUrl
-        }
-      }));
-    } catch (error) {
-      console.error(`Fehler beim Hochladen des Bildes für Karte ${cardId}:`, error);
-    }
-  };
 
   render() {
     // Filtern der Kartenliste basierend auf dem eingegebenen Kartennamen
-    const filteredCards = this.state.cards.filter(card =>
-      card.name.toLowerCase().includes(this.state.searchName.toLowerCase())
-    );
-
+  
+    if (!this.state.cards) {
+      return <div>Loading...</div>; // oder eine andere Ladeanzeige
+    }
     return (
       <div className="AdminPanel">
         <h1>Admin Panel</h1> {/* Überschrift für das Admin-Panel */}
         <form onSubmit={this.handleUpload}> {/* Formular zum Hochladen einer CSV-Datei */}
           <label htmlFor="csvFile">Wählen Sie eine CSV-Datei aus:</label>
-          <input type="file" id="csvFile" name="csvFile" accept=".csv" required />
-          <button type="submit">CSV-Datei hochladen</button>
+          <input 
+            type="file" 
+            id="csvFile" 
+            name="csvFile" 
+            accept=".csv" 
+            onChange={this.handleUpload}
+            required 
+          />
+          <button type="button" onClick={this.handleUploadClick}>CSV-Datei auswählen</button>
         </form>
-
         <div id="searchContainer">
           <label htmlFor="searchName">Kartenname suchen:</label>
           <input type="text" id="searchName" value={this.state.name} onChange={this.handleSearchChange} /> 
           <button onClick={this.handleDelete}>Löschen</button>
           <div id="searchResults">
             {/* Anzeige der Karten und Bildhochladefelder für die gefilterten Karten */}
-            {filteredCards.map((card, index) => (
+        {/*    {filteredCards.map((card, index) => (
               <div key={index}>
                 <Card card={card} />
                 <input type="file" onChange={(event) => this.handleImageUpload(card.id, event)} />
-              </div>
-            ))}
+        </div> 
+            ))} */}
           </div>
         </div>
         <div id="existingCards">
           <h2>Vorhandene Kartentypen</h2>
           {/* Liste der Kartentypen */}
-          <div className="cardContainer">
-            {this.state.cards.map((card, index) => (
-              <Card key={index} card={card} />
-            ))}
-          </div>
+         
         </div>
       </div>
     );

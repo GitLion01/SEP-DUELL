@@ -1,10 +1,11 @@
 package com.example.demo.cards;
 
 
+import com.example.demo.decks.Deck;
+import com.example.demo.decks.DeckRepository;
 import com.example.demo.user.UserAccount;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
@@ -15,17 +16,19 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+
 
 @Service
 public class CardService {
 
 
     private final CardRepository cardRepository;
+    private final DeckRepository deckRepository;
 
     @Autowired
-    public CardService(CardRepository cardRepository) {
+    public CardService(CardRepository cardRepository, DeckRepository deckRepository) {
         this.cardRepository = cardRepository;
+        this.deckRepository = deckRepository;
     }
 
 
@@ -43,38 +46,39 @@ public class CardService {
     }
 
     private void saveCard(CardRequest request) throws IllegalStateException {
-        boolean cardExists = cardRepository.findByName(request.getName()).isPresent();
+        boolean cardExists = cardRepository.existsByName(request.getName());
         if (cardExists) {
             throw new IllegalStateException("Card already exists: " + request.getName());
-}
-            Card card = new Card(
-                    request.getName(),
-                    request.getAttackPoints(),
-                    request.getDefensePoints(),
-                    request.getDescription(),
-                    request.getImage(),
-                    request.getRarity()
-            );
-            cardRepository.save(card);
-}
-            public void deleteCard(String name){
-                Optional<Card> optionalCard = cardRepository.findByName(name);
-                if (optionalCard.isEmpty()) {
-                    return;
-                }
-                Card card = optionalCard.get();
+        }
+        Card card = new Card(
+                request.getName(),
+                request.getAttackPoints(),
+                request.getDefensePoints(),
+                request.getDescription(),
+                request.getImage(),
+                request.getRarity()
+        );
+        cardRepository.save(card);
+    }
 
-                // Create a copy of the list of users associated with the card
-                List<UserAccount> usersCopy = new ArrayList<>(card.getUsers());
 
-                // Iterate over the copy and remove the card from each user's collection
-                for (UserAccount user : usersCopy) {
-                    user.removeCard(card);
-                }
+    public void deleteCard(String name){
+        Optional<Card> optionalCard = cardRepository.findByName(name);
+        if (optionalCard.isEmpty()) {
+            return;
+        }
+        Card card = optionalCard.get();
 
-                cardRepository.delete(card);
-                }
+        // Create a copy of the list of users associated with the card
+        List<UserAccount> usersCopy = new ArrayList<>(card.getUsers());
 
+        // Iterate over the copy and remove the card from each user's collection
+        for (UserAccount user : usersCopy) {
+            user.removeCard(card);
+        }
+
+        cardRepository.delete(card);
+    }
 
     public String deleteMultipleCards(List<String> names){
         for (String name : names) {
@@ -82,6 +86,9 @@ public class CardService {
         }
         return "Cards deleted";
     }
+
+
+
 
 
 
@@ -98,18 +105,25 @@ public class CardService {
                     int attackPoints = parts[2].equalsIgnoreCase("unlimited") ? Integer.MAX_VALUE : Integer.parseInt(parts[2].trim());
                     int defensePoints = parts[3].equalsIgnoreCase("unlimited") ? Integer.MAX_VALUE : Integer.parseInt(parts[3].trim());
                     String description = parts[4].trim();
+                    if (description.length() > 200) {
+                        description = description.substring(0, 200);
+                    }
                     byte[] image = parts[5].trim().getBytes(); // Load image data properly
                     Rarity rarity = Rarity.valueOf(parts[1].trim().toUpperCase());
 
                     CardRequest cardRequest = new CardRequest(name, attackPoints, defensePoints, description, image, rarity);
                     cardRequests.add(cardRequest);
                 } else {
-                    System.out.println("Invalid line: " + line);
+                    System.out.println("Ungültige Zeile: " + line);
                 }
             }
         }
         return cardRequests;
     }
+
+
+
+
 
     public String uploadAndSaveCards(MultipartFile file) {
         try {
@@ -119,7 +133,4 @@ public class CardService {
             return "Error uploading CSV: " + e.getMessage();
         }
     }
-    }
-
-
-
+}

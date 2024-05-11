@@ -13,10 +13,8 @@ class TwoFaktorAuthenfication extends Component {
     };
     
     // Funktion zum Aktualisieren des PIN-Codes
-    handlePincodeChange = (index, value) => { // Funktion zum Aktualisieren des PIN-Codes
-        const newPincode = this.state.pincode.split(''); // Kopie des aktuellen PIN-Codes erstellen
-        newPincode[index] = value; // Wert des Zeichens an der gegebenen Indexposition aktualisieren
-        this.setState({ pincode: newPincode.join('') }); // PIN-Code im Zustand aktualisieren
+    handlePincodeChange = (event, index, value) => { // Funktion zum Aktualisieren des PIN-Codes
+        this.setState({ pincode: event.target.value });
     };
     
     // Funktion zum Überprüfen des PIN-Codes
@@ -42,27 +40,27 @@ class TwoFaktorAuthenfication extends Component {
     };
 
     render() {
-        const isPincodeComplete = this.state.pincode.length === 6;
+        const isPincodeComplete = this.state.pincode.length === 6; // Definiere isPincodeComplete
         if (this.state.isPinCodeCorrect) {
             return <Navigate to="/startseite" />; 
         }
         return (
             <body className='TwoFact__body'> 
             <div className="TwoFact">
-                <form id="form">
+                <form id="form" onSubmit={this.handleSubmit}>
                     <h1>Zwei-Faktor-Verifizierung</h1>
                     <div className="form__group form__pincode">
                         <label id="textstelle">Gebe dein 6-stelligen Code ein</label>
-                        <input type="tel" name="pincode-1" maxLength="1" pattern="[\d]*" tabIndex="1" placeholder="·" autoComplete="off" value={this.state.pincode[0]} onChange={(e) => this.handlePincodeChange(0, e.target.value)}/>
-                        <input type="tel" name="pincode-2" maxLength="1" pattern="[\d]*" tabIndex="2" placeholder="·" autoComplete="off" value={this.state.pincode[1]} onChange={(e) => this.handlePincodeChange(1, e.target.value)}/>
-                        <input type="tel" name="pincode-3" maxLength="1" pattern="[\d]*" tabIndex="3" placeholder="·" autoComplete="off" value={this.state.pincode[2]} onChange={(e) => this.handlePincodeChange(2, e.target.value)}/>
-                        <input type="tel" name="pincode-4" maxLength="1" pattern="[\d]*" tabIndex="4" placeholder="·" autoComplete="off" value={this.state.pincode[3]} onChange={(e) => this.handlePincodeChange(3, e.target.value)}/>
-                        <input type="tel" name="pincode-5" maxLength="1" pattern="[\d]*" tabIndex="5" placeholder="·" autoComplete="off" value={this.state.pincode[4]} onChange={(e) => this.handlePincodeChange(4, e.target.value)}/>
-                        <input type="tel" name="pincode-6" maxLength="1" pattern="[\d]*" tabIndex="6" placeholder="·" autoComplete="off" value={this.state.pincode[5]} onChange={(e) => this.handlePincodeChange(5, e.target.value)}/>
+                        <input
+                            type="text"
+                            id="pincode"
+                            name="pincode"
+                            onChange={this.handlePincodeChange}
+                        />
                     </div>
                     <div className="TwoFact__form__buttons">
                         {/* Aktiviere den Button nur, wenn der PIN-Code vollständig ist */}
-                        <button type="submit" className="button button--primary" disabled={!isPincodeComplete}>
+                        <button type="submit" className="primary" disabled={!isPincodeComplete}>
                             Continue
                         </button>
                     </div>
@@ -72,4 +70,6 @@ class TwoFaktorAuthenfication extends Component {
         );
     }
 }
+document.body.classList.add('lTwoFact__body');
+
 export default TwoFaktorAuthenfication;
