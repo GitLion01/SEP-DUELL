@@ -105,16 +105,16 @@ public class DeckService{
             }
         }
 
-        // Create and save the deck if all cards were found
-        if (!cards.isEmpty()) {
-            Deck deck = new Deck();
-            deck.setUser(user); // Verwendung des 'user'-Objekts, das außerhalb des 'if'-Blocks deklariert wurde
-            deck.setName(request.getName());
-            deck.setCards(cards);
 
-            deckRepository.save(deck);
-            deckCreated = true;
+        Deck deck = new Deck();
+        deck.setUser(user);
+        deck.setName(request.getName());
+        if(!cards.isEmpty()) {
+            deck.setCards(cards);
         }
+
+        deckRepository.save(deck);
+        deckCreated = true;
 
         // Constructing the final message
         if (deckCreated) {

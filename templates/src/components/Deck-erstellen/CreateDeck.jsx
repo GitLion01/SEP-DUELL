@@ -4,18 +4,18 @@ import { useParams } from 'react-router-dom';
 import './CreateDeck.css';
 
 function CreateDeck() {
-    const { id } = useParams();
+    const { id } = useParams(); // Vorausgesetzt die userID wird korrekt ausgelesen
     const [decks, setDecks] = useState([]);
     const [myCards, setMyCards] = useState([]);
     const [activeDeck, setActiveDeck] = useState(null);
     const [deckName, setDeckName] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
     const [isEditing, setIsEditing] = useState(false);  // Zustand zum Überwachen, ob Änderungen gemacht wurden
-    const [updateTrigger, setUpdateTrigger] = useState(0); // Zählt, wie oft Updates notwendig waren
+    // const [updateTrigger, setUpdateTrigger] = useState(0); // Zählt, wie oft Updates notwendig waren
     const [formData, setFormData] = useState({
         userID: id,
         name:"",
-        cardNames:[]
+        cardNames:[""]
     });
 
     const handleInputChange = (event) => {
@@ -40,7 +40,7 @@ function CreateDeck() {
             .then(response => setDecks(response.data))
             .catch(error => console.error('Fehler beim Abrufen der Decks:', error));
 
-    }, [id, updateTrigger]);
+    }, [id /* updateTrigger */]);
 
     // Neues Deck hinzufügen
     const handleCreateNewDeck = async () => {
@@ -56,8 +56,8 @@ function CreateDeck() {
         // Erstelle neues Deck-Objekt
         const newDeck = {
             userID: id, //
-            name: `Deck ${decks.length + 1}`,
-            cardNames: [""]
+            name: `Deck ${decks.length + 2}`,
+            cardNames: []
         };
 
         try {
@@ -99,7 +99,7 @@ function CreateDeck() {
         axios.put(`http://localhost:8080/decks/addCards`, JSON.stringify(dataToSend))
             .then(response => {
                 console.log('Karte erfolgreich zum Deck hinzugefügt', response.data);
-                setUpdateTrigger(prev => prev + 1); // Trigger die useEffect Hook, um die Decks neu zu laden
+                // setUpdateTrigger(prev => prev + 1); // Trigger die useEffect Hook, um die Decks neu zu laden
                 setErrorMessage(''); // Klare Fehlermeldung, wenn Erfolg
             })
             .catch(error => {
