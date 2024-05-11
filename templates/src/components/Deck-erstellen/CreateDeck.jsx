@@ -11,13 +11,14 @@ function CreateDeck() {
     const [deckName, setDeckName] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
     const [isEditing, setIsEditing] = useState(false);  // Zustand zum Überwachen, ob Änderungen gemacht wurden
+    const [updateTrigger, setUpdateTrigger] = useState(0); // Zählt, wie oft Updates notwendig waren
     const [formData, setFormData] = useState({
         userID: id,
         name:"",
         cardNames:[]
     });
 
-    const handleInputChane = (event) => {
+    const handleInputChange = (event) => {
         const { name, value} = event.target;
         setFormData(prev => ({
             ...prev,
@@ -39,7 +40,7 @@ function CreateDeck() {
             .then(response => setDecks(response.data))
             .catch(error => console.error('Fehler beim Abrufen der Decks:', error));
 
-    }, [id]);
+    }, [id, updateTrigger]);
 
     // Neues Deck hinzufügen
     const handleCreateNewDeck = async () => {
@@ -79,23 +80,34 @@ function CreateDeck() {
 
     // Karte zu einem aktiven Deck hinzufügen und an den Server senden
     const handleAddCardToDeck = (card) => {
-        if (activeDeck !== null) {
-            // POST-Anfrage an das Backend, um die Karte zum Deck hinzuzufügen
-            axios.post(`http://localhost:8080/decks/addCard`, { cardId: card.name })
-                .then(response => {
-                    // Aktualisiere das lokale Deck mit der Antwort vom Server
-                    setDecks(prevDecks => {
-                        const newDecks = [...prevDecks];
-                        newDecks[activeDeck] = response.data; // Nehmen Sie an, dass die Antwort das aktualisierte Deck ist
-                        return newDecks;
-                    });
-                })
-                .catch(error => {
-                    console.error('Fehler beim Hinzufügen der Karte zum Deck:', error);
-                    alert('Fehler beim Hinzufügen der Karte: ' + error.response.data.message);
-                });
+        if (activeDeck === null) {
+            setErrorMessage('Kein aktives Deck ausgewählt.');
+            return;
         }
+    
+        const deckToUpdate = decks[activeDeck];
+        if (!deckToUpdate) {
+            setErrorMessage('Aktives Deck konnte nicht identifiziert werden.');
+            return;
+        }
+    
+        const dataToSend = {
+            deckName: deckToUpdate.name,
+            cardsToAdd: [card.name]
+        };
+    
+        axios.put(`http://localhost:8080/decks/addCards`, JSON.stringify(dataToSend))
+            .then(response => {
+                console.log('Karte erfolgreich zum Deck hinzugefügt', response.data);
+                setUpdateTrigger(prev => prev + 1); // Trigger die useEffect Hook, um die Decks neu zu laden
+                setErrorMessage(''); // Klare Fehlermeldung, wenn Erfolg
+            })
+            .catch(error => {
+                console.error('Fehler beim Hinzufügen der Karte zum Deck:', error);
+                setErrorMessage('Fehler beim Hinzufügen der Karte: ' + (error.response?.data.message || error.message));
+            });
     };
+    
 
     // Decknamen ändern
     const handleChangeDeckName = (e) => {
