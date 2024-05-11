@@ -77,12 +77,17 @@ public class DeckService{
             return "Error: Maximum of 3 decks per user allowed";
         }
 
+        // Check if a deck with the same name already exists for this user
+        if (!isDeckNameAvailableForUser(request.getName(), request.getUserID())) {
+            return "Error: A deck with the name '" + request.getName() + "' already exists for this user";
+        }
+
         //TODO: nur wenn user ein Deck mit dem Namen hat und nicht allgemein im spiel
         // check if deck with this name alredy exists
-        String deckName = request.getName();
+       /* String deckName = request.getName();
         if (!isDeckNameAvailable(deckName)) {
             return "Error: A deck with the name '" + deckName + "' already exists";
-        }
+        }*/
 
         List<String> cardNames = request.getCardNames();
         if (cardNames.size() > 30) {
@@ -136,6 +141,12 @@ public class DeckService{
         } else {
             return "Error: Deck could not be created";
         }
+    }
+
+    // Method to check if a deck name is available for a given user
+    private boolean isDeckNameAvailableForUser(String deckName, Long userId) {
+        Optional<Deck> existingDeck = deckRepository.findByNameAndUserId(deckName, userId);
+        return existingDeck.isEmpty();
     }
 
 

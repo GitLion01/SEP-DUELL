@@ -6,7 +6,9 @@ import com.example.demo.user.UserAccountRepository;
 import com.example.demo.user.UserRole;
 import jakarta.servlet.Registration;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -36,7 +38,7 @@ public class RegistrationController {
     }*/
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public String register(
+    public ResponseEntity<String> register(
             @RequestParam("image") MultipartFile image,
             @RequestParam("firstName") String firstName,
             @RequestParam("lastName") String lastName,
@@ -51,16 +53,21 @@ public class RegistrationController {
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
             Date dateOfBirth = dateFormat.parse(dateOfBirthStr);
 
-            // Convert role string to UserRole enum
-            /*UserRole role = UserRole.valueOf(roleStr.toUpperCase());*/
-
             byte[] imageData = image.getBytes();
-            return registrationService.register(imageData, firstName, lastName, dateOfBirth, username, email, password, role);
+            String registrationResult = registrationService.register(imageData, firstName, lastName, dateOfBirth, username, email, password, role);
+
+            // Based on the registration result, construct and return the appropriate ResponseEntity
+            if (registrationResult.startsWith("Error")) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(registrationResult);
+            } else {
+                return ResponseEntity.ok(registrationResult);
+            }
         } catch (IOException | ParseException | IllegalArgumentException e) {
-            e.printStackTrace();
-            return "Fehler beim Lesen des Bildes oder beim Parsen der Daten";
+            e.getMessage();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Fehler beim Lesen des Bildes oder beim Parsen der Daten");
         }
     }
+
 
     @GetMapping(path = "/users")
     public List<UserAccount> findAll() {
