@@ -33,26 +33,30 @@ public class CardController {
 
 
     @PostMapping(path = "/delete")
-    public String deleteCard(@RequestBody List<String> names) {
+    public ResponseEntity<String> deleteCard(@RequestBody List<String> names) {
         if (!names.isEmpty())
-            return cardService.deleteMultipleCards(names);
-         else
-            return "At least one card name is required.";
-        }
+            return ResponseEntity.ok(cardService.deleteMultipleCards(names));
+        else
+            return ResponseEntity.badRequest().body("At least one card name is required.");
+    }
 
 
 
 
     @GetMapping(path = "/findByName/{name}")
-    public Optional<Card> findByByName(@PathVariable String name) {
+    public ResponseEntity<Optional<Card>> findByByName(@PathVariable String name) {
         try {
-            return cardRepository.findByName(name);
+            Optional<Card> card = cardRepository.findByName(name);
+            return ResponseEntity.ok(card);
         } catch (Exception e) {
-            return Optional.empty();
+            return ResponseEntity.notFound().build();
         }
     }
 
 
     @GetMapping
-    public List<Card> findAll(){return cardRepository.findAll();}
+    public ResponseEntity<List<Card>> findAll() {
+        List<Card> cards = cardRepository.findAll();
+        return ResponseEntity.ok(cards);
+    }
 }

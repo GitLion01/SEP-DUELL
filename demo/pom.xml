@@ -21,6 +21,7 @@
         <java.version>18</java.version>
     </properties>
 
+
     <dependencies>
         <!-- Spring Boot Data JPA Starter -->
         <dependency>

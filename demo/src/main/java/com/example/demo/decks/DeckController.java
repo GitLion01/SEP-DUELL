@@ -3,6 +3,8 @@ package com.example.demo.decks;
 import com.example.demo.cards.Card;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -29,24 +31,48 @@ public class DeckController {
         return deckService.createDeck(request);
     }
 
-    @PutMapping("/updateName/{oldName}/{newName}") //Decknamen dürfen keine Leerzeichen enthalten
+
+
+
+   /* @PutMapping("/updateName/{oldName}/{newName}") //Decknamen dürfen keine Leerzeichen enthalten
     public String updateDeckName(@PathVariable String oldName, @PathVariable String newName) {
         return deckService.updateDeckName(oldName, newName);
+    }*/
+    @PutMapping("/updateName/{userId}/{oldName}/{newName}")
+    public ResponseEntity<String> updateDeckName(
+            @PathVariable Long userId,
+            @PathVariable String oldName,
+            @PathVariable String newName) {
+
+        String result = deckService.updateDeckName(userId, oldName, newName);
+        if (result.contains("Fehler")) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(result);
+        } else {
+            return ResponseEntity.ok(result);
+        }
     }
+
 
     @PutMapping("/removeCards")
-    public String removeCardsFromDeck(@RequestBody Map<String, Object> requestBody) {
-        String deckName = (String) requestBody.get("deckName");
-        List<String> cardsToRemove = (List<String>) requestBody.get("cardsToRemove");
-        return deckService.removeCards(deckName, cardsToRemove);
+    public String removeCardsFromDeck(@RequestBody DeckRequest request) {
+        return deckService.removeCards(request);
     }
 
 
+    /*@PutMapping("/addCards")
+    public String addCardsToDeck(DeckRequest request) {
+        return deckService.addCardsToDeck(request);
+    }*/
+
     @PutMapping("/addCards")
-    public String addCardsToDeck(@RequestBody Map<String, Object> requestBody) {
-        String deckName = (String) requestBody.get("deckName");
-        List<String> cardsToAdd = (List<String>) requestBody.get("cardsToAdd");
-        return deckService.addCardsToDeck(deckName, cardsToAdd);
+    public ResponseEntity<String> addCardsToDeck(@RequestBody DeckRequest request) {
+
+        // Aufruf des entsprechenden Service
+        String resultMessage = deckService.addCardsToDeck(request);
+
+        // Konstruieren der ResponseEntity basierend auf dem Service-Ergebnis
+        HttpStatus status = resultMessage.startsWith("Fehler") ? HttpStatus.BAD_REQUEST : HttpStatus.OK;
+        return new ResponseEntity<>(resultMessage, status);
     }
 
 

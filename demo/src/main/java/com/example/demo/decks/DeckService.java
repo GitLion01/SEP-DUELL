@@ -67,20 +67,27 @@ public class DeckService{
     }
 
 
-    public String createDeck(@RequestBody DeckRequest request/*, Principal principal*/) {
+    public String createDeck(@RequestBody DeckRequest request) {
 
-        // TODO: implementation in frontend
+
+
         // Check if the user already has 3 decks
         int userDeckCount = deckRepository.countByUserId(request.getUserID());
         if (userDeckCount >= 3) {
             return "Error: Maximum of 3 decks per user allowed";
         }
 
+        // Check if a deck with the same name already exists for this user
+        if (!isDeckNameAvailableForUser(request.getName(), request.getUserID())) {
+            return "Error: A deck with the name '" + request.getName() + "' already exists for this user";
+        }
+
+
         // check if deck with this name alredy exists
-        String deckName = request.getName();
+       /* String deckName = request.getName();
         if (!isDeckNameAvailable(deckName)) {
             return "Error: A deck with the name '" + deckName + "' already exists";
-        }
+        }*/
 
         List<String> cardNames = request.getCardNames();
         if (cardNames.size() > 30) {
@@ -103,18 +110,31 @@ public class DeckService{
                     System.out.println("Card not found: " + cardName);
                 }
             }
+
+            Deck deck = new Deck();
+            deck.setUser(user); // Verwendung des 'user'-Objekts, das außerhalb des 'if'-Blocks deklariert wurde
+            deck.setName(request.getName());
+            if(!cards.isEmpty()) {
+                deck.setCards(cards);
+            }
+            deckRepository.save(deck);
+            deckCreated = true;
         }
 
-
-        Deck deck = new Deck();
-        deck.setUser(user);
-        deck.setName(request.getName());
-        if(!cards.isEmpty()) {
+       /* // Create and save the deck if all cards were found
+        if (!cards.isEmpty()) {
+            Deck deck = new Deck();
+            deck.setUser(user); // Verwendung des 'user'-Objekts, das außerhalb des 'if'-Blocks deklariert wurde
+            deck.setName(request.getName());
             deck.setCards(cards);
         }
 
-        deckRepository.save(deck);
-        deckCreated = true;
+            deckRepository.save(deck);
+            deckCreated = true;
+        }*/
+
+
+
 
         // Constructing the final message
         if (deckCreated) {
@@ -124,8 +144,14 @@ public class DeckService{
         }
     }
 
+    // Method to check if a deck name is available for a given user
+    private boolean isDeckNameAvailableForUser(String deckName, Long userId) {
+        Optional<Deck> existingDeck = deckRepository.findByNameAndUserId(deckName, userId);
+        return existingDeck.isEmpty();
+    }
 
-    public String updateDeckName(String oldName, String newName) {
+
+   /* public String updateDeckName(String oldName, String newName) {
         try {
             Optional<Deck> optionalDeck = deckRepository.findByName(oldName);
             if (optionalDeck.isPresent()) {
@@ -139,6 +165,29 @@ public class DeckService{
         } catch (RuntimeException e) {
             return "Fehler beim Aktualisieren des Decknamens";
         }
+    }*/
+
+    public String updateDeckName(Long userId, String oldName, String newName) {
+        try {
+            // Überprüfen, ob der Benutzer existiert
+            Optional<UserAccount> optionalUser = userAccountRepository.findById(userId);
+            if (optionalUser.isPresent()) {
+                // Überprüfen, ob das Deck existiert und dem Benutzer gehört
+                Optional<Deck> optionalDeck = deckRepository.findByNameAndUserId(oldName, userId);
+                if (optionalDeck.isPresent()) {
+                    Deck deck = optionalDeck.get();
+                    deck.setName(newName);
+                    deckRepository.save(deck);
+                    return "Deck gefunden und Name aktualisiert";
+                } else {
+                    return "Deck nicht gefunden";
+                }
+            } else {
+                return "Benutzer nicht gefunden";
+            }
+        } catch (Exception e) {
+            return "Fehler beim Aktualisieren des Decknamens";
+        }
     }
 
 
@@ -146,7 +195,7 @@ public class DeckService{
 
 
 
-    public String removeCards(String deckName, List<String> cardNamesToRemove) {
+    /*public String removeCards(String deckName, List<String> cardNamesToRemove) {
         try {
             // Finde das Deck anhand des Namens
             Optional<Deck> optionalDeck = deckRepository.findByName(deckName);
@@ -180,6 +229,47 @@ public class DeckService{
             e.printStackTrace(); // Stack-Trace ausgeben
             return "Fehler beim Entfernen der Karten aus dem Deck";
         }
+    }*/
+
+    public String removeCards(DeckRequest request) {
+        try {
+            // Überprüfe, ob der Benutzer existiert
+            Optional<UserAccount> optionalUser = userAccountRepository.findById(request.getUserID());
+            if (!optionalUser.isPresent()) {
+                throw new RuntimeException("Der Benutzer mit der angegebenen ID wurde nicht gefunden.");
+            }
+
+            // Finde das Deck anhand des Namens und der UserID
+            Optional<Deck> optionalDeck = deckRepository.findByNameAndUserId(request.getName(), request.getUserID());
+            if (optionalDeck.isPresent()) {
+                Deck deck = optionalDeck.get();
+
+                // Extrahiere die IDs der Karten, die entfernt werden sollen
+                List<Long> cardIdsToRemove = new ArrayList<>();
+                for (String cardName : request.getCardNames()) {
+                    Optional<Card> optionalCard = cardRepository.findByName(cardName);
+                    optionalCard.ifPresent(card -> {
+                        cardIdsToRemove.add(card.getId());
+                        System.out.println("Card ID to remove: " + card.getId()); // Protokollausgabe hinzufügen
+                    });
+                }
+
+                // Entferne die Karten aus dem Deck über die benannte Abfrage
+                deckRepository.deleteDeckCardsByDeckIdAndCardIds(deck.getId(), cardIdsToRemove);
+
+                // Aktualisiere die Liste der Karten im Deck
+                deck.getCards().removeIf(card -> cardIdsToRemove.contains(card.getId()));
+                deckRepository.save(deck);
+
+                return "Die Karten wurden erfolgreich aus dem Deck entfernt.";
+            } else {
+                throw new RuntimeException("Das Deck wurde nicht gefunden.");
+            }
+        } catch (Exception e) {
+            System.err.println("Fehler beim Entfernen der Karten aus dem Deck: " + e.getMessage()); // Protokollausgabe hinzufügen
+            e.getMessage(); // Stack-Trace ausgeben
+            return "Fehler beim Entfernen der Karten aus dem Deck: " + e.getMessage();
+        }
     }
 
 
@@ -187,47 +277,12 @@ public class DeckService{
 
 
 
-   /* public String addCardsToDeck(String deckName, List<Card> cardsToAdd) {
-        try {
-            // Überprüfe, ob alle hinzuzufügenden Karten bereits in der Datenbank vorhanden sind
-            List<Card> existingCards = new ArrayList<>();
-            for (Card card : cardsToAdd) {
-                Optional<Card> optionalCard = cardRepository.findByName(card.getName());
-                if (optionalCard.isPresent()) {
-                    existingCards.add(optionalCard.get());
-                } else {
-                    throw new RuntimeException("Die Karte '" + card.getName() + "' ist nicht in der Datenbank vorhanden.");
-                }
-            }
 
-            // Überprüfe, ob das Deck bereits existiert
-            Optional<Deck> optionalDeck = deckRepository.findByName(deckName);
-            if (optionalDeck.isPresent()) {
-                Deck deck = optionalDeck.get();
-                List<Card> deckCards = deck.getCards();
 
-                // Überprüfe, ob das Deck die maximale Anzahl von Karten erreicht hat
-                if (deckCards.size() + existingCards.size() <= 30) {
-                    // Füge die Karten dem Deck hinzu
-                    deckCards.addAll(existingCards);
-
-                    // Speichere das aktualisierte Deck in der Datenbank
-                    deckRepository.save(deck);
-                    return "Die Karten wurden erfolgreich dem Deck hinzugefügt.";
-                } else {
-                    throw new RuntimeException("Das Deck kann maximal 30 Karten enthalten.");
-                }
-            } else {
-                throw new RuntimeException("Das Deck wurde nicht gefunden.");
-            }
-        } catch (Exception e) {
-            return "Fehler beim Hinzufügen der Karten zum Deck";
-        }
-    }*/
-   public String addCardsToDeck(String deckName, List<String> cardNames) {
+   /*public String addCardsToDeck(DeckRequest request) {
        try {
            // Überprüfe, ob das Deck bereits existiert
-           Optional<Deck> optionalDeck = deckRepository.findByName(deckName);
+           Optional<Deck> optionalDeck = deckRepository.findByName(request.getName());
            if (optionalDeck.isPresent()) {
                Deck deck = optionalDeck.get();
                List<Card> deckCards = deck.getCards();
@@ -260,7 +315,65 @@ public class DeckService{
        } catch (Exception e) {
            return "Fehler beim Hinzufügen der Karten zum Deck";
        }
+   }*/
+
+   public String addCardsToDeck(DeckRequest request) {
+       try {
+           // Überprüfen, ob der Benutzer existiert
+           Optional<UserAccount> optionalUser = userAccountRepository.findById(request.getUserID());
+           if (optionalUser.isPresent()) {
+               UserAccount user = optionalUser.get();
+
+               // Alle Decks des Benutzers abrufen
+               /*List<Deck> userDecks = user.getDecks();*/
+
+               // Das passende Deck finden
+               /*Optional<Deck> optionalDeck = userDecks.stream()
+                       .filter(deck -> deck.getName().equals(request.getName()))
+                       .findFirst();*/
+               Optional<Deck> optionalDeck = deckRepository.findAllDecksByUserIdAndName(request.getUserID(), request.getName());
+
+
+
+
+
+               if (optionalDeck.isPresent()) {
+                   Deck deck = optionalDeck.get();
+                   List<Card> deckCards = deck.getCards();
+                   List<Card> existingCards = new ArrayList<>();
+
+                   // Überprüfen, ob das Deck die maximale Anzahl von Karten erreicht hat
+                   if (deckCards.size() + request.getCardNames().size() <= 30) {
+                       // Überprüfen, ob alle hinzuzufügenden Karten bereits in der Datenbank vorhanden sind
+                       for (String cardName : request.getCardNames()) {
+                           Optional<Card> optionalCard = cardRepository.findByName(cardName);
+                           if (optionalCard.isPresent()) {
+                               existingCards.add(optionalCard.get());
+                           } else {
+                               throw new RuntimeException("Die Karte '" + cardName + "' ist nicht in der Datenbank vorhanden.");
+                           }
+                       }
+
+                       // Füge die Karten dem Deck hinzu
+                       deckCards.addAll(existingCards);
+
+                       // Speichere das aktualisierte Deck in der Datenbank
+                       deckRepository.save(deck);
+                       return "Die Karten wurden erfolgreich dem Deck hinzugefügt.";
+                   } else {
+                       throw new RuntimeException("Das Deck kann maximal 30 Karten enthalten.");
+                   }
+               } else {
+                   throw new RuntimeException("Das Deck wurde nicht gefunden.");
+               }
+           } else {
+               throw new RuntimeException("Der Benutzer mit der angegebenen ID wurde nicht gefunden.");
+           }
+       } catch (Exception e) {
+           return "Fehler beim Hinzufügen der Karten zum Deck: " + e.getMessage();
+       }
    }
+
 
 
 

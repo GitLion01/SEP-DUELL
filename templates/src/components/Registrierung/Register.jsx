@@ -1,6 +1,5 @@
-import React, { Component } from 'react'; // Importiere React und Component aus der 'react'-Bibliothek
-import './Register.css'; // Importiere das Styling für diese Komponente
-
+import React, { Component } from 'react';
+import './Register.css';
 
 
 // Definiere die Register-Komponente und render die Registrierung-Komponente
@@ -11,35 +10,34 @@ class Register extends Component {
 }
 
 
-// Deklariere die Registrierungskomponente
-//
+
 class Registrierung extends React.Component {
-  constructor(props) { // Konstruktor für die Registrierungskomponente
-    //props sind die Eigenschaften, die der Komponente übergeben werden können, wenn sie verwendet wird.
-    super(props); // Aufruf des Konstruktors der Elternklasse
-    this.state = { // Setze den Anfangszustand der Komponente fest
-      // Der Zustand (state) ist ein Objekt, das die Daten enthält, die die Komponente verwalten soll
-      //state) ist ein zentrales Konzept in React und wird verwendet, um Daten zu speichern,
-      //die sich im Laufe der Zeit ändern können
-      // und die das Aussehen und Verhalten der Benutzeroberfläche beeinflussen
-      image: null, // Das ausgewählte Bild
-      previewImage: null, // Die Vorschau des ausgewählten Bildes
-      formData: { // Formulardaten
-        username: '', // Benutzername
-        firstName: '', // Vorname
-        lastName: '', // Nachname
-        dateOfBirth: '', // Geburtsdatum
-        email: '', // E-Mail
-        password: '', // Passwort
-        role: "" // Rolle (Administrator oder Benutzer)
+  constructor(props) {
+    super(props);
+    this.state = {
+      image: null,
+      previewImage: null,
+      formData: {
+        username: '',
+        firstName: '',
+        lastName: '',
+        dateOfBirth: '',
+        email: '',
+        password: '',
+        role: ""
       },
       role: false,
     };
+
+    this.handleImageChange = this.handleImageChange.bind(this);
+    this.handleRoleChange = this.handleRoleChange.bind(this);
+    this.handleChange = this.handleChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
   }
 
   // Methode zum Verarbeiten des Formularabsendens
   // Methode zum Verarbeiten des Formularabsendens
-  handleSubmit = async (event) => { // Methode für das Absenden des Formulars
+  h/*andleSubmit = async (event) => { // Methode für das Absenden des Formulars
     event.preventDefault(); // Verhindere das Standardverhalten des Formulars
     const formData = this.state.formData; // Greife auf die Formulardaten im Zustand zu
     try {
@@ -47,10 +45,11 @@ class Registrierung extends React.Component {
       const response = await fetch('http://localhost:8080/registration', { // Sende die Formulardaten an den Server
         method: 'POST', // HTTP-Methode
         headers: {
-          'Content-Type': 'application/json' // Header für JSON-Daten
+          'Content-Type': 'multipart/form-data' // Header für JSON-Daten
         },
         body: JSON.stringify(formData) // Formulardaten in JSON umwandeln und senden
       });
+
 
       if (!response.ok) { // Wenn die Antwort nicht erfolgreich ist, wirf einen Fehler
         throw new Error('Registrierung fehlgeschlagen');
@@ -64,25 +63,68 @@ class Registrierung extends React.Component {
       console.error('Fehler bei der Registrierung:', error.message); // Logge Fehlermeldungen
     }
   };
+*/
+
+  handleSubmit = async (event) => {
+    event.preventDefault();
+    const formData = new FormData();
+
+    // Append form data fields to the FormData object
+    Object.entries(this.state.formData).forEach(([key, value]) => {
+      // Konvertiere das Datumfeld in ein String-Format
+      if (key === 'dateOfBirth' && value instanceof Date) {
+        formData.append(key, value.toISOString().split('T')[0]);
+      } else {
+        formData.append(key, value);
+      }
+    });
+
+    // Append the role separately
+    formData.append('role', this.state.role ? 'ADMIN' : 'USER');
+
+    // Append image file if available
+    if (this.state.image) {
+      formData.append('image', this.state.image);
+    }
+
+    try {
+      const response = await fetch('http://localhost:8080/registration', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Registrierung fehlgeschlagen');
+      }
+
+      window.location.href = '/';
+      console.log('Registrierung erfolgreich');
+    } catch (error) {
+      console.error('Fehler bei der Registrierung:', error.message); // Logge Fehlermeldungen
+    }
+  };
 
 
-  // Methode zur Verarbeitung der Bildauswahl und Anzeige der Vorschau
-  handleImageChange = (event) => { // Methode für die Änderung des Bildes
-    const file = event.target.files[0]; // Das ausgewählte Bild
+
+
+
+
+  handleImageChange(event) {
+    const file = event.target.files[0];
     if (file) {
-      const reader = new FileReader(); // FileReader-Objekt zum Lesen von Dateien
-      reader.onloadend = () => { // Wenn das Lesen abgeschlossen ist
+      const reader = new FileReader();
+      reader.onloadend = () => {
         this.setState({
-          image: file, // Setze das ausgewählte Bild
-          previewImage: reader.result // Setze die Vorschau des ausgewählten Bildes
+          image: file,
+          previewImage: reader.result
         });
       };
       reader.readAsDataURL(file); // Lese das ausgewählte Bild als Data-URL
     }
-  };
+  }
 
   // Methode zur Verarbeitung der Änderung der Checkbox
-  handleRoleChange = () => { // Methode für die Änderung der Rolle
+  /*handleRoleChange = () => { // Methode für die Änderung der Rolle
     this.setState(prevState => ({
       role:!prevState.role, // Toggle the role state
       formData: {
@@ -90,57 +132,94 @@ class Registrierung extends React.Component {
         role: prevState.role === 'ADMIN' ? 'USER' : 'ADMIN' // Ändere die Rolle
       },
     }));
-  };
-
-  // Methode zur Verarbeitung der Änderung von Formularelementen
-  handleChange = (event) => { // Methode für die Änderung von Formularelementen
-    const { name, value } = event.target; // Extrahiere Name und Wert des Elements
+  };*/
+  handleRoleChange = () => {
     this.setState(prevState => ({
+      role: !prevState.role,
       formData: {
-        ...prevState.formData, // Aktualisiere den vorherigen Zustand der Formulardaten
-        [name]: value // Setze den neuen Wert für das entsprechende Formularelement
-      }
+        ...prevState.formData,
+        role: !prevState.role ? 'ADMIN' : 'USER' // Setze die Rolle explizit als Zeichenfolge
+      },
     }));
   };
 
-  render() { // Methode zum Rendern der JSX
-    return (
-        /* Hauptcontainer für die Registrierung */
-        <div className="AppRegister">
-          {/* Überschrift für die Registrierung */}
-          <h2>REGISTRIERUNG</h2>
-          <form onSubmit={this.handleSubmit}>
 
-            {/* Profilbildauswahl */}
+
+  handleChange(event) {
+    const { name, value } = event.target;
+    this.setState(prevState => ({
+      formData: {
+        ...prevState.formData,
+        [name]: value
+      }
+    }));
+  }
+
+  /*handleSubmit = async (event) => {
+    event.preventDefault();
+    const formData = new FormData(); // Create a FormData object
+
+    // Append form data to the FormData object
+    Object.entries(this.state.formData).forEach(([key, value]) => {
+      formData.append(key, value);
+    });
+
+    formData.append('role', this.state.role ? 'ADMIN' : 'USER'); // Append role separately
+
+    // Append image file if available
+    if (this.state.image) {
+      formData.append('image', this.state.image);
+    }
+
+    try {
+      const response = await fetch('http://localhost:8080/registration', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Registration failed');
+      }
+
+      window.location.href = '/';
+      console.log('Registration successful');
+    } catch (error) {
+      console.error('Error during registration:', error.message);
+    }
+  };
+*/
+
+
+  render() {
+    return (
+        <div className="AppRegister">
+          <h2>REGISTRATION</h2>
+          <form onSubmit={this.handleSubmit}>
             <div className="form-group">
-              <label htmlFor="image">Profilbild:</label>
+              <label htmlFor="image">Profile Picture:</label>
               <input type="file" id="image" name="image" accept="image/*" onChange={this.handleImageChange} />
               {this.state.previewImage && (
                   <img src={this.state.previewImage} alt="Preview" style={{ width: '100px', marginTop: '10px', height: '100px', borderRadius: '100%' }} />
               )}
             </div>
 
-            {/* Benutzername */}
             <div className="form-group">
               <label htmlFor="username">Username:</label>
-              <input type="text" id="username" name="username" required  onChange={this.handleChange}/>
+              <input type="text" id="username" name="username" required onChange={this.handleChange} />
             </div>
 
-            {/* Vorname */}
             <div className="form-group">
-              <label htmlFor="firstName">Vorname:</label>
-              <input type="text" id="firstName" name="firstName" required onChange={this.handleChange}/>
+              <label htmlFor="firstName">First Name:</label>
+              <input type="text" id="firstName" name="firstName" required onChange={this.handleChange} />
             </div>
 
-            {/* Nachname */}
             <div className="form-group">
-              <label htmlFor="lastName">Nachname:</label>
-              <input type="text" id="lastName" name="lastName" required onChange={this.handleChange}/>
+              <label htmlFor="lastName">Last Name:</label>
+              <input type="text" id="lastName" name="lastName" required onChange={this.handleChange} />
             </div>
 
-            {/* Geburtsdatum */}
             <div className="form-group">
-              <label htmlFor="dateOfBirth">Geburtsdatum:</label>
+              <label htmlFor="dateOfBirth">Date of Birth:</label>
               <input type="date" id="dateOfBirth" name="dateOfBirth" required onChange={this.handleChange}/>
             </div>
 

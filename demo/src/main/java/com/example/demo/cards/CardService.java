@@ -49,7 +49,7 @@ public class CardService {
         boolean cardExists = cardRepository.existsByName(request.getName());
         if (cardExists) {
             throw new IllegalStateException("Card already exists: " + request.getName());
-}
+        }
             Card card = new Card(
                     request.getName(),
                     request.getAttackPoints(),
@@ -60,7 +60,9 @@ public class CardService {
             );
             cardRepository.save(card);
 }
-            public void deleteCard(String name){
+
+
+    public void deleteCard(String name){
                 Optional<Card> optionalCard = cardRepository.findByName(name);
                 if (optionalCard.isEmpty()) {
                     return;
@@ -88,6 +90,8 @@ public class CardService {
 
 
 
+
+
     public List<CardRequest> parseCSV(MultipartFile file) throws IOException {
         List<CardRequest> cardRequests = new ArrayList<>();
         try (InputStream is = file.getInputStream();
@@ -101,18 +105,24 @@ public class CardService {
                     int attackPoints = parts[2].equalsIgnoreCase("unlimited") ? Integer.MAX_VALUE : Integer.parseInt(parts[2].trim());
                     int defensePoints = parts[3].equalsIgnoreCase("unlimited") ? Integer.MAX_VALUE : Integer.parseInt(parts[3].trim());
                     String description = parts[4].trim();
+                    if (description.length() > 200) {
+                        description = description.substring(0, 200);
+                    }
                     byte[] image = parts[5].trim().getBytes(); // Load image data properly
                     Rarity rarity = Rarity.valueOf(parts[1].trim().toUpperCase());
 
                     CardRequest cardRequest = new CardRequest(name, attackPoints, defensePoints, description, image, rarity);
                     cardRequests.add(cardRequest);
                 } else {
-                    System.out.println("Invalid line: " + line);
+                    System.out.println("Ungültige Zeile: " + line);
                 }
             }
         }
         return cardRequests;
     }
+
+
+
 
 
     public String uploadAndSaveCards(MultipartFile file) {
