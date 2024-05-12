@@ -1,5 +1,6 @@
 package com.example.demo.decks;
 
+import com.example.demo.cards.Card;
 import com.example.demo.user.UserAccount;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -32,6 +33,8 @@ public interface DeckRepository extends JpaRepository<Deck, Long> {
     Optional<Deck> findAllDecksByUserIdAndName(Long userId, String deckName);
 
     Optional<Deck> findByNameAndUserId(String deckName, Long userId);
+
+    List<Deck> findByCardsContaining(Card card);
 }
 
 

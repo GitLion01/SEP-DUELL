@@ -33,9 +33,7 @@ public class Card {
     private List<Deck> decks = new ArrayList<>();
 
 
-    @JsonIgnore
-    @ManyToMany(mappedBy = "cards")
-    private List<UserAccount> users = new ArrayList<>();
+
 
     public Card(String name,
                 Integer attackPoints,

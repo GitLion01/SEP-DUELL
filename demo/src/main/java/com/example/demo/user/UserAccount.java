@@ -59,13 +59,7 @@ public class UserAccount implements UserDetails {
             inverseJoinColumns = @JoinColumn(name = "friend_requests"))
     private List<UserAccount> friendRequests=new ArrayList<>();
 
-    @ManyToMany
-    @JoinTable(
-            name = "user_cards", // Name of the join table
-            joinColumns = @JoinColumn(name = "user_id"), // Column name in the join table for UserAccount
-            inverseJoinColumns = @JoinColumn(name = "card_id") // Column name in the join table for Card
-    )
-    private List<Card> cards = new ArrayList<>();
+
 
 
     public UserAccount(byte[] image,
@@ -120,10 +114,7 @@ public class UserAccount implements UserDetails {
         friendRequests.remove(requester);
     }
 
-    public void removeCard(Card card) {
-        cards.remove(card);
-        card.getUsers().remove(this); // Remove the user from the card's collection
-    }
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

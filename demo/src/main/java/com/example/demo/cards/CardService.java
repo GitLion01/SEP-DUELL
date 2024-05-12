@@ -62,23 +62,29 @@ public class CardService {
 }
 
 
-    public void deleteCard(String name){
-                Optional<Card> optionalCard = cardRepository.findByName(name);
-                if (optionalCard.isEmpty()) {
-                    return;
-                }
-                Card card = optionalCard.get();
+    public void deleteCard(String name) {
+        Optional<Card> optionalCard = cardRepository.findByName(name);
+        if (optionalCard.isEmpty()) {
+            return;
+        }
+        Card card = optionalCard.get();
 
-                // Create a copy of the list of users associated with the card
-                List<UserAccount> usersCopy = new ArrayList<>(card.getUsers());
+        // Find all decks containing the card
+        List<Deck> decksContainingCard = deckRepository.findByCardsContaining(card);
 
-                // Iterate over the copy and remove the card from each user's collection
-                for (UserAccount user : usersCopy) {
-                    user.removeCard(card);
-                }
+        // Extract card IDs
+        List<Long> cardIds = new ArrayList<>();
+        cardIds.add(card.getId());
 
-                cardRepository.delete(card);
-                }
+        // Iterate over each deck containing the card and remove the card from it using deleteDeckCardsByDeckIdAndCardIds method
+        for (Deck deck : decksContainingCard) {
+            deckRepository.deleteDeckCardsByDeckIdAndCardIds(deck.getId(), cardIds);
+        }
+
+        cardRepository.delete(card);
+    }
+
+
 
     public String deleteMultipleCards(List<String> names){
         for (String name : names) {
