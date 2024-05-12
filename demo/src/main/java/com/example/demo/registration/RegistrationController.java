@@ -46,12 +46,14 @@ public class RegistrationController {
             @RequestParam("username") String username,
             @RequestParam("email") String email,
             @RequestParam("password") String password,
-            @RequestParam("role") UserRole role
+            @RequestParam("role") boolean isAdmin
     ) {
         try {
             // Convert date string to Date object
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
             Date dateOfBirth = dateFormat.parse(dateOfBirthStr);
+
+            UserRole role = isAdmin ? UserRole.ADMIN : UserRole.USER;
 
             /*byte[] imageData = image.getBytes();*/
             byte[] imageData = null;
