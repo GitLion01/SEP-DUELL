@@ -143,6 +143,10 @@ function CreateDeck() {
             // Senden der Anfrage zum Backend, um den Namen zu aktualisieren
             await axios.put(`http://localhost:8080/decks/updateName/${id}/${currentDeckName}/${deckName}`);
             console.log('Deckname erfolgreich geändert!');
+
+
+            setUpdateTrigger(prev => prev +1);
+
             setActiveDeck(null);
             setIsEditing(false);
         } catch (error) {
@@ -185,8 +189,42 @@ function CreateDeck() {
                 console.error('Fehler beim Löschen des Decks', error);
                 setErrorMessage('Fehler beim Löschen des Decks: ' + (error.response?.data.message || error.message));
             }
-    
     };
+
+    const handleRemoveCardFromDeck = async(cardName) => {
+        
+        const deckToUpdate = decks[activeDeck];
+        if (!deckToUpdate) {
+            setErrorMessage('Aktives  Deck konnte nicht identifiziert werden.');
+            return;
+        }
+
+        const dataToSend = {
+            userID: id,
+            name: deckToUpdate.name,
+            cardNames: [cardName]
+        };
+
+
+        try {
+            const response = await axios.put(`http://localhost:8080/decks/removeCards`, JSON.stringify(dataToSend), {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+
+            setUpdateTrigger(prev => prev + 1);
+
+            console.log("Karte erfolgreich entfernt", response.data);
+
+        }
+        catch (error) {
+            console.error('Fehler beim Entfernen der Karte', error);
+            setErrorMessage('Fehler beim Entfernen der Karte: ' + (error.response?.data.message || error.message));
+        }
+
+    }
 
 
     const clearErrorMessage = () => setErrorMessage('');
@@ -220,11 +258,15 @@ function CreateDeck() {
                     <div className="active-deck-container">
                         <h2>Aktives Deck: {decks[activeDeck].name}</h2>
                         <input type="text" value={deckName} onChange={(e) => setDeckName(e.target.value)} />
-                        <button onClick={handleDeleteDeck}>Deck Löschen</button>
-                        {decks[activeDeck].cards.map((card, index) => (
-                            <div key={index} className="card">{card.name}</div>
-                        ))}
-                        <button onClick={updateDeckName} >Fertig</button>
+                        <div className="button-container">
+                            <button onClick={updateDeckName} >Fertig</button>
+                            <button onClick={handleDeleteDeck}>Deck Löschen</button>
+                        </div>
+                        <div className="card-container">
+                            {decks[activeDeck].cards.map((card, index) => (
+                                <div key={index} className="card" onClick={() => handleRemoveCardFromDeck(card.name)}>{card.name}</div>
+                            ))}
+                        </div>
                     </div>
                 </div>
             )}
