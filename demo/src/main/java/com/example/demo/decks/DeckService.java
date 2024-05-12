@@ -15,10 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.security.Principal;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -230,7 +227,7 @@ public class DeckService{
         }
     }*/
 
-    public String removeCards(DeckRequest request) {
+    public String removeAllCardsInstancesFromDeck(DeckRequest request) {
         try {
             // Überprüfe, ob der Benutzer existiert
             Optional<UserAccount> optionalUser = userAccountRepository.findById(request.getUserID());
@@ -270,6 +267,95 @@ public class DeckService{
             return "Fehler beim Entfernen der Karten aus dem Deck: " + e.getMessage();
         }
     }
+
+    /*public String removeFirstInstanceOfCardType(DeckRequest request) {
+        try {
+            // Überprüfe, ob der Benutzer existiert
+            Optional<UserAccount> optionalUser = userAccountRepository.findById(request.getUserID());
+            if (!optionalUser.isPresent()) {
+                throw new RuntimeException("Der Benutzer mit der angegebenen ID wurde nicht gefunden.");
+            }
+
+            // Finde das Deck anhand des Namens und der UserID
+            Optional<Deck> optionalDeck = deckRepository.findByNameAndUserId(request.getName(), request.getUserID());
+            if (optionalDeck.isPresent()) {
+                Deck deck = optionalDeck.get();
+                List<String> cardNamesToRemove = request.getCardNames();
+
+                // Durchlaufe die Liste der Karten im Deck
+                Iterator<Card> iterator = deck.getCards().iterator();
+                while (iterator.hasNext()) {
+                    Card card = iterator.next();
+                    if (cardNamesToRemove.contains(card.getName())) {
+                        // Entferne das erste Vorkommen der Karte aus dem Deck
+                        iterator.remove();
+                        // Entferne die Karte aus der Liste der zu entfernenden Karten
+                        cardNamesToRemove.remove(card.getName());
+                        break; // Nur das erste Vorkommen entfernen
+                    }
+                }
+
+                // Aktualisiere das Deck in der Datenbank
+                deckRepository.save(deck);
+
+                return "Das erste Vorkommen der Karte(n) wurde(n) erfolgreich aus dem Deck entfernt.";
+            } else {
+                throw new RuntimeException("Das Deck wurde nicht gefunden.");
+            }
+        } catch (Exception e) {
+            System.err.println("Fehler beim Entfernen der Karte(n) aus dem Deck: " + e.getMessage());
+            return "Fehler beim Entfernen der Karte(n) aus dem Deck: " + e.getMessage();
+        }
+    }*/
+
+    public String removeFirstInstanceOfCardType(DeckRequest request) {
+        try {
+            // Überprüfe, ob der Benutzer existiert
+            Optional<UserAccount> optionalUser = userAccountRepository.findById(request.getUserID());
+            if (!optionalUser.isPresent()) {
+                throw new RuntimeException("Der Benutzer mit der angegebenen ID wurde nicht gefunden.");
+            }
+
+            // Finde das Deck anhand des Namens und der UserID
+            Optional<Deck> optionalDeck = deckRepository.findByNameAndUserId(request.getName(), request.getUserID());
+            if (optionalDeck.isPresent()) {
+                Deck deck = optionalDeck.get();
+                List<String> cardNamesToRemove = request.getCardNames();
+                List<String> deletedCardNames = new ArrayList<>();
+
+                for (String cardName : cardNamesToRemove) {
+                    // Überprüfen, ob die Karte im Deck vorhanden ist
+                    boolean cardFound = false;
+                    for (Card card : deck.getCards()) {
+                        if (card.getName().equals(cardName)) {
+                            deck.getCards().remove(card);
+                            deletedCardNames.add(cardName);
+                            cardFound = true;
+                            break;
+                        }
+                    }
+                    if (!cardFound) {
+                        deletedCardNames.add(cardName + " (nicht gefunden)");
+                    }
+                }
+
+                // Aktualisiere das Deck in der Datenbank
+                deckRepository.save(deck);
+
+                if (!deletedCardNames.isEmpty()) {
+                    return "Die erste Instanz der Karte(n) " + deletedCardNames + " wurde(n) erfolgreich aus dem Deck entfernt.";
+                } else {
+                    return "Keine Karten wurden aus dem Deck entfernt.";
+                }
+            } else {
+                throw new RuntimeException("Das Deck wurde nicht gefunden.");
+            }
+        } catch (Exception e) {
+            System.err.println("Fehler beim Entfernen der Karte(n) aus dem Deck: " + e.getMessage());
+            return "Fehler beim Entfernen der Karte(n) aus dem Deck: " + e.getMessage();
+        }
+    }
+
 
 
 
