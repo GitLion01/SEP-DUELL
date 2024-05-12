@@ -9,6 +9,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -111,7 +114,8 @@ public class CardService {
                     if (description.length() > 200) {
                         description = description.substring(0, 200);
                     }
-                    byte[] image = parts[5].trim().getBytes(); // Load image data properly
+                   /* byte[] image = parts[5].trim().getBytes(); // Load image data properly*/
+                    byte[] image = loadImageFromFile(parts[5].trim());
                     Rarity rarity = Rarity.valueOf(parts[1].trim().toUpperCase());
 
                     CardRequest cardRequest = new CardRequest(name, attackPoints, defensePoints, description, image, rarity);
@@ -122,6 +126,10 @@ public class CardService {
             }
         }
         return cardRequests;
+    }
+    private byte[] loadImageFromFile(String filePath) throws IOException {
+        Path path = Paths.get(filePath);
+        return Files.readAllBytes(path);
     }
 
     public String uploadAndSaveCards(MultipartFile file) {

@@ -22,6 +22,8 @@ class TwoFaktorAuthenfication extends Component {
         event.preventDefault(); // Verhindert das Standardverhalten des Formulars (Seite neu laden)
         
         try {
+
+
             const userId = localStorage.getItem('id');// Benutzer-ID aus dem LocalStorage abrufen
 
             const response = await axiosInstance.post('/login/verify', { // POST-Anfrage an die Backend-Route '/verify-pin' senden
