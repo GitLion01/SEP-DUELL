@@ -39,7 +39,7 @@ public class RegistrationController {
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> register(
-            @RequestParam("image") MultipartFile image,
+            @RequestParam(value = "image", required = false) MultipartFile image,
             @RequestParam("firstName") String firstName,
             @RequestParam("lastName") String lastName,
             @RequestParam("dateOfBirth") String dateOfBirthStr,
@@ -53,7 +53,11 @@ public class RegistrationController {
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
             Date dateOfBirth = dateFormat.parse(dateOfBirthStr);
 
-            byte[] imageData = image.getBytes();
+            /*byte[] imageData = image.getBytes();*/
+            byte[] imageData = null;
+            if(image != null){
+                imageData = image.getBytes();
+            }
             String registrationResult = registrationService.register(imageData, firstName, lastName, dateOfBirth, username, email, password, role);
 
             // Based on the registration result, construct and return the appropriate ResponseEntity

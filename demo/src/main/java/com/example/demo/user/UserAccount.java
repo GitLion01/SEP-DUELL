@@ -86,6 +86,23 @@ public class UserAccount implements UserDetails {
         this.role = role;
 
     }
+    public UserAccount(
+                       String firstName,
+                       String lastName,
+                       Date dateOfBirth,
+                       String username,
+                       String email,
+                       String password,
+                       UserRole role) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.dateOfBirth = dateOfBirth;
+        this.username = username;
+        this.email = email;
+        this.password = password;
+        this.role = role;
+
+    }
 
     public void addFriend(UserAccount friend) {
         friends.add(friend);

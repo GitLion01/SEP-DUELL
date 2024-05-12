@@ -36,5 +36,11 @@ public class ImageUploadService {
         userAccountRepository.save(user);
     }
 
+    public void deleteImage(Long userId) throws IOException {
+        UserAccount user = userAccountRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
+        user.setImage(null);
+        userAccountRepository.save(user);
+    }
+
 }
 

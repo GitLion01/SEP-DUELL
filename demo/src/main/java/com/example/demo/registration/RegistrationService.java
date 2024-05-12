@@ -11,6 +11,7 @@ import com.example.demo.user.UserRole;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
@@ -84,15 +85,27 @@ public class RegistrationService {
             }
 
             // Benutzer registrieren und Bildpfad übergeben
-            String token = userAccountService.signUpUser(new UserAccount(
-                    image,
-                    firstName,
-                    lastName,
-                    dateOfBirth,
-                    username,
-                    email,
-                    password,
-                    role));
+            String token;
+            if(image != null) {
+                token = userAccountService.signUpUser(new UserAccount(
+                        image,
+                        firstName,
+                        lastName,
+                        dateOfBirth,
+                        username,
+                        email,
+                        password,
+                        role));
+            }else{
+                token = userAccountService.signUpUser(new UserAccount(
+                        firstName,
+                        lastName,
+                        dateOfBirth,
+                        username,
+                        email,
+                        password,
+                        role));
+            }
 
             // E-Mail senden mit Bestätigungslink
             String link = "http://localhost:8080/registration/confirm?token=" + token;
@@ -104,6 +117,8 @@ public class RegistrationService {
             return null; // oder eine andere geeignete Aktion, z. B. eine Fehlermeldung zurückgeben
         }
     }
+
+
 
 
 
