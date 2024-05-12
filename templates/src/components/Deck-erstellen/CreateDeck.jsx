@@ -152,26 +152,37 @@ function CreateDeck() {
     };
     
 
-    const handleDeleteDeck = () => {
-        if (activeDeck !== null) {
-            const deckName = decks[activeDeck].name; // Festhalten der ID des aktiven Decks
-            axios.delete(`http://localhost:8080/${id}decks/${deckName}`)
-                .then(() => {
-                    // Nach erfolgreichem Löschen im Backend, entferne das Deck auch lokal
-                    const updatedDecks = decks.filter((_, index) => index !== activeDeck);
-                    setDecks(updatedDecks);
-                    setActiveDeck(null); // Setzt das aktive Deck zurück
-                    setErrorMessage(''); // Zurücksetzen der Fehlermeldung
-                    setIsEditing(false); // Beenden des Edit-Zustands
-                    alert('Deck erfolgreich gelöscht.');
-                })
-                .catch(error => {
-                    // Fehlerbehandlung, falls das Löschen im Backend fehlschlägt
-                    setErrorMessage('Fehler beim Löschen des Decks: ' + (error.response?.data.message || error.message));
+    const handleDeleteDeck = async () => {
+
+            const deckToDelete = decks[activeDeck];
+            if (!deckToDelete) {
+                setErrorMessage('Zu löschendes Deck konnte nicht identifiziert werden.');
+                return;
+            }
+
+            const dataToSend = {
+                [id]: deckToDelete.name,
+            };
+            
+            // Festhalten der ID des aktiven Decks
+            try {
+                const response = await axios.delete(`http://localhost:8080/decks/delete`, {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    data: dataToSend
                 });
-        } else {
-            setErrorMessage('Kein Deck ausgewählt zum Löschen.');
-        }
+    
+                setUpdateTrigger(prev => prev + 1);
+    
+                console.log("Deck erfolgreich gelöscht", response.data);
+    
+            }
+            catch (error) {
+                console.error('Fehler beim Löschen des Decks', error);
+                setErrorMessage('Fehler beim Löschen des Decks: ' + (error.response?.data.message || error.message));
+            }
+    
     };
 
 
