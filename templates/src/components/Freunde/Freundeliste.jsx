@@ -6,11 +6,11 @@ function App() {
     const [users, setUsers] = useState([]);
     const [friends, setFriends] = useState([]);
     const [friendRequests, setFriendRequests] = useState([]);
-    const currentUserId = 2; // Hier sollte die tatsächliche Benutzer-ID stehen
-    const id=2;
 
     // Funktionen zum Laden der Daten vom Backend
     useEffect(() => {
+
+        fetchUsers();
         // Lade Nutzerliste vom Backend
         fetchFriends();
         // Lade Freunde vom Backend
@@ -20,6 +20,28 @@ function App() {
     }, []);
 
 
+    const fetchUsers= async (id) => {
+        try {
+            // Die URL mit der id zusammensetzen
+            const url = `http://localhost:8080/registration/users`;
+            // Daten vom Backend abrufen
+            const response = await fetch(url);
+
+            // Überprüfen, ob die Anfrage erfolgreich war
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+
+            // Antwortdaten in das JSON-Format konvertieren
+            const data = await response.json();
+
+            // Mit den Daten arbeiten, z.B. setUsers aufrufen
+            setUsers(data);
+        } catch (error) {
+            // Fehler behandeln, z.B. Fehlermeldung ausgeben
+            console.error('Fetch failed:', error.message);
+        }
+    };
 
     const fetchFriends = async (id) => {
         try {
