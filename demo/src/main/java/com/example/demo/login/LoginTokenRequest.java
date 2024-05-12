@@ -13,6 +13,6 @@ public class LoginTokenRequest {
 
     private String token;
     @Getter
-    private Long UserId;
+    private Long userId;
 
 }

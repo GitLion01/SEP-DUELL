@@ -13,7 +13,7 @@ public class CardRequest {
     private Integer attackPoints;
     private Integer defensePoints;
     private String description;
-    private byte[] image;
+    private String image;
     private Rarity rarity;
 }
 

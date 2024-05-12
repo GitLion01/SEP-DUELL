@@ -115,7 +115,9 @@ public class CardService {
                         description = description.substring(0, 200);
                     }
                    /* byte[] image = parts[5].trim().getBytes(); // Load image data properly*/
-                    byte[] image = loadImageFromFile(parts[5].trim());
+                    /*byte[] image = loadImageFromFile(parts[5].trim());*/
+                    // Load image from file system and encode to Base64
+                    String image = loadImageAndEncodeToBase64(parts[5].trim());
                     Rarity rarity = Rarity.valueOf(parts[1].trim().toUpperCase());
 
                     CardRequest cardRequest = new CardRequest(name, attackPoints, defensePoints, description, image, rarity);
@@ -130,6 +132,11 @@ public class CardService {
     private byte[] loadImageFromFile(String filePath) throws IOException {
         Path path = Paths.get(filePath);
         return Files.readAllBytes(path);
+    }
+    private String loadImageAndEncodeToBase64(String filePath) throws IOException {
+        Path path = Paths.get(filePath);
+        byte[] imageData = Files.readAllBytes(path);
+        return Base64.getEncoder().encodeToString(imageData);
     }
 
     public String uploadAndSaveCards(MultipartFile file) {
