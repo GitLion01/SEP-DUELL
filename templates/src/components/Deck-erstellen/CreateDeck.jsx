@@ -9,6 +9,7 @@ function CreateDeck() {
     const [myCards, setMyCards] = useState([]);
     const [activeDeck, setActiveDeck] = useState(null);
     const [deckName, setDeckName] = useState('');
+    const [currentDeckName, setCurrentDeckName] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
     const [isEditing, setIsEditing] = useState(false);  // Zustand zum Überwachen, ob Änderungen gemacht wurden
     const [updateTrigger, setUpdateTrigger] = useState(0); // Zählt, wie oft Updates notwendig waren
@@ -56,7 +57,7 @@ function CreateDeck() {
         // Erstelle neues Deck-Objekt
         const newDeck = {
             userID: id, //
-            name: `Deck ${decks.length + 4}`,
+            name: `Deck ${decks.length + 1}`,
             cardNames: []
         };
 
@@ -81,7 +82,7 @@ function CreateDeck() {
     
 
     // Karte zu einem aktiven Deck hinzufügen und an den Server senden
-    const handleAddCardToDeck = (card) => {
+    const handleAddCardToDeck = async (card) => {
         if (activeDeck === null) {
             setErrorMessage('Kein aktives Deck ausgewählt.');
             return;
@@ -93,32 +94,63 @@ function CreateDeck() {
             return;
         }
     
+        // Formulardaten definieren zum Senden an Backend
         const dataToSend = {
-            deckName: deckToUpdate.name,
-            cardsToAdd: [card.name]
+            userID: id,
+            name: deckToUpdate.name,
+            cardNames: [card.name]
         };
     
-        axios.put(`http://localhost:8080/decks/addCards`, JSON.stringify(dataToSend))
-            .then(response => {
-                console.log('Karte erfolgreich zum Deck hinzugefügt', response.data);
-                setUpdateTrigger(prev => prev + 1); // Trigger die useEffect Hook, um die Decks neu zu laden
-                setErrorMessage(''); // Klare Fehlermeldung, wenn Erfolg
-            })
-            .catch(error => {
-                console.error('Fehler beim Hinzufügen der Karte zum Deck:', error);
-                setErrorMessage('Fehler beim Hinzufügen der Karte: ' + (error.response?.data.message || error.message));
+        
+        try {
+            const response = await axios.put(`http://localhost:8080/decks/addCards`, JSON.stringify(dataToSend), {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
             });
+
+            setUpdateTrigger(prev => prev + 1);
+
+            console.log("Karte erfolgreich hinzugefügt", response.data);
+
+        }
+        catch (error) {
+            console.error('Fehler beim Hinzufügen der Karte', error);
+            setErrorMessage('Fehler beim Hinzufügen der Karte: ' + (error.response?.data.message || error.message));
+        }
+
     };
     
-
-    // Decknamen ändern
-    const handleChangeDeckName = (e) => {
-        setIsEditing(true);
-        setDeckName(e.target.value);
-        const updatedDecks = [...decks];
-        updatedDecks[activeDeck].name = e.target.value;
-        setDecks(updatedDecks);
+    // !!!! Muss noch optimiert werden für Fall, dass ausgewählt wird obwohl keine Veränderung vorgenommen wird
+    // Wird aufgerufen, wenn ein Deck in der UI ausgewählt wird
+    const selectDeck = (index) => {
+        if (!isEditing) {
+            setActiveDeck(index);
+            setCurrentDeckName(decks[index].name);
+            setDeckName(decks[index].name);
+        } else {
+            setErrorMessage('Bitte speichern oder verwerfen Sie die Änderungen bevor Sie das Deck wechseln.');
+        }
     };
+
+    const updateDeckName = async () => {
+        if (!deckName.trim()) {
+            setErrorMessage('Der Deckname darf nicht leer sein');
+            return;
+        }
+    
+        try {
+            // Senden der Anfrage zum Backend, um den Namen zu aktualisieren
+            await axios.put(`http://localhost:8080/decks/updateName/${id}/${currentDeckName}/${deckName}`);
+            console.log('Deckname erfolgreich geändert!');
+            setActiveDeck(null);
+            setIsEditing(false);
+        } catch (error) {
+            console.error('Fehler beim Ändern des Decknamens:', error);
+            setErrorMessage('Fehler beim Ändern des Decknamens: ' + error.message);
+        }
+    };
+    
 
     const handleDeleteDeck = () => {
         if (activeDeck !== null) {
@@ -142,23 +174,6 @@ function CreateDeck() {
         }
     };
 
-    // Fertig mit der Bearbeitung
-    const handleFinish = () => {
-        if (!deckName.trim()) {
-            setErrorMessage('Der Deckname darf nicht leer sein');
-            return;
-        }
-
-
-
-        axios.post(`http://localhost:8080/${id}/decks/`, decks[activeDeck])
-            .then(() => {
-                console.log('Deck gespeichert!');
-                setActiveDeck(null);
-                setIsEditing(false);
-            })
-            .catch(error => console.error('Fehler beim Speichern des Decks:', error));
-    };
 
     const clearErrorMessage = () => setErrorMessage('');
 
@@ -173,15 +188,7 @@ function CreateDeck() {
             <button onClick={handleCreateNewDeck} disabled={isEditing}>Neues Deck erstellen</button>
             <div className="deck-list">
                 {decks.map((deck, index) => (
-                    <div key={index} className="card" onClick={() => {
-                        if (!isEditing) {
-                        setActiveDeck(index);
-                        setDeckName(deck.name);
-                        }
-                        else {
-                            setErrorMessage('Bitte speichern oder verwerfen Sie die Änderungen bevor Sie das Deck wechseln.');
-                        }
-                    }}>
+                    <div key={index} className="card" onClick={() => selectDeck(index)}>
                         {deck.name}
                     </div>
                 ))}
@@ -198,12 +205,12 @@ function CreateDeck() {
                     </div>
                     <div className="active-deck-container">
                         <h2>Aktives Deck: {decks[activeDeck].name}</h2>
-                        <input type="text" value={deckName} onChange={handleChangeDeckName} />
+                        <input type="text" value={deckName} onChange={(e) => setDeckName(e.target.value)} />
                         <button onClick={handleDeleteDeck}>Deck Löschen</button>
                         {decks[activeDeck].cards.map((card, index) => (
                             <div key={index} className="card">{card.name}</div>
                         ))}
-                        <button onClick={handleFinish} disabled={!deckName.trim()}>Fertig</button>
+                        <button onClick={updateDeckName} >Fertig</button>
                     </div>
                 </div>
             )}
