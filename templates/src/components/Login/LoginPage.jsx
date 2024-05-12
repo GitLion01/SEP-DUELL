@@ -30,6 +30,9 @@ class LoginPage extends React.Component { // Definieren der LoginPage-Klasse als
         if (res.data && res.data.status === 'success') {
           // Erfolgreiche Anmeldung
           console.log("Login successful!");
+          // Speichern der Benutzer-ID im LocalStorage
+          localStorage.setItem('id', res.data.id);
+
           this.setState({ redirectToHome: true });
         } else if (res.data && res.data.status === 'error') {
           // Fehlgeschlagene Anmeldung

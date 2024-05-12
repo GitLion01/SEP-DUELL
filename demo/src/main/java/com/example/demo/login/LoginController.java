@@ -25,7 +25,7 @@ public class LoginController {
     private final EmailSender emailSender;
 
     // Supercode als Konstante definieren
-    private static final String SUPER_CODE = "SUPER1234";
+    private static final String SUPER_CODE = "SUPER1";
 
     @Autowired
     public LoginController(AuthenticationManager authenticationManager,
@@ -49,7 +49,11 @@ public class LoginController {
 
             emailSender.send(userAccount.getEmail(), buildLoginEmail(userAccount.getFirstName(), token));
 
-            return ResponseEntity.ok(Map.of("status", "success", "message", "Login successful. Please check your email for the verification code."));
+            return ResponseEntity.ok(Map.of("status", "success",
+                    "message", "Login successful. Please check your email for the verification code.",
+                    "id", String.valueOf(userAccount.getId())
+
+            ));
         } catch (AuthenticationException e) {
             return ResponseEntity.ok(Map.of("status", "error", "message", "Login failed: " + e.getMessage()));
         }

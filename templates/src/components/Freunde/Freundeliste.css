@@ -1,34 +1,44 @@
-.friend-list {
-    max-width: 400px;
-    margin: 40px auto;
+/* App.css */
+
+.BFF {
+    display: flex;
+    justify-content: space-around;
+    background: white;
+}
+
+
+
+.BFF .UserList-hülle,
+.BFF .FriendList-hülle {
+    border: 1px solid #ccc; /* Umrandung hinzufügen */
+    border-radius: 5px; /* Runde Ecken */
+    padding: 10px; /* Innenabstand */
+    margin-bottom: 20px; /* Abstand zwischen den Containern */
+}
+
+
+
+.BFF .UserList-hülle h2,
+.BFF .FriendList-hülle h2 {
+    margin-top: 0; /* Überschrift ohne oberen Abstand */
+}
+
+
+
+
+.BFF .UserList, .FriendList,  .FriendRequests {
+    max-height: 300px; /* Maximale Höhe */
+    overflow-y: auto; /* Vertikale Scrollleiste, wenn der Inhalt die maximale Höhe überschreitet */
+}
+
+
+
+
+.BFF ul {
+    list-style-type:none;
     padding: 20px;
-    background-color: #f9f9f9;
-    border: 1px solid #ddd;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
-.friend-list ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.friend-list li {
-    padding: 10px;
-    border-bottom: 1px solid #ccc;
-}
-
-.friend-list li:last-child {
-    border-bottom: none;
-}
-
-.friend-list li.is-done {
-    text-decoration: line-through;
-}
-
-.friend-list input[type="text"] {
-    width: 100%;
-    padding: 10px;
+.BFF li {
     margin-bottom: 20px;
-    border: 1px solid #ccc;
 }

@@ -23,12 +23,12 @@ class TwoFaktorAuthenfication extends Component {
         
         try {
             const response = await axiosInstance.post('/login/verify', { // POST-Anfrage an die Backend-Route '/verify-pin' senden
-                pincode: this.state.pincode // PIN-Code als Teil des Datenobjekts senden
+                token: this.state.pincode // PIN-Code als Teil des Datenobjekts senden
             });
 
             console.log('Antwort vom Server:', response.data); // Ausgabe der Antwort des Servers in der Konsole
             // Hier könntest du entsprechend auf die Antwort des Servers reagieren, z.B. eine Weiterleitung oder eine Benachrichtigung anzeigen
-            if (response.data.isPinCodeCorrect) {
+            if (response.data==="Login verified successfully with Super Code" ||response.data==="Login verified successfully" ) {
                 this.setState({ isPinCodeCorrect: true }); // PIN-Code ist korrekt
             } else {
                 this.setState({ errorMessage: 'Falscher PIN-Code' }); // Fehlermeldung anzeigen
