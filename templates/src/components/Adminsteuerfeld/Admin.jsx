@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import axiosInstance from '../../api/axios';
 import './Admin.css'; // Stile für das Adminpanel
-import Card from '../card'; 
+import Card from '../Card';
 
 class AdminPanel extends Component {
   state = {

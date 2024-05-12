@@ -23,11 +23,10 @@ public class LoginController {
     private final EmailSender emailSender;
 
     // Supercode als Konstante definieren
-    private static final String SUPER_CODE = "SUPER1234";
+    private static final String SUPER_CODE = "SUPER1";
 
     @Autowired
     public LoginController(AuthenticationManager authenticationManager,
-                           UserAccountService userAccountService,
                            ConfirmationTokenService confirmationTokenService,
                            EmailSender emailSender) {
         this.authenticationManager = authenticationManager;

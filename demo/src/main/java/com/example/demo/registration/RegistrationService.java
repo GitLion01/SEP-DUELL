@@ -24,7 +24,6 @@ public class RegistrationService {
     private final EmailSender emailSender;
 
     public String register(RegistrationRequest request) {
-        try {
             boolean isValidemail = emailValidator.test(request.getEmail());
             if (!isValidemail) {
                 throw new IllegalStateException("Invalid email");
@@ -45,10 +44,6 @@ public class RegistrationService {
             String link = "http://localhost:8080/registration/confirm?token=" + token;
             emailSender.send(request.getEmail(), buildEmail(request.getFirstName(), link));
             return token;
-        } catch (Exception e) {
-            System.out.println("Fehler bei der Registrierung: " + e.getMessage());
-            return null; // oder eine andere geeignete Aktion, z. B. eine Fehlermeldung zurückgeben
-        }
     }
 
 
