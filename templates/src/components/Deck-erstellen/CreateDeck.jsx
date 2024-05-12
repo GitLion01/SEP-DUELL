@@ -173,6 +173,9 @@ function CreateDeck() {
                     data: dataToSend
                 });
     
+                setActiveDeck(null);
+                setIsEditing(false);
+
                 setUpdateTrigger(prev => prev + 1);
     
                 console.log("Deck erfolgreich gelöscht", response.data);
