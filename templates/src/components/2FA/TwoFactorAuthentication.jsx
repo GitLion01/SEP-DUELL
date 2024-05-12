@@ -26,7 +26,7 @@ class TwoFaktorAuthenfication extends Component {
 
             const response = await axiosInstance.post('/login/verify', { // POST-Anfrage an die Backend-Route '/verify-pin' senden
                 token: this.state.pincode, // PIN-Code als Teil des Datenobjekts senden
-                id: userId
+                UserId: userId
             });
 
             console.log('Antwort vom Server:', response.data); // Ausgabe der Antwort des Servers in der Konsole

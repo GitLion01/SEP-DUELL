@@ -1,6 +1,7 @@
 package com.example.demo.login;
 
 import com.example.demo.email.EmailSender;
+import com.example.demo.registration.token.ConfirmationToken;
 import com.example.demo.registration.token.ConfirmationTokenService;
 import com.example.demo.registration.token.TokenPurpose;
 import com.example.demo.user.UserAccount;
@@ -15,6 +16,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 @RestController
 @CrossOrigin
@@ -66,14 +69,13 @@ public class LoginController {
             return "Login verified successfully with Super Code";
         }
 
+
         return confirmationTokenService.getToken(request.getToken())
                 .map(token -> {
                     if (token.getExpiresAt().isBefore(LocalDateTime.now())) {
                         return "Token expired";
                     } else if (token.getPurpose() != TokenPurpose.LOGIN) {
                         return "Invalid token purpose";
-                    } else if (token.getAppUser().getId() != request.getId()) { // Vergleichen Sie die Benutzer-IDs
-                        return "Token does not match user";
                     } else {
                         return "Login verified successfully";
                     }
