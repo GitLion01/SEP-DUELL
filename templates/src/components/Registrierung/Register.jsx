@@ -31,7 +31,6 @@ class Registrierung extends React.Component {
         dateOfBirth: '', // Geburtsdatum
         email: '', // E-Mail
         password: '', // Passwort
-        role: "" // Rolle (Administrator oder Benutzer)
       },
       role: false,
     };
@@ -87,7 +86,7 @@ class Registrierung extends React.Component {
       role:!prevState.role, // Toggle the role state
       formData: {
         ...prevState.formData, // Aktualisiere den vorherigen Zustand der Formulardaten
-        role: prevState.role === 'ADMIN' ? 'USER' : 'ADMIN' // Ändere die Rolle
+        role: !prevState.role
       },
     }));
   };

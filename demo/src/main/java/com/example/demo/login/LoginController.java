@@ -72,6 +72,8 @@ public class LoginController {
                         return "Token expired";
                     } else if (token.getPurpose() != TokenPurpose.LOGIN) {
                         return "Invalid token purpose";
+                    } else if (token.getAppUser().getId() != request.getId()) { // Vergleichen Sie die Benutzer-IDs
+                        return "Token does not match user";
                     } else {
                         return "Login verified successfully";
                     }
