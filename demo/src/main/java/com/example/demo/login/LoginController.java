@@ -25,7 +25,7 @@ public class LoginController {
     private final EmailSender emailSender;
 
     // Supercode als Konstante definieren
-    private static final String SUPER_CODE = "SUPER1";
+    private static final String SUPER_CODE = "SUPER1234";
 
     @Autowired
     public LoginController(AuthenticationManager authenticationManager,
@@ -37,7 +37,7 @@ public class LoginController {
     }
 
     @PostMapping
-    public ResponseEntity<Map<String, Object>> login(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<Map<String, String>> login(@RequestBody LoginRequest loginRequest) {
         try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword())
@@ -46,19 +46,14 @@ public class LoginController {
 
             UserAccount userAccount = (UserAccount) authentication.getPrincipal();
             String token = confirmationTokenService.generateToken(userAccount, TokenPurpose.LOGIN);
+
             emailSender.send(userAccount.getEmail(), buildLoginEmail(userAccount.getFirstName(), token));
 
-            // ID des Benutzers in die Antwort einfügen
-            return ResponseEntity.ok(Map.of(
-                    "status", "success",
-                    "message", "Login successful. Please check your email for the verification code.",
-                    "userId", userAccount.getId()  // Benutzer-ID hinzufügen
-            ));
+            return ResponseEntity.ok(Map.of("status", "success", "message", "Login successful. Please check your email for the verification code."));
         } catch (AuthenticationException e) {
             return ResponseEntity.ok(Map.of("status", "error", "message", "Login failed: " + e.getMessage()));
         }
     }
-
 
     @PostMapping("/verify")
     public String verifyLoginToken(@RequestBody LoginTokenRequest request) {

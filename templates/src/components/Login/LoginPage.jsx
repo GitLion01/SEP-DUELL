@@ -25,65 +25,67 @@ class LoginPage extends React.Component { // Definieren der LoginPage-Klasse als
     event.preventDefault();
     const { email, password } = this.state;
     axios.post('http://localhost:8080/login', { email, password })
-        .then(res => {
-          console.log(res);
-          if (res.data && res.data === 'Login successful. Please check your email for the verification code.') {
-            // Erfolgreiche Anmeldung
-            console.log("Login successful!");
-            this.setState({ redirectToHome: true });
-              // Direkte Weiterleitung
-              window.location.href = "/2fa"
-          } else if (res.data && res.data === 'Login failed: ') {
-            // Fehlgeschlagene Anmeldung
-            this.setState({ error: res.data.message });
-            alert('Falsche Email oder Passwort')
-          } else {
-            console.error("Unerwartete Serverantwort:", res);
-            alert('Unerwartete Serverantwort');
-          }
-        });
-
-
+      .then(res => {
+        console.log(res);
+        if (res.data && res.data.status === 'success') {
+          // Erfolgreiche Anmeldung
+          console.log("Login successful!");
+          this.setState({ redirectToHome: true });
+        } else if (res.data && res.data.status === 'error') {
+          // Fehlgeschlagene Anmeldung
+          this.setState({ error: res.data.message });
+          alert('Falsche Email oder Passwort')
+        } else {
+          console.error("Unerwartete Serverantwort:", res);
+          alert('Unerwartete Serverantwort');
+        }
+      });
+  
+    
   };
 
   render() {
-
+    // Redirect durch Navigate ersetzen
+    if (this.state.redirectToHome) {
+      return <Navigate to="/2fa" />;
+    }
+    
     return (
-
-        <div className='login'>
-          <h1>Login</h1>
-          <form onSubmit={this.handleSubmit}>
-            <div>
-              <label htmlFor="email">your E-mail:</label>
-              <input
-                  type="text"
-                  id="email"
-                  name="email"
-                  value={this.state.email}
-                  onChange={this.handleChange}
-              />
-            </div>
-            <div>
-              <label htmlFor="password">Passwort:</label>
-              <input
-                  type="password"
-                  id="password"
-                  name="password"
-                  value={this.state.password}
-                  onChange={this.handleChange}
-              />
-            </div>
-            <button type="submit">Anmelden</button>
-          </form>
-          <div className="register-link">
-            <p>Noch kein Account?</p>
-            <Link to="/registration">
-              <button type="button">Registrieren</button>
-            </Link>
+     
+      <div className='login'>
+        <h1>Login</h1>
+        <form onSubmit={this.handleSubmit}>
+          <div>
+            <label htmlFor="email">Benutzername:</label>
+            <input
+              type="text"
+              id="email"
+              name="email"
+              value={this.state.email}
+              onChange={this.handleChange}
+            />
           </div>
+          <div>
+            <label htmlFor="password">Passwort:</label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              value={this.state.password}
+              onChange={this.handleChange}
+            />
+          </div>
+          <button type="submit">Anmelden</button>
+        </form>
+        <div className="register-link">
+          <p>Noch kein Account?</p>
+          <Link to="/registration">
+            <button type="button">Registrieren</button>
+          </Link>
         </div>
+      </div>
     );
-  }
+  } 
 }
 document.body.classList.add('login__body');
 

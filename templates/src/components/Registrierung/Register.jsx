@@ -39,31 +39,31 @@ class Registrierung extends React.Component {
 
   // Methode zum Verarbeiten des Formularabsendens
   // Methode zum Verarbeiten des Formularabsendens
-  handleSubmit = async (event) => {
-    event.preventDefault();
-    const formData = this.state.formData;
+  handleSubmit = async (event) => { // Methode für das Absenden des Formulars
+    event.preventDefault(); // Verhindere das Standardverhalten des Formulars
+    const formData = this.state.formData; // Greife auf die Formulardaten im Zustand zu
     try {
-      formData.role = this.state.role ? 'ADMIN' : 'USER';
-      const response = await fetch('http://localhost:8080/registration', {
-        method: 'POST',
+      formData.role = this.state.role ? 'ADMIN' : 'USER'; // Setze die Rolle basierend auf dem Checkbox-Zustand
+      const response = await fetch('http://localhost:8080/registration', { // Sende die Formulardaten an den Server
+        method: 'POST', // HTTP-Methode
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json' // Header für JSON-Daten
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(formData) // Formulardaten in JSON umwandeln und senden
       });
 
-      if (!response.ok) {
+      if (!response.ok) { // Wenn die Antwort nicht erfolgreich ist, wirf einen Fehler
         throw new Error('Registrierung fehlgeschlagen');
       }
 
-      console.log('Registrierung erfolgreich');
-      window.location.href = '/';// Weiterleitung zur Login-Seite nach erfolgreicher Registrierung
+
+      window.location.href = '/';
+      console.log('Registrierung erfolgreich'); // Logge eine Erfolgsmeldung
+      // Hier könntest du zur Login-Seite weiterleiten oder andere Aktionen nach erfolgreicher Registrierung durchführen
     } catch (error) {
-      console.error('Fehler bei der Registrierung:', error.message);
-      // Hier kannst du auch eine Fehlermeldung für den Benutzer anzeigen, z. B. durch Aktualisieren des State mit einer Fehlermeldung
+      console.error('Fehler bei der Registrierung:', error.message); // Logge Fehlermeldungen
     }
   };
-
 
 
   // Methode zur Verarbeitung der Bildauswahl und Anzeige der Vorschau
