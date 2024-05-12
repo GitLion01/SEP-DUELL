@@ -6,6 +6,7 @@ import com.example.demo.decks.DeckRepository;
 import com.example.demo.user.UserAccount;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
@@ -16,7 +17,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-
+import java.util.*;
 
 @Service
 public class CardService {
@@ -85,16 +86,12 @@ public class CardService {
     }
 
 
-
     public String deleteMultipleCards(List<String> names){
         for (String name : names) {
             deleteCard(name);
         }
         return "Cards deleted";
     }
-
-
-
 
 
 
@@ -126,10 +123,6 @@ public class CardService {
         }
         return cardRequests;
     }
-
-
-
-
 
     public String uploadAndSaveCards(MultipartFile file) {
         try {

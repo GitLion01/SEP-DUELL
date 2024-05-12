@@ -3,12 +3,13 @@ import LoginPage from './components/Login/LoginPage';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import TwoFaktorAuthenfication from './components/2FA/TwoFactorAuthentication';
 import Register from './components/Registrierung/Register.jsx' 
-import Startseite from './components/Startseite/Startsite.jsx';
+import Startseite from './components/Startseite/Startseite.jsx';
 import DeckEditor from './components/Deckarbeiten/DeckEditor.jsx';
 import AdminPanel from './components/Adminsteuerfeld/Admin.jsx';
 import Profile from './components/Profilansicht/Profile.jsx';
 import CreateDeck from './components/Deck-erstellen/CreateDeck.jsx';
 import './index.css';
+import Freundeliste from "./components/Freunde/Freundeliste.jsx";
 
 
 
@@ -24,6 +25,7 @@ function App() {
         <Route path='/deckbearbeiten' element = {<DeckEditor/>} /> 
         <Route path='/admin' element = {<AdminPanel/>} /> 
         <Route path="/create-deck" element={<CreateDeck />} />
+        <Route path="/freundelist" element={<Freundeliste/>} />
       </Routes>
     </Router>
   );

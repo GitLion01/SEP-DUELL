@@ -35,13 +35,13 @@
   color: white;
 }
 
-
+/*DAS MUSS BLEIBEN */
 /*EINSTELLUNGEN FÜR DIE EINGABEFELDER*/
 /*EINSTELLUNGEN ÜBER DIE AKZEPTANZ DER DATENTYPEN  BEI  EINGABEN */
-input[type="text"],
-input[type="date"],
-input[type="email"],
-input[type="password"] {
+.AppRegister [type="text"],
+.AppRegister input[type="date"],
+.AppRegister [type="email"],
+.AppRegister input[type="password"] {
   width: 95%; /* Vollständige Breite für Eingabefelder */
   padding: 5px; /* Innenabstand der Eingabefelder */
   border: 1px solid  rgb(255, 255, 255); /* Randstil für die Eingabefelder */

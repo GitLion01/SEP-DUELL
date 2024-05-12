@@ -121,7 +121,7 @@ class Registrierung extends React.Component {
           previewImage: reader.result
         });
       };
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(file); // Lese das ausgewählte Bild als Data-URL
     }
   }
 

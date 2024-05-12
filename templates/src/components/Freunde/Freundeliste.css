@@ -1,0 +1,44 @@
+/* App.css */
+
+.BFF {
+    display: flex;
+    justify-content: space-around;
+    background: white;
+}
+
+
+
+.BFF .UserList-hülle,
+.BFF .FriendList-hülle {
+    border: 1px solid #ccc; /* Umrandung hinzufügen */
+    border-radius: 5px; /* Runde Ecken */
+    padding: 10px; /* Innenabstand */
+    margin-bottom: 20px; /* Abstand zwischen den Containern */
+}
+
+
+
+.BFF .UserList-hülle h2,
+.BFF .FriendList-hülle h2 {
+    margin-top: 0; /* Überschrift ohne oberen Abstand */
+}
+
+
+
+
+.BFF .UserList, .FriendList,  .FriendRequests {
+    max-height: 300px; /* Maximale Höhe */
+    overflow-y: auto; /* Vertikale Scrollleiste, wenn der Inhalt die maximale Höhe überschreitet */
+}
+
+
+
+
+.BFF ul {
+    list-style-type:none;
+    padding: 20px;
+}
+
+.BFF li {
+    margin-bottom: 20px;
+}

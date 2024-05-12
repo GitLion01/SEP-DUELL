@@ -15,8 +15,5 @@ public class CardRequest {
     private String description;
     private byte[] image;
     private Rarity rarity;
-
-
-
 }
 

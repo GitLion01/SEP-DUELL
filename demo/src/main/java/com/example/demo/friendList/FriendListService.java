@@ -1,118 +1,135 @@
 package com.example.demo.friendList;
 
+import com.example.demo.email.EmailSender;
 import com.example.demo.user.UserAccount;
+import com.example.demo.dto.UserDTO;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
 public class FriendListService {
     final FriendListRepository friendListRepository;
-    public FriendListService(FriendListRepository friendListRepository) {
+    private final EmailSender emailSender;
+
+    public FriendListService(FriendListRepository friendListRepository, EmailSender emailSender) {
         this.friendListRepository = friendListRepository;
+        this.emailSender = emailSender;
     }
 
-    public Optional<List<UserAccount>> getFriendList(int id) {
-        Optional<UserAccount> user=friendListRepository.findById(id);
-        if(user.isPresent())
-        {
-            UserAccount userAccount=user.get();
-            return Optional.of(userAccount.getFriends());
-        }
-        else
-            return Optional.empty();
+    // Konvertiert UserAccount zu UserDTO
+    private UserDTO convertToDTO(UserAccount user) {
+        return new UserDTO(user.getUsername());
     }
 
-    public Optional<List<UserAccount>> getFriendListRequests(int id) {
-        Optional<UserAccount> user=friendListRepository.findById(id);
-        if(user.isPresent())
-        {
-            UserAccount userAccount=user.get();
-            return Optional.of(userAccount.getFriendRequests());
-        }
-        else
-            return Optional.empty();
+    // Gibt die Freundesliste als DTOs zurück
+    public Optional<List<UserDTO>> getFriendList(int id) {
+        Optional<UserAccount> user = friendListRepository.findById(id);
+        return user.map(u -> u.getFriends().stream().map(this::convertToDTO).collect(Collectors.toList()));
     }
 
-    public String FriendshipRequest(int id,int friend_id) {
-        Optional<UserAccount> user=friendListRepository.findById(id);
-        Optional<UserAccount> friend=friendListRepository.findById(friend_id);
-        if(user.isPresent() && friend.isPresent())
-        {
-            UserAccount userAccount=user.get();
-            UserAccount friendAccount=friend.get();
-            if(friendAccount.getFriendRequests().contains(userAccount))
+    // Gibt die eingehenden Freundschaftsanfragen als DTOs zurück
+    public Optional<List<UserDTO>> getFriendListRequests(int id) {
+        Optional<UserAccount> user = friendListRepository.findById(id);
+        return user.map(u -> u.getFriendRequests().stream().map(this::convertToDTO).collect(Collectors.toList()));
+    }
+
+    // Verarbeitet eine Freundschaftsanfrage
+    public String FriendshipRequest(int id, int friend_id) {
+        Optional<UserAccount> user = friendListRepository.findById(id);
+        Optional<UserAccount> friend = friendListRepository.findById(friend_id);
+        if (user.isPresent() && friend.isPresent()) {
+            UserAccount userAccount = user.get();
+            UserAccount friendAccount = friend.get();
+            if (friendAccount.getFriendRequests().contains(userAccount))
                 return "You have already sent a request";
-            if(userAccount.getFriendRequests().contains(friendAccount))
-                return "This user have already sent you a request";
-            if(friendAccount.getFriends().contains(userAccount))
+            if (userAccount.getFriendRequests().contains(friendAccount))
+                return "This user has already sent you a request";
+            if (friendAccount.getFriends().contains(userAccount))
                 return "You are already friends";
-            if(id==friend_id)
-                return "You can not send a request to yourself";
-            //Request must be saved in the friend account so the friend can see it and accept/decline it
+            if (id == friend_id)
+                return "You cannot send a request to yourself";
             friendAccount.addFriendRequest(userAccount);
-            return "Friend request sent from "+userAccount.getUsername()+" to "+friendAccount.getUsername();
-        }
-        else
+
+            // Send email notification
+            String acceptLink = String.format("http://localhost:8080/friendlist/accept?userId=%d&friendId=%d", friend_id, id);
+            String rejectLink = String.format("http://localhost:8080/friendlist/reject?userId=%d&friendId=%d", friend_id, id);
+            String emailContent = buildFriendRequestEmail(userAccount.getUsername(), acceptLink, rejectLink);
+            emailSender.send(friendAccount.getEmail(), emailContent);
+
+            return "Friend request sent from " + userAccount.getUsername() + " to " + friendAccount.getUsername();
+        } else {
             return "User not found";
+        }
     }
 
-    public String FriendshipAccept(int id,int friend_id) {
-        Optional<UserAccount> user=friendListRepository.findById(id);
-        Optional<UserAccount> friend=friendListRepository.findById(friend_id);
-        if(user.isPresent() && friend.isPresent()) {
+    // E-Mail-Vorlage für Freundschaftsanfragen
+    private String buildFriendRequestEmail(String requesterName, String acceptLink, String rejectLink) {
+        return "<div style=\"font-family:Helvetica,Arial,sans-serif;font-size:16px;margin:0;color:#0b0c0c\">\n" +
+                "<p>Hey, du hast eine Freundschaftsanfrage von " + requesterName + " bekommen. Möchtest du diese annehmen oder ablehnen?</p>\n" +
+                "<a href=\"" + acceptLink + "\">Akzeptieren</a> | <a href=\"" + rejectLink + "\">Ablehnen</a>\n" +
+                "</div>";
+    }
+
+    // Akzeptiert eine Freundschaftsanfrage
+    public String FriendshipAccept(int id, int friend_id) {
+        Optional<UserAccount> user = friendListRepository.findById(id);
+        Optional<UserAccount> friend = friendListRepository.findById(friend_id);
+        if (user.isPresent() && friend.isPresent()) {
             UserAccount userAccount = user.get();
             UserAccount friendAccount = friend.get();
 
-            if(userAccount.getFriendRequests().contains(friendAccount)) {
+            if (userAccount.getFriendRequests().contains(friendAccount)) {
                 friendAccount.addFriend(userAccount);
                 userAccount.addFriend(friendAccount);
                 userAccount.removeFriendRequest(friendAccount);
                 return "Friendship accepted";
             }
-            return "the request is already deleted/do not exist";
-        }
-        else
+            return "The request is already deleted/do not exist";
+        } else {
             return "User not found";
+        }
     }
 
-    public String FriendshipReject(int id,int friend_id) {
-        Optional<UserAccount> user=friendListRepository.findById(id);
-        Optional<UserAccount> friend=friendListRepository.findById(friend_id);
-        if(user.isPresent() && friend.isPresent()) {
-            UserAccount userAccount=user.get();
-            UserAccount friendAccount=friend.get();
+    // Lehnt eine Freundschaftsanfrage ab
+    public String FriendshipReject(int id, int friend_id) {
+        Optional<UserAccount> user = friendListRepository.findById(id);
+        Optional<UserAccount> friend = friendListRepository.findById(friend_id);
+        if (user.isPresent() && friend.isPresent()) {
+            UserAccount userAccount = user.get();
+            UserAccount friendAccount = friend.get();
 
-            if(userAccount.getFriendRequests().contains(friendAccount)) {
+            if (userAccount.getFriendRequests().contains(friendAccount)) {
                 userAccount.removeFriendRequest(friendAccount);
                 return "Friendship rejected";
             }
-            return "the request is already deleted/do not exist";
-        }
-        else
+            return "The request is already deleted/do not exist";
+        } else {
             return "User not found";
+        }
     }
 
-    public String RemoveFriend(int id,int friend_id) {
-        Optional<UserAccount> user=friendListRepository.findById(id);
-        Optional<UserAccount> friend=friendListRepository.findById(friend_id);
-        if(user.isPresent() && friend.isPresent()) {
-            UserAccount userAccount=user.get();
-            UserAccount friendAccount=friend.get();
+    // Entfernt einen Freund aus der Freundesliste
+    public String RemoveFriend(int id, int friend_id) {
+        Optional<UserAccount> user = friendListRepository.findById(id);
+        Optional<UserAccount> friend = friendListRepository.findById(friend_id);
+        if (user.isPresent() && friend.isPresent()) {
+            UserAccount userAccount = user.get();
+            UserAccount friendAccount = friend.get();
 
-            if(friendAccount.getFriends().contains(userAccount))
-            {
+            if (friendAccount.getFriends().contains(userAccount)) {
                 userAccount.removeFriend(friendAccount);
                 friendAccount.removeFriend(userAccount);
                 return "Friendship removed";
-            }
-            else
+            } else {
                 return "You are not friends";
-        }
-        else
+            }
+        } else {
             return "User not found";
+        }
     }
 }

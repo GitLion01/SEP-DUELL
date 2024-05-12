@@ -31,7 +31,6 @@ public class RegistrationService {
     private final UserAccountService userAccountService;
     private final ConfirmationTokenService confirmationTokenService;
     private final EmailSender emailSender;
-    private final ImageUploadService imageUploadService;
 
     /*public String register(RegistrationRequest request) {
         try {
@@ -117,11 +116,6 @@ public class RegistrationService {
             return null; // oder eine andere geeignete Aktion, z. B. eine Fehlermeldung zurückgeben
         }
     }
-
-
-
-
-
 
 
     @Transactional
