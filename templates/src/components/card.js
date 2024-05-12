@@ -1,4 +1,6 @@
 import React, { Component } from 'react';
+import 'bootstrap/dist/css/bootstrap.css'; // Importiere die Bootstrap-CSS-Datei
+import './card.css'
 
 class Card extends Component {
   render() {
@@ -6,6 +8,7 @@ class Card extends Component {
     
 {/* HTML Code von Bootstrap*/}
     return (
+      <body className='card__body'>
       <div className="card" style={{ width: "18rem" }}>
         <img src={picture} className="card-img-top" alt={name} />
         <div className="card-body">
@@ -22,8 +25,9 @@ class Card extends Component {
           <a href="#" className="card-link">Another link</a>
         </div> */}
     </div> 
+    </body>
     );
   }
 }
-
+document.body.classList.add('card__body');
 export default Card;

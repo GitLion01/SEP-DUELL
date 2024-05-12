@@ -62,7 +62,7 @@ function Profile() {
 
   // Profilseite rendern
   return (
-    <>
+    <body className='Profile__body'>
     <div className="Profile">
       <h1 className="titel"> Mein Profil</h1>
       <div className="daten">
@@ -98,8 +98,8 @@ function Profile() {
         <button className="button" type="button">Home</button>
       </Link>
     </div>
-    </>
+    </body>
   );
 }
-
+document.body.classList.add('card__body');
 export default Profile;

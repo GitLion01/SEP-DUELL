@@ -51,12 +51,12 @@ class LoginPage extends React.Component { // Definieren der LoginPage-Klasse als
     }
     
     return (
-     
+     <body className='login__body'>
       <div className='login'>
         <h1>Login</h1>
         <form onSubmit={this.handleSubmit}>
           <div>
-            <label htmlFor="email">Benutzername:</label>
+            <label htmlFor="email">E-Mail:</label>
             <input
               type="text"
               id="email"
@@ -82,8 +82,9 @@ class LoginPage extends React.Component { // Definieren der LoginPage-Klasse als
           <Link to="/registration">
             <button type="button">Registrieren</button>
           </Link>
+         </div>
         </div>
-      </div>
+      </body>
     );
   } 
 }

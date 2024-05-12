@@ -1,5 +1,5 @@
 /* Setzt den Hintergrund auf Schwarz */
-.login__body {
+body.login__body{
   margin: 0; /* Setzt den Außenabstand auf 0 */
   padding: 0; /* Setzt den Innenabstand auf 0 */
   display: flex; /* Verwendet Flexbox-Layout */
@@ -19,7 +19,6 @@
   padding: 100px; /* Innenabstand des Formulars */
   background-color: #ffffff; /* Hintergrundfarbe des Formulars auf Dunkelgrau setzen */
   box-sizing: border-box;
-
 }
 
 /* Stil für Label */
