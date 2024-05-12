@@ -1,4 +1,5 @@
 package com.example.demo.friendList;
+import com.example.demo.dto.UserDTO;
 import com.example.demo.user.UserAccount;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
