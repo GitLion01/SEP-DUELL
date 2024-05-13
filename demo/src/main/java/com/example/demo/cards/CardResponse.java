@@ -1,6 +1,6 @@
 package com.example.demo.cards;
-import lombok.*;
 
+import lombok.*;
 
 @Getter
 @Setter
@@ -8,12 +8,12 @@ import lombok.*;
 @NoArgsConstructor
 @EqualsAndHashCode
 @ToString
-public class CardRequest {
+public class CardResponse {
     private String name;
     private Integer attackPoints;
     private Integer defensePoints;
     private String description;
-    private byte[] image;
+    private String image; // Hier wird das Bild als Base64-String gespeichert
     private Rarity rarity;
-}
 
+}

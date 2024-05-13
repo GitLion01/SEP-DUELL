@@ -9,8 +9,10 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(path = "/cards")
@@ -43,7 +45,7 @@ public class CardController {
 
 
 
-    @GetMapping(path = "/findByName/{name}")
+    /*@GetMapping(path = "/findByName/{name}")
     public ResponseEntity<Optional<Card>> findByByName(@PathVariable String name) {
         try {
             Optional<Card> card = cardRepository.findByName(name);
@@ -51,12 +53,40 @@ public class CardController {
         } catch (Exception e) {
             return ResponseEntity.notFound().build();
         }
+    }*/
+    @GetMapping(path = "/findByName/{name}")
+    public ResponseEntity<Optional<CardResponse>> findByByName(@PathVariable String name) {
+        try {
+            Optional<Card> card = cardRepository.findByName(name);
+            if (card.isPresent()) {
+                // Konvertiere das Bild von byte[] zu Base64
+                String base64Image = Base64.getEncoder().encodeToString(card.get().getImage());
+                // Erstelle eine CardResponse mit dem Base64-Bild und anderen Details
+                CardResponse cardResponse = new CardResponse(card.get().getName(), card.get().getAttackPoints(), card.get().getDefensePoints(), card.get().getDescription(), base64Image, card.get().getRarity());
+                return ResponseEntity.ok(Optional.of(cardResponse));
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
 
-    @GetMapping
+    /*@GetMapping
     public ResponseEntity<List<Card>> findAll() {
         List<Card> cards = cardRepository.findAll();
         return ResponseEntity.ok(cards);
+    }*/
+    @GetMapping
+    public ResponseEntity<List<CardResponse>> findAll() {
+        List<Card> cards = cardRepository.findAll();
+        List<CardResponse> cardResponses = cards.stream().map(card -> {
+            // Konvertiere das Bild von byte[] zu Base64
+            String base64Image = Base64.getEncoder().encodeToString(card.getImage());
+            // Erstelle eine CardResponse mit dem Base64-Bild und anderen Details
+            return new CardResponse(card.getName(), card.getAttackPoints(), card.getDefensePoints(), card.getDescription(), base64Image, card.getRarity());
+        }).collect(Collectors.toList());
+        return ResponseEntity.ok(cardResponses);
     }
 }
