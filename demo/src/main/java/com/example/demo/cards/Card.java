@@ -27,8 +27,7 @@ public class Card {
     private Integer attackPoints;
     private Integer defensePoints;
     private String description;
-    @Lob
-    private String image;
+    private byte[] image;
     private Rarity rarity;
     @ManyToMany
     private List<Deck> decks = new ArrayList<>();
@@ -40,7 +39,7 @@ public class Card {
                 Integer attackPoints,
                 Integer defensePoints,
                 String description,
-                String image,
+                byte[] image,
                 Rarity rarity) {
 
         this.name = name;

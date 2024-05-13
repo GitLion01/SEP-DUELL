@@ -14,8 +14,7 @@ public class CardRequest {
     private Integer attackPoints;
     private Integer defensePoints;
     private String description;
-    @Lob
-    private String image;
+    private byte[] image;
     private Rarity rarity;
 }
 
