@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './CreateDeck.css';
-import { setUserId } from '../../redux/actions';
+import { Link } from 'react-router-dom';
 
 function CreateDeck() {
     const [id, setId] = useState(null);
@@ -278,6 +278,16 @@ function CreateDeck() {
     }
 
 
+    const handleHomeButtonClick = (event) => {
+        if (activeDeck !== null) {
+            event.preventDefault(); // Verhindert die Navigation
+            console.log("Navigation nicht erlaubt, da ein Deck aktiv ist.");
+            // Optional: Zeige eine Benachrichtigung oder Fehlermeldung an
+            alert("Bitte schließen Sie die Bearbeitung des aktiven Decks ab, bevor Sie zur Startseite wechseln.");
+        }
+        // Wenn activeDeck null ist, tut der Link seine Arbeit und navigiert normalerweise.
+    };
+
     const clearErrorMessage = () => setErrorMessage('');
 
     return (
@@ -321,7 +331,13 @@ function CreateDeck() {
                     </div>
                 </div>
             )}
+            <div>
+                <Link to="/startseite" onClick={handleHomeButtonClick}>
+                    <button className="button" type="button">Home</button>
+                </Link>
+            </div>
         </div>
+        
     );
 }
 

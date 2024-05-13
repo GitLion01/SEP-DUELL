@@ -6,7 +6,7 @@ import './Profile.css';
 // Profil-Seite
 
 function Profile() {
-  const { id } = useParams();
+  const id = localStorage.getItem('id');
   let [profilePicture, setProfilePicture] = useState('');
   const [username, setUsername] = useState('');
   const [vorname, setVorname] = useState('');
@@ -32,11 +32,13 @@ function Profile() {
         setNachname(userData.lastName);
         setEmail(userData.email);
         setPassword(userData.password);
-        setDateOfBirth(userData.geburtsdatum);
+        const date = new Date(userData.dateOfBirth);
+        const formattedDate = `${date.getDate().toString().padStart(2, '0')}.${(date.getMonth() + 1).toString().padStart(2, '0')}.${date.getFullYear()}`;
+        setDateOfBirth(formattedDate);
         setRole(userData.role);
-        if (userData.role !== 'admin') {
-          setSepcoins(userData.sepcoins);
-          setLeaderboardPunkte(userData.leaderbordpunkte);
+        if (userData.role !== 'ADMIN') {
+          setSepcoins(userData.sepCoins);
+          setLeaderboardPunkte(userData.leaderboardPoints);
         }
       })
       .catch(error => {
@@ -86,10 +88,10 @@ function Profile() {
       <p><strong>Vorname:</strong> {vorname}</p>
       <p><strong>Nachname:</strong> {nachname}</p>
       <p><strong>Email:</strong> {email}</p>
-      <p><strong>Passwort:</strong> {password} </p>
+      {/*<p><strong>Passwort:</strong> {password} </p>*/}
       <p><strong>Date of Birth:</strong> {geburtsdatum}</p>
-      {role !== 'admin' && <p><strong>SEP Coins:</strong> {sepcoins}</p>}
-      {role !== 'admin' && <p><strong>Leaderboard Punkte:</strong> {leaderbordpunkte}</p>}
+      {role !== 'ADMIN' && <p><strong>SEP Coins:</strong> {sepcoins}</p>}
+      {role !== 'ADMIN' && <p><strong>Leaderboard Punkte:</strong> {leaderbordpunkte}</p>}
       {error && <p className="error">{error}</p>} {/* Fehlermeldung anzeigen falls error != null */}
       </div>
     </div>
