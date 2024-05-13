@@ -1,4 +1,4 @@
-Profile__body {
+body {
   display: flex;
   justify-content: center;
   align-items: flex-start; /* damit es nicht vertikal zentriert, sondern oben bleibt */
@@ -79,7 +79,7 @@ Profile__body {
   background-color: #3120cf;
   color: #fff;
   cursor: pointer;
-  padding: 0 auto;
+  padding: 10px;
   text-decoration: none;
 }
 

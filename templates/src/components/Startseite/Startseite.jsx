@@ -36,7 +36,7 @@ class Startseite extends Component {
                 <a href="/spielen"><h2>SPIEL START</h2></a>
               </section>
               <section className="meinprofile">
-                <a href="/profil/:id"><h2>MEIN PROFIL</h2></a>
+                <a href="/profil"><h2>MEIN PROFIL</h2></a>
               </section>
               <section className="meindeck">
                 <a href="/decks"><h2>MEIN DECK</h2></a>
