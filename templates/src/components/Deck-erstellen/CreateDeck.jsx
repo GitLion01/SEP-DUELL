@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useParams } from 'react-router-dom';
 import './CreateDeck.css';
+import { setUserId } from '../../redux/actions';
 
 function CreateDeck() {
-    const { id } = useParams(); // Vorausgesetzt die userID wird korrekt ausgelesen
+    const [id, setId] = useState(null);
     const [decks, setDecks] = useState([]);
     const [myCards, setMyCards] = useState([]);
     const [activeDeck, setActiveDeck] = useState(null);
@@ -12,23 +12,24 @@ function CreateDeck() {
     const [currentDeckName, setCurrentDeckName] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
     const [isEditing, setIsEditing] = useState(false);  // Zustand zum Überwachen, ob Änderungen gemacht wurden
-    const [updateTrigger, setUpdateTrigger] = useState(0); // Zählt, wie oft Updates notwendig waren
     const [formData, setFormData] = useState({
         userID: id,
         name:"",
         cardNames:[""]
     });
 
-    const handleInputChange = (event) => {
-        const { name, value} = event.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value // Aktualisiere den entsprechenden Wert im formData Objekt
-        }));
-    };
+    //Lädt die userID aus dem LocalStorage beim ersten Render der Komponente
+    useEffect(() => {
+        const loadedId = localStorage.getItem('id');
+        if (loadedId) {
+            setId(loadedId);
+        }
+        else {
+            console.error('Keine userID im LocalStorage gefunden');
+        }
+    }, []);
 
-
-    // Karten von der Datenbank abrufen
+    // Karten und Decks von der Datenbank abrufen
     useEffect(() => {
 
         // Abrufen der Karten des Spielers
@@ -37,11 +38,40 @@ function CreateDeck() {
             .catch(error => console.error('Fehler beim Abrufen der Karten:', error));
 
         // Abrufen der Decks
-        axios.get(`http://localhost:8080/decks/getUserDecks/${id}`)
+        axios.get(`http://localhost:8080/decks/getUserDecks/${localStorage.getItem('id')}`)
             .then(response => setDecks(response.data))
             .catch(error => console.error('Fehler beim Abrufen der Decks:', error));
 
-    }, [id, updateTrigger]);
+    }, [id]);
+    
+    const loadDecks = async () => {
+        try {
+            const response = await axios.get(`http://localhost:8080/decks/getUserDecks/${id}`);
+            setDecks(response.data);
+        } catch (error) {
+            console.error('Fehler beim Abrufen der Decks:', error);
+        }
+    };
+
+    const loadCards = async () => {
+        try {
+            const response = await axios.get(`http://localhost:8080/cards`);
+            setMyCards(response.data);
+        } catch (error) {
+            console.error('Fehler beim Abrufen der Karten:', error);
+        }
+    };
+
+
+    /*
+    const handleInputChange = (event) => {
+        const { name, value} = event.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+    */
 
     // Neues Deck hinzufügen
     const handleCreateNewDeck = async () => {
@@ -69,14 +99,31 @@ function CreateDeck() {
                 }
             });
 
-            setUpdateTrigger(prev => prev + 1); // Trigger die useEffect Hook, um die Decks neu zu laden
+            loadDecks();
+            loadCards();
 
             console.log('Deck erfolgreich erstellt', response.data);
 
         }
         catch (error) {
             console.error('Fehler beim Erstellen des Decks', error);
-            setErrorMessage('Fehler beim Erstellen des Decks: ' + (error.response?.data.message || error.message));
+            if (error.response) {
+                // Der Server antwortet mit einem Statuscode außerhalb des Bereichs 2xx
+                console.error(error.response.data);
+                console.error(error.response.status);
+                console.error(error.response.headers);
+                setErrorMessage('Fehler beim Erstellen des Decks: ' + (error.response?.data.message || error.message));
+            }
+            else if (error.request) {
+                // Der Request wurde abgesetzt, aber es kam keine Antwort
+                console.error(error.request);
+                setErrorMessage('Keine Antwort vom Server beim Versuch, das Deck zu erstellen');
+            }
+            else {
+                // Anderer Fehler beim Setup des Requests
+                console.error('Error', error.message);
+                setErrorMessage('Fehler beim Erstellen des Decks: ' + error.message);
+            }
         }
     };
     
@@ -109,7 +156,8 @@ function CreateDeck() {
                 }
             });
 
-            setUpdateTrigger(prev => prev + 1);
+            loadDecks();
+            loadCards();
 
             console.log("Karte erfolgreich hinzugefügt", response.data);
 
@@ -128,6 +176,7 @@ function CreateDeck() {
             setActiveDeck(index);
             setCurrentDeckName(decks[index].name);
             setDeckName(decks[index].name);
+            setIsEditing(true);
         } else {
             setErrorMessage('Bitte speichern oder verwerfen Sie die Änderungen bevor Sie das Deck wechseln.');
         }
@@ -141,11 +190,12 @@ function CreateDeck() {
     
         try {
             // Senden der Anfrage zum Backend, um den Namen zu aktualisieren
-            await axios.put(`http://localhost:8080/decks/updateName/${id}/${currentDeckName}/${deckName}`);
-            console.log('Deckname erfolgreich geändert!');
+            const response = await axios.put(`http://localhost:8080/decks/updateName/${id}/${currentDeckName}/${deckName}`);
+            console.log('Deckname erfolgreich geändert!', response.data);
 
 
-            setUpdateTrigger(prev => prev +1);
+            loadDecks();
+            loadCards();
 
             setActiveDeck(null);
             setIsEditing(false);
@@ -180,7 +230,8 @@ function CreateDeck() {
                 setActiveDeck(null);
                 setIsEditing(false);
 
-                setUpdateTrigger(prev => prev + 1);
+                loadDecks();
+                loadCards();
     
                 console.log("Deck erfolgreich gelöscht", response.data);
     
@@ -207,14 +258,14 @@ function CreateDeck() {
 
 
         try {
-            const response = await axios.put(`http://localhost:8080/decks/removeCards`, JSON.stringify(dataToSend), {
+            const response = await axios.put(`http://localhost:8080/decks/removeCard`, JSON.stringify(dataToSend), {
                 headers: {
                     'Content-Type': 'application/json'
                 }
             });
 
-
-            setUpdateTrigger(prev => prev + 1);
+            loadDecks();
+            loadCards();
 
             console.log("Karte erfolgreich entfernt", response.data);
 

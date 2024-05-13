@@ -164,18 +164,26 @@ public class DeckService{
         }
     }*/
 
+    
     public String updateDeckName(Long userId, String oldName, String newName) {
         try {
             // Überprüfen, ob der Benutzer existiert
             Optional<UserAccount> optionalUser = userAccountRepository.findById(userId);
             if (optionalUser.isPresent()) {
                 // Überprüfen, ob das Deck existiert und dem Benutzer gehört
-                Optional<Deck> optionalDeck = deckRepository.findByNameAndUserId(oldName, userId);
-                if (optionalDeck.isPresent()) {
-                    Deck deck = optionalDeck.get();
-                    deck.setName(newName);
-                    deckRepository.save(deck);
-                    return "Deck gefunden und Name aktualisiert";
+                Optional<Deck> optionalOldDeck = deckRepository.findByNameAndUserId(oldName, userId);
+                if (optionalOldDeck.isPresent()) {
+                    // Überprüfen, ob der neue Name bereits für ein anderes Deck dieses Benutzers verwendet wird
+                    Optional<Deck> optionalNewDeck = deckRepository.findByNameAndUserId(newName, userId);
+                    if (optionalNewDeck.isPresent()) {
+                        return "Ein Deck mit dem Namen '" + newName + "' existiert bereits.";
+                    } else {
+                        // Aktualisieren Sie den Decknamen
+                        Deck deck = optionalOldDeck.get();
+                        deck.setName(newName);
+                        deckRepository.save(deck);
+                        return "Deck gefunden und Name erfolgreich aktualisiert";
+                    }
                 } else {
                     return "Deck nicht gefunden";
                 }
@@ -183,7 +191,7 @@ public class DeckService{
                 return "Benutzer nicht gefunden";
             }
         } catch (Exception e) {
-            return "Fehler beim Aktualisieren des Decknamens";
+            return "Fehler beim Aktualisieren des Decknamens: " + e.getMessage();
         }
     }
 
