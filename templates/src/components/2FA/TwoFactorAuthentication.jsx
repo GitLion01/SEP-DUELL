@@ -13,7 +13,7 @@ class TwoFaktorAuthenfication extends Component {
     };
     
     // Funktion zum Aktualisieren des PIN-Codes
-    handlePincodeChange = (event, index, value) => { // Funktion zum Aktualisieren des PIN-Codes
+    handlePincodeChange = (event ,index, value) => { // Funktion zum Aktualisieren des PIN-Codes
         this.setState({ pincode: event.target.value });
     };
     
@@ -45,9 +45,11 @@ class TwoFaktorAuthenfication extends Component {
     };
 
     render() {
-        const isPincodeComplete = this.state.pincode.length === 6; // Definiere isPincodeComplete
+        const { pincode } = this.state; // Pincode aus dem state extrahieren
+        const isPincodeComplete = pincode.length===6; 
         if (this.state.isPinCodeCorrect) {
             return <Navigate to="/startseite" />; 
+            
         }
         return (
             <body className='TwoFact__body'> 
@@ -75,6 +77,6 @@ class TwoFaktorAuthenfication extends Component {
         );
     }
 }
-document.body.classList.add('lTwoFact__body');
+document.body.classList.add('TwoFact__body');
 
 export default TwoFaktorAuthenfication;

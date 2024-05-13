@@ -42,7 +42,7 @@ public class WebSecurityConfig {
                         .loginProcessingUrl("/perform_login")  // URL, auf der die Login-Anfrage verarbeitet wird
                         .defaultSuccessUrl("/home", true)  // Weiterleitungs-URL nach erfolgreichem Login
                         .failureUrl("/login?error=true")  // Weiterleitungs-URL nach fehlgeschlagenem Login
-                        .usernameParameter("email")  // Benutzername-Parameter, standardmäßig ist es "username"
+                        .usernameParameter("username")  // Benutzername-Parameter, standardmäßig ist es "username"
                         .passwordParameter("password")  // Passwort-Parameter, standardmäßig ist es "password"
                 )
                 .logout(logout -> logout

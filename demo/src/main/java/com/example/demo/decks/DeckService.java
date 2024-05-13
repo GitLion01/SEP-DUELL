@@ -58,10 +58,7 @@ public class DeckService{
     }
 
 
-    public boolean isDeckNameAvailable(String deckName) {
-        Optional<Deck> existingDeck = deckRepository.findByName(deckName);
-        return existingDeck.isEmpty(); // Returns true if no deck with the given name exists
-    }
+
 
 
     public String createDeck(@RequestBody DeckRequest request) {
@@ -124,7 +121,6 @@ public class DeckService{
             deck.setUser(user); // Verwendung des 'user'-Objekts, das außerhalb des 'if'-Blocks deklariert wurde
             deck.setName(request.getName());
             deck.setCards(cards);
-        }
 
             deckRepository.save(deck);
             deckCreated = true;
@@ -164,7 +160,29 @@ public class DeckService{
         }
     }*/
 
-    
+    /*public String updateDeckName(Long userId, String oldName, String newName) {
+        try {
+            // Überprüfen, ob der Benutzer existiert
+            Optional<UserAccount> optionalUser = userAccountRepository.findById(userId);
+            if (optionalUser.isPresent()) {
+                // Überprüfen, ob das Deck existiert und dem Benutzer gehört
+                Optional<Deck> optionalDeck = deckRepository.findByNameAndUserId(oldName, userId);
+                if (optionalDeck.isPresent()) {
+                    Deck deck = optionalDeck.get();
+                    deck.setName(newName);
+                    deckRepository.save(deck);
+                    return "Deck gefunden und Name aktualisiert";
+                } else {
+                    return "Deck nicht gefunden";
+                }
+            } else {
+                return "Benutzer nicht gefunden";
+            }
+        } catch (Exception e) {
+            return "Fehler beim Aktualisieren des Decknamens";
+        }
+    }
+*/
     public String updateDeckName(Long userId, String oldName, String newName) {
         try {
             // Überprüfen, ob der Benutzer existiert

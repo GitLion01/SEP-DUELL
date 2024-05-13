@@ -1,4 +1,4 @@
-body {
+Profile__body {
   display: flex;
   justify-content: center;
   align-items: flex-start; /* damit es nicht vertikal zentriert, sondern oben bleibt */

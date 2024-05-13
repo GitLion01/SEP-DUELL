@@ -2,21 +2,31 @@
     color: white;
     text-align: center;
 }
-.AdminPanel input {
-    width: 20%;
-}
-
-.AdminPanel button {
-    width: 10%;
-    margin-top: 20px;
-    margin-bottom: 10px;
-    background-color: blueviolet;
+.AdminPanel form {
+    color: white;
 }
 
 .AdminPanel label {
-    font-size: 200%;
+    font-size: 100%;
 }
 
 .label__body {
     color: white
+}
+
+.AdminPanel h2 {
+    color: white;
+    text-align: center; 
+}
+
+
+.AdminPanel__body {
+    height: 22cm;
+}
+
+.existingCards {
+    display: flex;        /* Aktiviert Flexbox */
+    flex-wrap: wrap;      /* Erlaubt Umbrüche, wenn der Raum ausgeht */
+    justify-content: center; /* Zentriert die Karten horizontal */
+    gap: 20px;            /* Setzt einen Abstand zwischen den Karten */
 }
