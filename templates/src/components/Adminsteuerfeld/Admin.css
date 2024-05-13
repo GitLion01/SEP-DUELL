@@ -18,3 +18,15 @@
     color: white;
     text-align: center; 
 }
+
+
+.AdminPanel__body {
+    height: 22cm;
+}
+
+.existingCards {
+    display: flex;        /* Aktiviert Flexbox */
+    flex-wrap: wrap;      /* Erlaubt Umbrüche, wenn der Raum ausgeht */
+    justify-content: center; /* Zentriert die Karten horizontal */
+    gap: 20px;            /* Setzt einen Abstand zwischen den Karten */
+}

@@ -8,7 +8,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import java.io.BufferedReader;
@@ -108,7 +112,7 @@ public class CardService {
                     if (description.length() > 200) {
                         description = description.substring(0, 200);
                     }
-                    byte[] image = parts[5].trim().getBytes(); // Load image data properly
+                    String image = loadImageAndEncodeToBase64(parts[5].trim());
                     Rarity rarity = Rarity.valueOf(parts[1].trim().toUpperCase());
 
                     CardRequest cardRequest = new CardRequest(name, attackPoints, defensePoints, description, image, rarity);
@@ -122,8 +126,16 @@ public class CardService {
     }
 
 
+    private byte [] loadImageFromFile (String filePath) throws IOException {
+        Path path = Paths.get(filePath);
+        return Files.readAllBytes(path);
+    }
 
-
+    private String loadImageAndEncodeToBase64 (String filePath) throws IOException {
+        Path path = Paths.get(filePath);
+        byte[] imageData = Files.readAllBytes(path);
+        return Base64.getEncoder().encodeToString(imageData);
+    }
 
     public String uploadAndSaveCards(MultipartFile file) {
         try {

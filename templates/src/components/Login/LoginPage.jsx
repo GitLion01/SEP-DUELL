@@ -3,6 +3,8 @@ import './LoginPage.css'; // Importieren der CSS-Datei für die Stilisierung der
 import { Link, Navigate } from 'react-router-dom'; // Importieren von Link und Navigate für die Navigation
 import axiosInstance from '../../api/axios'; // Importieren der Axios-Instanz für die Kommunikation mit dem Server
 import axios from 'axios';
+import styled from 'styled-components';
+
 
 class LoginPage extends React.Component { // Definieren der LoginPage-Klasse als eine React-Komponente
   constructor(props) { // Konstruktor, der den initialen Zustand setzt
@@ -13,7 +15,7 @@ class LoginPage extends React.Component { // Definieren der LoginPage-Klasse als
       redirectToHome: false, // Initialisieren Sie den Zustand für die Weiterleitung auf false
       error:''
     };
-  }
+  } 
 
   handleChange = (event) => { // Methode zum Aktualisieren des Zustands bei Änderungen in den Eingabefeldern
     this.setState({ // Setzen des Zustands mit dem neuen Wert aus dem Eingabefeld

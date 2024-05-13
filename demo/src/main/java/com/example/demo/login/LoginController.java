@@ -52,7 +52,7 @@ public class LoginController {
             return ResponseEntity.ok(Map.of(
                     "status", "success",
                     "message", "Login successful. Please check your email for the verification code.",
-                    "userId", userAccount.getId()  // Benutzer-ID hinzufügen
+                    "id", String.valueOf(userAccount.getId())
             ));
         } catch (AuthenticationException e) {
             return ResponseEntity.ok(Map.of("status", "error", "message", "Login failed: " + e.getMessage()));

@@ -4,13 +4,13 @@ import './card.css'
 
 class Card extends Component {
   render() {
-    const { name, rarity, attackPoints, defensePoints, description, picture } = this.props.card;
-    
+    const { name, rarity, attackPoints, defensePoints, description, image } = this.props.card;
+    console.log(image);
 {/* HTML Code von Bootstrap*/}
     return (
       <body className='card__body'>
       <div className="card" style={{ width: "18rem" }}>
-        <img src={picture} className="card-img-top" alt={name} />
+      <img src={`data:image/jpeg;base64,${image}`} className="card-img-top" alt={name} />
         <div className="card-body">
           <h5 className="card-title">{name}</h5>
           <p className="card-text">{description}</p>

@@ -1,5 +1,5 @@
 /* Setzt den Hintergrund auf Schwarz */
-body.login__body{
+.login__body {
   margin: 0; /* Setzt den Außenabstand auf 0 */
   padding: 0; /* Setzt den Innenabstand auf 0 */
   display: flex; /* Verwendet Flexbox-Layout */
@@ -9,7 +9,6 @@ body.login__body{
   background-color: #000000; /* Hintergrundfarbe des Body auf Schwarz setzen */
   color: #000000; /* Textfarbe auf Weiß setzen */
 }
-
 /* Stil für den Container des Login-Formulars */
 .login {
   display: block;
