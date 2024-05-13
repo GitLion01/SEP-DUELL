@@ -27,7 +27,11 @@ public class ProfileController {
             UserAccount profile = profileOptional.get();
 
             // Konvertieren Sie das Bild in einen Base64-String
-            String imageBase64 = Base64.getEncoder().encodeToString(profile.getImage());
+            byte[] image = profile.getImage();
+            String imageBase64 = null;
+            if(image != null) {
+                imageBase64 = Base64.getEncoder().encodeToString(profile.getImage());
+            }
             //Abrufen der Decks des Users
             List<Deck> decks = profileService.getUserDecks(id);
 
