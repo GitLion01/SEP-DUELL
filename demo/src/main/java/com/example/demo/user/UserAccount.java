@@ -80,6 +80,7 @@ public class UserAccount implements UserDetails {
         this.role = role;
 
     }
+
     public UserAccount(
                        String firstName,
                        String lastName,
