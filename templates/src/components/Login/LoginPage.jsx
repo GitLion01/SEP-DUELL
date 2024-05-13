@@ -59,7 +59,7 @@ class LoginPage extends React.Component { // Definieren der LoginPage-Klasse als
         <h1>Login</h1>
         <form onSubmit={this.handleSubmit}>
           <div>
-            <label htmlFor="email">Benutzername:</label>
+            <label htmlFor="email">Email:</label>
             <input
               type="text"
               id="email"

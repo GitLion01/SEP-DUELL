@@ -1,12 +1,8 @@
-/* App.css */
-
 .BFF {
     display: flex;
     justify-content: space-around;
     background: white;
 }
-
-
 
 .BFF .UserList-hülle,
 .BFF .FriendList-hülle {
@@ -16,29 +12,78 @@
     margin-bottom: 20px; /* Abstand zwischen den Containern */
 }
 
-
-
 .BFF .UserList-hülle h2,
 .BFF .FriendList-hülle h2 {
     margin-top: 0; /* Überschrift ohne oberen Abstand */
 }
 
-
-
-
-.BFF .UserList, .FriendList,  .FriendRequests {
+.BFF .UserList, .FriendList, .FriendRequests {
     max-height: 300px; /* Maximale Höhe */
     overflow-y: auto; /* Vertikale Scrollleiste, wenn der Inhalt die maximale Höhe überschreitet */
 }
 
-
-
-
 .BFF ul {
-    list-style-type:none;
+    list-style-type: none;
     padding: 20px;
 }
 
 .BFF li {
     margin-bottom: 20px;
+}
+
+/* Modal styles */
+.Modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    right: auto;
+    bottom: auto;
+    margin-right: -50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+}
+
+.Overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.75);
+    z-index: 999;
+}
+
+.profile-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.profile-header h2 {
+    margin-bottom: 20px;
+}
+
+.profile-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.profile-picture {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    margin-bottom: 20px;
+}
+
+.profile-info p {
+    margin: 5px 0;
+}
+
+button {
+    margin-top: 20px;
 }
