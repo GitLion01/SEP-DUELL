@@ -1,18 +1,16 @@
 package com.example.demo.decks;
 
 import com.example.demo.cards.Card;
-import com.example.demo.cards.CardRepository;
-import com.example.demo.cards.CardService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
+
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+
 
 
 @RestController
@@ -21,55 +19,105 @@ import java.util.Optional;
 @AllArgsConstructor
 public class DeckController {
 
-    private final DeckRepository deckRepository;
+
     @Autowired
     private final DeckService deckService;
-    private final CardRepository cardRepository;
+    @Autowired
+    private DeckRepository deckRepository;
 
 
-    // TODO: Check via frontend (throws NullPointerException because no User)
     @PostMapping(path = "/create")
-    public String createDeck(@RequestBody DeckRequest request/*, Principal principal*/) {
-        return deckService.createDeck(request/*, principal*/);
+    public String createDeck(@RequestBody DeckRequest request) {
+        return deckService.createDeck(request);
     }
 
-    @PutMapping("/updateName/{oldName}/{newName}") //Decknamen dürfen keine Leerzeichen enthalten
+
+
+
+   /* @PutMapping("/updateName/{oldName}/{newName}") //Decknamen dürfen keine Leerzeichen enthalten
     public String updateDeckName(@PathVariable String oldName, @PathVariable String newName) {
         return deckService.updateDeckName(oldName, newName);
+    }*/
+    @PutMapping("/updateName/{userId}/{oldName}/{newName}")
+    public ResponseEntity<String> updateDeckName(
+            @PathVariable Long userId,
+            @PathVariable String oldName,
+            @PathVariable String newName) {
+
+        String result = deckService.updateDeckName(userId, oldName, newName);
+        if (result.contains("Fehler")) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(result);
+        } else {
+            return ResponseEntity.ok(result);
+        }
     }
 
-    @PutMapping("/removeCards")
-    public String removeCardsFromDeck(@RequestBody Map<String, Object> requestBody) {
-        String deckName = (String) requestBody.get("deckName");
-        List<String> cardsToRemove = (List<String>) requestBody.get("cardsToRemove");
-        return deckService.removeCards(deckName, cardsToRemove);
+
+    @PutMapping("/removeAllCardInstancesFromDeck")
+    public ResponseEntity<String> removeAllCardInstancesFromDeck(@RequestBody DeckRequest request) {
+        String result = deckService.removeAllCardsInstancesFromDeck(request);
+        HttpStatus status = result.startsWith("Fehler") ? HttpStatus.BAD_REQUEST : HttpStatus.OK;
+        return new ResponseEntity<>(result, status);
     }
 
+    @PutMapping("/removeCard")
+    public ResponseEntity<String> removeCard(@RequestBody DeckRequest request) {
+        String result = deckService.removeFirstInstanceOfCardType(request);
+        HttpStatus status = result.startsWith("Fehler") ? HttpStatus.BAD_REQUEST : HttpStatus.OK;
+        return new ResponseEntity<>(result, status);
+    }
+
+
+
+
+    /*@PutMapping("/addCards")
+    public String addCardsToDeck(DeckRequest request) {
+        return deckService.addCardsToDeck(request);
+    }*/
 
     @PutMapping("/addCards")
-    public String addCardsToDeck(@RequestBody Map<String, Object> requestBody) {
-        String deckName = (String) requestBody.get("deckName");
-        List<String> cardsToAdd = (List<String>) requestBody.get("cardsToAdd");
-        return deckService.addCardsToDeck(deckName, cardsToAdd);
-    }
+    public ResponseEntity<String> addCardsToDeck(@RequestBody DeckRequest request) {
 
-    // TODO: Check
-    @PutMapping("/replaceCards/{deckName}")
-    public String replaceCardsInDeck(@PathVariable String deckName, @RequestBody ReplaceCardsRequest request) {
-        return deckService.replaceCardsInDeck(deckName, request.getCardsToRemove(), request.getCardsToAdd());
+        // Aufruf des entsprechenden Service
+        String resultMessage = deckService.addCardsToDeck(request);
+
+        // Konstruieren der ResponseEntity basierend auf dem Service-Ergebnis
+        HttpStatus status = resultMessage.startsWith("Fehler") ? HttpStatus.BAD_REQUEST : HttpStatus.OK;
+        return new ResponseEntity<>(resultMessage, status);
     }
 
 
-    @GetMapping("/{deckName}/cards")//Decknamen dürfen keine Leerzeichen enthalten
-    public List<Card> getAllCardsFromDeck(@PathVariable String deckName) {
-        return deckService.getAllCardsFromDeck(deckName);
+    @PutMapping("/replaceCards/{deckName}/{userID}")//Decknamen dürfen keine Leerzeichen enthalten
+    public String replaceCardsInDeck(@PathVariable String deckName, @PathVariable Long userID, @RequestBody ReplaceCardsRequest request) {
+        return deckService.replaceCardsInDeck(deckName, userID, request.getCardsToRemove(), request.getCardsToAdd());
     }
 
-    // TODO: Check via frontend
-    @GetMapping(path = "/getUserDecks")
-    public List<Deck> getUserDecks(@RequestBody String email) {
-        return deckService.getUserDecksByEmail(email);
+
+    @GetMapping("/cards/{deckName}/{userID}")//Decknamen dürfen keine Leerzeichen enthalten
+    public List<Card> getAllCardsFromDeck(@PathVariable Long userID, @PathVariable String deckName) {
+        return deckService.getAllCardsFromDeck(userID, deckName);
     }
+
+
+
+    @GetMapping(path = "/getUserDecks/{userID}")
+    public List<Deck> getUserDecks(@PathVariable Long userID) {
+        return deckService.getUserDecksByUserId(userID);
+    }
+
+    @GetMapping(path = "/getAll")
+    public List<Deck> getAll() {
+        return deckRepository.findAll();
+    }
+
+
+    @DeleteMapping("/delete")
+    public String deleteDeck(@RequestBody Map<Long, String> requestBody) {
+        Long userId = requestBody.keySet().iterator().next();
+        String deckName = requestBody.get(userId);
+        return deckService.deleteDeckByUserIdAndDeckName(userId, deckName);
+    }
+
 }
 
 

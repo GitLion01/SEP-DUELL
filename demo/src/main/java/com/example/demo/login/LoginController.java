@@ -1,6 +1,8 @@
 package com.example.demo.login;
 
 import com.example.demo.email.EmailSender;
+import com.example.demo.registration.token.ConfirmationToken;
+import com.example.demo.registration.token.ConfirmationTokenRepository;
 import com.example.demo.registration.token.ConfirmationTokenService;
 import com.example.demo.registration.token.TokenPurpose;
 import com.example.demo.user.UserAccount;
@@ -15,9 +17,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+
 
 @RestController
-@CrossOrigin
+
 @RequestMapping("/login")
 public class LoginController {
     private final AuthenticationManager authenticationManager;
@@ -25,19 +30,21 @@ public class LoginController {
     private final EmailSender emailSender;
 
     // Supercode als Konstante definieren
-    private static final String SUPER_CODE = "SUPER1234";
+    private static final String SUPER_CODE = "SUPER1";
+    private final ConfirmationTokenRepository confirmationTokenRepository;
 
     @Autowired
     public LoginController(AuthenticationManager authenticationManager,
                            ConfirmationTokenService confirmationTokenService,
-                           EmailSender emailSender) {
+                           EmailSender emailSender, ConfirmationTokenRepository confirmationTokenRepository) {
         this.authenticationManager = authenticationManager;
         this.confirmationTokenService = confirmationTokenService;
         this.emailSender = emailSender;
+        this.confirmationTokenRepository = confirmationTokenRepository;
     }
 
     @PostMapping
-    public ResponseEntity<Map<String, Object>> login(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<Map<String, String>> login(@RequestBody LoginRequest loginRequest) {
         try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword())
@@ -46,19 +53,18 @@ public class LoginController {
 
             UserAccount userAccount = (UserAccount) authentication.getPrincipal();
             String token = confirmationTokenService.generateToken(userAccount, TokenPurpose.LOGIN);
+
             emailSender.send(userAccount.getEmail(), buildLoginEmail(userAccount.getFirstName(), token));
 
-            // ID des Benutzers in die Antwort einfügen
-            return ResponseEntity.ok(Map.of(
-                    "status", "success",
+            return ResponseEntity.ok(Map.of("status", "success",
                     "message", "Login successful. Please check your email for the verification code.",
                     "id", String.valueOf(userAccount.getId())
+
             ));
         } catch (AuthenticationException e) {
             return ResponseEntity.ok(Map.of("status", "error", "message", "Login failed: " + e.getMessage()));
         }
     }
-
 
     @PostMapping("/verify")
     public String verifyLoginToken(@RequestBody LoginTokenRequest request) {
@@ -66,6 +72,9 @@ public class LoginController {
         if (request.getToken().equals(SUPER_CODE)) {
             return "Login verified successfully with Super Code";
         }
+// Debugging-Anweisungen hinzufügen
+        System.out.println("Received token: " + request.getToken());
+        System.out.println("Received userId: " + request.getUserId());
 
         return confirmationTokenService.getToken(request.getToken())
                 .map(token -> {
@@ -73,7 +82,9 @@ public class LoginController {
                         return "Token expired";
                     } else if (token.getPurpose() != TokenPurpose.LOGIN) {
                         return "Invalid token purpose";
-                    } else {
+                    }else if (!confirmationTokenRepository.existsByUserIdAndToken(request.getUserId(), request.getToken())) {
+                        return "Token does not match user ID " + request.getUserId();
+                    }else {
                         return "Login verified successfully";
                     }
                 })

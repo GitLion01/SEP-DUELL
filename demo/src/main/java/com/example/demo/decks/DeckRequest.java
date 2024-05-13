@@ -13,6 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 @Getter
 public class DeckRequest {
+    private Long userID;
     private String name;
     private List<String> cardNames;
 }

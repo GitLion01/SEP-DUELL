@@ -32,9 +32,7 @@ public class UserAccountService implements UserDetailsService {
 
 
 
-    /*public UserAccount findByUsername(String username) {
-        return userAccountRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException(USER_NOT_FOUND_MESSAGE));
-    }*/
+
     public boolean isUsernameTaken(String username) {
         return userAccountRepository.existsByUsername(username);
     }

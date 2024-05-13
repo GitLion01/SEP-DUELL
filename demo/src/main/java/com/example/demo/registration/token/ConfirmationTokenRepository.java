@@ -23,4 +23,7 @@ public interface ConfirmationTokenRepository extends JpaRepository<ConfirmationT
     @Modifying
     @Query("DELETE FROM ConfirmationToken c WHERE c.appUser.email = ?1 AND c.purpose = ?2")
     void deleteTokensByEmailAndPurpose(String email, TokenPurpose purpose);
+
+    @Query("SELECT CASE WHEN COUNT(c) > 0 THEN true ELSE false END FROM ConfirmationToken c WHERE c.appUser.id = ?1 AND c.token = ?2")
+    Boolean existsByUserIdAndToken(Long userId, String token);
 }

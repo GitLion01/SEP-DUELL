@@ -17,7 +17,5 @@ public class CardRequest {
     @Lob
     private String image;
     private Rarity rarity;
-
-
-
 }
+

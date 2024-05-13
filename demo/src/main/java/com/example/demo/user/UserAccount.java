@@ -33,7 +33,6 @@ public class UserAccount implements UserDetails {
     private Date dateOfBirth;
     private Integer leaderboardPoints = 0;
     private Integer sepCoins = 500;
-    @Lob
     private byte[] image;
     @Enumerated(EnumType.STRING)
     private UserRole role;
@@ -43,7 +42,7 @@ public class UserAccount implements UserDetails {
     private List<Deck> decks = new ArrayList<>();
 
     @ManyToMany
-    /*to ignore the infinite loop occurring in the serialization ,when join the tow tables
+    /*to ignore the infinite loop occurring in the serialization ,when join the two tables
     /if a user accepted the friend request*/
     @JsonIgnore
     @JoinTable(
@@ -60,13 +59,7 @@ public class UserAccount implements UserDetails {
             inverseJoinColumns = @JoinColumn(name = "friend_requests"))
     private List<UserAccount> friendRequests=new ArrayList<>();
 
-    @ManyToMany
-    @JoinTable(
-            name = "user_cards", // Name of the join table
-            joinColumns = @JoinColumn(name = "user_id"), // Column name in the join table for UserAccount
-            inverseJoinColumns = @JoinColumn(name = "card_id") // Column name in the join table for Card
-    )
-    private List<Card> cards = new ArrayList<>();
+
 
 
     public UserAccount(byte[] image,
@@ -78,6 +71,24 @@ public class UserAccount implements UserDetails {
                        String password,
                        UserRole role) {
         this.image = image;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.dateOfBirth = dateOfBirth;
+        this.username = username;
+        this.email = email;
+        this.password = password;
+        this.role = role;
+
+    }
+
+    public UserAccount(
+                       String firstName,
+                       String lastName,
+                       Date dateOfBirth,
+                       String username,
+                       String email,
+                       String password,
+                       UserRole role) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.dateOfBirth = dateOfBirth;
@@ -104,10 +115,7 @@ public class UserAccount implements UserDetails {
         friendRequests.remove(requester);
     }
 
-    public void removeCard(Card card) {
-        cards.remove(card);
-        card.getUsers().remove(this); // Remove the user from the card's collection
-    }
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -144,4 +152,5 @@ public class UserAccount implements UserDetails {
     public boolean isEnabled() {
         return this.enabled;
     }
+
 }

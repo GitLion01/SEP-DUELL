@@ -3,8 +3,6 @@ import './LoginPage.css'; // Importieren der CSS-Datei für die Stilisierung der
 import { Link, Navigate } from 'react-router-dom'; // Importieren von Link und Navigate für die Navigation
 import axiosInstance from '../../api/axios'; // Importieren der Axios-Instanz für die Kommunikation mit dem Server
 import axios from 'axios';
-import styled from 'styled-components';
-
 
 class LoginPage extends React.Component { // Definieren der LoginPage-Klasse als eine React-Komponente
   constructor(props) { // Konstruktor, der den initialen Zustand setzt
@@ -15,7 +13,7 @@ class LoginPage extends React.Component { // Definieren der LoginPage-Klasse als
       redirectToHome: false, // Initialisieren Sie den Zustand für die Weiterleitung auf false
       error:''
     };
-  } 
+  }
 
   handleChange = (event) => { // Methode zum Aktualisieren des Zustands bei Änderungen in den Eingabefeldern
     this.setState({ // Setzen des Zustands mit dem neuen Wert aus dem Eingabefeld
@@ -32,6 +30,9 @@ class LoginPage extends React.Component { // Definieren der LoginPage-Klasse als
         if (res.data && res.data.status === 'success') {
           // Erfolgreiche Anmeldung
           console.log("Login successful!");
+          // Speichern der Benutzer-ID im LocalStorage
+          localStorage.setItem('id', res.data.id);
+
           this.setState({ redirectToHome: true });
         } else if (res.data && res.data.status === 'error') {
           // Fehlgeschlagene Anmeldung
@@ -53,12 +54,12 @@ class LoginPage extends React.Component { // Definieren der LoginPage-Klasse als
     }
     
     return (
-     <body className='login__body'>
+     
       <div className='login'>
         <h1>Login</h1>
         <form onSubmit={this.handleSubmit}>
           <div>
-            <label htmlFor="email">E-Mail:</label>
+            <label htmlFor="email">Benutzername:</label>
             <input
               type="text"
               id="email"
@@ -84,9 +85,8 @@ class LoginPage extends React.Component { // Definieren der LoginPage-Klasse als
           <Link to="/registration">
             <button type="button">Registrieren</button>
           </Link>
-         </div>
         </div>
-      </body>
+      </div>
     );
   } 
 }
