@@ -32,4 +32,15 @@ public class ImageUploadController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to upload image");
         }
     }
+
+    @PostMapping("/delete/{userId}")
+    public ResponseEntity<String> deleteImage(@PathVariable Long userId) {
+        try {
+            imageUploadService.deleteImage(userId);
+            return ResponseEntity.ok("Image uploaded successfully");
+        } catch (IOException e) {
+            e.getMessage();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to upload image");
+        }
+    }
 }

@@ -24,9 +24,9 @@ class Registrierung extends React.Component {
         dateOfBirth: '',
         email: '',
         password: '',
-        role: ""
+        role: false
       },
-      role: false,
+     role: false,
     };
 
     this.handleImageChange = this.handleImageChange.bind(this);
@@ -37,7 +37,7 @@ class Registrierung extends React.Component {
 
   // Methode zum Verarbeiten des Formularabsendens
   // Methode zum Verarbeiten des Formularabsendens
-  h/*andleSubmit = async (event) => { // Methode für das Absenden des Formulars
+  /*handleSubmit = async (event) => { // Methode für das Absenden des Formulars
     event.preventDefault(); // Verhindere das Standardverhalten des Formulars
     const formData = this.state.formData; // Greife auf die Formulardaten im Zustand zu
     try {
@@ -79,7 +79,9 @@ class Registrierung extends React.Component {
       }
     });
 
-    // Append the role separately
+    /*// Append the role separately
+    formData.append('role', this.state.role ? 'ADMIN' : 'USER');*/
+    // Rolle separat hinzufügen
     formData.append('role', this.state.role ? 'ADMIN' : 'USER');
 
     // Append image file if available
@@ -100,7 +102,7 @@ class Registrierung extends React.Component {
       window.location.href = '/';
       console.log('Registrierung erfolgreich');
     } catch (error) {
-      console.error('Fehler bei der Registrierung:', error.message); // Logge Fehlermeldungen
+      console.error('Fehler bei der Registrierung:', error.message);
     }
   };
 
@@ -123,13 +125,13 @@ class Registrierung extends React.Component {
     }
   }
 
-  // Methode zur Verarbeitung der Änderung der Checkbox
-  /*handleRoleChange = () => { // Methode für die Änderung der Rolle
+
+  /*handleRoleChange = () => {
     this.setState(prevState => ({
-      role:!prevState.role, // Toggle the role state
+      role: !prevState.role,
       formData: {
-        ...prevState.formData, // Aktualisiere den vorherigen Zustand der Formulardaten
-        role: prevState.role === 'ADMIN' ? 'USER' : 'ADMIN' // Ändere die Rolle
+        ...prevState.formData,
+        role: !prevState.role ? 'ADMIN' : 'USER' // Setze die Rolle explizit als Zeichenfolge
       },
     }));
   };*/
@@ -138,10 +140,11 @@ class Registrierung extends React.Component {
       role: !prevState.role,
       formData: {
         ...prevState.formData,
-        role: !prevState.role ? 'ADMIN' : 'USER' // Setze die Rolle explizit als Zeichenfolge
+        role: !prevState.role // Aktualisiere role im formData-Objekt mit dem neuen booleschen Wert
       },
     }));
   };
+
 
 
 

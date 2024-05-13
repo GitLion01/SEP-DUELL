@@ -27,21 +27,19 @@ public class Card {
     private Integer attackPoints;
     private Integer defensePoints;
     private String description;
-    private byte[] image;
+    private String image;
     private Rarity rarity;
     @ManyToMany
     private List<Deck> decks = new ArrayList<>();
 
 
-    @JsonIgnore
-    @ManyToMany(mappedBy = "cards")
-    private List<UserAccount> users = new ArrayList<>();
+
 
     public Card(String name,
                 Integer attackPoints,
                 Integer defensePoints,
                 String description,
-                byte[] image,
+                String image,
                 Rarity rarity) {
 
         this.name = name;

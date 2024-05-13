@@ -2,14 +2,16 @@ import React from 'react'; // Importieren der React-Bibliothek
 import './LoginPage.css'; // Importieren der CSS-Datei für die Stilisierung der Login-Seite
 import { Link, Navigate } from 'react-router-dom'; // Importieren von Link und Navigate für die Navigation
 import axiosInstance from '../../api/axios'; // Importieren der Axios-Instanz für die Kommunikation mit dem Server
+import axios from 'axios';
 
 class LoginPage extends React.Component { // Definieren der LoginPage-Klasse als eine React-Komponente
   constructor(props) { // Konstruktor, der den initialen Zustand setzt
     super(props); // Aufruf des Konstruktors der übergeordneten Klasse
     this.state = { // Initialisierung des Zustands
-      username: "", // Initialisieren Sie den Zustand mit leeren Zeichenketten für den Benutzernamen
+      email: "", // Initialisieren Sie den Zustand mit leeren Zeichenketten für den Benutzernamen
       password: '', // Initialisieren Sie den Zustand mit leeren Zeichenketten für das Passwort
-      redirectToHome: false // Initialisieren Sie den Zustand für die Weiterleitung auf false
+      redirectToHome: false, // Initialisieren Sie den Zustand für die Weiterleitung auf false
+      error:''
     };
   }
 
@@ -19,52 +21,50 @@ class LoginPage extends React.Component { // Definieren der LoginPage-Klasse als
     });
   };
 
-  handleSubmit = async (event) => { // Methode zum Bearbeiten des Formulars beim Einreichen
-    event.preventDefault(); // Verhindern des Standardverhaltens des Formulars
-    const { username, password } = this.state; // Extrahieren von Benutzername und Passwort aus dem Zustand
+  handleSubmit = async (event) => {
+    event.preventDefault();
+    const { email, password } = this.state;
+    axios.post('http://localhost:8080/login', { email, password })
+      .then(res => {
+        console.log(res);
+        if (res.data && res.data.status === 'success') {
+          // Erfolgreiche Anmeldung
+          console.log("Login successful!");
+          // Speichern der Benutzer-ID im LocalStorage
+          localStorage.setItem('id', res.data.id);
 
-    try { // Versuch, die Anmeldung durchzuführen
-      const response = await axiosInstance.post('/login', { // Senden der Anmeldeinformationen an den Server
-        username, password
+          this.setState({ redirectToHome: true });
+        } else if (res.data && res.data.status === 'error') {
+          // Fehlgeschlagene Anmeldung
+          this.setState({ error: res.data.message });
+          alert('Falsche Email oder Passwort')
+        } else {
+          console.error("Unerwartete Serverantwort:", res);
+          alert('Unerwartete Serverantwort');
+        }
       });
-
-      if (!response.ok) { // Überprüfen der Antwort des Servers
-        throw new Error('Anmeldung fehlgeschlagen'); // Fehlermeldung, wenn die Anmeldung fehlgeschlagen ist
-      }
-
-      console.log('Anmeldung erfolgreich'); // Ausgabe in der Konsole, wenn die Anmeldung erfolgreich war
-
-      // Redirect durch Navigate ersetzen
-      this.setState({ redirectToHome: true }); // Setzen des Zustands für die Weiterleitung auf true
-
-    } catch (error) { // Fangen von Fehlern
-      console.error('Fehler bei der Anmeldung:', error.message); // Hier wird eine Fehlermeldung in der Konsole ausgegeben, die besagt, dass ein Fehler bei der Anmeldung aufgetreten ist. Die `error.message` enthält die spezifische Fehlermeldung, die vom Server zurückgegeben wurde.
-      if (error.message === 'Anmeldung fehlgeschlagen') { // Überprüfen, ob der Fehler eine fehlgeschlagene Anmeldung war
-        alert('Falscher Benutzername oder Passwort'); // Anzeigen einer Benachrichtigung für den Benutzer
-      }
-      // Hier kannst du eine Fehlermeldung für den Benutzer anzeigen
-    }
+  
+    
   };
 
   render() {
     // Redirect durch Navigate ersetzen
     if (this.state.redirectToHome) {
-      return <Navigate to="/2FA/TwoFactorAuthentication" />;
+      return <Navigate to="/2fa" />;
     }
-
-
+    
     return (
-      <body className='login__body'>
+     
       <div className='login'>
         <h1>Login</h1>
         <form onSubmit={this.handleSubmit}>
           <div>
-            <label htmlFor="username">Benutzername:</label>
+            <label htmlFor="email">Benutzername:</label>
             <input
               type="text"
-              id="username"
-              name="username"
-              value={this.state.username}
+              id="email"
+              name="email"
+              value={this.state.email}
               onChange={this.handleChange}
             />
           </div>
@@ -87,9 +87,9 @@ class LoginPage extends React.Component { // Definieren der LoginPage-Klasse als
           </Link>
         </div>
       </div>
-      </body>
     );
-  }
+  } 
 }
+document.body.classList.add('login__body');
 
 export default LoginPage;

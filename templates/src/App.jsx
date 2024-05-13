@@ -3,7 +3,7 @@ import LoginPage from './components/Login/LoginPage';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import TwoFaktorAuthenfication from './components/2FA/TwoFactorAuthentication';
 import Register from './components/Registrierung/Register.jsx' 
-import Startseite from './components/Startseite/Startsite.jsx';
+import Startseite from './components/Startseite/Startseite.jsx';
 import DeckEditor from './components/Deckarbeiten/DeckEditor.jsx';
 import AdminPanel from './components/Adminsteuerfeld/Admin.jsx';
 import Profile from './components/Profilansicht/Profile.jsx';

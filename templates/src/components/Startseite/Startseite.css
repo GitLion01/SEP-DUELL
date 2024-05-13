@@ -1,0 +1,67 @@
+.AppStart {
+
+  text-align: center;
+  background-image: url('/public/img/Startseitehintergrund.jpg');
+  background-size: cover; /* Das Bild wird so skaliert, dass es den gesamten Hintergrund bedeckt */
+  background-position: center; /* Das Bild wird zentriert positioniert */
+
+
+}
+
+.AppStart header {
+
+  color: white;
+  padding: 30px;
+}
+
+
+
+.AppStart main {
+  display: flex;
+  justify-content: center; /* Zentriert den Inhalt horizontal */
+  align-items: center; /* Zentriert den Inhalt vertikal */
+  height: calc(100vh - 180px); /* Berechnet die Höhe des Inhaltsbereichs des Bildschirms */
+
+}
+
+
+.AppStart .centered-content {
+  display: flex;
+  /* flex-direction: column; /* Anordnung des Inhalts in einer Spalte */
+  flex-direction: row;
+  /* padding-right: 30%;*/
+
+}
+
+.AppStart section {
+  flex: 1;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  margin:  10px;
+  background-color: rgb(1, 1, 29, 0.9);
+  color: white;
+}
+
+.AppStart footer {
+  background-color: rgb(1, 1, 17);
+  color: white;
+  padding: 15px;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+}
+
+.AppStart footer nav ul {
+  padding: 0;
+}
+
+.AppStart footer nav ul li {
+  display: inline;
+  margin-right: 10px;
+}
+
+.AppStart footer nav ul li a {
+  color: white;
+  text-decoration: none;
+}

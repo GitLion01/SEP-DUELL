@@ -1,4 +1,5 @@
 package com.example.demo.friendList;
+import com.example.demo.dto.UserDTO;
 import com.example.demo.user.UserAccount;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -14,30 +15,33 @@ public class FriendListController {
 
     private final FriendListService friendListService;
 
-    @GetMapping(path ="/{id}")
-    public List<UserAccount> getFriends(@PathVariable int id) {
+    @GetMapping(path = "/{id}")
+    public List<UserDTO> getFriends(@PathVariable int id) {
         return friendListService.getFriendList(id).orElse(null);
     }
 
-    @GetMapping(path ="requests/{id}")
-    public List<UserAccount> getFriendListRequests(@PathVariable int id) {
+    @GetMapping(path = "requests/{id}")
+    public List<UserDTO> getFriendListRequests(@PathVariable int id) {
         return friendListService.getFriendListRequests(id).orElse(null);
     }
 
     @PostMapping(path = "/add")
     public String FriendshipRequest(@RequestBody List<Integer> request) {
-        return friendListService.FriendshipRequest(request.get(0),request.get(1));
+        return friendListService.FriendshipRequest(request.get(0), request.get(1));
     }
-    @PostMapping(path = "/accept")
-    public String FriendshipAccept(@RequestBody List<Integer> request) {
-        return friendListService.FriendshipAccept(request.get(0),request.get(1));
+
+    @GetMapping(path = "/accept")
+    public String FriendshipAccept(@RequestParam("userId") int userId, @RequestParam("friendId") int friendId) {
+        return friendListService.FriendshipAccept(userId, friendId);
     }
-    @PostMapping(path = "/reject")
-    public String FriendshipReject(@RequestBody List<Integer> request) {
-        return friendListService.FriendshipReject(request.get(0),request.get(1));
+
+    @GetMapping(path = "/reject")
+    public String FriendshipReject(@RequestParam("userId") int userId, @RequestParam("friendId") int friendId) {
+        return friendListService.FriendshipReject(userId, friendId);
     }
+
     @PostMapping(path = "/remove")
     public String RemoveFriend(@RequestBody List<Integer> request) {
-        return friendListService.RemoveFriend(request.get(0),request.get(1));
+        return friendListService.RemoveFriend(request.get(0), request.get(1));
     }
 }

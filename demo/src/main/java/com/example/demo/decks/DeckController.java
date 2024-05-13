@@ -53,10 +53,21 @@ public class DeckController {
     }
 
 
-    @PutMapping("/removeCards")
-    public String removeCardsFromDeck(@RequestBody DeckRequest request) {
-        return deckService.removeCards(request);
+    @PutMapping("/removeAllCardInstancesFromDeck")
+    public ResponseEntity<String> removeAllCardInstancesFromDeck(@RequestBody DeckRequest request) {
+        String result = deckService.removeAllCardsInstancesFromDeck(request);
+        HttpStatus status = result.startsWith("Fehler") ? HttpStatus.BAD_REQUEST : HttpStatus.OK;
+        return new ResponseEntity<>(result, status);
     }
+
+    @PutMapping("/removeCard")
+    public ResponseEntity<String> removeCard(@RequestBody DeckRequest request) {
+        String result = deckService.removeFirstInstanceOfCardType(request);
+        HttpStatus status = result.startsWith("Fehler") ? HttpStatus.BAD_REQUEST : HttpStatus.OK;
+        return new ResponseEntity<>(result, status);
+    }
+
+
 
 
     /*@PutMapping("/addCards")
