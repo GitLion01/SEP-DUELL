@@ -1,6 +1,6 @@
 package com.example.demo.decks;
 
-import com.example.demo.cards.Card;
+
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -13,7 +13,7 @@ import java.util.List;
 @EqualsAndHashCode
 @ToString
 public class ReplaceCardsRequest {
-    private List<Card> cardsToRemove;
-    private List<Card> cardsToAdd;
+    private List<String> cardsToRemove;
+    private List<String> cardsToAdd;
 
 }

@@ -1,186 +1,168 @@
 import React, { useState, useEffect } from 'react';
+import Modal from 'react-modal';
 import './Freundeliste.css';
+import '../Profileinsicht/ProfileFriends.css'
+Modal.setAppElement('#root'); // Set the root element for accessibility
 
 function App() {
-    // State für die Nutzerliste, die Freunde und die Freundschaftsanfragen
-    const [users, setUsers] = useState([]);
-    const [friends, setFriends] = useState([]);
-    const [friendRequests, setFriendRequests] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [friends, setFriends] = useState([]);
+  const [selectedFriend, setSelectedFriend] = useState(null); // State for selected friend
+  const [modalIsOpen, setModalIsOpen] = useState(false); // State for modal open/close
 
-    // Funktionen zum Laden der Daten vom Backend
-    useEffect(() => {
+  useEffect(() => {
+    fetchUsers();
+    fetchFriends();
+  }, []);
 
-        fetchUsers();
-        // Lade Nutzerliste vom Backend
-        fetchFriends();
-        // Lade Freunde vom Backend
+  const userId = localStorage.getItem('id');
 
-        // Lade Freundschaftsanfragen vom Backend
-        fetchFriendRequests();
-    }, []);
+  const fetchUsers = async () => {
+    try {
+      const url = `http://localhost:8080/registration/users`;
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      const data = await response.json();
+      setUsers(data);
+    } catch (error) {
+      console.error('Fetch failed:', error.message);
+    }
+  };
 
+  const fetchFriends = async () => {
+    try {
+      const url = `http://localhost:8080/friendlist/${userId}`;
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      const data = await response.json();
+      setFriends(data);
+    } catch (error) {
+      console.error('Fetch failed:', error.message);
+    }
+  };
 
-    const fetchUsers= async (id) => {
-        try {
-            // Die URL mit der id zusammensetzen
-            const url = `http://localhost:8080/registration/users`;
-            // Daten vom Backend abrufen
-            const response = await fetch(url);
+  const sendFriendRequest = (friendId) => {
+    const url = 'http://localhost:8080/friendlist/add';
+    const requestData = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify([userId, friendId])
+    };
 
-            // Überprüfen, ob die Anfrage erfolgreich war
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-
-            // Antwortdaten in das JSON-Format konvertieren
-            const data = await response.json();
-
-            // Mit den Daten arbeiten, z.B. setUsers aufrufen
-            setUsers(data);
-        } catch (error) {
-            // Fehler behandeln, z.B. Fehlermeldung ausgeben
-            console.error('Fetch failed:', error.message);
+    fetch(url, requestData)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
         }
+        console.log(`Freundschaftsanfrage an ${userId} gesendet`);
+      })
+      .catch(error => {
+        console.error('There was a problem with the network request:', error);
+      });
+  };
+
+  const removeFriend = (friendId) => {
+    const url = 'http://localhost:8080/friendlist/remove';
+    const requestData = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify([userId, friendId])
     };
 
-    const fetchFriends = async (id) => {
-        try {
-            // Die URL mit der id zusammensetzen
-            const userId = localStorage.getItem('id');// Benutzer-ID aus dem LocalStorage abrufen
-
-            const url = `http://localhost:8080/friendlist/${userId}`;
-            // Daten vom Backend abrufen
-            const response = await fetch(url);
-
-            // Überprüfen, ob die Anfrage erfolgreich war
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-
-            // Antwortdaten in das JSON-Format konvertieren
-            const data = await response.json();
-
-            // Mit den Daten arbeiten, z.B. setUsers aufrufen
-            setFriends(data);
-        } catch (error) {
-            // Fehler behandeln, z.B. Fehlermeldung ausgeben
-            console.error('Fetch failed:', error.message);
+    fetch(url, requestData)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
         }
-    };
+        return response.json();
+      })
+      .then(data => {
+        console.log('Backend response:', data);
+        const index = friends.findIndex(f => f.id === friendId);
+        const updatedFriends = [...friends.slice(0, index), ...friends.slice(index + 1)];
+        setFriends(updatedFriends);
+        console.log(`Freund mit ID ${friendId} wurde aus der Freundesliste entfernt`);
+      })
+      .catch(error => {
+        console.error('There was a problem with the network request:', error);
+      });
+  };
 
+  const openModal = (friend) => {
+    setSelectedFriend(friend);
+    setModalIsOpen(true);
+  };
 
-    const fetchFriendRequests = async () => {
-        try {
-            // Daten von 'http://localhost:8080/friendlist/request' abrufen
-            const response = await fetch('http://localhost:8080/friendlist/request');
+  const closeModal = () => {
+    setSelectedFriend(null);
+    setModalIsOpen(false);
+  };
 
-            // Überprüfen, ob die Anfrage erfolgreich war
-            if (!response.ok) {
-                throw new Error('Failed to fetch friend requests');
-            }
-
-            // Die Antwort in JSON-Format umwandeln
-            const data = await response.json();
-
-            // Hier kannst du die Daten verwenden oder setzen, wie du es benötigst
-            // Zum Beispiel:
-            // setFriendRequests(data);
-
-            console.log('Friend Requests:', data);
-        } catch (error) {
-            console.error('Error fetching friend requests:', error.message);
-        }
-    };
-
-
-
-    const sendFriendRequest = (user) => {
-        const url = 'http://localhost:8080/friendlist/add';
-        const requestData = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                user: user
-            })
-        };
-
-        fetch(url, requestData)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                console.log(`Freundschaftsanfrage an ${user} gesendet`);
-            })
-            .catch(error => {
-                console.error('There was a problem with the network request:', error);
-            });
-    };
-
-
-
-    const removeFriend = (friend) => {
-        const url = 'http://localhost:8080/friendlist/remove';
-        const requestData = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                friend: friend
-            })
-        };
-
-        fetch(url, requestData)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                // Wenn die Backend-Anfrage erfolgreich war, entferne den Freund auch aus der Frontend-Liste
-                const updatedFriends = friends.filter(f => f.id !== friend.id);
-                setFriends(updatedFriends);
-                console.log(`${friend.username} wurde aus der Freundesliste entfernt`);
-            })
-            .catch(error => {
-                console.error('There was a problem with the network request:', error);
-            });
-    };
-
-
-
-
-    return (
-        <div className="BFF">
-
-            <div className="UserList-hülle">
-                <h2>Nutzerliste</h2>
-                <div className="UserList">
-                    <ul>
-                        {users.map(user => (
-                            <li key={user.id}>
-                                {user.username} {/* Oder eine andere Eigenschaft, die du anzeigen möchtest */}
-                                <button onClick={() => sendFriendRequest(user)}>Add</button>
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-            </div>
-            <div className="FriendList-hülle">
-                <h2>Meine Freunde</h2>
-                <div className="FriendList">
-                    <ul>
-                        {friends.map(friend => (
-                            <li key={friend.id}>
-                                {friend.username}
-                                <button onClick={() => removeFriend(friend)}>Freund entfernen</button>
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-            </div>
+  return (
+    <div className="BFF">
+      <div className="UserList-hülle">
+        <h2>Nutzerliste</h2>
+        <div className="UserList">
+          <ul>
+            {users.map(user => (
+              <li key={user.id}>
+                {user.username}
+                <button onClick={() => sendFriendRequest(user.id)}>Add</button>
+              </li>
+            ))}
+          </ul>
         </div>
-    );
+      </div>
+      <div className="FriendList-hülle">
+        <h2>Meine Freunde</h2>
+        <div className="FriendList">
+          <ul>
+            {friends.map(friend => (
+              <li key={friend.id}>
+                <span onClick={() => openModal(friend)} style={{ cursor: 'pointer', color: 'blue' }}>{friend.username}</span>
+                <button onClick={() => removeFriend(friend.id)}>Freund entfernen</button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+
+      <Modal
+        isOpen={modalIsOpen}
+        onRequestClose={closeModal}
+        contentLabel="Friend Profile"
+        className="Modal"
+        overlayClassName="Overlay"
+      >
+        {selectedFriend && (
+          <div className={'profile-container'}>
+            <div className={'profile-header'}>
+              <h2>Profil von {selectedFriend.username}</h2>
+            </div>
+            <div className={'profile-info'}>
+              <img className={'profile-picture'} src={`data:image/jpeg;base64,${selectedFriend.profilePicture}`} alt="Profilbild" />
+              <p><strong>Benutzername:</strong> {selectedFriend.username}</p>
+              <p><strong>Vorname:</strong> {selectedFriend.firstName}</p>
+              <p><strong>Nachname:</strong> {selectedFriend.lastName}</p>
+              <p><strong>E-Mail:</strong> {selectedFriend.email}</p>
+              <p><strong>Geburtsdatum:</strong> {selectedFriend.birthDate}</p>
+              <p><strong>Leaderboard-Punkte:</strong> {selectedFriend.leaderboardPoints}</p>
+              <p><strong>SEP-Coins:</strong> {selectedFriend.sepCoins}</p>
+            </div>
+            <button onClick={closeModal}>Schließen</button>
+          </div>
+        )}
+      </Modal>
+    </div>
+  );
 }
 
 export default App;

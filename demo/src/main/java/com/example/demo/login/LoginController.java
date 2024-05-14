@@ -20,7 +20,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 @RestController
-@CrossOrigin
+
 @RequestMapping("/login")
 public class LoginController {
     private final AuthenticationManager authenticationManager;
@@ -29,14 +29,16 @@ public class LoginController {
 
     // Supercode als Konstante definieren
     private static final String SUPER_CODE = "SUPER1";
+    private final ConfirmationTokenRepository confirmationTokenRepository;
 
     @Autowired
     public LoginController(AuthenticationManager authenticationManager,
                            ConfirmationTokenService confirmationTokenService,
-                           EmailSender emailSender) {
+                           EmailSender emailSender, ConfirmationTokenRepository confirmationTokenRepository) {
         this.authenticationManager = authenticationManager;
         this.confirmationTokenService = confirmationTokenService;
         this.emailSender = emailSender;
+        this.confirmationTokenRepository = confirmationTokenRepository;
     }
 
     @PostMapping
@@ -68,7 +70,9 @@ public class LoginController {
         if (request.getToken().equals(SUPER_CODE)) {
             return "Login verified successfully with Super Code";
         }
-
+// Debugging-Anweisungen hinzufügen
+        System.out.println("Received token: " + request.getToken());
+        System.out.println("Received userId: " + request.getUserId());
 
         return confirmationTokenService.getToken(request.getToken())
                 .map(token -> {
@@ -76,10 +80,9 @@ public class LoginController {
                         return "Token expired";
                     } else if (token.getPurpose() != TokenPurpose.LOGIN) {
                         return "Invalid token purpose";
-                    } else if(!Objects.equals(token.getAppUser().getId(), request.getUserId())) {
-                        return token.getAppUser().getId() + "token not match" + request.getUserId();
-                    }
-                    else {
+                    }else if (!confirmationTokenRepository.existsByUserIdAndToken(request.getUserId(), request.getToken())) {
+                        return "Token does not match user ID " + request.getUserId();
+                    }else {
                         return "Login verified successfully";
                     }
                 })

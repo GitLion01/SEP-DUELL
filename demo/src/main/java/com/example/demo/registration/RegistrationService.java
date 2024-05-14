@@ -2,6 +2,7 @@ package com.example.demo.registration;
 
 
 import com.example.demo.email.EmailSender;
+import com.example.demo.images.ImageUploadService;
 import com.example.demo.registration.token.ConfirmationToken;
 import com.example.demo.registration.token.ConfirmationTokenService;
 import com.example.demo.user.UserAccount;
@@ -10,8 +11,16 @@ import com.example.demo.user.UserRole;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.Date;
 
 
 @AllArgsConstructor
@@ -23,15 +32,27 @@ public class RegistrationService {
     private final ConfirmationTokenService confirmationTokenService;
     private final EmailSender emailSender;
 
-    public String register(RegistrationRequest request) {
-            boolean isValidemail = emailValidator.test(request.getEmail());
-            if (!isValidemail) {
-                throw new IllegalStateException("Invalid email");
+    /*public String register(RegistrationRequest request) {
+        try {
+            boolean isValidEmail = emailValidator.test(request.getEmail());
+            if (!isValidEmail) {
+                throw new IllegalStateException("Ungültige E-Mail");
             }
             // Überprüfen, ob der Benutzername bereits vergeben ist
             if (userAccountService.isUsernameTaken(request.getUsername())) {
                 throw new IllegalStateException("Benutzername bereits vergeben");
             }
+
+            // Konvertiere MultipartFile in byte[]
+            byte[] imageBytes;
+            if(!request.getImage().isEmpty()){
+                imageBytes = imageUploadService.uploadImage(request.getImage());
+            }else{
+                return "Datei ist leer";
+            }
+
+
+            // Benutzer registrieren und Bildpfad übergeben
             String token = userAccountService.signUpUser(new UserAccount(
                     request.getImage(),
                     request.getFirstName(),
@@ -41,9 +62,59 @@ public class RegistrationService {
                     request.getEmail(),
                     request.getPassword(),
                     request.getRole()));
+
+            // E-Mail senden mit Bestätigungslink
             String link = "http://localhost:8080/registration/confirm?token=" + token;
             emailSender.send(request.getEmail(), buildEmail(request.getFirstName(), link));
+
             return token;
+        } catch (Exception e) {
+            System.out.println("Fehler bei der Registrierung: " + e.getMessage());
+            return null; // oder eine andere geeignete Aktion, z. B. eine Fehlermeldung zurückgeben
+        }
+    }
+*/
+
+    public String register(byte[] image, String firstName, String lastName, Date dateOfBirth,
+                           String username, String email, String password, UserRole role) {
+        try {
+            // Überprüfen, ob der Benutzername bereits vergeben ist
+            if (userAccountService.isUsernameTaken(username)) {
+                throw new IllegalStateException("Benutzername bereits vergeben");
+            }
+
+            // Benutzer registrieren und Bildpfad übergeben
+            String token;
+            if(image != null) {
+                token = userAccountService.signUpUser(new UserAccount(
+                        image,
+                        firstName,
+                        lastName,
+                        dateOfBirth,
+                        username,
+                        email,
+                        password,
+                        role));
+            }else{
+                token = userAccountService.signUpUser(new UserAccount(
+                        firstName,
+                        lastName,
+                        dateOfBirth,
+                        username,
+                        email,
+                        password,
+                        role));
+            }
+
+            // E-Mail senden mit Bestätigungslink
+            String link = "http://localhost:8080/registration/confirm?token=" + token;
+            emailSender.send(email, buildEmail(firstName, link));
+
+            return token;
+        } catch (Exception e) {
+            System.out.println("Fehler bei der Registrierung: " + e.getMessage());
+            return null; // oder eine andere geeignete Aktion, z. B. eine Fehlermeldung zurückgeben
+        }
     }
 
 

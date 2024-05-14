@@ -12,10 +12,7 @@ import lombok.NoArgsConstructor;
 public class LoginTokenRequest {
 
     private String token;
-    private long userId;
-
-    public Long getUserId() {
-        return this.userId;
-    }
+    @Getter
+    private Long userId;
 
 }

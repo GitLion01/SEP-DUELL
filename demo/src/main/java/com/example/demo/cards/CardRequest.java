@@ -1,4 +1,5 @@
 package com.example.demo.cards;
+import jakarta.persistence.Lob;
 import lombok.*;
 
 
@@ -15,7 +16,5 @@ public class CardRequest {
     private String description;
     private byte[] image;
     private Rarity rarity;
-
-
-
 }
+

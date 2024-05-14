@@ -6,8 +6,12 @@ import com.example.demo.decks.DeckRepository;
 import com.example.demo.user.UserAccount;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -16,7 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-
+import java.util.*;
 
 @Service
 public class CardService {
@@ -50,35 +54,40 @@ public class CardService {
         if (cardExists) {
             throw new IllegalStateException("Card already exists: " + request.getName());
         }
-        Card card = new Card(
-                request.getName(),
-                request.getAttackPoints(),
-                request.getDefensePoints(),
-                request.getDescription(),
-                request.getImage(),
-                request.getRarity()
-        );
-        cardRepository.save(card);
-    }
+            Card card = new Card(
+                    request.getName(),
+                    request.getAttackPoints(),
+                    request.getDefensePoints(),
+                    request.getDescription(),
+                    request.getImage(),
+                    request.getRarity()
+            );
+            cardRepository.save(card);
+}
 
 
-    public void deleteCard(String name){
+    public void deleteCard(String name) {
         Optional<Card> optionalCard = cardRepository.findByName(name);
         if (optionalCard.isEmpty()) {
             return;
         }
         Card card = optionalCard.get();
 
-        // Create a copy of the list of users associated with the card
-        List<UserAccount> usersCopy = new ArrayList<>(card.getUsers());
+        // Find all decks containing the card
+        List<Deck> decksContainingCard = deckRepository.findByCardsContaining(card);
 
-        // Iterate over the copy and remove the card from each user's collection
-        for (UserAccount user : usersCopy) {
-            user.removeCard(card);
+        // Extract card IDs
+        List<Long> cardIds = new ArrayList<>();
+        cardIds.add(card.getId());
+
+        // Iterate over each deck containing the card and remove the card from it using deleteDeckCardsByDeckIdAndCardIds method
+        for (Deck deck : decksContainingCard) {
+            deckRepository.deleteDeckCardsByDeckIdAndCardIds(deck.getId(), cardIds);
         }
 
         cardRepository.delete(card);
     }
+
 
     public String deleteMultipleCards(List<String> names){
         for (String name : names) {
@@ -86,9 +95,6 @@ public class CardService {
         }
         return "Cards deleted";
     }
-
-
-
 
 
 
@@ -108,7 +114,10 @@ public class CardService {
                     if (description.length() > 200) {
                         description = description.substring(0, 200);
                     }
-                    byte[] image = parts[5].trim().getBytes(); // Load image data properly
+                   /* byte[] image = parts[5].trim().getBytes(); // Load image data properly*/
+                    byte[] image = loadImageFromFile(parts[5].trim());
+                    // Load image from file system and encode to Base64
+                    /*String image = loadImageAndEncodeToBase64(parts[5].trim());*/
                     Rarity rarity = Rarity.valueOf(parts[1].trim().toUpperCase());
 
                     CardRequest cardRequest = new CardRequest(name, attackPoints, defensePoints, description, image, rarity);
@@ -120,10 +129,15 @@ public class CardService {
         }
         return cardRequests;
     }
-
-
-
-
+    private byte[] loadImageFromFile(String filePath) throws IOException {
+        Path path = Paths.get(filePath);
+        return Files.readAllBytes(path);
+    }
+    private String loadImageAndEncodeToBase64(String filePath) throws IOException {
+        Path path = Paths.get(filePath);
+        byte[] imageData = Files.readAllBytes(path);
+        return Base64.getEncoder().encodeToString(imageData);
+    }
 
     public String uploadAndSaveCards(MultipartFile file) {
         try {
@@ -133,4 +147,7 @@ public class CardService {
             return "Error uploading CSV: " + e.getMessage();
         }
     }
-}
+    }
+
+
+

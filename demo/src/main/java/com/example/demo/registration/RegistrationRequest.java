@@ -1,14 +1,13 @@
 package com.example.demo.registration;
 
 import com.example.demo.user.UserRole;
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
+import lombok.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Date;
 
 @Getter
+@Setter
 @AllArgsConstructor
 @EqualsAndHashCode
 @ToString
@@ -21,6 +20,7 @@ public class RegistrationRequest {
     private Date dateOfBirth;
     private byte[] image;
     private UserRole role;
+
 
 
 }

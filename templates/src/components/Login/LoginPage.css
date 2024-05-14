@@ -9,7 +9,6 @@
   background-color: #000000; /* Hintergrundfarbe des Body auf Schwarz setzen */
   color: #000000; /* Textfarbe auf Weiß setzen */
 }
-
 /* Stil für den Container des Login-Formulars */
 .login {
   display: block;
@@ -19,7 +18,6 @@
   padding: 100px; /* Innenabstand des Formulars */
   background-color: #ffffff; /* Hintergrundfarbe des Formulars auf Dunkelgrau setzen */
   box-sizing: border-box;
-
 }
 
 /* Stil für Label */
