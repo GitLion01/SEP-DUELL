@@ -1,18 +1,45 @@
 /* Layout für die gesamte Seite */
-/* Layout für die gesamte Seite */
 .container {
-    display: flex; /* Geändert von block zu flex für bessere Kontrolle über die Kind-Elemente */
+    display: flex;
     flex-direction: column;
     align-items: center;
-    width: 100%; /* Fast die gesamte Breite der Seite */
-    min-height: 98%; /* Mindesthöhe, um fast die gesamte sichtbare Höhe einer Seite einzunehmen */
-    margin: 10px auto; /* Zentriert den Container horizontal mit einem kleinen Rand */
-    padding: 20px; /* Etwas Innenabstand hinzufügen */
-    box-sizing: border-box; /* Stellt sicher, dass Padding und Border innerhalb der Breite und Höhe enthalten sind */
+    width: 100%;
+    min-height: 98%;
+    margin: 10px auto;
+    padding: 20px;
+    box-sizing: border-box;
 }
 
+.deck-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+    margin-top: 20px;
+}
 
-/* Layout und Styling für die Deck- und Kartenbereiche */
+.deck {
+    width: 150px;
+    height: 200px;
+    padding: 10px;
+    margin: 10px;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.deck:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
 .cards-container {
     display: flex;
     justify-content: space-between;
@@ -21,27 +48,38 @@
     margin-top: 20px;
 }
 
-.card-list {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: flex-start;
-    align-items: flex-start;
-    width: 100%;
+.cards-left, .active-deck-container {
+    flex: 1;
     margin: 10px;
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 8px;
     background-color: #f9f9f9;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    overflow-y: auto;
     max-height: 600px;
+    overflow-y: auto;
+}
+
+.card-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: flex-start;
+}
+
+.card-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: flex-start;
+    width: 100%;
 }
 
 .card {
-    width: 151px;
+    width: 150px;
     height: 200px;
     padding: 10px;
-    margin: 5px;
+    margin: 10px;
     background-color: white;
     border: 1px solid #ddd;
     border-radius: 4px;
@@ -55,45 +93,6 @@
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
-/* Spezifische Layout-Anpassungen für die verfügbaren Karten und das aktive Deck */
-.cards-left {
-    width: 50%;
-    flex: 1;
-    margin: 10px;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    background-color: #f9f9f9;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    max-height: 600px; 
-    overflow-y: auto; /* Ermöglicht vertikales Scrollen innerhalb des Containers */
-}
-
-
-.active-deck-container {
-    display: flex;
-    flex-direction: column;
-    width: 50%;
-    margin: 10px;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    background-color: #f9f9f9;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    overflow-y: auto;
-    max-height: 600px
-}
-
-.card-container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: flex-start;
-    align-items: flex-start;
-    width: 100%;
-}
-
-
-/* Styling für Input und Buttons */
 input, button {
     padding: 8px;
     margin: 5px;

@@ -73,6 +73,16 @@ function CreateDeck() {
     };
     */
 
+    // Funktion zur Generierung eines zufälligen Namens
+    const generateRandomName = () => {
+        const pres = ["Alpha", "Beta", "Gamma", "Delta", "Epsilon", "Theta", "Kappa", "Lambda", "Omega"];
+        const nouns = ["Phoenix", "Dragon", "Tiger", "Unicorn", "Griffin", "Hyena"];
+        const pre = pres[Math.floor(Math.random() * pres.length)];
+        const noun = nouns[Math.floor(Math.random() * nouns.length)];
+        return `${pre} ${noun}`;
+    };
+
+
     // Neues Deck hinzufügen
     const handleCreateNewDeck = async () => {
         if (decks.length >= 3) {
@@ -87,7 +97,7 @@ function CreateDeck() {
         // Erstelle neues Deck-Objekt
         const newDeck = {
             userID: id, //
-            name: `Deck ${decks.length + 1}`,
+            name: generateRandomName(),
             cardNames: []
         };
 
@@ -246,7 +256,7 @@ function CreateDeck() {
         
         const deckToUpdate = decks[activeDeck];
         if (!deckToUpdate) {
-            setErrorMessage('Aktives  Deck konnte nicht identifiziert werden.');
+            setErrorMessage('Aktives Deck konnte nicht identifiziert werden.');
             return;
         }
 
@@ -301,7 +311,7 @@ function CreateDeck() {
             <button onClick={handleCreateNewDeck} disabled={isEditing}>Neues Deck erstellen</button>
             <div className="deck-list">
                 {decks.map((deck, index) => (
-                    <div key={index} className="card" onClick={() => selectDeck(index)}>
+                    <div key={index} className="deck" onClick={() => selectDeck(index)}>
                         {deck.name}
                     </div>
                 ))}
@@ -310,17 +320,24 @@ function CreateDeck() {
                 <div className="cards-container">
                     <div className="cards-left">
                         <h2>Verfügbare Karten</h2>
-                        {myCards.map(card => (
-                            <div key={card.id} className="card" onClick={() => handleAddCardToDeck(card)}>
-                                {card.name}
-                            </div>
-                        ))}
+                        <div className="card-list">
+
+                            {myCards.map(card => (
+
+                                <div key={card.id} className="card" onClick={() => handleAddCardToDeck(card)}>
+
+                                    {card.name}
+
+                                </div>
+
+                            ))}
+                        </div>
                     </div>
                     <div className="active-deck-container">
                         <h2>Aktives Deck: {decks[activeDeck].name}</h2>
-                        <input type="text" value={deckName} onChange={(e) => setDeckName(e.target.value)} />
+                        <input type="text" value={deckName} onChange={(e) => setDeckName(e.target.value)}/>
                         <div className="button-container">
-                            <button onClick={updateDeckName} >Fertig</button>
+                            <button onClick={updateDeckName}>Fertig</button>
                             <button onClick={handleDeleteDeck}>Deck Löschen</button>
                         </div>
                         <div className="card-container">
