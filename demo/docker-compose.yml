@@ -7,7 +7,7 @@ services:
     image: springboot-postgresql
     build: ./ #build in diesem Ordner
     ports:
-      - "8086:8080"
+      - "8080:8080"
     depends_on:
       - postgresqldb
 
@@ -15,7 +15,7 @@ services:
   postgresqldb:
     image: postgres
     ports:
-      - "5434:5432"
+      - "5432:5432"
     environment:
       POSTGRES_DB: registration
       POSTGRES_USER: postgres

@@ -6,38 +6,41 @@ import './Profile.css';
 // Profil-Seite
 
 function Profile() {
-  const { id } = useParams();
-  let [profilePicture, setProfilePicture] = useState('');
+  const id = localStorage.getItem('id');
+  const [profilePicture, setProfilePicture] = useState('');
   const [username, setUsername] = useState('');
   const [vorname, setVorname] = useState('');
   const [nachname, setNachname] = useState('');
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('');
   const [geburtsdatum, setDateOfBirth] = useState('');
-  const [sepcoins, setSepcoins] = useState('');
-  const [leaderbordpunkte, setLeaderboardPunkte] = useState('');
+  const [sepCoins, setSepcoins] = useState('');
+  const [leaderbordpunkte, setLeaderbordPunkte] = useState('');
   const [role, setRole] =useState('');
   const [error, setError] = useState(null);
-  let [userdata, setUserdata] = useState('');
+  const [userdata, setUserdata] = useState('');
   
   // Benutzerdaten von der API abrufen
   useEffect(() => {
     Axios.get(`http://localhost:8080/profile/${id}`)
       .then(response => {
+          console.log(response.data);
         const userData = response.data;
         setUserdata(response.data);
-        setProfilePicture(userData.profilePicture);
+          setProfilePicture(userData.image);
         setUsername(userData.username);
         setVorname(userData.firstName);
         setNachname(userData.lastName);
         setEmail(userData.email);
         setPassword(userData.password);
-        setDateOfBirth(userData.geburtsdatum);
+        const date = new Date(userData.dateOfBirth);
+        const formattedDate = `${date.getDate().toString().padStart(2, '0')}.${(date.getMonth() + 1).toString().padStart(2, '0')}.${date.getFullYear()}`;
+        setDateOfBirth(formattedDate);
         setRole(userData.role);
-        if (userData.role !== 'admin') {
-          setSepcoins(userData.sepcoins);
-          setLeaderboardPunkte(userData.leaderbordpunkte);
-        };
+          if (userData.role !== 'ADMIN') {
+              setSepcoins(userData.sepCoins);
+              setLeaderbordPunkte(userData.leaderboardPoints);
+          }
       })
       .catch(error => {
         console.error(error);
@@ -48,21 +51,22 @@ function Profile() {
 
   // Update SEP-Coins wenn der Wert von SEP-Coins geändert wird
   useEffect(() => {
-    if (role !== 'admin') {
-      setSepcoins(userdata.sepcoins);
+    if (role !== 'ADMIN') {
+      setSepcoins(userdata.sepCoins);
     }
-  }, [role, userdata.sepcoins]);
+  }, [role, userdata.sepCoins]);
 
   // Update Leaderboard-Punkte wenn der Wert von Leaderboard-Punkte geändert wird
   useEffect(() => {
-    if (role !== 'admin') {
-      setLeaderboardPunkte(userdata.leaderbordpunkte);
+    if (role !== 'ADMIN') {
+        setLeaderbordPunkte(userdata.leaderboardPoints);
     }
-  }, [role, userdata.leaderbordpunkte])
+  }, [role, userdata.leaderboardPoints])
+
 
   // Profilseite rendern
   return (
-    <body className='Profile__body'>
+    <>
     <div className="Profile">
       <h1 className="titel"> Mein Profil</h1>
       <div className="daten">
@@ -71,7 +75,7 @@ function Profile() {
         const file = event.target.files[0];
         const formData = new FormData();
         formData.append('file', file);
-        Axios.post('http://localhost:8080/profile-picture', formData)
+        Axios.post('http://localhost:8080/profile/image', formData)
         .then(response => {
             console.log('Profile picture uploaded successfully');
             setProfilePicture(response.data.profilePicture);
@@ -81,15 +85,15 @@ function Profile() {
             setError('Ein Fehler ist aufgetreten');
           });
         }} style={{display: 'none'}} />
-      <img className="profilbild" src={profilePicture ? profilePicture : require('./testbild.jpg')} alt="Profilbild" onClick={() => document.querySelector('input[type="file"]').click()} />
+      <img className="profilbild" src={profilePicture ? `data:image/jpeg;base64,${profilePicture}` : require('./testbild.jpg') } alt={'Profilbild'} onClick={() => document.querySelector('input[type="file"]').click()} />
       <p><strong>Username:</strong> {username}</p>
       <p><strong>Vorname:</strong> {vorname}</p>
       <p><strong>Nachname:</strong> {nachname}</p>
       <p><strong>Email:</strong> {email}</p>
-      <p><strong>Passwort:</strong> {password} </p>
+      {/*<p><strong>Passwort:</strong> {password} </p>*/}
       <p><strong>Date of Birth:</strong> {geburtsdatum}</p>
-      {role !== 'admin' && <p><strong>SEP Coins:</strong> {sepcoins}</p>}
-      {role !== 'admin' && <p><strong>Leaderboard Punkte:</strong> {leaderbordpunkte}</p>}
+      {role !== 'ADMIN' && <p><strong>SEP Coins:</strong> {sepCoins}</p>}
+      {role !== 'ADMIN' && <p><strong>Leaderboard Punkte:</strong> {leaderbordpunkte}</p>}
       {error && <p className="error">{error}</p>} {/* Fehlermeldung anzeigen falls error != null */}
       </div>
     </div>
@@ -98,8 +102,7 @@ function Profile() {
         <button className="button" type="button">Home</button>
       </Link>
     </div>
-    </body>
+    </>
   );
 }
-document.body.classList.add('card__body');
 export default Profile;

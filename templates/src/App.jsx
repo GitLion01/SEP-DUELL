@@ -21,10 +21,10 @@ function App() {
         <Route path="/registration" element={<Register/>} /> 
         <Route path="/startseite" element={<Startseite/>} /> {/* Die Namen der Seiten müssen groß geschrieben werden, damit das klappt*/}
         <Route path="/2fa" element={<TwoFaktorAuthenfication/>} />
-        <Route path="/profil/:id" element={<Profile/>} /> 
+        <Route path="/profil" element={<Profile/>} /> 
         <Route path='/deckbearbeiten' element = {<DeckEditor/>} /> 
         <Route path='/admin' element = {<AdminPanel/>} /> 
-        <Route path="/create-deck" element={<CreateDeck />} />
+        <Route path='/decks' element={<CreateDeck />} />
         <Route path="/freundelist" element={<Freundeliste/>} />
       </Routes>
     </Router>
