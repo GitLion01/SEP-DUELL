@@ -13,6 +13,7 @@ class Startseite extends Component {
 
   handleLogout = () => {
     this.setState({ loggedIn: false });
+    localStorage.removeItem('id');
   };
 
 
