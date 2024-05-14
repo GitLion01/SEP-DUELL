@@ -152,10 +152,7 @@ function App() {
               <p><strong>Benutzername:</strong> {selectedFriend.username}</p>
               <p><strong>Vorname:</strong> {selectedFriend.firstName}</p>
               <p><strong>Nachname:</strong> {selectedFriend.lastName}</p>
-              <p><strong>E-Mail:</strong> {selectedFriend.email}</p>
-              <p><strong>Geburtsdatum:</strong> {selectedFriend.birthDate}</p>
               <p><strong>Leaderboard-Punkte:</strong> {selectedFriend.leaderboardPoints}</p>
-              <p><strong>SEP-Coins:</strong> {selectedFriend.sepCoins}</p>
             </div>
             <button onClick={closeModal}>Schließen</button>
           </div>

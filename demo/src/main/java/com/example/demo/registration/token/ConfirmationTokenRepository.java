@@ -26,4 +26,6 @@ public interface ConfirmationTokenRepository extends JpaRepository<ConfirmationT
 
     @Query("SELECT CASE WHEN COUNT(c) > 0 THEN true ELSE false END FROM ConfirmationToken c WHERE c.appUser.id = ?1 AND c.token = ?2")
     Boolean existsByUserIdAndToken(Long userId, String token);
+    //TODO: lösche Token nach dem User sich einloggt
+
 }

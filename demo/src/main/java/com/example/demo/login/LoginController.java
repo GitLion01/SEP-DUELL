@@ -2,6 +2,7 @@ package com.example.demo.login;
 
 import com.example.demo.email.EmailSender;
 import com.example.demo.registration.token.ConfirmationToken;
+import com.example.demo.registration.token.ConfirmationTokenRepository;
 import com.example.demo.registration.token.ConfirmationTokenService;
 import com.example.demo.registration.token.TokenPurpose;
 import com.example.demo.user.UserAccount;
