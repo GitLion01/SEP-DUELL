@@ -1,6 +1,7 @@
 package com.example.demo.friendList;
 import com.example.demo.dto.UserDTO;
 import lombok.AllArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -43,7 +44,7 @@ public class FriendListController {
     }
 
     @PostMapping(path = "/remove")
-    public String RemoveFriend(@RequestBody List<Integer> request) {
+    public ResponseEntity<String> RemoveFriend(@RequestBody List<Integer> request) {
         return friendListService.RemoveFriend(request.get(0), request.get(1));
     }
 }
