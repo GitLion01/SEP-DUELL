@@ -18,7 +18,12 @@ public class EmailTestController {
 
     @GetMapping("/send")
     public String sendTestEmail() {
-        emailSender.send("gatekeeper.cardhaven@web.de", "This is a test email");
+        String recipient = "gatekeeper.cardhaven@web.de";  // Empfänger der E-Mail
+        String emailContent = "This is a test email";  // Inhalt der E-Mail
+        String emailSubject = "Test Email Subject";  // Betreff der E-Mail
+
+        emailSender.send(recipient, emailContent, emailSubject);  // Füge den Betreff hinzu
         return "Email sent!";
     }
 }
+
