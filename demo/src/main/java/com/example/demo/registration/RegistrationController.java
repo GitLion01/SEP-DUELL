@@ -3,6 +3,7 @@ package com.example.demo.registration;
 import com.example.demo.images.ImageUploadService;
 import com.example.demo.user.UserAccount;
 import com.example.demo.user.UserAccountRepository;
+import com.example.demo.user.UserAccountService;
 import com.example.demo.user.UserRole;
 import jakarta.servlet.Registration;
 import lombok.AllArgsConstructor;
@@ -28,6 +29,7 @@ public class RegistrationController {
 
     private final RegistrationService registrationService;
     private final UserAccountRepository userAccountRepository;
+    private final UserAccountService userAccountService;
 
 
 
@@ -88,5 +90,10 @@ public class RegistrationController {
     @GetMapping(path = "confirm")
     public String confirm(@RequestParam("token") String token) {
         return registrationService.confirmToken(token);
+    }
+
+    @GetMapping(path = "/setFriendslistPrivacy")
+    public void setFriendslistPrivacy(@RequestBody long Userid,@RequestBody boolean privacy) {
+        userAccountService.setFriendslistPrivacy(Userid,privacy);
     }
 }

@@ -95,4 +95,13 @@ public class UserAccountService implements UserDetailsService {
             return null;
         }
     }
+
+    public void setFriendslistPrivacy(long Userid,boolean privacy)
+    {
+        Optional<UserAccount> user = userAccountRepository.findById(Userid);
+        if(user.isPresent()) {
+            UserAccount userAccount = user.get();
+            userAccount.setPrivateFriendList(!userAccount.getPrivateFriendList());
+        }
+    }
 }

@@ -1,5 +1,4 @@
 package com.example.demo.user;
-import com.example.demo.cards.Card;
 import com.example.demo.decks.Deck;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
@@ -40,6 +39,7 @@ public class UserAccount implements UserDetails {
     private Boolean enabled = false;
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Deck> decks = new ArrayList<>();
+    private Boolean privateFriendList =false;
 
     @ManyToMany
     /*to ignore the infinite loop occurring in the serialization ,when join the two tables

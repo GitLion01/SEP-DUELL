@@ -60,7 +60,7 @@ function App() {
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }
-        console.log(`Freundschaftsanfrage an ${userId} gesendet`);
+        console.log(`Freundschaftsanfrage an ${friendId} gesendet`);
       })
       .catch(error => {
         console.error('There was a problem with the network request:', error);

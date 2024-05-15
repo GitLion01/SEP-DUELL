@@ -57,8 +57,8 @@ public class LoginController {
 
             return ResponseEntity.ok(Map.of("status", "success",
                     "message", "Login successful. Please check your email for the verification code.",
-                    "id", String.valueOf(userAccount.getId())
-
+                    "id", String.valueOf(userAccount.getId()),
+                    "userRole",String.valueOf(userAccount.getRole())
             ));
         } catch (AuthenticationException e) {
             return ResponseEntity.ok(Map.of("status", "error", "message", "Login failed: " + e.getMessage()));
@@ -69,11 +69,9 @@ public class LoginController {
     public String verifyLoginToken(@RequestBody LoginTokenRequest request) {
         // Überprüfung auf den Supercode
         if (request.getToken().equals(SUPER_CODE)) {
+            confirmationTokenRepository.deleteToken(request.getUserId(), request.getToken());
             return "Login verified successfully with Super Code";
         }
-// Debugging-Anweisungen hinzufügen
-        System.out.println("Received token: " + request.getToken());
-        System.out.println("Received userId: " + request.getUserId());
 
         return confirmationTokenService.getToken(request.getToken())
                 .map(token -> {
@@ -84,6 +82,7 @@ public class LoginController {
                     }else if (!confirmationTokenRepository.existsByUserIdAndToken(request.getUserId(), request.getToken())) {
                         return "Token does not match user ID " + request.getUserId();
                     }else {
+                        confirmationTokenRepository.deleteToken(request.getUserId(), request.getToken());
                         return "Login verified successfully";
                     }
                 })
