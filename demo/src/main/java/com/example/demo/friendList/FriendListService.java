@@ -3,6 +3,8 @@ package com.example.demo.friendList;
 import com.example.demo.email.EmailSender;
 import com.example.demo.user.UserAccount;
 import com.example.demo.dto.UserDTO;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -131,7 +133,7 @@ public class FriendListService {
     }
 
     // Entfernt einen Freund aus der Freundesliste
-    public String RemoveFriend(int id, int friend_id) {
+    public ResponseEntity<String> RemoveFriend(int id, int friend_id) {
         Optional<UserAccount> user = friendListRepository.findById(id);
         Optional<UserAccount> friend = friendListRepository.findById(friend_id);
         if (user.isPresent() && friend.isPresent()) {
@@ -141,12 +143,12 @@ public class FriendListService {
             if (friendAccount.getFriends().contains(userAccount)) {
                 userAccount.removeFriend(friendAccount);
                 friendAccount.removeFriend(userAccount);
-                return "Friendship removed";
+                return new ResponseEntity<>("{\"message\":\"Friendship removed\"}", HttpStatus.OK);
             } else {
-                return "You are not friends";
+                return new ResponseEntity<>("{\"message\":\"You are not friends\"}", HttpStatus.BAD_REQUEST);
             }
         } else {
-            return "User not found";
+            return new ResponseEntity<>("{\"message\":\"User not found\"}", HttpStatus.NOT_FOUND);
         }
     }
 }
