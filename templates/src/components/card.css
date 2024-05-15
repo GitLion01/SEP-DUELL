@@ -74,3 +74,9 @@
     background-color: #ffffff; 
     border-bottom: 2px solid #000000; 
   }
+
+
+  .card-img-top {
+    height: 250px; /* Beispielhöhe */
+    object-fit: cover; /* optional: um sicherzustellen, dass das Bild gut aussieht */
+}
