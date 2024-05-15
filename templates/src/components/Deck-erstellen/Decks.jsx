@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import './CreateDeck.css';
+import './Decks.css';
 import { Link } from 'react-router-dom';
 
-function CreateDeck() {
+function Decks() {
     const [id, setId] = useState(null);
     const [decks, setDecks] = useState([]);
     const [myCards, setMyCards] = useState([]);
     const [activeDeck, setActiveDeck] = useState(null);
     const [deckName, setDeckName] = useState('');
-    const [currentDeckName, setCurrentDeckName] = useState('');
+    const [originalDeckName, setCurrentDeckName] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
     const [isEditing, setIsEditing] = useState(false);  // Zustand zum Überwachen, ob Änderungen gemacht wurden
     const [formData, setFormData] = useState({
@@ -109,8 +109,8 @@ function CreateDeck() {
                 }
             });
 
-            loadDecks();
-            loadCards();
+            await loadDecks();
+            await loadCards();
 
             console.log('Deck erfolgreich erstellt', response.data);
 
@@ -192,7 +192,7 @@ function CreateDeck() {
         }
     };
 
-    const updateDeckName = async () => {
+    const handleSaveDeckName = async () => {
         if (!deckName.trim()) {
             setErrorMessage('Der Deckname darf nicht leer sein');
             return;
@@ -200,12 +200,10 @@ function CreateDeck() {
     
         try {
             // Senden der Anfrage zum Backend, um den Namen zu aktualisieren
-            const response = await axios.put(`http://localhost:8080/decks/updateName/${id}/${currentDeckName}/${deckName}`);
+            const response = await axios.put(`http://localhost:8080/decks/updateName/${id}/${originalDeckName}/${deckName}`);
             console.log('Deckname erfolgreich geändert!', response.data);
 
-
-            loadDecks();
-            loadCards();
+            await loadDecks();
 
             setActiveDeck(null);
             setIsEditing(false);
@@ -214,7 +212,14 @@ function CreateDeck() {
             setErrorMessage('Fehler beim Ändern des Decknamens: ' + error.message);
         }
     };
-    
+
+
+    const handleFinishEditing = () => {
+        // Stellt den ursprünglichen Namen wieder her, wenn nicht gespeichert wurde
+        setDeckName(originalDeckName);
+        setActiveDeck(null);
+        setIsEditing(false);
+    }
 
     const handleDeleteDeck = async () => {
 
@@ -240,8 +245,8 @@ function CreateDeck() {
                 setActiveDeck(null);
                 setIsEditing(false);
 
-                loadDecks();
-                loadCards();
+                await loadDecks();
+                await loadCards();
     
                 console.log("Deck erfolgreich gelöscht", response.data);
     
@@ -274,8 +279,8 @@ function CreateDeck() {
                 }
             });
 
-            loadDecks();
-            loadCards();
+            await loadDecks();
+            await loadCards();
 
             console.log("Karte erfolgreich entfernt", response.data);
 
@@ -337,8 +342,9 @@ function CreateDeck() {
                         <h2>Aktives Deck: {decks[activeDeck].name}</h2>
                         <input type="text" value={deckName} onChange={(e) => setDeckName(e.target.value)}/>
                         <div className="button-container">
-                            <button onClick={updateDeckName}>Fertig</button>
+                            <button onClick={handleFinishEditing}>Fertig</button>
                             <button onClick={handleDeleteDeck}>Deck Löschen</button>
+                            <button onClick={handleSaveDeckName}>Name speichern</button>
                         </div>
                         <div className="card-container">
                             {decks[activeDeck].cards.map((card, index) => (
@@ -358,4 +364,4 @@ function CreateDeck() {
     );
 }
 
-export default CreateDeck;
+export default Decks;
