@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static com.example.demo.user.UserRole.ADMIN;
+
 @Service
 @Transactional
 public class FriendListService {
@@ -33,12 +35,26 @@ public class FriendListService {
         return user.map(u -> u.getFriends().stream().map(this::convertToDTO).collect(Collectors.toList()));
     }
 
+    public Optional<List<UserDTO>> getFriendsFriendList(int id,int friendID) {
+        Optional<UserAccount> user = friendListRepository.findById(id);
+        Optional<UserAccount> friend = friendListRepository.findById(friendID);
+        if(user.isPresent() && friend.isPresent()) {
+            if(user.get().getRole()==ADMIN)
+                return friend.map(u -> u.getFriends().stream().map(this::convertToDTO).collect(Collectors.toList()));
+            if(friend.get().getPrivateFriendList())
+                return Optional.empty();
+            if(user.get().getFriends().contains(friend.get()))
+                return friend.map(u -> u.getFriends().stream().map(this::convertToDTO).collect(Collectors.toList()));
+        }
+        return Optional.empty();
+    }
+/*
     // Gibt die eingehenden Freundschaftsanfragen als DTOs zurück
     public Optional<List<UserDTO>> getFriendListRequests(int id) {
         Optional<UserAccount> user = friendListRepository.findById(id);
         return user.map(u -> u.getFriendRequests().stream().map(this::convertToDTO).collect(Collectors.toList()));
     }
-
+*/
     // Verarbeitet eine Freundschaftsanfrage
     public String FriendshipRequest(int id, int friend_id) {
         Optional<UserAccount> user = friendListRepository.findById(id);

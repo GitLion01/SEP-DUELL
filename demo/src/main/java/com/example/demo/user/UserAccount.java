@@ -40,6 +40,7 @@ public class UserAccount implements UserDetails {
     private Boolean enabled = false;
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Deck> decks = new ArrayList<>();
+    private Boolean privateFriendList =false;
 
     @ManyToMany
     /*to ignore the infinite loop occurring in the serialization ,when join the two tables
