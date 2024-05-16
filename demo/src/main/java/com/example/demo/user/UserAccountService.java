@@ -1,5 +1,4 @@
 package com.example.demo.user;
-
 import com.example.demo.registration.token.ConfirmationToken;
 import com.example.demo.registration.token.ConfirmationTokenService;
 import com.example.demo.registration.token.TokenPurpose;
@@ -28,9 +27,6 @@ public class UserAccountService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return userAccountRepository.findByEmail(username).orElseThrow(() -> new UsernameNotFoundException(USER_NOT_FOUND_MESSAGE));
 }
-
-
-
 
 
     public boolean isUsernameTaken(String username) {
@@ -93,15 +89,6 @@ public class UserAccountService implements UserDetailsService {
             // Handle any exceptions
             e.getMessage();
             return null;
-        }
-    }
-
-    public void setFriendslistPrivacy(long Userid,boolean privacy)
-    {
-        Optional<UserAccount> user = userAccountRepository.findById(Userid);
-        if(user.isPresent()) {
-            UserAccount userAccount = user.get();
-            userAccount.setPrivateFriendList(!userAccount.getPrivateFriendList());
         }
     }
 }

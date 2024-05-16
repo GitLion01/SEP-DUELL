@@ -1,11 +1,8 @@
 package com.example.demo.registration;
-
-import com.example.demo.images.ImageUploadService;
 import com.example.demo.user.UserAccount;
 import com.example.demo.user.UserAccountRepository;
 import com.example.demo.user.UserAccountService;
 import com.example.demo.user.UserRole;
-import jakarta.servlet.Registration;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -18,7 +15,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping(path = "/registration")
@@ -29,7 +25,6 @@ public class RegistrationController {
 
     private final RegistrationService registrationService;
     private final UserAccountRepository userAccountRepository;
-    private final UserAccountService userAccountService;
 
 
 
@@ -71,7 +66,6 @@ public class RegistrationController {
                 return ResponseEntity.ok(registrationResult);
             }
         } catch (IOException | ParseException | IllegalArgumentException e) {
-            e.getMessage();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Fehler beim Lesen des Bildes oder beim Parsen der Daten");
         }
     }
@@ -92,8 +86,4 @@ public class RegistrationController {
         return registrationService.confirmToken(token);
     }
 
-    @GetMapping(path = "/setFriendslistPrivacy")
-    public void setFriendslistPrivacy(@RequestBody long Userid,@RequestBody boolean privacy) {
-        userAccountService.setFriendslistPrivacy(Userid,privacy);
-    }
 }
