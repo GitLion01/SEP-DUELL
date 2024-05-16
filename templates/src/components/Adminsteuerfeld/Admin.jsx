@@ -41,6 +41,7 @@ class Admin extends Component {
             this.fetchCards(); // Ruft erneut fetchCards auf, um die Kartenliste zu aktualisieren
         } catch (error) {
             console.error('Fehler beim Hochladen der Datei:', error); // Gibt einen Fehler aus, falls das Hochladen fehlschlägt
+            alert('Fehler beim hochladen der Datei')
         }
     };
 

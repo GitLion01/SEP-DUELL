@@ -11,10 +11,13 @@ function App() {
   const [selectedFriendFriends, setSelectedFriendFriends] = useState([]); 
   const [modalIsOpen, setModalIsOpen] = useState(false); // State for modal open/close
   const userId = localStorage.getItem('id');
+  const [friendslistPrivacy, setFriendslistPrivacy] = useState(false); // State for friendslist privacy
+
 
   useEffect(() => {
     fetchUsers();
     fetchFriends();
+    checkFriendslistPrivacy();
   }, []);
 
 
@@ -126,6 +129,41 @@ function App() {
       });
   };
 
+  const checkFriendslistPrivacy  = async () => {
+    try {
+      const url = `http://localhost:8080/getFriendslistPrivacy?UserId=${userId}`
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      const data = await response.json(); 
+      setFriendslistPrivacy(data);
+    }catch (error) {
+        console.error('Fetch failed', error.message); 
+    }
+  }
+
+  const handleCheckboxChange = async () => {
+    try {
+      const url = `http://localhost:8080/setFriendslistPrivacy?UserId=${userId}`;
+      const requestData = {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      };
+
+      const response = await fetch(url, requestData);
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+
+      setFriendslistPrivacy(!friendslistPrivacy);
+    } catch (error) {
+      console.error('Fetch failed:', error.message);
+    }
+  };
+
   const openModal = (friend) => {
     setSelectedFriend(friend);
     fetchFriendsOfFriend(userId, friend.id); // Fetch friends of the selected friend with userId
@@ -160,6 +198,7 @@ function App() {
           id="friendslistPrivacy" 
           name="friendslistPrivacy" 
           checked={friendslistPrivacy}
+          onChange={handleCheckboxChange}
         />
         <div className="FriendList">
           <ul>

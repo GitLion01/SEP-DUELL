@@ -40,6 +40,7 @@ class TwoFaktorAuthenfication extends Component {
         } catch (error) {
             console.error('Fehler beim Überprüfen des PIN-Codes:', error.message); // Ausgabe eines Fehlers in der Konsole
             // Hier könntest du auf einen Fehler beim Überprüfen des PIN-Codes reagieren, z.B. eine Fehlermeldung anzeigen
+            alert ('PIN-Code falsch oder abgelaufen')
         }
     };
 
