@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Axios from 'axios';
 import './Profile.css';
+import testbild from './testbild.jpg';
 
 // Profil-Seite
 
@@ -115,7 +116,7 @@ function Profile() {
           <img className="profilbild"
           
           // Falls Profilbild existiert, umwandeln von base64 in Bildformat, ansonsten Testbild anzeigen
-          src={profilePicture ? `data:image/jpeg;base64,${profilePicture}` : require('./testbild.jpg') }
+          src={profilePicture ? `data:image/jpeg;base64,${profilePicture}` : testbild }
           alt={'Profilbild'} onClick={() => document.querySelector('input[type="file"]').click()}
           />
           <p><strong>Username:</strong> {username}</p>
