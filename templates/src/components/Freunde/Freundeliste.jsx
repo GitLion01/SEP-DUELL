@@ -10,13 +10,13 @@ function App() {
   const [selectedFriend, setSelectedFriend] = useState(null); // State for selected friend
   const [selectedFriendFriends, setSelectedFriendFriends] = useState([]); 
   const [modalIsOpen, setModalIsOpen] = useState(false); // State for modal open/close
+  const userId = localStorage.getItem('id');
 
   useEffect(() => {
     fetchUsers();
     fetchFriends();
   }, []);
 
-  const userId = localStorage.getItem('id');
 
   const fetchUsers = async () => {
     try {
@@ -34,6 +34,7 @@ function App() {
 
   const fetchFriends = async () => {
     try {
+      console.log(friends)
       const url = `http://localhost:8080/friendlist/${userId}`;
       const response = await fetch(url);
       if (!response.ok) {
@@ -46,7 +47,8 @@ function App() {
     }
   };
 
-  const sendFriendRequest = (friendId) => {
+
+    const sendFriendRequest = (friendId) => {
     const url = 'http://localhost:8080/friendlist/add';
     const requestData = {
       method: 'POST',
@@ -90,6 +92,7 @@ function App() {
       setSelectedFriendFriends([]);
     }
   };
+
 
 
   const removeFriend = (friendId) => {
@@ -152,6 +155,12 @@ function App() {
       </div>
       <div className="FriendList-hülle">
         <h2>Meine Freunde</h2>
+        <input 
+          type="checkbox" 
+          id="friendslistPrivacy" 
+          name="friendslistPrivacy" 
+          checked={friendslistPrivacy}
+        />
         <div className="FriendList">
           <ul>
             {friends.map(friend => (
@@ -177,7 +186,7 @@ function App() {
               <h2>Profil von {selectedFriend.username}</h2>
             </div>
             <div className={'profile-info'}>
-              <img className={'profile-picture'} src={`data:image/jpeg;base64,${selectedFriend.profilePicture}`} alt="Profilbild" />
+              <img className={'profile-picture'} src={`data:image/jpeg;base64,${selectedFriend.image}`} alt="Profilbild" />
               <p><strong>Benutzername:</strong> {selectedFriend.username}</p>
               <p><strong>Vorname:</strong> {selectedFriend.firstName}</p>
               <p><strong>Nachname:</strong> {selectedFriend.lastName}</p>
