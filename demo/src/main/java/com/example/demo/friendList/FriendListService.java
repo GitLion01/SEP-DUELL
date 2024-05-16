@@ -47,7 +47,7 @@ public class FriendListService {
         if(user.isPresent() && friend.isPresent()) {
             if(user.get().getRole()==ADMIN)
                 return friend.map(u -> u.getFriends().stream().map(this::convertToDTO).collect(Collectors.toList()));
-            if(!friend.get().getPrivateFriendList())
+            if(friend.get().getPrivateFriendList())
                 return Optional.empty();
             if(user.get().getFriends().contains(friend.get()))
                 return friend.map(u -> u.getFriends().stream().map(this::convertToDTO).collect(Collectors.toList()));

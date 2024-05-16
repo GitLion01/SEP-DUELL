@@ -148,7 +148,7 @@ function App() {
               <h2>Profil von {selectedFriend.username}</h2>
             </div>
             <div className={'profile-info'}>
-              <img className={'profile-picture'} src={`data:image/jpeg;base64,${selectedFriend.profilePicture}`} alt="Profilbild" />
+              <img className={'profile-picture'} src={`data:image/jpeg;base64,${selectedFriend.image}`} alt="Profilbild" />
               <p><strong>Benutzername:</strong> {selectedFriend.username}</p>
               <p><strong>Vorname:</strong> {selectedFriend.firstName}</p>
               <p><strong>Nachname:</strong> {selectedFriend.lastName}</p>
