@@ -3,13 +3,16 @@ package com.example.demo.friendList;
 import com.example.demo.email.EmailSender;
 import com.example.demo.user.UserAccount;
 import com.example.demo.dto.UserDTO;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Arrays;
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static com.example.demo.user.UserRole.ADMIN;
 
 @Service
 @Transactional
@@ -24,7 +27,12 @@ public class FriendListService {
 
     // Konvertiert UserAccount zu UserDTO
     private UserDTO convertToDTO(UserAccount user) {
-        return new UserDTO(user.getUsername(), Arrays.toString(user.getImage()),user.getId(),user.getFirstName(),user.getLastName(),user.getFriends(), user.getLeaderboardPoints());
+        byte[] image = user.getImage();
+        String imageBase64 = null;
+        if(image != null) {
+            imageBase64 = Base64.getEncoder().encodeToString(user.getImage());
+        }
+        return new UserDTO(user.getUsername(), imageBase64,user.getId(),user.getFirstName(),user.getLastName(),user.getFriends(), user.getLeaderboardPoints());
     }
 
     // Gibt die Freundesliste als DTOs zurück
@@ -33,12 +41,26 @@ public class FriendListService {
         return user.map(u -> u.getFriends().stream().map(this::convertToDTO).collect(Collectors.toList()));
     }
 
+    public Optional<List<UserDTO>> getFriendsFriendList(int id,int friendID) {
+        Optional<UserAccount> user = friendListRepository.findById(id);
+        Optional<UserAccount> friend = friendListRepository.findById(friendID);
+        if(user.isPresent() && friend.isPresent()) {
+            if(user.get().getRole()==ADMIN)
+                return friend.map(u -> u.getFriends().stream().map(this::convertToDTO).collect(Collectors.toList()));
+            if(friend.get().getPrivateFriendList())
+                return Optional.empty();
+            if(user.get().getFriends().contains(friend.get()))
+                return friend.map(u -> u.getFriends().stream().map(this::convertToDTO).collect(Collectors.toList()));
+        }
+        return Optional.empty();
+    }
+/*
     // Gibt die eingehenden Freundschaftsanfragen als DTOs zurück
     public Optional<List<UserDTO>> getFriendListRequests(int id) {
         Optional<UserAccount> user = friendListRepository.findById(id);
         return user.map(u -> u.getFriendRequests().stream().map(this::convertToDTO).collect(Collectors.toList()));
     }
-
+*/
     // Verarbeitet eine Freundschaftsanfrage
     public String FriendshipRequest(int id, int friend_id) {
         Optional<UserAccount> user = friendListRepository.findById(id);
@@ -115,7 +137,7 @@ public class FriendListService {
     }
 
     // Entfernt einen Freund aus der Freundesliste
-    public String RemoveFriend(int id, int friend_id) {
+    public ResponseEntity<String> RemoveFriend(int id, int friend_id) {
         Optional<UserAccount> user = friendListRepository.findById(id);
         Optional<UserAccount> friend = friendListRepository.findById(friend_id);
         if (user.isPresent() && friend.isPresent()) {
@@ -125,12 +147,12 @@ public class FriendListService {
             if (friendAccount.getFriends().contains(userAccount)) {
                 userAccount.removeFriend(friendAccount);
                 friendAccount.removeFriend(userAccount);
-                return "Friendship removed";
+                return new ResponseEntity<>("{\"message\":\"Friendship removed\"}", HttpStatus.OK);
             } else {
-                return "You are not friends";
+                return new ResponseEntity<>("{\"message\":\"You are not friends\"}", HttpStatus.BAD_REQUEST);
             }
         } else {
-            return "User not found";
+            return new ResponseEntity<>("{\"message\":\"User not found\"}", HttpStatus.NOT_FOUND);
         }
     }
 }

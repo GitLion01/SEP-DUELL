@@ -1,11 +1,10 @@
 package com.example.demo.friendList;
 import com.example.demo.dto.UserDTO;
-import com.example.demo.user.UserAccount;
 import lombok.AllArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping(path = "/friendlist")
@@ -19,12 +18,16 @@ public class FriendListController {
     public List<UserDTO> getFriends(@PathVariable int id) {
         return friendListService.getFriendList(id).orElse(null);
     }
-
+    @GetMapping(path ="/{id}/friends/{friendId}")
+    public List<UserDTO> getFriendsFriendList(@PathVariable int id,@PathVariable int friendId) {
+        return friendListService.getFriendsFriendList(id,friendId).orElse(null);
+    }
+/*
     @GetMapping(path = "requests/{id}")
     public List<UserDTO> getFriendListRequests(@PathVariable int id) {
         return friendListService.getFriendListRequests(id).orElse(null);
     }
-
+*/
     @PostMapping(path = "/add")
     public String FriendshipRequest(@RequestBody List<Integer> request) {
         return friendListService.FriendshipRequest(request.get(0), request.get(1));
@@ -41,7 +44,7 @@ public class FriendListController {
     }
 
     @PostMapping(path = "/remove")
-    public String RemoveFriend(@RequestBody List<Integer> request) {
+    public ResponseEntity<String> RemoveFriend(@RequestBody List<Integer> request) {
         return friendListService.RemoveFriend(request.get(0), request.get(1));
     }
 }

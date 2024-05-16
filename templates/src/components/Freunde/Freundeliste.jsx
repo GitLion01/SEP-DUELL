@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import Modal from 'react-modal';
 import './Freundeliste.css';
-import '../Profileinsicht/ProfileFriends.css'
+import '../ProfileForFriends/ProfileFriends.css'
 Modal.setAppElement('#root'); // Set the root element for accessibility
 
 function App() {
   const [users, setUsers] = useState([]);
   const [friends, setFriends] = useState([]);
   const [selectedFriend, setSelectedFriend] = useState(null); // State for selected friend
+  const [selectedFriendFriends, setSelectedFriendFriends] = useState([]); 
   const [modalIsOpen, setModalIsOpen] = useState(false); // State for modal open/close
 
   useEffect(() => {
@@ -60,12 +61,36 @@ function App() {
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }
-        console.log(`Freundschaftsanfrage an ${userId} gesendet`);
+        console.log(`Freundschaftsanfrage an ${friendId} gesendet`);
+        alert('Freundschaftsanfrage wurde gesendet')
+
+        
       })
       .catch(error => {
         console.error('There was a problem with the network request:', error);
       });
   };
+
+  const fetchFriendsOfFriend = async (userId, friendId) => {
+    try {
+      const url = `http://localhost:8080/friendlist/${userId}/friends/${friendId}`;
+      const response = await fetch(url);
+      if (!response.ok) {
+        if (response.status === 403) {
+          console.warn('Zugriff auf die Freundesliste dieses Freundes ist nicht erlaubt.');
+          setSelectedFriendFriends([]);
+          return;
+        }
+        throw new Error('Network response was not ok');
+      }
+      const data = await response.json();
+      setSelectedFriendFriends(data);
+    } catch (error) {
+      console.error('Fetch failed:', error.message);
+      setSelectedFriendFriends([]);
+    }
+  };
+
 
   const removeFriend = (friendId) => {
     const url = 'http://localhost:8080/friendlist/remove';
@@ -90,6 +115,8 @@ function App() {
         const updatedFriends = [...friends.slice(0, index), ...friends.slice(index + 1)];
         setFriends(updatedFriends);
         console.log(`Freund mit ID ${friendId} wurde aus der Freundesliste entfernt`);
+        alert('Freund wurde aus der Freundesliste entfernt')
+
       })
       .catch(error => {
         console.error('There was a problem with the network request:', error);
@@ -98,12 +125,14 @@ function App() {
 
   const openModal = (friend) => {
     setSelectedFriend(friend);
+    fetchFriendsOfFriend(userId, friend.id); // Fetch friends of the selected friend with userId
     setModalIsOpen(true);
   };
 
   const closeModal = () => {
     setSelectedFriend(null);
     setModalIsOpen(false);
+    setSelectedFriendFriends([]);
   };
 
   return (
@@ -153,6 +182,16 @@ function App() {
               <p><strong>Vorname:</strong> {selectedFriend.firstName}</p>
               <p><strong>Nachname:</strong> {selectedFriend.lastName}</p>
               <p><strong>Leaderboard-Punkte:</strong> {selectedFriend.leaderboardPoints}</p>
+            </div>
+            <div className="friends-of-friend">
+              <h4>Freunde von {selectedFriend.username}</h4>
+              <div className="friends-list">
+                <ul>
+                  {selectedFriendFriends.map(friend => (
+                    <li key={friend.id}>{friend.username}</li>
+                  ))}
+                </ul>
+              </div>
             </div>
             <button onClick={closeModal}>Schließen</button>
           </div>

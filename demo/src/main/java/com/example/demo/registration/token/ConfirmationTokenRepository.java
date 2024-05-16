@@ -3,6 +3,7 @@ package com.example.demo.registration.token;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,8 +25,14 @@ public interface ConfirmationTokenRepository extends JpaRepository<ConfirmationT
     @Query("DELETE FROM ConfirmationToken c WHERE c.appUser.email = ?1 AND c.purpose = ?2")
     void deleteTokensByEmailAndPurpose(String email, TokenPurpose purpose);
 
-    @Query("SELECT CASE WHEN COUNT(c) > 0 THEN true ELSE false END FROM ConfirmationToken c WHERE c.appUser.id = ?1 AND c.token = ?2")
-    Boolean existsByUserIdAndToken(Long userId, String token);
+    @Query("SELECT count(c) > 0 FROM ConfirmationToken c WHERE c.appUser.id = :app_user_id AND c.token = :token")
+    Boolean existsByUserIdAndToken(@Param("app_user_id") Long app_user_id, @Param("token") String token);
+
+    @Transactional
+    @Modifying
+    @Query("DELETE FROM ConfirmationToken c WHERE c.appUser.id = ?1 AND c.token = ?2")
+    void deleteToken(Long app_user_id,String token);
+
     //TODO: lösche Token nach dem User sich einloggt
 
 }
