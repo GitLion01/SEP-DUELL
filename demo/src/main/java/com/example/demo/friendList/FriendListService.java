@@ -7,8 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Arrays;
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -28,7 +27,12 @@ public class FriendListService {
 
     // Konvertiert UserAccount zu UserDTO
     private UserDTO convertToDTO(UserAccount user) {
-        return new UserDTO(user.getUsername(), Arrays.toString(user.getImage()),user.getId(),user.getFirstName(),user.getLastName(),user.getFriends(), user.getLeaderboardPoints());
+        byte[] image = user.getImage();
+        String imageBase64 = null;
+        if(image != null) {
+            imageBase64 = Base64.getEncoder().encodeToString(user.getImage());
+        }
+        return new UserDTO(user.getUsername(), imageBase64,user.getId(),user.getFirstName(),user.getLastName(),user.getFriends(), user.getLeaderboardPoints());
     }
 
     // Gibt die Freundesliste als DTOs zurück
