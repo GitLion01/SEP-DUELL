@@ -30,22 +30,22 @@ public class FriendListController {
 */
     @PostMapping(path = "/add")
     public String FriendshipRequest(@RequestBody List<Long> request) {
-        return friendListService.FriendshipRequest(request.get(0), request.get(1));
+        return friendListService.friendshipRequest(request.get(0), request.get(1));
     }
 
     @GetMapping(path = "/accept")
     public String FriendshipAccept(@RequestParam("userId") long userId, @RequestParam("friendId") long friendId) {
-        return friendListService.FriendshipAccept(userId, friendId);
+        return friendListService.friendshipAccept(userId, friendId);
     }
 
     @GetMapping(path = "/reject")
     public String FriendshipReject(@RequestParam("userId") long userId, @RequestParam("friendId") long friendId) {
-        return friendListService.FriendshipReject(userId, friendId);
+        return friendListService.friendshipReject(userId, friendId);
     }
 
     @PostMapping(path = "/remove")
     public ResponseEntity<String> RemoveFriend(@RequestBody List<Integer> request) {
-        return friendListService.RemoveFriend(request.get(0), request.get(1));
+        return friendListService.removeFriend(request.get(0), request.get(1));
     }
 
 

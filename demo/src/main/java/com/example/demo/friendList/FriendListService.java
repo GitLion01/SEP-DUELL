@@ -62,7 +62,7 @@ public class FriendListService {
     }
 */
     // Verarbeitet eine Freundschaftsanfrage
-    public String FriendshipRequest(long id, long friend_id) {
+    public String friendshipRequest(long id, long friend_id) {
         Optional<UserAccount> user = friendListRepository.findById(id);
         Optional<UserAccount> friend = friendListRepository.findById(friend_id);
         if (user.isPresent() && friend.isPresent()) {
@@ -99,7 +99,7 @@ public class FriendListService {
     }
 
     // Akzeptiert eine Freundschaftsanfrage
-    public String FriendshipAccept(long id, long friend_id) {
+    public String friendshipAccept(long id, long friend_id) {
         Optional<UserAccount> user = friendListRepository.findById(id);
         Optional<UserAccount> friend = friendListRepository.findById(friend_id);
         if (user.isPresent() && friend.isPresent()) {
@@ -119,7 +119,7 @@ public class FriendListService {
     }
 
     // Lehnt eine Freundschaftsanfrage ab
-    public String FriendshipReject(long id, long friend_id) {
+    public String friendshipReject(long id, long friend_id) {
         Optional<UserAccount> user = friendListRepository.findById(id);
         Optional<UserAccount> friend = friendListRepository.findById(friend_id);
         if (user.isPresent() && friend.isPresent()) {
@@ -137,7 +137,7 @@ public class FriendListService {
     }
 
     // Entfernt einen Freund aus der Freundesliste
-    public ResponseEntity<String> RemoveFriend(long id, long friend_id) {
+    public ResponseEntity<String> removeFriend(long id, long friend_id) {
         Optional<UserAccount> user = friendListRepository.findById(id);
         Optional<UserAccount> friend = friendListRepository.findById(friend_id);
         if (user.isPresent() && friend.isPresent()) {

@@ -14,7 +14,7 @@ import java.util.List;
 public class ProfileRequest {
     private String name;
     private int SEPCoins;
-    private int LeaderboardPoints;
-    private int Cards;
+    private int leaderboardPoints;
+    private int cards;
     private List<Card> cardList;
 }
