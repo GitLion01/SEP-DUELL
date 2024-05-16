@@ -15,11 +15,11 @@ public class FriendListController {
     private final FriendListService friendListService;
 
     @GetMapping(path = "/{id}")
-    public List<UserDTO> getFriends(@PathVariable int id) {
+    public List<UserDTO> getFriends(@PathVariable long id) {
         return friendListService.getFriendList(id).orElse(null);
     }
     @GetMapping(path ="/{id}/friends/{friendId}")
-    public List<UserDTO> getFriendsFriendList(@PathVariable int id,@PathVariable int friendId) {
+    public List<UserDTO> getFriendsFriendList(@PathVariable long id,@PathVariable long friendId) {
         return friendListService.getFriendsFriendList(id,friendId).orElse(null);
     }
 /*
@@ -29,22 +29,33 @@ public class FriendListController {
     }
 */
     @PostMapping(path = "/add")
-    public String FriendshipRequest(@RequestBody List<Integer> request) {
-        return friendListService.FriendshipRequest(request.get(0), request.get(1));
+    public String FriendshipRequest(@RequestBody List<Long> request) {
+        return friendListService.friendshipRequest(request.get(0), request.get(1));
     }
 
     @GetMapping(path = "/accept")
-    public String FriendshipAccept(@RequestParam("userId") int userId, @RequestParam("friendId") int friendId) {
-        return friendListService.FriendshipAccept(userId, friendId);
+    public String FriendshipAccept(@RequestParam("userId") long userId, @RequestParam("friendId") long friendId) {
+        return friendListService.friendshipAccept(userId, friendId);
     }
 
     @GetMapping(path = "/reject")
-    public String FriendshipReject(@RequestParam("userId") int userId, @RequestParam("friendId") int friendId) {
-        return friendListService.FriendshipReject(userId, friendId);
+    public String FriendshipReject(@RequestParam("userId") long userId, @RequestParam("friendId") long friendId) {
+        return friendListService.friendshipReject(userId, friendId);
     }
 
     @PostMapping(path = "/remove")
     public ResponseEntity<String> RemoveFriend(@RequestBody List<Integer> request) {
-        return friendListService.RemoveFriend(request.get(0), request.get(1));
+        return friendListService.removeFriend(request.get(0), request.get(1));
+    }
+
+
+    @PutMapping(path = "/setFriendslistPrivacy")
+    public ResponseEntity<Void> setFriendslistPrivacy(@RequestParam("UserId") long UserId) {
+        return friendListService.setFriendslistPrivacy(UserId);
+    }
+
+    @GetMapping(path = "/getFriendslistPrivacy")
+    public ResponseEntity<Boolean> getFriendslistPrivacy(@RequestParam("UserId") long UserId) {
+        return friendListService.getFriendslistPrivacy(UserId);
     }
 }

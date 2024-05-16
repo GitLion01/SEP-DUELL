@@ -36,18 +36,18 @@ public class FriendListService {
     }
 
     // Gibt die Freundesliste als DTOs zurück
-    public Optional<List<UserDTO>> getFriendList(int id) {
+    public Optional<List<UserDTO>> getFriendList(long id) {
         Optional<UserAccount> user = friendListRepository.findById(id);
         return user.map(u -> u.getFriends().stream().map(this::convertToDTO).collect(Collectors.toList()));
     }
 
-    public Optional<List<UserDTO>> getFriendsFriendList(int id,int friendID) {
+    public Optional<List<UserDTO>> getFriendsFriendList(long id,long friendID) {
         Optional<UserAccount> user = friendListRepository.findById(id);
         Optional<UserAccount> friend = friendListRepository.findById(friendID);
         if(user.isPresent() && friend.isPresent()) {
             if(user.get().getRole()==ADMIN)
                 return friend.map(u -> u.getFriends().stream().map(this::convertToDTO).collect(Collectors.toList()));
-            if(friend.get().getPrivateFriendList())
+            if(!friend.get().getPrivateFriendList())
                 return Optional.empty();
             if(user.get().getFriends().contains(friend.get()))
                 return friend.map(u -> u.getFriends().stream().map(this::convertToDTO).collect(Collectors.toList()));
@@ -62,7 +62,7 @@ public class FriendListService {
     }
 */
     // Verarbeitet eine Freundschaftsanfrage
-    public String FriendshipRequest(int id, int friend_id) {
+    public String friendshipRequest(long id, long friend_id) {
         Optional<UserAccount> user = friendListRepository.findById(id);
         Optional<UserAccount> friend = friendListRepository.findById(friend_id);
         if (user.isPresent() && friend.isPresent()) {
@@ -99,7 +99,7 @@ public class FriendListService {
     }
 
     // Akzeptiert eine Freundschaftsanfrage
-    public String FriendshipAccept(int id, int friend_id) {
+    public String friendshipAccept(long id, long friend_id) {
         Optional<UserAccount> user = friendListRepository.findById(id);
         Optional<UserAccount> friend = friendListRepository.findById(friend_id);
         if (user.isPresent() && friend.isPresent()) {
@@ -119,7 +119,7 @@ public class FriendListService {
     }
 
     // Lehnt eine Freundschaftsanfrage ab
-    public String FriendshipReject(int id, int friend_id) {
+    public String friendshipReject(long id, long friend_id) {
         Optional<UserAccount> user = friendListRepository.findById(id);
         Optional<UserAccount> friend = friendListRepository.findById(friend_id);
         if (user.isPresent() && friend.isPresent()) {
@@ -137,7 +137,7 @@ public class FriendListService {
     }
 
     // Entfernt einen Freund aus der Freundesliste
-    public ResponseEntity<String> RemoveFriend(int id, int friend_id) {
+    public ResponseEntity<String> removeFriend(long id, long friend_id) {
         Optional<UserAccount> user = friendListRepository.findById(id);
         Optional<UserAccount> friend = friendListRepository.findById(friend_id);
         if (user.isPresent() && friend.isPresent()) {
@@ -154,5 +154,26 @@ public class FriendListService {
         } else {
             return new ResponseEntity<>("{\"message\":\"User not found\"}", HttpStatus.NOT_FOUND);
         }
+    }
+
+    public ResponseEntity<Void> setFriendslistPrivacy(long UserId)
+    {
+        Optional<UserAccount> user = friendListRepository.findById(UserId);
+        if(user.isPresent()) {
+            UserAccount userAccount = user.get();
+            userAccount.setPrivateFriendList(!userAccount.getPrivateFriendList());
+            return new ResponseEntity<>(HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
+
+    public ResponseEntity<Boolean> getFriendslistPrivacy(long UserId)
+    {
+        Optional<UserAccount> user = friendListRepository.findById(UserId);
+        if(user.isPresent()) {
+            UserAccount userAccount = user.get();
+            return new ResponseEntity<>(userAccount.getPrivateFriendList(), HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 }
