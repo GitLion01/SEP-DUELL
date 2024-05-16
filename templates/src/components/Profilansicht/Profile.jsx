@@ -20,6 +20,28 @@ function Profile() {
   const [error, setError] = useState(null);
   const [userdata, setUserdata] = useState('');
   
+  // Funktion, um ein Bild von einer URL zu laden und als File zurückzugeben
+  const urlToFile = async (url, filename, mimeType) => {
+    const response = await fetch(url);
+    const blob = await response.blob();
+    return new File([blob], filename, { type: mimeType });
+  };
+
+   // Funktion zum Hochladen des Testbilds
+   const uploadTestbild = async () => {
+    try {
+      const file = await urlToFile(testbild, 'testbild.jpg', 'image/jpeg');
+      const formData = new FormData();
+      formData.append('image', file);
+
+      await Axios.post(`http://localhost:8080/image/upload/${id}`, formData);
+      fetchUpdatedImage();
+      console.log('Testbild wurde als Profilbild hochgeladen');
+    } catch (error) {
+      setError('Ein Fehler ist aufgetreten');
+      console.error(error);
+    }
+  };
 
   // Benutzerdaten von der API abrufen
   useEffect(() => {
@@ -28,7 +50,14 @@ function Profile() {
           console.log(response.data);
         const userData = response.data;
         setUserdata(response.data);
-        setProfilePicture(userData.image);
+
+        if (!userData.image) {
+          uploadTestbild();
+        } else {
+          setProfilePicture(userData.image);
+        }
+
+        //setProfilePicture(userData.image);
         setUsername(userData.username);
         setVorname(userData.firstName);
         setNachname(userData.lastName);
@@ -111,14 +140,16 @@ function Profile() {
       <div className="Profile">
         <h1 className="titel"> Mein Profil</h1>
         <div className="daten">
+          
           {/* Profilbild anzeigen und Ändern */}
           <input type="file" accept="image/*" onChange={handleFileChange} style={{display: 'none'}} />
           <img className="profilbild"
-          
-          // Falls Profilbild existiert, umwandeln von base64 in Bildformat, ansonsten Testbild anzeigen
-          src={profilePicture ? `data:image/jpeg;base64,${profilePicture}` : testbild }
+
+          // Profilbild umwandeln von base64 in Bildformat
+          src={`data:image/jpeg;base64,${profilePicture}`}
           alt={'Profilbild'} onClick={() => document.querySelector('input[type="file"]').click()}
           />
+
           <p><strong>Username:</strong> {username}</p>
           <p><strong>Vorname:</strong> {vorname}</p>
           <p><strong>Nachname:</strong> {nachname}</p>
