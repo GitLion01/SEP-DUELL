@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import Modal from 'react-modal';
 import './Freundeliste.css';
 import '../ProfileForFriends/ProfileFriends.css'
@@ -9,7 +9,7 @@ function App() {
   const [users, setUsers] = useState([]);
   const [friends, setFriends] = useState([]);
   const [selectedFriend, setSelectedFriend] = useState(null); // State for selected friend
-  const [selectedFriendFriends, setSelectedFriendFriends] = useState([]);
+  const [selectedFriendFriends, setSelectedFriendFriends] = useState([]); 
   const [modalIsOpen, setModalIsOpen] = useState(false); // State for modal open/close
   const [isChecked, setIsChecked] = useState(false);
   const [friendslistPrivacy, setFriendslistPrivacy] = useState(false); // State for friendslist privacy
@@ -18,9 +18,34 @@ function App() {
     fetchUsers();
     fetchFriends();
     setCheckBox();
-  }, []);
+    const userId = localStorage.getItem('id'); // Get user ID from local storage
 
-  const userId = localStorage.getItem('id');
+  console.log("Current user ID:", userId);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [friendsResponse, usersResponse] = await Promise.all([
+          fetchFriends(),
+          fetchUsers()
+        ]);
+
+        setFriends(friendsResponse);
+
+        const filteredUsers =
+            usersResponse.filter(user =>
+                user.id.toString() !== userId.toString() &&
+                !friendsResponse.some(friend => friend.id.toString() === user.id.toString())
+            );
+
+        setUsers(filteredUsers);
+      } catch (error) {
+        console.error('Fetch failed:', error.message);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const fetchUsers = async () => {
     try {
@@ -96,7 +121,6 @@ function App() {
   };
 
 
-
   const removeFriend = (friendId) => {
     const url = 'http://localhost:8080/friendlist/remove';
     const requestData = {
@@ -108,24 +132,22 @@ function App() {
     };
 
     fetch(url, requestData)
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        return response.json();
-      })
-      .then(data => {
-        console.log('Backend response:', data);
-        const index = friends.findIndex(f => f.id === friendId);
-        const updatedFriends = [...friends.slice(0, index), ...friends.slice(index + 1)];
-        setFriends(updatedFriends);
-        console.log(`Freund mit ID ${friendId} wurde aus der Freundesliste entfernt`);
-        alert('Freund wurde aus der Freundesliste entfernt')
-
-      })
-      .catch(error => {
-        console.error('There was a problem with the network request:', error);
-      });
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(data => {
+          console.log('Backend response:', data);
+          const updatedFriends = friends.filter(f => f.id !== friendId);
+          setFriends(updatedFriends);
+          console.log(`Freund mit ID ${friendId} wurde aus der Freundesliste entfernt`);
+          alert('Freund wurde aus der Freundesliste entfernt');
+        })
+        .catch(error => {
+          console.error('There was a problem with the network request:', error);
+        });
   };
 
   const openModal = (friend) => {
