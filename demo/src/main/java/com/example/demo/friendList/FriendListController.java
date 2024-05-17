@@ -15,19 +15,14 @@ public class FriendListController {
     private final FriendListService friendListService;
 
     @GetMapping(path = "/{id}")
-    public List<UserDTO> getFriends(@PathVariable long id) {
+    public List<UserDTO> getFriends(@PathVariable int id) {
         return friendListService.getFriendList(id).orElse(null);
     }
     @GetMapping(path ="/{id}/friends/{friendId}")
-    public List<UserDTO> getFriendsFriendList(@PathVariable long id,@PathVariable long friendId) {
+    public List<UserDTO> getFriendsFriendList(@PathVariable int id,@PathVariable int friendId) {
         return friendListService.getFriendsFriendList(id,friendId).orElse(null);
     }
-/*
-    @GetMapping(path = "requests/{id}")
-    public List<UserDTO> getFriendListRequests(@PathVariable int id) {
-        return friendListService.getFriendListRequests(id).orElse(null);
-    }
-*/
+
     @PostMapping(path = "/add")
     public String FriendshipRequest(@RequestBody List<Long> request) {
         return friendListService.friendshipRequest(request.get(0), request.get(1));

@@ -54,13 +54,7 @@ public class FriendListService {
         }
         return Optional.empty();
     }
-/*
-    // Gibt die eingehenden Freundschaftsanfragen als DTOs zurück
-    public Optional<List<UserDTO>> getFriendListRequests(int id) {
-        Optional<UserAccount> user = friendListRepository.findById(id);
-        return user.map(u -> u.getFriendRequests().stream().map(this::convertToDTO).collect(Collectors.toList()));
-    }
-*/
+
     // Verarbeitet eine Freundschaftsanfrage
     public String friendshipRequest(long id, long friend_id) {
         Optional<UserAccount> user = friendListRepository.findById(id);
@@ -82,7 +76,8 @@ public class FriendListService {
             String acceptLink = String.format("http://localhost:8080/friendlist/accept?userId=%d&friendId=%d", friend_id, id);
             String rejectLink = String.format("http://localhost:8080/friendlist/reject?userId=%d&friendId=%d", friend_id, id);
             String emailContent = buildFriendRequestEmail(userAccount.getUsername(), acceptLink, rejectLink);
-            emailSender.send(friendAccount.getEmail(), emailContent);
+            String emailSubject = "Freundschaftsanfrage"; // Betreff der E-Mail
+            emailSender.send(friendAccount.getEmail(), emailContent, emailSubject);
 
             return "Friend request sent from " + userAccount.getUsername() + " to " + friendAccount.getUsername();
         } else {
