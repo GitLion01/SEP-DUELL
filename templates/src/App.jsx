@@ -7,7 +7,7 @@ import Startseite from './components/Startseite/Startseite.jsx';
 import DeckEditor from './components/Deckarbeiten/DeckEditor.jsx';
 import AdminPanel from './components/Adminsteuerfeld/Admin.jsx';
 import Profile from './components/Profilansicht/Profile.jsx';
-import CreateDeck from './components/Deck-erstellen/CreateDeck.jsx';
+import Decks from './components/Deck-erstellen/Decks.jsx';
 import './index.css';
 import Freundeliste from "./components/Freunde/Freundeliste.jsx";
 import ProtectedRoute from './ProtectedRoute.jsx';

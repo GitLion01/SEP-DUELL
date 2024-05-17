@@ -114,6 +114,12 @@ class Registrierung extends React.Component {
 
   handleImageChange(event) {
     const file = event.target.files[0];
+    
+    if (file.size >1048576) { // 1MB Limit
+      alert('Die Datei ist zu groß. Die maximale Dateigröße beträgt 1MB. ');
+      return
+    }
+
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
