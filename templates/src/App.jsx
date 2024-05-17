@@ -4,7 +4,6 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import TwoFaktorAuthenfication from './components/2FA/TwoFactorAuthentication';
 import Register from './components/Registrierung/Register.jsx' 
 import Startseite from './components/Startseite/Startseite.jsx';
-import DeckEditor from './components/Deckarbeiten/DeckEditor.jsx';
 import AdminPanel from './components/Adminsteuerfeld/Admin.jsx';
 import Profile from './components/Profilansicht/Profile.jsx';
 import Decks from './components/Deck-erstellen/Decks.jsx';
@@ -23,9 +22,8 @@ function App() {
         <Route path="/startseite" element={<ProtectedRoute element={Startseite} />} /> {/* Die Namen der Seiten müssen groß geschrieben werden, damit das klappt*/}
         <Route path="/2fa" element={<TwoFaktorAuthenfication/>} />
         <Route path="/profil" element={<ProtectedRoute element={Profile} />} />
-        <Route path="/deckbearbeiten" element={<ProtectedRoute element={DeckEditor} />} />
         <Route path="/admin" element={<ProtectedRoute element={AdminPanel} requiredRole="ADMIN" />} />
-        <Route path="/decks" element={<ProtectedRoute element={CreateDeck} />} />
+        <Route path="/decks" element={<ProtectedRoute element={Decks} />} />
         <Route path="/freundelist" element={<ProtectedRoute element={Freundeliste} />} />
       </Routes>
     </Router>
