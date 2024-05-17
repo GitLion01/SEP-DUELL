@@ -107,8 +107,9 @@ public class RegistrationService {
             }
 
             // E-Mail senden mit Bestätigungslink
+            String subject = "Account Activation";  // Betreff der E-Mail
             String link = "http://localhost:8080/registration/confirm?token=" + token;
-            emailSender.send(email, buildEmail(firstName, link));
+            emailSender.send(email, buildEmail(firstName, link), subject);  // Füge den Betreff hinzu
 
             return token;
         } catch (Exception e) {

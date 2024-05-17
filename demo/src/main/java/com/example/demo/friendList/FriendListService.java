@@ -75,11 +75,11 @@ public class FriendListService {
             friendAccount.addFriendRequest(userAccount);
 
             // Send email notification
+            String subject = "Friend Request"; // Define a subject for the email
             String acceptLink = String.format("http://localhost:8080/friendlist/accept?userId=%d&friendId=%d", friend_id, id);
             String rejectLink = String.format("http://localhost:8080/friendlist/reject?userId=%d&friendId=%d", friend_id, id);
             String emailContent = buildFriendRequestEmail(userAccount.getUsername(), acceptLink, rejectLink);
-            emailSender.send(friendAccount.getEmail(), emailContent);
-
+            emailSender.send(friendAccount.getEmail(), emailContent, subject);  // Now includes the subject
             return "Friend request sent from " + userAccount.getUsername() + " to " + friendAccount.getUsername();
         } else {
             return "User not found";
