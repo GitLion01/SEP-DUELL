@@ -3,8 +3,6 @@ import Modal from 'react-modal';
 import './Freundeliste.css';
 import '../ProfileForFriends/ProfileFriends.css'
 import BackButton from '../BackButton';
-import '../Profileinsicht/ProfileFriends.css'
-
 Modal.setAppElement('#root'); // Set the root element for accessibility
 
 function App() {
@@ -132,6 +130,7 @@ function App() {
 
   const openModal = (friend) => {
     setSelectedFriend(friend);
+    fetchFriendsOfFriend(userId,friend.id);
     setModalIsOpen(true);
   };
 
@@ -193,39 +192,34 @@ function App() {
       </div>
       <div className="FriendList-hülle">
         <h2>Meine Freunde</h2>
-        <input
-          type="checkbox"
-          id="friendslistPrivacy"
-          name="friendslistPrivacy"
-          checked={friendslistPrivacy}
-          onChange={handleCheckboxChange}
-        />
         <div className="FriendList">
           <ul>
             {friends.map(friend => (
-              <li key={friend.id}>
-                <span onClick={() => openModal(friend)} style={{ cursor: 'pointer', color: 'blue' }}>{friend.username}</span>
-                <button onClick={() => removeFriend(friend.id)}>Freund entfernen</button>
-              </li>
+                <li key={friend.id}>
+                  <span onClick={() => openModal(friend)}
+                        style={{cursor: 'pointer', color: 'blue'}}>{friend.username}</span>
+                  <button onClick={() => removeFriend(friend.id)}>Freund entfernen</button>
+                </li>
             ))}
           </ul>
         </div>
-          <div className="form-check form-switch">
-              <input className="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault" onChange={handleCheckboxChange} checked={isChecked}/>
-              <label className="form-check-label" htmlFor="flexSwitchCheckDefault">Privat</label>
-          </div>
+        <div className="form-check form-switch">
+          <input className="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault"
+                 onChange={handleCheckboxChange} checked={isChecked}/>
+          <label className="form-check-label" htmlFor="flexSwitchCheckDefault">Privat</label>
+        </div>
       </div>
 
       <Modal
-        isOpen={modalIsOpen}
-        onRequestClose={closeModal}
-        contentLabel="Friend Profile"
-        className="Modal"
-        overlayClassName="Overlay"
+          isOpen={modalIsOpen}
+          onRequestClose={closeModal}
+          contentLabel="Friend Profile"
+          className="Modal"
+          overlayClassName="Overlay"
       >
         {selectedFriend && (
-          <div className={'profile-container'}>
-            <div className={'profile-header'}>
+            <div className={'profile-container'}>
+              <div className={'profile-header'}>
               <h2>Profil von {selectedFriend.username}</h2>
             </div>
             <div className={'profile-info'}>
