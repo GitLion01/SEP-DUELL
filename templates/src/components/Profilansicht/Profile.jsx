@@ -155,7 +155,7 @@ function Profile() {
           <p><strong>Nachname:</strong> {nachname}</p>
           <p><strong>Email:</strong> {email}</p>
           {/*<p><strong>Passwort:</strong> {password} </p>*/}
-          <p><strong>Date of Birth:</strong> {geburtsdatum}</p>
+          <p><strong>Geburtsdatum:</strong> {geburtsdatum}</p>
           {role !== 'ADMIN' && <p><strong>SEP Coins:</strong> {sepCoins}</p>}
           {role !== 'ADMIN' && <p><strong>Leaderboard Punkte:</strong> {leaderbordpunkte}</p>}
           {error && <p className="error">{error}</p>} {/* Fehlermeldung anzeigen falls error != null */}
