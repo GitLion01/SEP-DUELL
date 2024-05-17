@@ -25,7 +25,7 @@ class Startseite extends Component {
 
   render() {
     const { loggedIn } = this.state;
-
+    const info = console.log(localStorage.getItem('userRole'))
     if (!loggedIn) {
       console.log("Benutzer ausgeloggt, Weiterleitung zur Login-Seite");
       // Hier können Sie eine Weiterleitung zur Login-Seite implementieren

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Modal from 'react-modal';
 import './Freundeliste.css';
 import '../ProfileForFriends/ProfileFriends.css'
+import BackButton from '../BackButton';
 Modal.setAppElement('#root'); // Set the root element for accessibility
 
 function App() {
@@ -178,6 +179,7 @@ function App() {
 
   return (
     <div className="BFF">
+      <BackButton />
       <div className="UserList-hülle">
         <h2>Nutzerliste</h2>
         <div className="UserList">

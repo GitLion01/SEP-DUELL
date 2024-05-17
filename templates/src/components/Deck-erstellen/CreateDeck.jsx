@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './CreateDeck.css';
 import { Link } from 'react-router-dom';
+import BackButton from '../BackButton';
 
 function CreateDeck() {
     const [id, setId] = useState(null);
@@ -291,7 +292,9 @@ function CreateDeck() {
     const clearErrorMessage = () => setErrorMessage('');
 
     return (
+        
         <div className="container">
+            <BackButton />
             <h1>Meine Decks</h1>
             {errorMessage && (
                 <div className="error-message" onClick={clearErrorMessage}>

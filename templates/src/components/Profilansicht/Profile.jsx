@@ -67,6 +67,7 @@ function Profile() {
   // Profilseite rendern
   return (
     <>
+    <BackButton />
     <div className="Profile">
       <h1 className="titel"> Mein Profil</h1>
       <div className="daten">

@@ -2,6 +2,7 @@ import React, { Component } from 'react'; // Importiert React und die Component-
 import axiosInstance from '../../api/axios'; // Importiert eine axios-Instanz für HTTP-Anfragen
 import './Admin.css'; // Importiert die CSS-Datei für das Styling der Admin-Komponente
 import Card from '../card'; // Importiert die Card-Komponente
+import BackButton from '../BackButton';
 
 class Admin extends Component {
     state = { 
@@ -87,6 +88,7 @@ class Admin extends Component {
 
         return (
             <body className='AdminPanel__body'> {/* Fügt eine Klasse für das Body-Element hinzu */}
+                  <BackButton />
                 <div className="AdminPanel">
                     <h1>Admin Panel</h1> {/* Überschrift für das Admin-Panel */}
                     <form onSubmit={this.handleUpload}> {/* Formular zum Hochladen einer CSV-Datei */}
