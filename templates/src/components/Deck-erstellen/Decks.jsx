@@ -13,14 +13,7 @@ function Decks() {
     const [originalDeckName, setCurrentDeckName] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
     const [isEditing, setIsEditing] = useState(false);  // Zustand zum Überwachen, ob Änderungen gemacht wurden
-    
-    /*
-    const [formData, setFormData] = useState({
-        userID: id,
-        name:"",
-        cardNames:[""]
-    });
-    */
+
 
     //Lädt die userID aus dem LocalStorage beim ersten Render der Komponente
     useEffect(() => {
@@ -67,15 +60,6 @@ function Decks() {
     };
 
 
-    /*
-    const handleInputChange = (event) => {
-        const { name, value} = event.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
-    };
-    */
 
     // Funktion zur Generierung eines zufälligen Namens
     const generateRandomName = () => {
