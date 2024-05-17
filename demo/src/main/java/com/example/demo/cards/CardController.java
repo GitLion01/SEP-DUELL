@@ -45,15 +45,6 @@ public class CardController {
 
 
 
-    /*@GetMapping(path = "/findByName/{name}")
-    public ResponseEntity<Optional<Card>> findByByName(@PathVariable String name) {
-        try {
-            Optional<Card> card = cardRepository.findByName(name);
-            return ResponseEntity.ok(card);
-        } catch (Exception e) {
-            return ResponseEntity.notFound().build();
-        }
-    }*/
     @GetMapping(path = "/findByName/{name}")
     public ResponseEntity<Optional<CardResponse>> findByByName(@PathVariable String name) {
         try {
@@ -73,11 +64,7 @@ public class CardController {
     }
 
 
-    /*@GetMapping
-    public ResponseEntity<List<Card>> findAll() {
-        List<Card> cards = cardRepository.findAll();
-        return ResponseEntity.ok(cards);
-    }*/
+
     @GetMapping
     public ResponseEntity<List<CardResponse>> findAll() {
         List<Card> cards = cardRepository.findAll();

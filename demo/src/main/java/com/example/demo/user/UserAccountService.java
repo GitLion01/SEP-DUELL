@@ -1,5 +1,6 @@
 package com.example.demo.user;
 import com.example.demo.registration.token.ConfirmationToken;
+import com.example.demo.registration.token.ConfirmationTokenRepository;
 import com.example.demo.registration.token.ConfirmationTokenService;
 import com.example.demo.registration.token.TokenPurpose;
 import lombok.AllArgsConstructor;
@@ -8,6 +9,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -22,6 +24,7 @@ public class UserAccountService implements UserDetailsService {
     private final static String USER_NOT_FOUND_MESSAGE = "User not found";
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final ConfirmationTokenService confirmationTokenService;
+    private final ConfirmationTokenRepository confirmationTokenRepository;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -66,29 +69,12 @@ public class UserAccountService implements UserDetailsService {
         userAccountRepository.enableAppUser(email);
     }
 
-
-    public int countDecksByUserId(Long userId) {
-        try {
-            return userAccountRepository.countDecksByUserId(userId);
-        } catch (Exception e) {
-            System.out.println("Fehler beim Zählen der Decks für den Benutzer mit der ID " + userId + ": " + e.getMessage());
-            return 0; // oder eine andere geeignete Aktion, z. B. einen Standardwert zurückgeben
+    @Transactional
+    public void deleteUser(String email) {
+        if(email != null && userAccountRepository.findByEmail(email).isPresent()) {
+            confirmationTokenRepository.deleteExpiredTokens(LocalDateTime.now());
+            userAccountRepository.deleteByEmail(email);
         }
     }
 
-
-    public Long getUserIdByEmail(String email) {
-        try {
-            Optional<UserAccount> userAccountOptional = userAccountRepository.findByEmail(email);
-            if (userAccountOptional.isPresent()) {
-                return userAccountOptional.get().getId();
-            }
-            // Handle case when user with given email is not found
-            return null;
-        } catch (Exception e) {
-            // Handle any exceptions
-            e.getMessage();
-            return null;
-        }
-    }
 }

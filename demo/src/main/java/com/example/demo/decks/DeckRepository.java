@@ -15,7 +15,7 @@ import java.util.Optional;
 @Repository
 public interface DeckRepository extends JpaRepository<Deck, Long> {
 
-    Optional<Deck> findByName(String deckName);
+
 
 
     @Transactional

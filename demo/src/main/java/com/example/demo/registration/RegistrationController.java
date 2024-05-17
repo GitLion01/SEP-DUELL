@@ -29,10 +29,7 @@ public class RegistrationController {
 
 
 
-   /* @PostMapping
-    public String register(@RequestBody RegistrationRequest request) {
-        return registrationService.register(request);
-    }*/
+
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> register(

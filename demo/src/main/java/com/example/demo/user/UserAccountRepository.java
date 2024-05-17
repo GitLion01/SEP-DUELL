@@ -12,7 +12,6 @@ import java.util.Optional;
 @Repository
 @Transactional(readOnly = true)
 public interface UserAccountRepository extends JpaRepository<UserAccount, Long> {
-    Optional<UserAccount> findByUsername(String username);
     Optional<UserAccount> findByEmail(String email);
 
     @Transactional
@@ -21,6 +20,10 @@ public interface UserAccountRepository extends JpaRepository<UserAccount, Long> 
             "SET a.enabled = TRUE WHERE a.email = ?1")
     int enableAppUser(String email);
 
+    @Transactional
+    @Modifying
+    @Query
+    void deleteByEmail(String email);
 
 
     @Query("SELECT COUNT(d) FROM UserAccount u JOIN u.decks d WHERE u.id = :userId")

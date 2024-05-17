@@ -27,6 +27,7 @@ import java.util.Date;
 @Service
 public class RegistrationService {
 
+
     private final UserAccountService userAccountService;
     private final ConfirmationTokenService confirmationTokenService;
     private final EmailSender emailSender;
@@ -92,7 +93,9 @@ public class RegistrationService {
         LocalDateTime expiredAt = confirmationToken.getExpiresAt();
 
         if (expiredAt.isBefore(LocalDateTime.now())) {
-            throw new IllegalStateException("token expired");
+            // Token ist abgelaufen, Benutzer und Token löschen
+            userAccountService.deleteUser(confirmationToken.getAppUser().getEmail());
+            return "token expired and user deleted";
         }
 
         confirmationTokenService.setConfirmedAt(token);

@@ -33,6 +33,10 @@ public interface ConfirmationTokenRepository extends JpaRepository<ConfirmationT
     @Query("DELETE FROM ConfirmationToken c WHERE c.appUser.id = ?1 AND c.token = ?2")
     void deleteToken(Long app_user_id,String token);
 
-    //TODO: lösche Token nach dem User sich einloggt
+    @Transactional
+    @Modifying
+    @Query("DELETE FROM ConfirmationToken c WHERE c.expiresAt < ?1 AND c.confirmedAt IS NULL")
+    void deleteExpiredTokens(LocalDateTime now);
+
 
 }

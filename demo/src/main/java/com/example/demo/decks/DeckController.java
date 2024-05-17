@@ -34,10 +34,7 @@ public class DeckController {
 
 
 
-   /* @PutMapping("/updateName/{oldName}/{newName}") //Decknamen dürfen keine Leerzeichen enthalten
-    public String updateDeckName(@PathVariable String oldName, @PathVariable String newName) {
-        return deckService.updateDeckName(oldName, newName);
-    }*/
+
     @PutMapping("/updateName/{userId}/{oldName}/{newName}")
     public ResponseEntity<String> updateDeckName(
             @PathVariable Long userId,
@@ -70,10 +67,7 @@ public class DeckController {
 
 
 
-    /*@PutMapping("/addCards")
-    public String addCardsToDeck(DeckRequest request) {
-        return deckService.addCardsToDeck(request);
-    }*/
+
 
     @PutMapping("/addCards")
     public ResponseEntity<String> addCardsToDeck(@RequestBody DeckRequest request) {
