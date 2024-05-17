@@ -12,11 +12,14 @@ function Decks() {
     const [originalDeckName, setCurrentDeckName] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
     const [isEditing, setIsEditing] = useState(false);  // Zustand zum Überwachen, ob Änderungen gemacht wurden
+    
+    /*
     const [formData, setFormData] = useState({
         userID: id,
         name:"",
         cardNames:[""]
     });
+    */
 
     //Lädt die userID aus dem LocalStorage beim ersten Render der Komponente
     useEffect(() => {
