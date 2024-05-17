@@ -156,9 +156,9 @@ public class FriendListService {
         }
     }
 
-    public ResponseEntity<Void> setFriendslistPrivacy(long UserId)
+    public ResponseEntity<Void> setFriendslistPrivacy(long userId)
     {
-        Optional<UserAccount> user = friendListRepository.findById(UserId);
+        Optional<UserAccount> user = friendListRepository.findById(userId);
         if(user.isPresent()) {
             UserAccount userAccount = user.get();
             userAccount.setPrivateFriendList(!userAccount.getPrivateFriendList());
@@ -167,9 +167,9 @@ public class FriendListService {
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
-    public ResponseEntity<Boolean> getFriendslistPrivacy(long UserId)
+    public ResponseEntity<Boolean> getFriendslistPrivacy(long userId)
     {
-        Optional<UserAccount> user = friendListRepository.findById(UserId);
+        Optional<UserAccount> user = friendListRepository.findById(userId);
         if(user.isPresent()) {
             UserAccount userAccount = user.get();
             return new ResponseEntity<>(userAccount.getPrivateFriendList(), HttpStatus.OK);

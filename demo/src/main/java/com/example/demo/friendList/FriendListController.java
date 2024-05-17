@@ -50,12 +50,12 @@ public class FriendListController {
 
 
     @PutMapping(path = "/setFriendslistPrivacy")
-    public ResponseEntity<Void> setFriendslistPrivacy(@RequestParam("UserId") long UserId) {
-        return friendListService.setFriendslistPrivacy(UserId);
+    public ResponseEntity<Void> setFriendslistPrivacy(@RequestParam("userId") long userId) {
+        return friendListService.setFriendslistPrivacy(userId);
     }
 
     @GetMapping(path = "/getFriendslistPrivacy")
-    public ResponseEntity<Boolean> getFriendslistPrivacy(@RequestParam("UserId") long UserId) {
-        return friendListService.getFriendslistPrivacy(UserId);
+    public ResponseEntity<Boolean> getFriendslistPrivacy(@RequestParam("userId") long userId) {
+        return friendListService.getFriendslistPrivacy(userId);
     }
 }

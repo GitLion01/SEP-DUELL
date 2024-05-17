@@ -4,6 +4,10 @@
     background: white;
 }
 
+.form-check-label {
+    color: #070707;
+}
+
 .BFF .UserList-hülle,
 .BFF .FriendList-hülle {
     border: 1px solid #ccc; /* Umrandung hinzufügen */
