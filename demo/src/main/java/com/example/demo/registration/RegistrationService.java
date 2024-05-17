@@ -27,53 +27,12 @@ import java.util.Date;
 @Service
 public class RegistrationService {
 
-    private final EmailValidator emailValidator;
+
     private final UserAccountService userAccountService;
     private final ConfirmationTokenService confirmationTokenService;
     private final EmailSender emailSender;
 
-    /*public String register(RegistrationRequest request) {
-        try {
-            boolean isValidEmail = emailValidator.test(request.getEmail());
-            if (!isValidEmail) {
-                throw new IllegalStateException("Ungültige E-Mail");
-            }
-            // Überprüfen, ob der Benutzername bereits vergeben ist
-            if (userAccountService.isUsernameTaken(request.getUsername())) {
-                throw new IllegalStateException("Benutzername bereits vergeben");
-            }
 
-            // Konvertiere MultipartFile in byte[]
-            byte[] imageBytes;
-            if(!request.getImage().isEmpty()){
-                imageBytes = imageUploadService.uploadImage(request.getImage());
-            }else{
-                return "Datei ist leer";
-            }
-
-
-            // Benutzer registrieren und Bildpfad übergeben
-            String token = userAccountService.signUpUser(new UserAccount(
-                    request.getImage(),
-                    request.getFirstName(),
-                    request.getLastName(),
-                    request.getDateOfBirth(),
-                    request.getUsername(),
-                    request.getEmail(),
-                    request.getPassword(),
-                    request.getRole()));
-
-            // E-Mail senden mit Bestätigungslink
-            String link = "http://localhost:8080/registration/confirm?token=" + token;
-            emailSender.send(request.getEmail(), buildEmail(request.getFirstName(), link));
-
-            return token;
-        } catch (Exception e) {
-            System.out.println("Fehler bei der Registrierung: " + e.getMessage());
-            return null; // oder eine andere geeignete Aktion, z. B. eine Fehlermeldung zurückgeben
-        }
-    }
-*/
 
     public String register(byte[] image, String firstName, String lastName, Date dateOfBirth,
                            String username, String email, String password, UserRole role) {
@@ -132,7 +91,9 @@ public class RegistrationService {
         LocalDateTime expiredAt = confirmationToken.getExpiresAt();
 
         if (expiredAt.isBefore(LocalDateTime.now())) {
-            throw new IllegalStateException("token expired");
+            // Token ist abgelaufen, Benutzer und Token löschen
+            userAccountService.deleteUser(confirmationToken.getAppUser().getEmail());
+            return "token expired and user deleted";
         }
 
         confirmationTokenService.setConfirmedAt(token);

@@ -12,7 +12,6 @@ import lombok.NoArgsConstructor;
 public class LoginTokenRequest {
 
     private String token;
-    @Getter
     private Long userId;
 
 }
