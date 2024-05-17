@@ -50,13 +50,7 @@ public class FriendListService {
         }
         return Optional.empty();
     }
-/*
-    // Gibt die eingehenden Freundschaftsanfragen als DTOs zurück
-    public Optional<List<UserDTO>> getFriendListRequests(int id) {
-        Optional<UserAccount> user = friendListRepository.findById(id);
-        return user.map(u -> u.getFriendRequests().stream().map(this::convertToDTO).collect(Collectors.toList()));
-    }
-*/
+
     // Verarbeitet eine Freundschaftsanfrage
     public String FriendshipRequest(int id, int friend_id) {
         Optional<UserAccount> user = friendListRepository.findById(id);

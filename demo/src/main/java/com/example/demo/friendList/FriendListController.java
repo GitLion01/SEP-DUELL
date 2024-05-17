@@ -22,29 +22,24 @@ public class FriendListController {
     public List<UserDTO> getFriendsFriendList(@PathVariable int id,@PathVariable int friendId) {
         return friendListService.getFriendsFriendList(id,friendId).orElse(null);
     }
-/*
-    @GetMapping(path = "requests/{id}")
-    public List<UserDTO> getFriendListRequests(@PathVariable int id) {
-        return friendListService.getFriendListRequests(id).orElse(null);
-    }
-*/
+
     @PostMapping(path = "/add")
-    public String FriendshipRequest(@RequestBody List<Integer> request) {
+    public String friendshipRequest(@RequestBody List<Integer> request) {
         return friendListService.FriendshipRequest(request.get(0), request.get(1));
     }
 
     @GetMapping(path = "/accept")
-    public String FriendshipAccept(@RequestParam("userId") int userId, @RequestParam("friendId") int friendId) {
+    public String friendshipAccept(@RequestParam("userId") int userId, @RequestParam("friendId") int friendId) {
         return friendListService.FriendshipAccept(userId, friendId);
     }
 
     @GetMapping(path = "/reject")
-    public String FriendshipReject(@RequestParam("userId") int userId, @RequestParam("friendId") int friendId) {
+    public String friendshipReject(@RequestParam("userId") int userId, @RequestParam("friendId") int friendId) {
         return friendListService.FriendshipReject(userId, friendId);
     }
 
     @PostMapping(path = "/remove")
-    public ResponseEntity<String> RemoveFriend(@RequestBody List<Integer> request) {
+    public ResponseEntity<String> removeFriend(@RequestBody List<Integer> request) {
         return friendListService.RemoveFriend(request.get(0), request.get(1));
     }
 }
