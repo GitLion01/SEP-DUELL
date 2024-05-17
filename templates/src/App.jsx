@@ -10,6 +10,7 @@ import Profile from './components/Profilansicht/Profile.jsx';
 import CreateDeck from './components/Deck-erstellen/CreateDeck.jsx';
 import './index.css';
 import Freundeliste from "./components/Freunde/Freundeliste.jsx";
+import ProtectedRoute from './ProtectedRoute.jsx';
 
 
 
@@ -19,13 +20,13 @@ function App() {
       <Routes>
         <Route path="/" element={<LoginPage />} />
         <Route path="/registration" element={<Register/>} /> 
-        <Route path="/startseite" element={<Startseite/>} /> {/* Die Namen der Seiten müssen groß geschrieben werden, damit das klappt*/}
+        <Route path="/startseite" element={<ProtectedRoute element={Startseite} />} /> {/* Die Namen der Seiten müssen groß geschrieben werden, damit das klappt*/}
         <Route path="/2fa" element={<TwoFaktorAuthenfication/>} />
-        <Route path="/profil" element={<Profile/>} /> 
-        <Route path='/deckbearbeiten' element = {<DeckEditor/>} /> 
-        <Route path='/admin' element = {<AdminPanel/>} /> 
-        <Route path='/decks' element={<CreateDeck />} />
-        <Route path="/freundelist" element={<Freundeliste/>} />
+        <Route path="/profil" element={<ProtectedRoute element={Profile} />} />
+        <Route path="/deckbearbeiten" element={<ProtectedRoute element={DeckEditor} />} />
+        <Route path="/admin" element={<ProtectedRoute element={AdminPanel} requiredRole="ADMIN" />} />
+        <Route path="/decks" element={<ProtectedRoute element={CreateDeck} />} />
+        <Route path="/freundelist" element={<ProtectedRoute element={Freundeliste} />} />
       </Routes>
     </Router>
   );

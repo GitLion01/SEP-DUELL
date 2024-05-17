@@ -36,6 +36,38 @@
 .profile-info p strong {
   margin-right: 10px;
 }
+.friends-of-friend {
+  width: 100%;
+  margin-top: 20px;
+}
+
+.friends-list {
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  padding: 10px;
+  border-radius: 5px;
+  background-color: #f9f9f9; /* Light background for contrast */
+}
+
+.friends-list ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.friends-list li {
+  margin: 5px 0;
+  padding: 5px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  transition: background-color 0.3s;
+}
+
+.friends-list li:hover {
+  background-color: #f0f0f0; /* Highlight on hover */
+}
 
 .loading {
   font-style: italic;

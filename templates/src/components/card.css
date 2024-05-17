@@ -1,12 +1,3 @@
-    .list-group list-group-flush {
-        border-width: 0 0 var(--bs-list-group-border-width);
-    }
-
-    .list-group-item {
-        display: block;
-        padding: var(--bs-list-group-item-padding-y) var(--bs-list-group-item-padding-x);
-        color: var(--bs-list-group-color);
-    }
 
     .card { 
         --bs--bs-card-spacer-y: 1rem;
@@ -26,16 +17,7 @@
         font-size: 1.25rem;
     }
 
-    .list-group {
-        --bs-list-group-border-color: var(--bs-border-color);
-        --bs-list-group-border-width: var(--bs-border-width);
-        --bs-list-group-item-padding-x: 1rem;
-        --bs-list-group-item-padding-y: 0.5rem;
-    }
-
-    .list-group-flush > .list-group-item {
-        border-width: 0 0 var(--bs-list-group-border-width);
-    }
+    
 
     .card-body {
         display: flex;
@@ -74,3 +56,9 @@
     background-color: #ffffff; 
     border-bottom: 2px solid #000000; 
   }
+
+
+  .card-img-top {
+    height: 250px; /* Beispielhöhe */
+    object-fit: cover; /* optional: um sicherzustellen, dass das Bild gut aussieht */
+}

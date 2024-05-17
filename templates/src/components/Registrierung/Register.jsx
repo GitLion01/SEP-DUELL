@@ -103,6 +103,7 @@ class Registrierung extends React.Component {
       console.log('Registrierung erfolgreich');
     } catch (error) {
       console.error('Fehler bei der Registrierung:', error.message);
+      alert('Fehler bei der Registrierung')
     }
   };
 
