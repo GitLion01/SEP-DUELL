@@ -35,35 +35,6 @@ class Registrierung extends React.Component {
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
-  // Methode zum Verarbeiten des Formularabsendens
-  // Methode zum Verarbeiten des Formularabsendens
-  /*handleSubmit = async (event) => { // Methode für das Absenden des Formulars
-    event.preventDefault(); // Verhindere das Standardverhalten des Formulars
-    const formData = this.state.formData; // Greife auf die Formulardaten im Zustand zu
-    try {
-      formData.role = this.state.role ? 'ADMIN' : 'USER'; // Setze die Rolle basierend auf dem Checkbox-Zustand
-      const response = await fetch('http://localhost:8080/registration', { // Sende die Formulardaten an den Server
-        method: 'POST', // HTTP-Methode
-        headers: {
-          'Content-Type': 'multipart/form-data' // Header für JSON-Daten
-        },
-        body: JSON.stringify(formData) // Formulardaten in JSON umwandeln und senden
-      });
-
-
-      if (!response.ok) { // Wenn die Antwort nicht erfolgreich ist, wirf einen Fehler
-        throw new Error('Registrierung fehlgeschlagen');
-      }
-
-
-      window.location.href = '/';
-      console.log('Registrierung erfolgreich'); // Logge eine Erfolgsmeldung
-      // Hier könntest du zur Login-Seite weiterleiten oder andere Aktionen nach erfolgreicher Registrierung durchführen
-    } catch (error) {
-      console.error('Fehler bei der Registrierung:', error.message); // Logge Fehlermeldungen
-    }
-  };
-*/
 
   handleSubmit = async (event) => {
     event.preventDefault();
@@ -79,8 +50,6 @@ class Registrierung extends React.Component {
       }
     });
 
-    /*// Append the role separately
-    formData.append('role', this.state.role ? 'ADMIN' : 'USER');*/
     // Rolle separat hinzufügen
     formData.append('role', this.state.role ? 'ADMIN' : 'USER');
 
@@ -242,7 +211,7 @@ class Registrierung extends React.Component {
             {/* Passwort */}
             <div className="form-group">
               <label htmlFor="password">Passwort:</label>
-              <input type="password" id="password" name="password" onChange={this.handleChange}/>
+              <input type="password" id="password" name="password" required onChange={this.handleChange}/>
             </div>
 
             {/* Admin-Checkbox */}
