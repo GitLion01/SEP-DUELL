@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import Axios from 'axios';
 import './Profile.css';
 import testbild from './testbild.jpg';
+import BackButton from '../BackButton';
 
 // Profil-Seite
 
@@ -138,6 +139,7 @@ function Profile() {
   return (
     <>
       <div className="Profile">
+        <BackButton/>
         <h1 className="titel"> Mein Profil</h1>
         <div className="daten">
           
