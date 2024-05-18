@@ -76,10 +76,10 @@
 }
 
 .card {
-    width: 150px;
-    height: 200px;
+    width: 250px;
+    height: 450px;
     padding: 10px;
-    margin: 10px;
+    margin: 20px;
     background-color: white;
     border: 1px solid #ddd;
     border-radius: 4px;

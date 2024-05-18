@@ -3,6 +3,7 @@ import axios from 'axios';
 import './Decks.css';
 import { Link } from 'react-router-dom';
 import BackButton from '../BackButton';
+import Card from '../card';
 
 function Decks() {
     const [id, setId] = useState(null);
@@ -60,6 +61,15 @@ function Decks() {
     };
 
 
+    /*
+    const handleInputChange = (event) => {
+        const { name, value} = event.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+    */
 
     // Funktion zur Generierung eines zufälligen Namens
     const generateRandomName = () => {
@@ -306,28 +316,39 @@ function Decks() {
             <button onClick={handleCreateNewDeck} disabled={isEditing}>Neues Deck erstellen</button>
             <div className="deck-list">
                 {decks.map((deck, index) => (
-                    <div key={index} className="deck" onClick={() => selectDeck(index)}>
-                        {deck.name}
+                    
+                    <div key={index}
+                        className="deck"
+                        onClick={() => selectDeck(index)}>
+                            {deck.name}
                     </div>
+                    
                 ))}
             </div>
-            {activeDeck !== null && (
-                <div className="cards-container">
-                    <div className="cards-left">
+            <div className="cards-left">
                         <h2>Verfügbare Karten</h2>
                         <div className="card-list">
 
                             {myCards.map(card => (
 
-                                <div key={card.id} className="card" onClick={() => handleAddCardToDeck(card)}>
+                                <div 
+                                    key={card.id}
+                                    className="card">
 
-                                    {card.name}
+                                    <Card card={card} onCardClick={() => {
+                                        if (activeDeck != null) {
+                                            handleAddCardToDeck(card);
+                                        }
+                                    }} />
 
                                 </div>
 
                             ))}
                         </div>
                     </div>
+            {activeDeck !== null && (
+                <div className="cards-container">
+                    
                     <div className="active-deck-container">
                         <h2>Aktives Deck: {decks[activeDeck].name}</h2>
                         <input type="text" value={deckName} onChange={(e) => setDeckName(e.target.value)}/>
@@ -338,7 +359,9 @@ function Decks() {
                         </div>
                         <div className="card-container">
                             {decks[activeDeck].cards.map((card, index) => (
-                                <div key={index} className="card" onClick={() => handleRemoveCardFromDeck(card.name)}>{card.name}</div>
+                                <div key={index} className="card">
+                                    <Card card={card} onCardClick={() => handleRemoveCardFromDeck(card.name)} />
+                                </div>
                             ))}
                         </div>
                     </div>
