@@ -10,9 +10,6 @@
     font-size: 100%;
 }
 
-.label__body {
-    color: white
-}
 
 .AdminPanel h2 {
     color: white;
@@ -22,6 +19,8 @@
 
 .AdminPanel__body {
     height: 22cm;
+    background-color: black;
+    font-family: ;
 }
 
 .existingCards {
