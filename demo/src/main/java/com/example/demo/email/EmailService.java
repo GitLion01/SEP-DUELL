@@ -19,14 +19,14 @@ public class EmailService implements EmailSender {
 
     @Override
     @Async
-    public void send(String to, String email, String subject) {
+    public void send(String to, String email, String subject) {  // Hinzugefügt: String subject als Parameter
         try {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");
             helper.setText(email, true);
             helper.setTo(to);
-            helper.setSubject(subject);  // Setze den Betreff dynamisch
-            helper.setFrom("gatekeeper.cardhaven@web.de"); // Hier Ihre tatsächliche web.de E-Mail-Adresse eintragen
+            helper.setSubject(subject);  // Jetzt ist 'subject' definiert als Parameter
+            helper.setFrom("gatekeeper.cardhaven@gmail.com"); // Nutze deine E-Mail-Adresse
             mailSender.send(mimeMessage);
         } catch (MessagingException e) {
             LOGGER.error("failed to send email", e);

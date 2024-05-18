@@ -10,6 +10,7 @@ import com.example.demo.user.UserAccountService;
 import com.example.demo.user.UserRole;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import org.hibernate.validator.internal.constraintvalidators.bv.EmailValidator;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
@@ -66,10 +67,9 @@ public class RegistrationService {
             }
 
             // E-Mail senden mit Bestätigungslink
+            String subject = "Account Activation";  // Betreff der E-Mail
             String link = "http://localhost:8080/registration/confirm?token=" + token;
-            String emailSubject = "Confirm your email";  // Betreff für die Bestätigungsmail
-            String emailContent = buildEmail(firstName, link);
-            emailSender.send(email, emailContent, emailSubject);  // Adjusted to include the subject
+            emailSender.send(email, buildEmail(firstName, link), subject);  // Füge den Betreff hinzu
 
             return token;
         } catch (Exception e) {

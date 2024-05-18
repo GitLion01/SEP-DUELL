@@ -52,9 +52,8 @@ public class LoginController {
 
             UserAccount userAccount = (UserAccount) authentication.getPrincipal();
             String token = confirmationTokenService.generateToken(userAccount, TokenPurpose.LOGIN);
-
-            String emailSubject = "Login Verification";
-            emailSender.send(userAccount.getEmail(), buildLoginEmail(userAccount.getFirstName(), token), emailSubject);
+            String subject = "Login Verification";  // Änderung
+            emailSender.send(userAccount.getEmail(), buildLoginEmail(userAccount.getFirstName(), token), subject);
 
             return ResponseEntity.ok(Map.of("status", "success",
                     "message", "Login successful. Please check your email for the verification code.",
