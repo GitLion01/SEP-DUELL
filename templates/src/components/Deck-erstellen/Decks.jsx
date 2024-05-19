@@ -314,6 +314,7 @@ function Decks() {
                 </div>
             )}
             <button onClick={handleCreateNewDeck} disabled={isEditing}>Neues Deck erstellen</button>
+            <div className="wrap">
             <div className="deck-list">
                 {decks.map((deck, index) => (
                     
@@ -371,6 +372,7 @@ function Decks() {
                 <Link to="/startseite" onClick={handleHomeButtonClick}>
                     <button className="button" type="button">Home</button>
                 </Link>
+            </div>
             </div>
         </div>
         

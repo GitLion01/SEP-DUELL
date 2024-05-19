@@ -4,7 +4,7 @@
     flex-direction: column;
     align-items: center;
     width: 100%;
-    min-height: 10vh;
+    min-height: 100vh;
     margin: 0 auto;
     padding: 20px;
     box-sizing: border-box;
@@ -74,8 +74,8 @@
 .card {
     width: 200px; /* angepasste Breite */
     height: 350px; /* angepasste Höhe */
-    padding: 10px;
-    margin: 10px;
+    padding: 0;
+    margin: 0;
     background-color: white;
     border: 1px solid #ddd;
     border-radius: 4px;
