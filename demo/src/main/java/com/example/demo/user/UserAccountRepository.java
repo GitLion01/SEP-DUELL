@@ -25,11 +25,6 @@ public interface UserAccountRepository extends JpaRepository<UserAccount, Long> 
     @Query
     void deleteByEmail(String email);
 
-
-    @Query("SELECT COUNT(d) FROM UserAccount u JOIN u.decks d WHERE u.id = :userId")
-    int countDecksByUserId(@Param("userId") Long userId);
-
-
     boolean existsByUsername(String username);
 
 
