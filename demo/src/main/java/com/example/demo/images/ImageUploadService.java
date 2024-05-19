@@ -24,13 +24,13 @@ public class ImageUploadService {
 
     private final UserAccountRepository userAccountRepository;
 
+    @Autowired
     public ImageUploadService(UserAccountRepository userAccountRepository) {
         this.userAccountRepository = userAccountRepository;
     }
 
     public void updateImage(Long userId, MultipartFile image) throws IOException {
-        UserAccount user = userAccountRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
+        UserAccount user = userAccountRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
 
         user.setImage(image.getBytes());
         userAccountRepository.save(user);

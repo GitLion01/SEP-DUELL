@@ -22,6 +22,7 @@ public class Deck {
     @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(
             name = "deck_card",
+            // deck_id und card_id sind zusammengesetzter Primärschlüssel in Ergebnistabelle
             joinColumns = @JoinColumn(name = "deck_id"),
             inverseJoinColumns = @JoinColumn(name = "card_id")
     )

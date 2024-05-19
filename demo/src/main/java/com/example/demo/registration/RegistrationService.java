@@ -38,7 +38,7 @@ public class RegistrationService {
     public String register(byte[] image, String firstName, String lastName, Date dateOfBirth,
                            String username, String email, String password, UserRole role) {
         try {
-            // Überprüfen, ob der Benutzername bereits vergeben ist
+            // Überprüft, ob der Benutzername bereits vergeben ist
             if (userAccountService.isUsernameTaken(username)) {
                 throw new IllegalStateException("Benutzername bereits vergeben");
             }
@@ -46,6 +46,7 @@ public class RegistrationService {
             // Benutzer registrieren und Bildpfad übergeben
             String token;
             if(image != null) {
+                // mit Bild
                 token = userAccountService.signUpUser(new UserAccount(
                         image,
                         firstName,
@@ -56,6 +57,7 @@ public class RegistrationService {
                         password,
                         role));
             }else{
+                // ohne Bild
                 token = userAccountService.signUpUser(new UserAccount(
                         firstName,
                         lastName,
@@ -74,7 +76,7 @@ public class RegistrationService {
             return token;
         } catch (Exception e) {
             System.out.println("Fehler bei der Registrierung: " + e.getMessage());
-            return null; // oder eine andere geeignete Aktion, z. B. eine Fehlermeldung zurückgeben
+            return null;
         }
     }
 

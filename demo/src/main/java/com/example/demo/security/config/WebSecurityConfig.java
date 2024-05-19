@@ -31,7 +31,7 @@ public class WebSecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         return http
-                .csrf(AbstractHttpConfigurer::disable)
+                .csrf(AbstractHttpConfigurer::disable) // deaktiviert standardmäßigen csrf-Schutz
                 .authorizeHttpRequests(
                         req -> req.requestMatchers("/**")
                                 .permitAll()
@@ -49,7 +49,7 @@ public class WebSecurityConfig {
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/login?logout=true"))
                 .userDetailsService(userAccountService)
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // kann man auch auf ALWAYS setzen
                 .build();
     }
 

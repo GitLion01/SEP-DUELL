@@ -40,8 +40,8 @@ public class CardService {
         List<String> addedCards = new ArrayList<>();
         for (CardRequest request : requests) {
             try {
-                saveCard(request);
-                addedCards.add(request.getName());
+                saveCard(request); // Karte wird hinzugefügt
+                addedCards.add(request.getName()); // Karte wird der Liste an hinzugefügten Karten hinzugefügt für Ausgabe
             } catch (IllegalStateException e) {
                 System.out.println("Error adding card: " + e.getMessage());
             }
@@ -50,10 +50,12 @@ public class CardService {
     }
 
     private void saveCard(CardRequest request) throws IllegalStateException {
+        // prüft ob die Karte bereits existiert
         boolean cardExists = cardRepository.existsByName(request.getName());
         if (cardExists) {
             throw new IllegalStateException("Card already exists: " + request.getName());
         }
+            // erstellt eine Karteninstanz
             Card card = new Card(
                     request.getName(),
                     request.getAttackPoints(),
@@ -62,29 +64,34 @@ public class CardService {
                     request.getImage(),
                     request.getRarity()
             );
+            // speichert die Karte, falls sie noch nicht existiert
             cardRepository.save(card);
 }
 
 
     public void deleteCard(String name) {
+        // prüft ob die Karte bereits existiert
         Optional<Card> optionalCard = cardRepository.findByName(name);
         if (optionalCard.isEmpty()) {
             return;
         }
+        // Karte hier nicht mehr vom Typ Optional
         Card card = optionalCard.get();
 
-        // Find all decks containing the card
+        // findet alle Decks in der die Karte enthalten ist
         List<Deck> decksContainingCard = deckRepository.findByCardsContaining(card);
 
-        // Extract card IDs
+        // extrahiert die IDs der Karte
         List<Long> cardIds = new ArrayList<>();
         cardIds.add(card.getId());
 
-        // Iterate over each deck containing the card and remove the card from it using deleteDeckCardsByDeckIdAndCardIds method
+
+        // iteriert über jedes Deck, was die Karte enthält und löscht die Karteninstanzen
         for (Deck deck : decksContainingCard) {
             deckRepository.deleteDeckCardsByDeckIdAndCardIds(deck.getId(), cardIds);
         }
 
+        // löscht die Karte aus dem Spiel (es mussten zuerst alle Karten aus den anderen tabellen gelöscht werden wegen Fremdschlüsselverweis)
         cardRepository.delete(card);
     }
 
@@ -100,13 +107,16 @@ public class CardService {
 
     public List<CardRequest> parseCSV(MultipartFile file) throws IOException {
         List<CardRequest> cardRequests = new ArrayList<>();
-        try (InputStream is = file.getInputStream();
-             BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
+        try (InputStream is = file.getInputStream(); // erschafft ein Input Stream von einer Datei (hier zuerst byte-Stream
+             // bietet Methoden für leseoperationen
+             BufferedReader reader = new BufferedReader(
+                     // dekodiert die bytes in charsets
+                     new InputStreamReader(is, StandardCharsets.UTF_8))) {
 
             String line;
             while ((line = reader.readLine()) != null) {
-                String[] parts = line.split(",");
-                if (parts.length == 6) {
+                String[] parts = line.split(","); // Zeile wird in Teile durch Komma zerlegt
+                if (parts.length == 6) { // es dürfen max 6 Teile entstehen
                     String name = parts[0].trim();
                     int attackPoints = parts[2].equalsIgnoreCase("unlimited") ? Integer.MAX_VALUE : Integer.parseInt(parts[2].trim());
                     int defensePoints = parts[3].equalsIgnoreCase("unlimited") ? Integer.MAX_VALUE : Integer.parseInt(parts[3].trim());
@@ -114,12 +124,10 @@ public class CardService {
                     if (description.length() > 200) {
                         description = description.substring(0, 200);
                     }
-                   /* byte[] image = parts[5].trim().getBytes(); // Load image data properly*/
                     byte[] image = loadImageFromFile(parts[5].trim());
-                    // Load image from file system and encode to Base64
-                    /*String image = loadImageAndEncodeToBase64(parts[5].trim());*/
                     Rarity rarity = Rarity.valueOf(parts[1].trim().toUpperCase());
 
+                    // erstellt Reqeusts aus den Daten und fügt sie einer Liste hinzu. Sie werdne für die Erstellung der Karteninstanzen benötigt
                     CardRequest cardRequest = new CardRequest(name, attackPoints, defensePoints, description, image, rarity);
                     cardRequests.add(cardRequest);
                 } else {
@@ -129,6 +137,8 @@ public class CardService {
         }
         return cardRequests;
     }
+
+    // extrahiert das Bild aus der angegebenen Datei
     private byte[] loadImageFromFile(String filePath) throws IOException {
         Path path = Paths.get(filePath);
         return Files.readAllBytes(path);
@@ -139,9 +149,12 @@ public class CardService {
         return Base64.getEncoder().encodeToString(imageData);
     }
 
+
     public String uploadAndSaveCards(MultipartFile file) {
         try {
+            // extrahierte Requests aus der parseCSV methode
             List<CardRequest> cardRequests = parseCSV(file);
+            // fügt alle Karten anhand der Request dem Spiel hinzu
             return addCards(cardRequests);
         } catch (IOException e) {
             return "Error uploading CSV: " + e.getMessage();

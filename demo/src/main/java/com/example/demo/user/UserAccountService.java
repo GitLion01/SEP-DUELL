@@ -37,9 +37,6 @@ public class UserAccountService implements UserDetailsService {
     }
 
 
-    public List<UserAccount> findAll() {
-        return userAccountRepository.findAll();
-    }
 
     public String signUpUser(UserAccount userAccount) {
         boolean userExists = userAccountRepository.findByEmail(userAccount.getEmail()).isPresent();
