@@ -69,6 +69,11 @@
     width: 100%;
 }
 
+.stats-circle {
+    width: 15%;
+    height: 9%;
+}
+
 .card {
     width: 175px; /* Breite */
     height: 300px; /* Höhe */
@@ -86,10 +91,31 @@
     justify-content: space-between;
 }
 
+.card-img-top {
+    height: 170px; /* Höhe automatisch anpassen */
+    object-fit: cover; /* optional: um sicherzustellen, dass das Bild gut aussieht */
+  }
+
 .card:hover {
     transform: translateY(-5px);
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
+
+.card-description {
+    flex: 1; /* Nimmt den verbleibenden Platz ein */
+    padding: 5px;
+  }
+  
+.card-button {
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 20px); /* 10px Padding auf beiden Seiten berücksichtigen */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+  
 
 input, button {
     padding: 8px;

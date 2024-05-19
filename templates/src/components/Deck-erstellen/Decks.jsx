@@ -196,6 +196,10 @@ function Decks() {
             setErrorMessage('Der Deckname darf nicht leer sein');
             return;
         }
+
+        if (deckName === originalDeckName) {
+            return;
+        }
     
         try {
             // Senden der Anfrage zum Backend, um den Namen zu aktualisieren
@@ -204,8 +208,6 @@ function Decks() {
 
             await loadDecks();
 
-            setActiveDeck(null);
-            setIsEditing(false);
         } catch (error) {
             console.error('Fehler beim Ändern des Decknamens:', error);
             setErrorMessage('Fehler beim Ändern des Decknamens: ' + error.message);
@@ -346,12 +348,12 @@ function Decks() {
                         <div className="button-container">
                             <button onClick={handleFinishEditing}>Fertig</button>
                             <button onClick={handleDeleteDeck}>Deck Löschen</button>
-                            <button onClick={handleSaveDeckName}>Name speichern</button>
+                            <button onClick={handleSaveDeckName} disabled={!deckName.trim() || deckName === originalDeckName}>Name speichern</button>
                         </div>
                         <div className="card-container">
                             {decks[activeDeck].cards.map((card, index) => (
                                 <div key={index} className="card">
-                                    <Card card={card} onCardClick={() => handleRemoveCardFromDeck(card.name)} />
+                                    <Card card={card} onCardClick={() => handleRemoveCardFromDeck(card.name)}/>
                                 </div>
                             ))}
                         </div>

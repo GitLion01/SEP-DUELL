@@ -15,13 +15,20 @@
         this.setState(prevState => ({ showBack: !prevState.showBack }));
       }
 
+      handleCardClick = () => {
+        const { onCardClick, card } = this.props;
+        if (onCardClick) {
+          onCardClick(card);
+        }
+      }
+
       render() {
-        const { card, onCardClick } = this.props; // onCardClick wird aus den Props entnommen
+        const { card } = this.props; // onCardClick wird aus den Props entnommen
         const { name, rarity, attackPoints, defensePoints, description, image } = this.props.card;
         const { showBack } = this.state;
 
         return (
-          <div className="card" onClick={() => onCardClick(card)}>
+          <div className="card" onClick={this.handleCardClick}>
             <div className="card-rarity">
               <h6>{rarity}</h6>
             </div>
@@ -45,7 +52,7 @@
             </div>
             <div style={{ position: 'absolute', bottom: '10px', left: 0, right: 0, textAlign: 'center' }}>
                 <button onClick={this.toggleCard} className="btn btn-primary btn-sm">
-                  {showBack ? 'Zurück zur Vorderseite' : 'Beschreibung'}
+                  {showBack ? 'Vorderseite' : 'Rückseite'}
                 </button>
             </div>
           </div>
