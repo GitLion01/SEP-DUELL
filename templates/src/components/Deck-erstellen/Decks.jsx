@@ -326,6 +326,7 @@ function Decks() {
                     
                 ))}
             </div>
+            <div className="inside">
             <div className="cards-left">
                         <h2>Verfügbare Karten</h2>
                         <div className="card-list">
@@ -348,7 +349,6 @@ function Decks() {
                         </div>
                     </div>
             {activeDeck !== null && (
-                <div className="cards-container">
                     
                     <div className="active-deck-container">
                         <h2>Aktives Deck: {decks[activeDeck].name}</h2>
@@ -366,12 +366,12 @@ function Decks() {
                             ))}
                         </div>
                     </div>
-                </div>
             )}
             <div>
                 <Link to="/startseite" onClick={handleHomeButtonClick}>
                     <button className="button" type="button">Home</button>
                 </Link>
+            </div>
             </div>
             </div>
         </div>

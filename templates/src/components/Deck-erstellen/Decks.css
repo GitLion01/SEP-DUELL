@@ -19,6 +19,11 @@
     margin-top: 20px;
 }
 
+.inside {
+    display: flex;
+    flex-direction: row;
+}
+
 .deck {
     width: 100px;
     height: 100px;
@@ -39,15 +44,6 @@
 .deck:hover {
     transform: translateY(-5px);
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
-
-.cards-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    width: 100%;
-    margin-top: 20px;
-    overflow-y: auto;
 }
 
 .cards-left, .active-deck-container {
