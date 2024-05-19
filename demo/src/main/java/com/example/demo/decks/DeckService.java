@@ -250,10 +250,6 @@ public class DeckService{
 
                Optional<Deck> optionalDeck = deckRepository.findAllDecksByUserIdAndName(request.getUserID(), request.getName());
 
-
-
-
-
                if (optionalDeck.isPresent()) {
                    Deck deck = optionalDeck.get();
                    List<Card> deckCards = deck.getCards();
@@ -278,13 +274,13 @@ public class DeckService{
                        deckRepository.save(deck);
                        return "Die Karten wurden erfolgreich dem Deck hinzugefügt.";
                    } else {
-                       throw new RuntimeException("Das Deck kann maximal 30 Karten enthalten.");
+                       return "Das Deck kann maximal 30 Karten enthalten.";
                    }
                } else {
-                   throw new RuntimeException("Das Deck wurde nicht gefunden.");
+                   return "Das Deck wurde nicht gefunden.";
                }
            } else {
-               throw new RuntimeException("Der Benutzer mit der angegebenen ID wurde nicht gefunden.");
+               return "Der Benutzer mit der angegebenen ID wurde nicht gefunden.";
            }
        } catch (Exception e) {
            return "Fehler beim Hinzufügen der Karten zum Deck: " + e.getMessage();
