@@ -23,7 +23,7 @@
         return (
           <div className="card" onClick={() => onCardClick(card)}>
             <div className="card-rarity">
-              <h6>Seltenheit: {rarity}</h6>
+              <h6>{rarity}</h6>
             </div>
             <div className="card-body d-flex flex-column">
               {showBack ? (

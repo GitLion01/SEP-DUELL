@@ -6,7 +6,7 @@
     width: 100%;
     min-height: 100vh;
     margin: 0 auto;
-    padding: 20px;
+    padding: 0px;
     box-sizing: border-box;
     overflow-y: auto;
 }
@@ -16,7 +16,6 @@
     flex-wrap: wrap;
     justify-content: center;
     width: 100%;
-    margin-top: 20px;
 }
 
 .inside {
@@ -54,22 +53,25 @@
     border-radius: 8px;
     background-color: #f9f9f9;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    max-height: 600px;
+    max-height: auto;
     overflow-y: auto;
+    width: 575px;
 }
 
 .card-list, .card-container {
     display: flex;
+    margin: 5px;
     flex-wrap: wrap;
     justify-content: flex-start;
     align-items: flex-start;
     overflow-y: auto;
-    max-height: 500px;
+    max-height: 400px;
+    width: 100%;
 }
 
 .card {
-    width: 200px; /* angepasste Breite */
-    height: 350px; /* angepasste Höhe */
+    width: 175px; /* Breite */
+    height: 300px; /* Höhe */
     padding: 0;
     margin: 0;
     background-color: white;
