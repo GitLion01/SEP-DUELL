@@ -21,13 +21,13 @@
         const { showBack } = this.state;
 
         return (
-          <div className="card" onClick={() => onCardClick(card)} >
+          <div className="card" onClick={() => onCardClick(card)}>
             <div className="card-rarity">
               <h6>Seltenheit: {rarity}</h6>
             </div>
             <div className="card-body d-flex flex-column">
               {showBack ? (
-                <div className="card-text">{description}</div>
+                <div className="card-description">{description}</div>
               ) : (
                 <>
                   <img src={`data:image/jpeg;base64,${image}`} className="card-img-top" alt={name} />
