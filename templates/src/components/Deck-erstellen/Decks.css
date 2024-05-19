@@ -108,13 +108,3 @@ button {
 button:hover {
     background-color: #0056b3;
 }
-
-.error-message {
-    color: red;
-    cursor: pointer;
-    margin: 10px 0;
-    padding: 10px;
-    background-color: #ffd2d2;
-    border: 1px solid #ff0000;
-    border-radius: 4px;
-}
