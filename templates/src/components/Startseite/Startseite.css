@@ -1,9 +1,9 @@
 .AppStart {
 
   text-align: center;
-  background-image: url('/public/img/Startseitehintergrund.jpg');
-  background-size: cover; /* Das Bild wird so skaliert, dass es den gesamten Hintergrund bedeckt */
-  background-position: center; /* Das Bild wird zentriert positioniert */
+ /* background-image: url('/public/img/Startseitehintergrund.jpg');*/
+  /*background-size: cover; /* Das Bild wird so skaliert, dass es den gesamten Hintergrund bedeckt */
+  /*background-position: center; /* Das Bild wird zentriert positioniert */
 
 
 }

@@ -242,7 +242,7 @@ class Registrierung extends React.Component {
             {/* Passwort */}
             <div className="form-group">
               <label htmlFor="password">Passwort:</label>
-              <input type="password" id="password" name="password" onChange={this.handleChange}/>
+              <input type="password" id="password" name="password"  required onChange={this.handleChange}/>
             </div>
 
             {/* Admin-Checkbox */}
