@@ -10,22 +10,24 @@
         };
       }
 
-      toggleCard = () => {
+      toggleCard = (event) => {
+        event.stopPropagation(); // Verhindert das Auslösen des übergeordneten onClick-Events
         this.setState(prevState => ({ showBack: !prevState.showBack }));
       }
 
       render() {
+        const { card, onCardClick } = this.props; // onCardClick wird aus den Props entnommen
         const { name, rarity, attackPoints, defensePoints, description, image } = this.props.card;
         const { showBack } = this.state;
 
         return (
-          <div className="card" style={{ width: "18rem", height: "25rem", position: 'relative' }}>
+          <div className="card" onClick={() => onCardClick(card)}>
             <div className="card-rarity">
               <h6>Seltenheit: {rarity}</h6>
             </div>
             <div className="card-body d-flex flex-column">
               {showBack ? (
-                <div className="card-text">{description}</div>
+                <div className="card-description">{description}</div>
               ) : (
                 <>
                   <img src={`data:image/jpeg;base64,${image}`} className="card-img-top" alt={name} />
