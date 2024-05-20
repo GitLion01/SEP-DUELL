@@ -207,6 +207,7 @@ function Decks() {
             console.log('Deckname erfolgreich geändert!', response.data);
 
             await loadDecks();
+            await loadCards();
 
         } catch (error) {
             console.error('Fehler beim Ändern des Decknamens:', error);
