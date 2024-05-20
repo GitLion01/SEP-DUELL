@@ -33,3 +33,5 @@ services:
       POSTGRES_DB: registration
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 123456
+    volumes:
+      - ./database:/var/lib/postgresql/data

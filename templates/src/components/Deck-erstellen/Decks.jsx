@@ -164,8 +164,8 @@ function Decks() {
                 }
             });
 
-            loadDecks();
-            loadCards();
+            await loadDecks();
+            await loadCards();
 
             console.log("Karte erfolgreich hinzugefügt", response.data);
 
@@ -208,6 +208,8 @@ function Decks() {
 
             await loadDecks();
             await loadCards();
+            setActiveDeck(null);
+            setIsEditing(false);
 
         } catch (error) {
             console.error('Fehler beim Ändern des Decknamens:', error);

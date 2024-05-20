@@ -1,11 +1,22 @@
 #docker-compose is to make image and container for the file
-
 version: "3.8"
 services:
+  templates:
+    build: .
+    image: templates
+    container_name: templates_c #c for container
+    ports:
+      - '3000:3000'
+      #the both next properties start the container in interactive mode (don't automatically shout down)
+    stdin_open: true
+    tty: true
+    depends_on:
+      - api
+
   api:
     # . because the docker-compose is in the same directory with the dockerfile
     build: .
-    container_name: api_c
+    image: api_image
     ports:
       #This means that port 8081 on the host machine is mapped to port 8080 within
       #the Docker container running in backend application.
@@ -13,12 +24,3 @@ services:
     volumes:
       - ./src/api/axios:/app
       - ./axios/node_modules:/app
-
-  templates:
-    build: .
-    container_name: templates_c #c for container
-    ports:
-      - '3000:3000'
-    #the both next properties start the container in interactive mode (don't automatically shout down)
-    stdin_open: true
-    tty: true

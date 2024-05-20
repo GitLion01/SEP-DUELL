@@ -35,7 +35,7 @@ public class FriendListService {
         return new UserDTO(user.getUsername(), imageBase64,user.getId(),user.getFirstName(),user.getLastName(),user.getFriends(), user.getLeaderboardPoints());
     }
 
-    // Gibt die Freundesliste als DTOs zurück
+    // Gibt die Freundesliste als DTOs zurück (Data Transfer Object)
     public Optional<List<UserDTO>> getFriendList(long id) {
         Optional<UserAccount> user = friendListRepository.findById(id);
         return user.map(u -> u.getFriends().stream().map(this::convertToDTO).collect(Collectors.toList()));
