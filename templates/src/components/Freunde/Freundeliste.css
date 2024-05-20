@@ -1,48 +1,60 @@
+/* Container für die Nutzerliste und Freundeliste */
 .BFF {
     display: flex;
     justify-content: space-around;
     background: white;
+    width: 130%;
+    margin: 0 auto;
 }
 
+/* Stil für die Label der Formulare */
 .form-check-label {
     color: #070707;
 }
 
+/* Stil für die Hülle der Nutzerliste und Freundeliste */
 .BFF .UserList-hülle,
 .BFF .FriendList-hülle {
-    border: 1px solid #ccc; /* Umrandung hinzufügen */
-    border-radius: 5px; /* Runde Ecken */
-    padding: 10px; /* Innenabstand */
-    margin-bottom: 20px; /* Abstand zwischen den Containern */
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 20px;
+    margin-bottom: 20px;
+    width: 45%;
 }
 
+/* Stil für die Überschriften in der Nutzerliste und Freundeliste */
 .BFF .UserList-hülle h2,
 .BFF .FriendList-hülle h2 {
-    margin-top: 0; /* Überschrift ohne oberen Abstand */
+    margin-bottom: 20px;
+    font-size: 24px;
+    text-decoration: underline;
 }
 
-.BFF .UserList, .FriendList, .FriendRequests {
-    max-height: 300px; /* Maximale Höhe */
-    overflow-y: auto; /* Vertikale Scrollleiste, wenn der Inhalt die maximale Höhe überschreitet */
+/* Stil für die Listen in der Nutzerliste und Freundeliste */
+.BFF .UserList,
+.BFF .FriendList,
+.BFF .FriendRequests {
+    max-height: 500px;
+    overflow-y: auto;
 }
 
+/* Stil für die Listenpunkte in der Nutzerliste und Freundeliste */
 .BFF ul {
     list-style-type: none;
     padding: 20px;
+    font-size: 18px;
 }
 
+/* Stil für die einzelnen Listeneinträge */
 .BFF li {
     margin-bottom: 20px;
 }
 
-/* Modal styles */
+/* Stil für die Modalen Fenster */
 .Modal {
     position: fixed;
     top: 50%;
     left: 50%;
-    right: auto;
-    bottom: auto;
-    margin-right: -50%;
     transform: translate(-50%, -50%);
     background: white;
     padding: 20px;
@@ -51,6 +63,7 @@
     z-index: 1000;
 }
 
+/* Stil für den Overlay hinter dem Modalen Fenster */
 .Overlay {
     position: fixed;
     top: 0;
@@ -61,33 +74,44 @@
     z-index: 999;
 }
 
+/* Container für das Profil */
 .profile-container {
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
+/* Stil für die Überschrift im Profil-Header */
 .profile-header h2 {
     margin-bottom: 20px;
+    font-size: 24px;
+    text-decoration: underline;
 }
 
+/* Stil für die Profilinformationen */
 .profile-info {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
 }
 
+/* Stil für das Profilbild */
 .profile-picture {
-    width: 100px;
-    height: 100px;
+    width: 150px;
+    height: 150px;
     border-radius: 50%;
     margin-bottom: 20px;
 }
 
+/* Stil für die einzelnen Profilinformationen */
 .profile-info p {
     margin: 5px 0;
+    font-size: 18px;
 }
 
+/* Stil für Buttons */
 button {
     margin-top: 20px;
+    font-size: 12px;
+    padding: 8px 16px;
 }
