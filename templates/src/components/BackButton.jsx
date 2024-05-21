@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+// Design von http://www.w3.org/2000/svg
 
 const BackButton = () => {
   const navigate = useNavigate();

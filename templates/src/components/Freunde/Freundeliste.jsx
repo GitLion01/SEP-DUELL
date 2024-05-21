@@ -173,7 +173,9 @@ function App() {
                     <ul>
                         {users.map(user => (
                             <li key={user.id}>
-                                {user.username}
+                                <span onClick={() => openModal(user)} style={{cursor: 'pointer', color: 'blue'}}>
+                                    {user.username}
+                                </span>
                                 <button onClick={() => sendFriendRequest(user.id)}>Add</button>
                             </li>
                         ))}
