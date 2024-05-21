@@ -4,6 +4,6 @@ COPY target/demo-0.0.1-SNAPSHOT.jar application.jar
 RUN mkdir -p /app/images
 
 # Copy the image file into the container
-COPY images/bild.jpg /app/images/
+COPY images/* /app/images/
 
 ENTRYPOINT ["java", "-jar", "application.jar"]

@@ -144,15 +144,15 @@ class Admin extends Component {
                             <option value="LEGENDARY">Legendär</option>
                         </select>
                     </form>
-                    {loading ? (
-                        <p>Loading...</p>
-                    ) : (
-                        <div id="existingCards" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '20px' }}>
-                            {filteredCards.map((card, index) => (
-                                <Card key={index} card={card} />
-                            ))}
-                        </div>
-                    )}
+                        {loading ? (
+                            <p>Loading...</p>
+                        ) : (
+                            <div id="existingCards" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '20px' }}>
+                                {filteredCards.map((card, index) => (
+                                    <Card key={index} card={card} />
+                                ))}
+                            </div>
+                        )}
                 </div>
             </div>
         );
