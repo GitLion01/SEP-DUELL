@@ -4,19 +4,17 @@ import com.example.demo.cards.Card;
 import com.example.demo.cards.CardRepository;
 import com.example.demo.user.UserAccount;
 import com.example.demo.user.UserAccountRepository;
-import com.example.demo.user.UserAccountService;
-import lombok.AllArgsConstructor;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import java.security.Principal;
+
 import java.util.*;
-import java.util.stream.Collectors;
+
 
 
 @Service
