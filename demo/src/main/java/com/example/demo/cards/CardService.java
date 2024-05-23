@@ -105,20 +105,19 @@ public class CardService {
 
 
 
-    public List<CardRequest> parseCSV(MultipartFile file) throws IOException {
+    public List<CardRequest> parseCSV(MultipartFile file) throws IOException, NumberFormatException {
         List<CardRequest> cardRequests = new ArrayList<>();
         try (InputStream is = file.getInputStream(); // erschafft ein Input Stream von einer Datei (hier zuerst byte-Stream
              // bietet Methoden für leseoperationen
              BufferedReader reader = new BufferedReader(
-                     // dekodiert die bytes in charsets
-                     new InputStreamReader(is, StandardCharsets.UTF_8))) {
+                     new InputStreamReader(is, StandardCharsets.UTF_8))) { //StandardCharsets.UTF_8 wandelt bytes in unicode-Zeichen um
 
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split(","); // Zeile wird in Teile durch Komma zerlegt
                 if (parts.length == 6) { // es dürfen max 6 Teile entstehen
                     String name = parts[0].trim();
-                    int attackPoints = parts[2].equalsIgnoreCase("unlimited") ? Integer.MAX_VALUE : Integer.parseInt(parts[2].trim());
+                    int attackPoints = parts[2].equalsIgnoreCase("unlimited") ? Integer.MAX_VALUE : Integer.parseInt(parts[2].trim()); // keine Kommazahl möglich
                     int defensePoints = parts[3].equalsIgnoreCase("unlimited") ? Integer.MAX_VALUE : Integer.parseInt(parts[3].trim());
                     String description = parts[4].trim();
                     if (description.length() > 200) {
@@ -160,7 +159,8 @@ public class CardService {
             return "Error uploading CSV: " + e.getMessage();
         }
     }
-    }
+
+}
 
 
 
