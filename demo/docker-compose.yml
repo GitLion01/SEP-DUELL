@@ -17,6 +17,7 @@ services:
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: 123456
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      #konfigurationschlüßel für die Spring-Boot-Anwendung : Wert für die Konfiguration
       SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
       SPRING_MAIL_HOST: smtp.gmail.com
       SPRING_MAIL_PORT: 587
