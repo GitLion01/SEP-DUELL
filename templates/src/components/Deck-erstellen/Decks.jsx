@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './Decks.css';
-import { Link } from 'react-router-dom';
 import BackButton from '../BackButton';
+import Card from '../card';
+import Modal from '../Modal';
 
 function Decks() {
     const [id, setId] = useState(null);
@@ -60,6 +61,15 @@ function Decks() {
     };
 
 
+    /*
+    const handleInputChange = (event) => {
+        const { name, value} = event.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+    */
 
     // Funktion zur Generierung eines zufälligen Namens
     const generateRandomName = () => {
@@ -154,8 +164,8 @@ function Decks() {
                 }
             });
 
-            loadDecks();
-            loadCards();
+            await loadDecks();
+            await loadCards();
 
             console.log("Karte erfolgreich hinzugefügt", response.data);
 
@@ -177,12 +187,17 @@ function Decks() {
             setIsEditing(true);
         } else {
             setErrorMessage('Bitte speichern oder verwerfen Sie die Änderungen bevor Sie das Deck wechseln.');
+            console.log(errorMessage)
         }
     };
 
     const handleSaveDeckName = async () => {
         if (!deckName.trim()) {
             setErrorMessage('Der Deckname darf nicht leer sein');
+            return;
+        }
+
+        if (deckName === originalDeckName) {
             return;
         }
     
@@ -192,9 +207,10 @@ function Decks() {
             console.log('Deckname erfolgreich geändert!', response.data);
 
             await loadDecks();
-
+            await loadCards();
             setActiveDeck(null);
             setIsEditing(false);
+
         } catch (error) {
             console.error('Fehler beim Ändern des Decknamens:', error);
             setErrorMessage('Fehler beim Ändern des Decknamens: ' + error.message);
@@ -280,17 +296,6 @@ function Decks() {
 
     }
 
-
-    const handleHomeButtonClick = (event) => {
-        if (activeDeck !== null) {
-            event.preventDefault(); // Verhindert die Navigation
-            console.log("Navigation nicht erlaubt, da ein Deck aktiv ist.");
-            // Optional: Zeige eine Benachrichtigung oder Fehlermeldung an
-            alert("Bitte schließen Sie die Bearbeitung des aktiven Decks ab, bevor Sie zur Startseite wechseln.");
-        }
-        // Wenn activeDeck null ist, tut der Link seine Arbeit und navigiert normalerweise.
-    };
-
     const clearErrorMessage = () => setErrorMessage('');
 
     return (
@@ -299,55 +304,67 @@ function Decks() {
             <BackButton />
             <h1>Meine Decks</h1>
             {errorMessage && (
-                <div className="error-message" onClick={clearErrorMessage}>
+                <Modal message={errorMessage} onClose={clearErrorMessage}>
                     {errorMessage}
-                </div>
+                </Modal>
             )}
             <button onClick={handleCreateNewDeck} disabled={isEditing}>Neues Deck erstellen</button>
+            <div className="wrap">
             <div className="deck-list">
                 {decks.map((deck, index) => (
-                    <div key={index} className="deck" onClick={() => selectDeck(index)}>
-                        {deck.name}
+                    
+                    <div key={index}
+                        className="deck"
+                        onClick={() => selectDeck(index)}>
+                            {deck.name}
                     </div>
+                    
                 ))}
             </div>
-            {activeDeck !== null && (
-                <div className="cards-container">
-                    <div className="cards-left">
+            <div className="inside">
+            <div className="cards-left">
                         <h2>Verfügbare Karten</h2>
                         <div className="card-list">
 
                             {myCards.map(card => (
 
-                                <div key={card.id} className="card" onClick={() => handleAddCardToDeck(card)}>
+                                <div 
+                                    key={card.id}
+                                    className="card">
 
-                                    {card.name}
+                                    <Card card={card} onCardClick={() => {
+                                        if (activeDeck != null) {
+                                            handleAddCardToDeck(card);
+                                        }
+                                    }} />
 
                                 </div>
 
                             ))}
                         </div>
                     </div>
+            {activeDeck !== null && (
+                    
                     <div className="active-deck-container">
                         <h2>Aktives Deck: {decks[activeDeck].name}</h2>
                         <input type="text" value={deckName} onChange={(e) => setDeckName(e.target.value)}/>
                         <div className="button-container">
                             <button onClick={handleFinishEditing}>Fertig</button>
                             <button onClick={handleDeleteDeck}>Deck Löschen</button>
-                            <button onClick={handleSaveDeckName}>Name speichern</button>
+                            <button onClick={handleSaveDeckName} disabled={!deckName.trim() || deckName === originalDeckName}>Name speichern</button>
                         </div>
                         <div className="card-container">
                             {decks[activeDeck].cards.map((card, index) => (
-                                <div key={index} className="card" onClick={() => handleRemoveCardFromDeck(card.name)}>{card.name}</div>
+                                <div key={index} className="card">
+                                    <Card card={card} onCardClick={() => handleRemoveCardFromDeck(card.name)}/>
+                                </div>
                             ))}
                         </div>
                     </div>
-                </div>
             )}
             <div>
-                <Link to="/startseite" onClick={handleHomeButtonClick}>
-                    <button className="button" type="button">Home</button>
-                </Link>
+            </div>
+            </div>
             </div>
         </div>
         

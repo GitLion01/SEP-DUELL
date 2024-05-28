@@ -1,64 +1,59 @@
+.card {
+  --bs--bs-card-spacer-y: 1rem;
+  --bs-card-spacer-x: 1rem;
+  --bs-card-title-spacer-y: 0.5rem;
+  --bs-card-img-overlay-padding: 1rem;
+  word-wrap: break-word;
+  box-sizing: border-box;
+}
 
-    .card { 
-        --bs--bs-card-spacer-y: 1rem;
-        --bs-card-spacer-x: 1rem;
-        --bs-card-title-spacer-y: 0.5rem;
-        --bs-card-img-overlay-padding: 1rem;
-        word-wrap: break-word;
-        box-sizing: border-box;  
-    }
+.card-title {
+  margin-bottom: var(--bs-card-title-spacer-y);
+  color: var(--bs-card-title-color);
+  font-size: medium;
+}
 
-    .card-title {
-        margin-bottom: var(--bs-card-title-spacer-y);
-        color: var(--bs-card-title-color);
-    }
+h5 {
+  font-size: 1.25rem;
+}
 
-    h5 {
-        font-size: 1.25rem;
-    }
-
-    
-
-    .card-body {
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-      }
+.card-body {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
 
 .d-flex {
-    margin-top: auto; /* Drückt den Button an den unteren Rand der .card-body, wenn genug Inhalt vorhanden ist */
-  }
+  margin-top: auto; /* Drückt den Button an den unteren Rand der .card-body, wenn genug Inhalt vorhanden ist */
+}
 
-    
-        
-  .stats-circle {
-    width: 40px;
-    height: 40px;
-    background-color: #fff;
-    color: #333;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-  }
-  
-  .attack-points {
-    background-color: #ff4136;  
-  }
+.stats-circle {
+  width: 40px;
+  height: 40px;
+  background-color: #fff;
+  color: #333;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
 
-  .defense-points {
-    background-color: #0074d9;  
-  }
+.attack-points {
+  background-color: #ff4136;  
+}
 
-  .card-rarity {
-    text-align: center;
-    background-color: #ffffff; 
-    border-bottom: 2px solid #000000; 
-  }
+.defense-points {
+  background-color: #0074d9;  
+}
 
+.card-rarity {
+  text-align: center;
+  background-color: #ffffff;
+  border-bottom: 2px solid #000000;
+}
 
-  .card-img-top {
-    height: 250px; /* Beispielhöhe */
-    object-fit: cover; /* optional: um sicherzustellen, dass das Bild gut aussieht */
+.card-img-top {
+  height: 250px; /* Höhe automatisch anpassen */
+  object-fit: cover; /* optional: um sicherzustellen, dass das Bild gut aussieht */
 }

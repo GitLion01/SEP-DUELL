@@ -1,5 +1,4 @@
 package com.example.demo.cards;
-import jakarta.persistence.Lob;
 import lombok.*;
 
 
