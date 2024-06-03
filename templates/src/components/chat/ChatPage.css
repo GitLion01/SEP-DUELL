@@ -1,0 +1,26 @@
+.chat-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+  }
+  
+  .chat-container {
+    display: flex;
+    width: 100%;
+    max-width: 1200px;
+    height: calc(100vh - 100px);
+  }
+  
+  .chat-window {
+    flex: 1;
+    min-width: 700px; /* Feste Breite für das Chat-Fenster */
+    max-width: 700px; /* Feste Breite für das Chat-Fenster */
+    height: 100%; /* Höhe anpassen, um die gesamte verfügbare Höhe zu nutzen */
+    padding: 20px;
+    border: 1px solid #ccc;
+    margin-left: 20px;
+    background-color: #ffffff;
+    color: #000000;
+    overflow-y: auto;
+  }
