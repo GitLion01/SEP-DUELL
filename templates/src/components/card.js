@@ -51,8 +51,8 @@
                 </>
               )}
             </div>
-            <div style={{ position: 'absolute', bottom: '5px', left: 0, right: 0, textAlign: 'center' }}>
-                <button onClick={this.toggleCard} className="btn btn-primary btn-sm">
+            <div style={{ position: 'absolute', bottom: '-1px', left: 0, right: 0, textAlign: 'center' }}>
+                <button onClick={this.toggleCard} className="btn btn-primary btn-sm" style={{ marginTop: '5px' }}>
                   {showBack ? 'Vorderseite' : 'Rückseite'}
                 </button>
             </div>
