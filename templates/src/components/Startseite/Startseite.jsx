@@ -53,6 +53,9 @@ class Startseite extends Component {
             <section className="adminsteuerfeld">
               <a href="/admin" onClick={this.handleAdminClick}><h2>MEIN ADMINSTEUERFELD</h2></a>
             </section>
+            <section className="shop">
+              <a href="/shop"><h2>SHOP</h2></a>
+            </section>
           </div>
         </main>
         <footer>

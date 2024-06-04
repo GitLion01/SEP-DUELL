@@ -1,0 +1,62 @@
+.ShopPage_body {
+    color: white; 
+}
+
+.ShopPage_body h1 {
+    font-size: 2.5em;
+    margin-bottom: 20px;
+    text-align: center; /* Zentriere das H1-Element */
+    width: 100%; /* Nimmt die volle Breite des übergeordneten Containers ein */
+}
+
+.ShopPage_body p {
+    font-size: 1.2em;
+    margin-bottom: 20px;
+}
+
+.sep-coins {
+    border: 2px solid white; /* Weißer Rahmen */
+    padding: 10px 20px;
+    margin-bottom: 20px;
+    font-size: 1.2em;
+    border-radius: 5px; /* Optional: Abgerundete Ecken */
+}
+
+button {
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    margin: 10px;
+    cursor: pointer;
+    border-radius: 10px;
+    font-size: 1em;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+button:hover {
+    transform: scale(1.05);
+}
+
+button.bronze {
+    background-color: #cd7f32; /* Bronze Farbe */
+}
+
+button.bronze:hover {
+    background-color: #b87333; /* Dunklere Bronze Farbe */
+}
+
+button.silver {
+    background-color: #c0c0c0; /* Silber Farbe */
+}
+
+button.silver:hover {
+    background-color: #a9a9a9; /* Dunklere Silber Farbe */
+}
+
+button.gold {
+    background-color: #ffd700; /* Gold Farbe */
+}
+
+button.gold:hover {
+    background-color: #e6be8a; /* Dunklere Gold Farbe */
+}
