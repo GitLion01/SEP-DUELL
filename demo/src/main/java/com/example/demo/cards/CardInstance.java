@@ -19,6 +19,4 @@ public class CardInstance {
     @ManyToOne
     @JoinColumn(name= "user_id")
     private UserAccount userAccount;
-
-    private int count=0;
 }

@@ -25,9 +25,9 @@ public class Card {
     private String description;
     private byte[] image;
     private Rarity rarity;
-    @ManyToMany
+    @ManyToMany(mappedBy = "cards", cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     private List<Deck> decks = new ArrayList<>();
-    @OneToMany
+    @OneToMany(mappedBy = "card", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CardInstance> cardInstance=new ArrayList<>();
 
 
