@@ -48,6 +48,8 @@ class ShopPage extends Component {
             toast.error('Du hast nicht genug Münzen')
             return; 
         }
+        
+        const newSepCoins = this.state.sepCoins - cost;
     
         const newCards = []; 
         for (let i = 0; i < 5; i++) {
@@ -56,8 +58,9 @@ class ShopPage extends Component {
 
         this.setState((prevState) => 
             ({ newCards: newCards, 
-              sepCoins: prevState.sepCoins - cost })); //Methode die SEP Coins von User aktualisiert und Karten an das Backend schickt 
-     //   this.updatesepCoins(this.state.sepCoins); 
+              sepCoins: newSepCoins})); //Methode die SEP Coins von User aktualisiert und Karten an das Backend schickt 
+        console.log(newSepCoins)
+      //    this.updatesepCoins(newSepCoins); 
      //   this.setUserCards(newCards);
      }
 
