@@ -2,6 +2,7 @@ package com.example.demo.profile;
 
 import com.example.demo.decks.Deck;
 import com.example.demo.user.UserAccount;
+import com.example.demo.user.UserAccountRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,7 +13,7 @@ public class ProfileService {
 
     private final ProfileRepository profileRepository;
 
-    public ProfileService(ProfileRepository profileRepository) {
+    public ProfileService(ProfileRepository profileRepository, UserAccountRepository userAccountRepository) {
         this.profileRepository = profileRepository;
     }
 
@@ -25,6 +26,17 @@ public class ProfileService {
         return profileRepository.findDecksByUserId(userId);
     }
 
+    public String updateSEPCoins(Integer coins, Long userId) {
+        Optional<UserAccount> user = profileRepository.findById(userId);
+        if(user.isPresent())
+        {
+            UserAccount userGet = user.get();
+            userGet.setSepCoins(coins);
+            profileRepository.save(userGet);
+            return "success";
+        }
+        return "fail";
+    }
 
 
 
