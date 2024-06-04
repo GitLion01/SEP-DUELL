@@ -48,6 +48,8 @@ class ShopPage extends Component {
             toast.error('Du hast nicht genug Münzen')
             return; 
         }
+        
+        const newSepCoins = this.state.sepCoins - cost;
     
         const newCards = []; 
         for (let i = 0; i < 5; i++) {
@@ -56,26 +58,26 @@ class ShopPage extends Component {
 
         this.setState((prevState) => 
             ({ newCards: newCards, 
-              sepCoins: prevState.sepCoins - cost })); //Methode die SEP Coins von User aktualisiert und Karten an das Backend schickt 
-        await this.updatesepCoins(this.state.sepCoins);
-        console.log(this.state.sepCoins);
-        //this.setUserCards(newCards);
+              sepCoins: newSepCoins})); //Methode die SEP Coins von User aktualisiert und Karten an das Backend schickt 
+        console.log(newSepCoins)
+      //    this.updatesepCoins(newSepCoins); 
+     //   this.setUserCards(newCards);
      }
 
-     updatesepCoins = async (sepCoins) => {
+   /*  updatesepCoins = async (sepCoins) => {
         try {
-            const response = await axiosInstance.put(`/profile/${this.state.id}?sepCoins=${sepCoins}`); //Hier aktualisieren
+            const response = await axiosInstance.put(`/profile/${this.state.id}`, { sepCoins }); //Hier aktualisieren 
             console.log(response)
-            await this.getsepCoins();
+            this.getsepCoins(); 
         }
         catch {
-            console.error('Fehler beim Aktualisieren der Münzen')
+            console.error(error + 'Fehler beim Aktualisieren der Münzen')
         }
      }
 
-     /*setUserCards = async (newCards) => {
+     setUserCards = async (newCards) => {
      
-     }*/
+     }  */
 
      getRandomCard = (type) => {
         const random = Math.random();
