@@ -1,14 +1,13 @@
 package com.example.demo.cards;
-
-
 import com.example.demo.decks.Deck;
 import com.example.demo.decks.DeckRepository;
 import com.example.demo.user.UserAccount;
+import com.example.demo.user.UserAccountRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -28,11 +27,15 @@ public class CardService {
 
     private final CardRepository cardRepository;
     private final DeckRepository deckRepository;
+    private final UserAccountRepository userAccountRepository;
+    private final CardInstanceRepository cardInstanceRepository;
 
     @Autowired
-    public CardService(CardRepository cardRepository, DeckRepository deckRepository) {
+    public CardService(CardRepository cardRepository, DeckRepository deckRepository, UserAccountRepository userAccountRepository, CardInstanceRepository cardInstanceRepository) {
         this.cardRepository = cardRepository;
         this.deckRepository = deckRepository;
+        this.userAccountRepository = userAccountRepository;
+        this.cardInstanceRepository = cardInstanceRepository;
     }
 
 
@@ -65,7 +68,6 @@ public class CardService {
             cardRepository.save(card);
 }
 
-
     public void deleteCard(String name) {
         Optional<Card> optionalCard = cardRepository.findByName(name);
         if (optionalCard.isEmpty()) {
@@ -88,15 +90,12 @@ public class CardService {
         cardRepository.delete(card);
     }
 
-
     public String deleteMultipleCards(List<String> names){
         for (String name : names) {
             deleteCard(name);
         }
         return "Cards deleted";
     }
-
-
 
     public List<CardRequest> parseCSV(MultipartFile file) throws IOException {
         List<CardRequest> cardRequests = new ArrayList<>();
@@ -129,10 +128,12 @@ public class CardService {
         }
         return cardRequests;
     }
+
     private byte[] loadImageFromFile(String filePath) throws IOException {
         Path path = Paths.get(filePath);
         return Files.readAllBytes(path);
     }
+
     private String loadImageAndEncodeToBase64(String filePath) throws IOException {
         Path path = Paths.get(filePath);
         byte[] imageData = Files.readAllBytes(path);
@@ -147,7 +148,35 @@ public class CardService {
             return "Error uploading CSV: " + e.getMessage();
         }
     }
+
+    public ResponseEntity<String> addCardsInstanzen(Long userID, List<String> cards) {
+        Optional<UserAccount> user = userAccountRepository.findById(userID);
+        if(user.isPresent()) {
+            UserAccount userAccount = user.get();
+            for (String s : cards) {
+                Optional<Card> cardOptional = cardRepository.findByName(s);
+                if (cardOptional.isPresent()) {
+                    Card card = cardOptional.get();
+
+                    CardInstance cardInstance = new CardInstance();
+                    cardInstance.setCard(card);
+                    cardInstance.setCount(cardInstance.getCount() + 1);
+
+                    card.getCardInstance().add(cardInstance);
+
+                    cardInstance.setUserAccount(userAccount); // Setzen Sie den UserAccount in der CardInstance
+                    userAccount.getUserCardInstance().add(cardInstance);
+
+                    cardInstanceRepository.save(cardInstance);
+                    cardRepository.save(card);
+                    userAccountRepository.save(userAccount);
+                }
+            }
+            return ResponseEntity.ok("Cards added");
+        }
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
+}
 
 
 
