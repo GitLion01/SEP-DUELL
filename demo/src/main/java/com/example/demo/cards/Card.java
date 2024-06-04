@@ -31,6 +31,8 @@ public class Card {
     private Rarity rarity;
     @ManyToMany
     private List<Deck> decks = new ArrayList<>();
+    @ManyToOne
+    private UserAccount userAccounts;
 
 
 

@@ -57,24 +57,25 @@ class ShopPage extends Component {
         this.setState((prevState) => 
             ({ newCards: newCards, 
               sepCoins: prevState.sepCoins - cost })); //Methode die SEP Coins von User aktualisiert und Karten an das Backend schickt 
-     //   this.updatesepCoins(this.state.sepCoins); 
-     //   this.setUserCards(newCards);
+        this.updatesepCoins(this.state.sepCoins);
+        console.log(this.state.sepCoins);
+        //this.setUserCards(newCards);
      }
 
-   /*  updatesepCoins = async (sepCoins) => {
+     updatesepCoins = async (sepCoins) => {
         try {
             const response = await axiosInstance.put(`/profile/${this.state.id}`, { sepCoins }); //Hier aktualisieren 
             console.log(response)
             this.getsepCoins(); 
         }
         catch {
-            console.error(error + 'Fehler beim Aktualisieren der Münzen')
+            console.error('Fehler beim Aktualisieren der Münzen')
         }
      }
 
-     setUserCards = async (newCards) => {
+     /*setUserCards = async (newCards) => {
      
-     }  */
+     }*/
 
      getRandomCard = (type) => {
         const random = Math.random();

@@ -5,6 +5,7 @@ import com.example.demo.decks.Deck;
 import com.example.demo.user.UserAccount;
 import com.example.demo.user.UserAccountResponse;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -54,5 +55,12 @@ public class ProfileController {
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @PutMapping(path ="/{id}")
+    public ResponseEntity<String> updateSEPCoins(@PathVariable Long id,@RequestParam("sepCoins") Integer sepCoins) {
+        String result = profileService.updateSEPCoins(sepCoins,id);
+        HttpStatus status = result.startsWith("fail") ? HttpStatus.BAD_REQUEST : HttpStatus.OK;
+        return new ResponseEntity<>(result, status);
     }
 }
