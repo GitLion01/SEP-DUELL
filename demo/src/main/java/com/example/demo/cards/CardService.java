@@ -3,6 +3,7 @@ import com.example.demo.decks.Deck;
 import com.example.demo.decks.DeckRepository;
 import com.example.demo.user.UserAccount;
 import com.example.demo.user.UserAccountRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +22,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
+@Transactional
 @Service
 public class CardService {
 
@@ -68,6 +70,7 @@ public class CardService {
             cardRepository.save(card);
 }
 
+
     public void deleteCard(String name) {
         Optional<Card> optionalCard = cardRepository.findByName(name);
         if (optionalCard.isEmpty()) {
@@ -87,8 +90,13 @@ public class CardService {
             deckRepository.deleteDeckCardsByDeckIdAndCardIds(deck.getId(), cardIds);
         }
 
+        // Finally, delete the card itself, which will cascade the delete to CardInstance entries
         cardRepository.delete(card);
     }
+
+
+
+
 
     public String deleteMultipleCards(List<String> names){
         for (String name : names) {
@@ -160,7 +168,6 @@ public class CardService {
 
                     CardInstance cardInstance = new CardInstance();
                     cardInstance.setCard(card);
-                    cardInstance.setCount(cardInstance.getCount() + 1);
 
                     card.getCardInstance().add(cardInstance);
 
