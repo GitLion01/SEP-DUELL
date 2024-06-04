@@ -1,5 +1,5 @@
 package com.example.demo.user;
-import com.example.demo.cards.Card;
+import com.example.demo.cards.CardInstance;
 import com.example.demo.decks.Deck;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
@@ -60,13 +60,10 @@ public class UserAccount implements UserDetails {
             inverseJoinColumns = @JoinColumn(name = "friend_requests"))
     private List<UserAccount> friendRequests=new ArrayList<>();
 
-    @OneToMany
-    @JoinTable(
-            name = "user_card",
-            joinColumns = @JoinColumn(name= "user_id"),
-            inverseJoinColumns = @JoinColumn(name= "card_id")
-    )
-    private List<Card> userCard=new ArrayList<>();
+    // mappedBy : um das besitzende Seite der Verbindung zu definieren
+    // es gibt immer eine besitzende Seite bei bidirektionalen Beziehung zwischen zwei Entitäten
+    @OneToMany(mappedBy = "userAccount")
+    private List<CardInstance> userCardInstance=new ArrayList<>();
 
 
 

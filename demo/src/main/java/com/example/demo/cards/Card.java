@@ -1,9 +1,5 @@
 package com.example.demo.cards;
-
-
 import com.example.demo.decks.Deck;
-import com.example.demo.user.UserAccount;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -31,8 +27,8 @@ public class Card {
     private Rarity rarity;
     @ManyToMany
     private List<Deck> decks = new ArrayList<>();
-    @ManyToOne
-    private UserAccount userAccounts;
+    @OneToMany
+    private List<CardInstance> cardInstance=new ArrayList<>();
 
 
 
