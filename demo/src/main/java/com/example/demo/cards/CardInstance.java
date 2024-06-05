@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 @Entity
@@ -22,4 +24,5 @@ public class CardInstance {
     @JoinColumn(name= "user_id")
     @JsonIgnore
     private UserAccount userAccount;
+
 }
