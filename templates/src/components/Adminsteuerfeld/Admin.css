@@ -13,7 +13,7 @@
 
 .AdminPanel h2 {
     color: white;
-    text-align: center; 
+    text-align: center;
 }
 
 
@@ -23,9 +23,42 @@
     font-family: ;
 }
 
+.Sachen {
+    margin-bottom: 10px;
+}
+
 .existingCards {
     display: flex;        /* Aktiviert Flexbox */
     flex-wrap: wrap;      /* Erlaubt Umbrüche, wenn der Raum ausgeht */
     justify-content: center; /* Zentriert die Karten horizontal */
     gap: 20px;            /* Setzt einen Abstand zwischen den Karten */
+}
+/* Admin.css */
+
+.AdminPanel select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.AdminPanel select:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+.AdminPanel select:hover {
+    border-color: #0056b3;
+}
+
+.AdminPanel select option {
+    padding: 10px;
+    font-size: 16px;
 }

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './Decks.css';
-import { Link } from 'react-router-dom';
 import BackButton from '../BackButton';
 import Card from '../card';
+import Modal from '../Modal';
 
 function Decks() {
     const [id, setId] = useState(null);
@@ -164,8 +164,8 @@ function Decks() {
                 }
             });
 
-            loadDecks();
-            loadCards();
+            await loadDecks();
+            await loadCards();
 
             console.log("Karte erfolgreich hinzugefügt", response.data);
 
@@ -187,12 +187,17 @@ function Decks() {
             setIsEditing(true);
         } else {
             setErrorMessage('Bitte speichern oder verwerfen Sie die Änderungen bevor Sie das Deck wechseln.');
+            console.log(errorMessage)
         }
     };
 
     const handleSaveDeckName = async () => {
         if (!deckName.trim()) {
             setErrorMessage('Der Deckname darf nicht leer sein');
+            return;
+        }
+
+        if (deckName === originalDeckName) {
             return;
         }
     
@@ -202,9 +207,10 @@ function Decks() {
             console.log('Deckname erfolgreich geändert!', response.data);
 
             await loadDecks();
-
+            await loadCards();
             setActiveDeck(null);
             setIsEditing(false);
+
         } catch (error) {
             console.error('Fehler beim Ändern des Decknamens:', error);
             setErrorMessage('Fehler beim Ändern des Decknamens: ' + error.message);
@@ -290,17 +296,6 @@ function Decks() {
 
     }
 
-
-    const handleHomeButtonClick = (event) => {
-        if (activeDeck !== null) {
-            event.preventDefault(); // Verhindert die Navigation
-            console.log("Navigation nicht erlaubt, da ein Deck aktiv ist.");
-            // Optional: Zeige eine Benachrichtigung oder Fehlermeldung an
-            alert("Bitte schließen Sie die Bearbeitung des aktiven Decks ab, bevor Sie zur Startseite wechseln.");
-        }
-        // Wenn activeDeck null ist, tut der Link seine Arbeit und navigiert normalerweise.
-    };
-
     const clearErrorMessage = () => setErrorMessage('');
 
     return (
@@ -309,9 +304,9 @@ function Decks() {
             <BackButton />
             <h1>Meine Decks</h1>
             {errorMessage && (
-                <div className="error-message" onClick={clearErrorMessage}>
+                <Modal message={errorMessage} onClose={clearErrorMessage}>
                     {errorMessage}
-                </div>
+                </Modal>
             )}
             <button onClick={handleCreateNewDeck} disabled={isEditing}>Neues Deck erstellen</button>
             <div className="wrap">
@@ -356,21 +351,18 @@ function Decks() {
                         <div className="button-container">
                             <button onClick={handleFinishEditing}>Fertig</button>
                             <button onClick={handleDeleteDeck}>Deck Löschen</button>
-                            <button onClick={handleSaveDeckName}>Name speichern</button>
+                            <button onClick={handleSaveDeckName} disabled={!deckName.trim() || deckName === originalDeckName}>Name speichern</button>
                         </div>
                         <div className="card-container">
                             {decks[activeDeck].cards.map((card, index) => (
                                 <div key={index} className="card">
-                                    <Card card={card} onCardClick={() => handleRemoveCardFromDeck(card.name)} />
+                                    <Card card={card} onCardClick={() => handleRemoveCardFromDeck(card.name)}/>
                                 </div>
                             ))}
                         </div>
                     </div>
             )}
             <div>
-                <Link to="/startseite" onClick={handleHomeButtonClick}>
-                    <button className="button" type="button">Home</button>
-                </Link>
             </div>
             </div>
             </div>

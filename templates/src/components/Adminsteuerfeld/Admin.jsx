@@ -1,125 +1,162 @@
-import React, { Component } from 'react'; // Importiert React und die Component-Klasse aus der React-Bibliothek
-import axiosInstance from '../../api/axios'; // Importiert eine axios-Instanz für HTTP-Anfragen
-import './Admin.css'; // Importiert die CSS-Datei für das Styling der Admin-Komponente
-import Card from '../card'; // Importiert die Card-Komponente
+import React, { Component } from 'react';
+import axiosInstance from '../../api/axios';
+import './Admin.css';
+import Card from '../card';
 import BackButton from '../BackButton';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 class Admin extends Component {
-    state = { 
+    state = {
         cards: [], // Initialisiert den State mit einem leeren Array für Karten
-        searchTerm:'' // Initialisiert den State mit einem leeren String für den Suchbegriff
-    } 
+        searchTerm:'', // Initialisiert den State mit einem leeren String für den Suchbegriff
+        loading: false,
+        error: null,
+        rarityFilter: ''
+    }
 
     componentDidMount() {
         this.fetchCards(); // Ruft die Funktion fetchCards auf, sobald die Komponente in den DOM eingefügt wird
     }
 
     fetchCards = async () => {
+        this.setState({ loading: true, error: null });
         try {
-            const response = await axiosInstance.get('/cards'); // Führt eine GET-Anfrage aus, um Karten vom Server zu holen
-            // Wir gehen davon aus, dass die Karten im response.data-Array enthalten sind
-            this.setState({ cards: response.data }); // Aktualisiert den State mit den erhaltenen Karten
+            const response = await axiosInstance.get('/cards');
+            this.setState({ cards: response.data, loading: false });
         } catch (error) {
-            console.error('Fehler beim Abrufen der Karten:', error); // Gibt einen Fehler aus, falls die Anfrage fehlschlägt
+            this.setState({ loading: false, error: 'Fehler beim Abrufen der Karten' });
+            toast.error('Fehler beim Abrufen der Karten');
         }
     };
-    
+
     handleUpload = async (event) => {
-        event.preventDefault(); // Verhindert das Standardverhalten des Formulars
-        const file = event.target.files[0]; // Holt die hochgeladene Datei aus dem Event-Target
-        const formData = new FormData(); // Erstellt ein neues FormData-Objekt
-        formData.append('file', file); // Fügt die Datei zum FormData-Objekt hinzu
-    
+        event.preventDefault();
+        const file = event.target.files[0];
+        const formData = new FormData();
+        formData.append('file', file);
+
+        this.setState({ loading: true, error: null });
+
         try {
             const response = await axiosInstance.post('/cards/upload', formData, {
                 headers: {
-                    'Content-Type': 'multipart/form-data' // Setzt den Content-Type Header
+                    'Content-Type': 'multipart/form-data'
                 }
             });
             console.log('Response data:', response.data); // Überprüfen, was genau vom Server zurückkommt
             console.log('Datei erfolgreich hochgeladen.');
-            // Die Karten vom Server neu laden, um die neuesten Karten anzuzeigen
-            this.fetchCards(); // Ruft erneut fetchCards auf, um die Kartenliste zu aktualisieren
+            toast.success('Datei erfolgreich hochgeladen.');
+            event.target.value = null;
+            this.fetchCards();
         } catch (error) {
-            console.error('Fehler beim Hochladen der Datei:', error); // Gibt einen Fehler aus, falls das Hochladen fehlschlägt
-            alert('Fehler beim hochladen der Datei')
+            this.setState({ loading: false, error: 'Fehler beim Hochladen der Datei' });
+            toast.error('Fehler beim Hochladen der Datei');
         }
     };
 
     handleSearchChange = (event) => {
-        this.setState({ searchTerm: event.target.value }); // Aktualisiert den Suchbegriff im State, wenn sich der Wert des Eingabefelds ändert
+        this.setState({ searchTerm: event.target.value });
     };
 
     handleSearch = async (event) => {
-        event.preventDefault(); // Verhindert das Standardverhalten des Formulars
+        event.preventDefault();
+        if (!this.state.searchTerm.trim()) {
+            toast.warn('Bitte geben Sie einen Suchbegriff ein.');
+            return;
+        }
+        this.setState({ loading: true, error: null });
         try {
-            const response = await axiosInstance.get(`/cards/findByName/${this.state.searchTerm}`); // Führt eine GET-Anfrage aus, um eine Karte nach Namen zu suchen
-            if (response.data) {
-                this.setState({ cards: [response.data] }); // Setzt die Karten neu basierend auf der Suche
-            } else {
-                this.setState({ cards: [] }); // Leere die Kartenliste, wenn keine Karte gefunden wurde
-            }
-        } catch (error) { 
-            console.error('Fehler beim Suchen:', error); // Gibt einen Fehler aus, falls die Suchanfrage fehlschlägt
-            this.setState({ cards: [] }); // Leere die Kartenliste, wenn ein Fehler auftritt
+            const response = await axiosInstance.get(`/cards/findByName/${this.state.searchTerm}`);
+            this.setState({ cards: response.data ? [response.data] : [], loading: false });
+        } catch (error) {
+            this.setState({ loading: false, error: 'Fehler beim Suchen' });
+            toast.error('Fehler beim Suchen');
         }
     };
 
     handleDelete = async (event) => {
-        event.preventDefault(); // Verhindert das Standardverhalten des Formulars
-        if (this.state.searchTerm) {
-            try {
-                // Annahme, dass der Endpunkt eine POST-Anforderung erwartet
-                const response = await axiosInstance.post('/cards/delete', [this.state.searchTerm]); // Führt eine POST-Anfrage aus, um eine Karte zu löschen
-                console.log('Löschvorgang:', response.data); // Gibt den Löschvorgang in der Konsole aus
-                // Aktualisiere die Kartenliste, falls das Löschen erfolgreich war
-                this.fetchCards(); // Ruft erneut fetchCards auf, um die Kartenliste zu aktualisieren
-            } catch (error) {
-                console.error('Fehler beim Löschen der Karte:', error); // Gibt einen Fehler aus, falls das Löschen fehlschlägt
-            }
-        } else {
-            console.error('Kein Kartenname eingegeben'); // Gibt einen Fehler aus, falls kein Kartenname eingegeben wurde
+        event.preventDefault();
+        if (!this.state.searchTerm.trim()) {
+            toast.warn('Bitte geben Sie einen Kartenname zum Löschen ein.');
+            return;
+        }
+        this.setState({ loading: true, error: null });
+        try {
+            const response = await axiosInstance.post('/cards/delete', [this.state.searchTerm]);
+            toast.success('Karte erfolgreich gelöscht.');
+            this.fetchCards();
+        } catch (error) {
+            this.setState({ loading: false, error: 'Fehler beim Löschen der Karte' });
+            toast.error('Fehler beim Löschen der Karte');
         }
     };
 
-    render() { 
-        console.log(this.state.cards); // Konsolenausgabe hinzugefügt, um die Karten im State anzuzeigen
-        console.log(Array.isArray(this.state.cards)); // Überprüft, ob cards ein Array ist
+    handleRarityFilterChange = (event) => {
+        this.setState({ rarityFilter: event.target.value });
+    };
+
+    getFilteredCards = () => {
+        const { cards, rarityFilter } = this.state;
+        if (!rarityFilter) return cards;
+        return cards.filter(card => card.rarity === rarityFilter);
+    };
+
+    render() {
+        const { cards, searchTerm, loading, rarityFilter } = this.state;
+        console.log(cards);
+        const filteredCards = this.getFilteredCards();
 
         return (
-            <body className='AdminPanel__body'> {/* Fügt eine Klasse für das Body-Element hinzu */}
-                  <BackButton />
+            <div className='AdminPanel__body'>
+                <ToastContainer />
+                <BackButton />
                 <div className="AdminPanel">
-                    <h1>Admin Panel</h1> {/* Überschrift für das Admin-Panel */}
-                    <form onSubmit={this.handleUpload}> {/* Formular zum Hochladen einer CSV-Datei */}
+                    <h1>Admin Panel</h1>
+                    <form onSubmit={this.handleUpload}>
                         <label htmlFor="csvFile">Wählen Sie eine CSV-Datei aus:</label>
-                        <input 
-                            type="file" 
-                            id="csvFile" 
-                            name="csvFile" 
-                            accept=".csv" 
+                        <input
+                            type="file"
+                            id="csvFile"
+                            name="csvFile"
+                            accept=".csv"
                             onChange={this.handleUpload}
-                            required 
+                            required
                         />
                     </form>
                     <h2>Vorhandene Kartentypen</h2>
-                    <form onSubmit={this.handleSearch}> {/* Formular zum Suchen von Karten */}
-                        <input type="text" placeholder="Karte suchen" value={this.state.searchTerm} onChange={this.handleSearchChange} required />
-                        <button type="submit">Suchen</button> {/* Button zum Ausführen der Suchanfrage */}
-                        <button type="button" onClick={this.handleDelete}>Löschen</button> {/* Button zum Löschen einer Karte */}
-                        <button type="button" onClick={this.fetchCards}>Alle anzeigen</button> {/* Button zum Anzeigen aller Karten */}
+                    <form className='Sachen'>
+                        <input
+                            type="text"
+                            placeholder="Karte suchen"
+                            value={searchTerm}
+                            onChange={this.handleSearchChange}
+                            required
+                        />
+                        <button type="submit" onClick={this.handleSearch}>Suchen</button>
+                        <button type="button" onClick={this.handleDelete}>Löschen</button>
+                        <button type="button" onClick={this.fetchCards}>Alle anzeigen</button>
+                        <label htmlFor="rarityFilter">Seltenheit filtern:</label>
+                        <select id="rarityFilter" className="select-style" value={rarityFilter} onChange={this.handleRarityFilterChange}>
+                            <option value="">Alle</option>
+                            <option value="NORMAL">Normal</option>
+                            <option value="RARE">Selten</option>
+                            <option value="LEGENDARY">Legendär</option>
+                        </select>
                     </form>
-                    <div id="existingCards" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '20px' }}>
-                        {/* Liste der Kartentypen */}
-                        {this.state.cards.map((card, index) =>( 
-                            <Card key={index} card={card} /> // Rendern der Card-Komponente für jede Karte im State
-                        ))}
-                    </div>  
+                        {loading ? (
+                            <p>Loading...</p>
+                        ) : (
+                            <div id="existingCards" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '20px' }}>
+                                {filteredCards.map((card, index) => (
+                                    <Card key={index} card={card} />
+                                ))}
+                            </div>
+                        )}
                 </div>
-            </body>
+            </div>
         );
     }
 }
 
-document.body.classList.add('AdminPanel__body'); // Fügt eine Klasse zum Body-Element hinzu
-export default Admin; // Exportiert die Admin-Komponente als Standardexport
+export default Admin;

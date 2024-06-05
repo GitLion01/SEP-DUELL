@@ -11,8 +11,8 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 import static com.example.demo.user.UserRole.ADMIN;
+
 
 @Service
 @Transactional
@@ -30,14 +30,17 @@ public class FriendListService {
         byte[] image = user.getImage();
         String imageBase64 = null;
         if(image != null) {
+            //von Soufian Code kopiert
+            //encode in 64 Base dann convert to Byte[]
             imageBase64 = Base64.getEncoder().encodeToString(user.getImage());
         }
         return new UserDTO(user.getUsername(), imageBase64,user.getId(),user.getFirstName(),user.getLastName(),user.getFriends(), user.getLeaderboardPoints());
     }
 
-    // Gibt die Freundesliste als DTOs zurück
+    // Gibt die Freundesliste als DTOs zurück (Data Transfer Object)
     public Optional<List<UserDTO>> getFriendList(long id) {
         Optional<UserAccount> user = friendListRepository.findById(id);
+        //für jede Object ruft die Methode convertToDTO auf bzw. für jeden Freund , :: referenz
         return user.map(u -> u.getFriends().stream().map(this::convertToDTO).collect(Collectors.toList()));
     }
 

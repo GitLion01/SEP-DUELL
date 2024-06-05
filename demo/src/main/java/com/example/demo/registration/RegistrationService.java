@@ -2,7 +2,6 @@ package com.example.demo.registration;
 
 
 import com.example.demo.email.EmailSender;
-import com.example.demo.images.ImageUploadService;
 import com.example.demo.registration.token.ConfirmationToken;
 import com.example.demo.registration.token.ConfirmationTokenService;
 import com.example.demo.user.UserAccount;
@@ -10,16 +9,8 @@ import com.example.demo.user.UserAccountService;
 import com.example.demo.user.UserRole;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
-import org.hibernate.validator.internal.constraintvalidators.bv.EmailValidator;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.multipart.MultipartFile;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Date;
 

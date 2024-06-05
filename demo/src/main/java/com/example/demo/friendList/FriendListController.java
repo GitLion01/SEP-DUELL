@@ -18,6 +18,7 @@ public class FriendListController {
     public List<UserDTO> getFriends(@PathVariable int id) {
         return friendListService.getFriendList(id).orElse(null);
     }
+
     @GetMapping(path ="/{id}/friends/{friendId}")
     public List<UserDTO> getFriendsFriendList(@PathVariable int id,@PathVariable int friendId) {
         return friendListService.getFriendsFriendList(id,friendId).orElse(null);

@@ -5,12 +5,26 @@ services:
   app:
     container_name: springboot-postgresql
     image: springboot-postgresql
-    build: ./ #build in diesem Ordner
+    build: ./
     ports:
+      #This means that port 8080 on the host machine is mapped to port 8080 within
+      #the Docker container running in backend application.
       - "8080:8080"
     depends_on:
       - postgresqldb
-
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgresqldb:5432/registration
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: 123456
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      #konfigurationschlüßel für die Spring-Boot-Anwendung : Wert für die Konfiguration
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
+      SPRING_MAIL_HOST: smtp.gmail.com
+      SPRING_MAIL_PORT: 587
+      SPRING_MAIL_USERNAME: gatekeeper.cardhaven@gmail.com
+      SPRING_MAIL_PASSWORD: vdafjcxkzihyyoqq
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: true
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: true
 
   postgresqldb:
     image: postgres
@@ -20,3 +34,5 @@ services:
       POSTGRES_DB: registration
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 123456
+    volumes:
+      - ./database:/var/lib/postgresql/data
