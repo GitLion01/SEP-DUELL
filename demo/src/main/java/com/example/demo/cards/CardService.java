@@ -3,6 +3,7 @@ import com.example.demo.decks.Deck;
 import com.example.demo.decks.DeckRepository;
 import com.example.demo.user.UserAccount;
 import com.example.demo.user.UserAccountRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +22,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
+@Transactional
 @Service
 public class CardService {
 
@@ -41,10 +43,31 @@ public class CardService {
 
     public String addCards(List<CardRequest> requests) {
         List<String> addedCards = new ArrayList<>();
+        List<UserAccount> allUsers = userAccountRepository.findAll();
         for (CardRequest request : requests) {
             try {
                 saveCard(request);
                 addedCards.add(request.getName());
+
+                // add card for all users
+                for (UserAccount userAccount : allUsers) {
+                    List<CardInstance> allCardInstances = cardInstanceRepository.findByUserAccount(userAccount);
+
+                    boolean cardExists = false;
+
+                    // Check if the card already exists for the user
+                    for (CardInstance cardInstance : allCardInstances) {
+                        if (cardInstance.getCard().getName().equals(request.getName())) {
+                            cardExists = true;
+                            break;
+                        }
+                    }
+
+                    // If the card doesn't exist for the user, add it
+                    if (!cardExists) {
+                        addCardsInstanzen(userAccount.getId(), Collections.singletonList(request.getName()));
+                    }
+                }
             } catch (IllegalStateException e) {
                 System.out.println("Error adding card: " + e.getMessage());
             }
@@ -68,6 +91,7 @@ public class CardService {
             cardRepository.save(card);
 }
 
+
     public void deleteCard(String name) {
         Optional<Card> optionalCard = cardRepository.findByName(name);
         if (optionalCard.isEmpty()) {
@@ -87,8 +111,13 @@ public class CardService {
             deckRepository.deleteDeckCardsByDeckIdAndCardIds(deck.getId(), cardIds);
         }
 
+        // Finally, delete the card itself, which will cascade the delete to CardInstance entries
         cardRepository.delete(card);
     }
+
+
+
+
 
     public String deleteMultipleCards(List<String> names){
         for (String name : names) {
@@ -159,9 +188,8 @@ public class CardService {
                     Card card = cardOptional.get();
 
                     CardInstance cardInstance = new CardInstance();
-                    cardInstance.setCard(card);
-                    cardInstance.setCount(cardInstance.getCount() + 1);
 
+                    cardInstance.setCard(card);
                     card.getCardInstance().add(cardInstance);
 
                     cardInstance.setUserAccount(userAccount); // Setzen Sie den UserAccount in der CardInstance
