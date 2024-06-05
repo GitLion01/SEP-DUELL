@@ -1,20 +1,19 @@
 package com.example.demo.decks;
 
 import com.example.demo.cards.Card;
+import com.example.demo.cards.CardInstance;
+import com.example.demo.cards.CardInstanceRepository;
 import com.example.demo.cards.CardRepository;
 import com.example.demo.user.UserAccount;
 import com.example.demo.user.UserAccountRepository;
-import com.example.demo.user.UserAccountService;
-import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import java.security.Principal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -26,14 +25,15 @@ public class DeckService{
     private final CardRepository cardRepository;
     @Autowired
     private UserAccountRepository userAccountRepository;
-
+    private final CardInstanceRepository cardInstanceRepository;
 
 
 
     @Autowired
-    public DeckService(DeckRepository deckRepository, CardRepository cardRepository) {
+    public DeckService(DeckRepository deckRepository, CardRepository cardRepository, CardInstanceRepository cardInstanceRepository) {
         this.deckRepository = deckRepository;
         this.cardRepository = cardRepository;
+        this.cardInstanceRepository = cardInstanceRepository;
     }
 
 
@@ -439,6 +439,16 @@ public class DeckService{
             e.printStackTrace();
             return "Fehler beim Löschen des Decks";
         }
+    }
+
+    public ResponseEntity<List<Card>> getUserCards(Long userID){
+        Optional<UserAccount> userOptional = userAccountRepository.findById(userID);
+        if (userOptional.isPresent()) {
+            UserAccount user = userOptional.get();
+            List<CardInstance> cardInstances= cardInstanceRepository.findByUserAccount(user);
+            return new ResponseEntity<>(cardInstances.stream().map(CardInstance::getCard).collect(Collectors.toList()), HttpStatus.OK);
+            }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 }
 

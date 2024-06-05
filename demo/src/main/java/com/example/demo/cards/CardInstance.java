@@ -1,5 +1,6 @@
 package com.example.demo.cards;
 import com.example.demo.user.UserAccount;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,9 +15,11 @@ public class CardInstance {
 
     @ManyToOne
     @JoinColumn(name= "card_id")
+    @JsonIgnore
     private Card card;
 
     @ManyToOne
     @JoinColumn(name= "user_id")
+    @JsonIgnore
     private UserAccount userAccount;
 }
