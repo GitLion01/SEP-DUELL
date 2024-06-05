@@ -32,9 +32,6 @@ public class DeckController {
     }
 
 
-
-
-
     @PutMapping("/updateName/{userId}/{oldName}/{newName}")
     public ResponseEntity<String> updateDeckName(
             @PathVariable Long userId,
@@ -92,6 +89,10 @@ public class DeckController {
         return deckService.getAllCardsFromDeck(userID, deckName);
     }
 
+    @GetMapping("/cards/{userId}")
+    public ResponseEntity<List<Card>> getUserCards(@PathVariable Long userId){
+        return deckService.getUserCards(userId);
+    }
 
 
     @GetMapping(path = "/getUserDecks/{userID}")

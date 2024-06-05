@@ -13,7 +13,7 @@
 
 .AdminPanel h2 {
     color: white;
-    text-align: center;
+    text-align: center; 
 }
 
 
@@ -62,3 +62,4 @@
     padding: 10px;
     font-size: 16px;
 }
+

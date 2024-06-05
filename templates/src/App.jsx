@@ -10,6 +10,9 @@ import Decks from './components/Deck-erstellen/Decks.jsx';
 import './index.css';
 import Freundeliste from "./components/Freunde/Freundeliste.jsx";
 import ProtectedRoute from './ProtectedRoute.jsx';
+import ShopPage from './components/ShopPage/ShopPage.jsx';
+import ChatPage from './components/chat/ChatPage.jsx';
+
 
 
 
@@ -25,6 +28,8 @@ function App() {
         <Route path="/admin" element={<ProtectedRoute element={AdminPanel} requiredRole="ADMIN" />} />
         <Route path="/decks" element={<ProtectedRoute element={Decks} />} />
         <Route path="/freundelist" element={<ProtectedRoute element={Freundeliste} />} />
+        <Route path="/shop" element={<ProtectedRoute element={ShopPage} />} />
+        <Route path="/chat" element={<ProtectedRoute element={ChatPage} />} /> {/* Neue Route für die Chat-Seite */}
       </Routes>
     </Router>
   );

@@ -1,13 +1,16 @@
 package com.example.demo.decks;
 
 import com.example.demo.cards.Card;
+import com.example.demo.cards.CardInstance;
+import com.example.demo.cards.CardInstanceRepository;
 import com.example.demo.cards.CardRepository;
 import com.example.demo.user.UserAccount;
 import com.example.demo.user.UserAccountRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -22,16 +25,17 @@ public class DeckService{
 
     private final DeckRepository deckRepository;
     private final CardRepository cardRepository;
-    private final UserAccountRepository userAccountRepository;
-
+    @Autowired
+    private UserAccountRepository userAccountRepository;
+    private final CardInstanceRepository cardInstanceRepository;
 
 
 
     @Autowired
-    public DeckService(DeckRepository deckRepository, CardRepository cardRepository, UserAccountRepository userAccountRepository) {
+    public DeckService(DeckRepository deckRepository, CardRepository cardRepository, CardInstanceRepository cardInstanceRepository) {
         this.deckRepository = deckRepository;
         this.cardRepository = cardRepository;
-        this.userAccountRepository = userAccountRepository;
+        this.cardInstanceRepository = cardInstanceRepository;
     }
 
 
@@ -86,6 +90,8 @@ public class DeckService{
             deckCreated = true;
         }
 
+
+        // Constructing the final message
         if (deckCreated) {
             return "Deck created successfully";
         } else {
@@ -247,6 +253,10 @@ public class DeckService{
                UserAccount user = optionalUser.get();
 
                Optional<Deck> optionalDeck = deckRepository.findAllDecksByUserIdAndName(request.getUserID(), request.getName());
+
+
+
+
 
                if (optionalDeck.isPresent()) {
                    Deck deck = optionalDeck.get();
@@ -430,6 +440,16 @@ public class DeckService{
             e.printStackTrace();
             return "Fehler beim Löschen des Decks";
         }
+    }
+
+    public ResponseEntity<List<Card>> getUserCards(Long userID){
+        Optional<UserAccount> userOptional = userAccountRepository.findById(userID);
+        if (userOptional.isPresent()) {
+            UserAccount user = userOptional.get();
+            List<CardInstance> cardInstances= cardInstanceRepository.findByUserAccount(user);
+            return new ResponseEntity<>(cardInstances.stream().map(CardInstance::getCard).collect(Collectors.toList()), HttpStatus.OK);
+            }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 }
 

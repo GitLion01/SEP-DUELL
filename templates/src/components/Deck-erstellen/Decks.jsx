@@ -31,7 +31,7 @@ function Decks() {
     useEffect(() => {
 
         // Abrufen der Karten des Spielers
-        axios.get(`http://localhost:8080/cards`)
+        axios.get(`http://localhost:8080/decks/cards/${id}`)
             .then(response => setMyCards(response.data))
             .catch(error => console.error('Fehler beim Abrufen der Karten:', error));
 
@@ -41,7 +41,7 @@ function Decks() {
             .catch(error => console.error('Fehler beim Abrufen der Decks:', error));
 
     }, [id]);
-    
+
     const loadDecks = async () => {
         try {
             const response = await axios.get(`http://localhost:8080/decks/getUserDecks/${id}`);
@@ -53,23 +53,12 @@ function Decks() {
 
     const loadCards = async () => {
         try {
-            const response = await axios.get(`http://localhost:8080/cards`);
+            const response = await axios.get(`http://localhost:8080/decks/cards/${id}`);
             setMyCards(response.data);
         } catch (error) {
             console.error('Fehler beim Abrufen der Karten:', error);
         }
     };
-
-
-    /*
-    const handleInputChange = (event) => {
-        const { name, value} = event.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
-    };
-    */
 
     // Funktion zur Generierung eines zufälligen Namens
     const generateRandomName = () => {
@@ -92,7 +81,7 @@ function Decks() {
             return;
         }
 
-        // Erstelle neues Deck-Objekt
+        // Erstelle neues Deck-Objekt als FormData
         const newDeck = {
             userID: id, //
             name: generateRandomName(),
@@ -100,13 +89,14 @@ function Decks() {
         };
 
         try {
-            // Senden der Anfrage an das Backend
+            // Senden der Anfrage an das Backend mit der FormData als JSON-String
             const response = await axios.post(`http://localhost:8080/decks/create`, JSON.stringify(newDeck),{
                 headers: {
                     'Content-Type': 'application/json'
                 }
             });
 
+            // Lade nach erfolgreichem Erstellen Decks und Karten neu
             await loadDecks();
             await loadCards();
 
@@ -134,7 +124,7 @@ function Decks() {
             }
         }
     };
-    
+
 
     // Karte zu einem aktiven Deck hinzufügen und an den Server senden
     const handleAddCardToDeck = async (card) => {
@@ -142,21 +132,29 @@ function Decks() {
             setErrorMessage('Kein aktives Deck ausgewählt.');
             return;
         }
-    
+
         const deckToUpdate = decks[activeDeck];
         if (!deckToUpdate) {
             setErrorMessage('Aktives Deck konnte nicht identifiziert werden.');
             return;
         }
-    
+
+        const cardCountInDeck = deckToUpdate.cards.filter(c => c.name === card.name).length;
+        const cardCountInMyCards = myCards.filter(c => c.name === card.name).length;
+
+        if (cardCountInDeck >= cardCountInMyCards) {
+            setErrorMessage('Sie können diese Karte nicht häufiger zu Ihrem Deck hinzufügen, als Sie sie besitzen.');
+            return;
+        }
+
         // Formulardaten definieren zum Senden an Backend
         const dataToSend = {
             userID: id,
             name: deckToUpdate.name,
             cardNames: [card.name]
         };
-    
-        
+
+        // Senden des Formulars an den Server als JSON-String
         try {
             const response = await axios.put(`http://localhost:8080/decks/addCards`, JSON.stringify(dataToSend), {
                 headers: {
@@ -164,6 +162,7 @@ function Decks() {
                 }
             });
 
+            // Laden der Decks und Karten nach erfolgreichem Hinzufügen
             await loadDecks();
             await loadCards();
 
@@ -176,8 +175,7 @@ function Decks() {
         }
 
     };
-    
-    // !!!! Muss noch optimiert werden für Fall, dass ausgewählt wird obwohl keine Veränderung vorgenommen wird
+
     // Wird aufgerufen, wenn ein Deck in der UI ausgewählt wird
     const selectDeck = (index) => {
         if (!isEditing) {
@@ -191,21 +189,27 @@ function Decks() {
         }
     };
 
+    // Behandlung der Deck-Namensänderung
     const handleSaveDeckName = async () => {
+
+        // überprüft, dass der neue Deckname nicht leer ist
         if (!deckName.trim()) {
             setErrorMessage('Der Deckname darf nicht leer sein');
             return;
         }
 
+        // wenn Deckname nicht geändert wurde, soll nichts passieren
         if (deckName === originalDeckName) {
             return;
         }
-    
+
+        // sendet Anfrage an den Server, den alten Decknamen mit dem Neuen zu ersetzen
         try {
             // Senden der Anfrage zum Backend, um den Namen zu aktualisieren
             const response = await axios.put(`http://localhost:8080/decks/updateName/${id}/${originalDeckName}/${deckName}`);
             console.log('Deckname erfolgreich geändert!', response.data);
 
+            // nach erfolgreichem ändern sollen Decks und Karten neu geladen und der Bearbeitungsmodus beendet werden
             await loadDecks();
             await loadCards();
             setActiveDeck(null);
@@ -217,7 +221,7 @@ function Decks() {
         }
     };
 
-
+    // Funktion für das Drücken des Fertig-Buttons
     const handleFinishEditing = () => {
         // Stellt den ursprünglichen Namen wieder her, wenn nicht gespeichert wurde
         setDeckName(originalDeckName);
@@ -225,57 +229,62 @@ function Decks() {
         setIsEditing(false);
     }
 
+    // Funktion für das Löschen des aktiven Decks
     const handleDeleteDeck = async () => {
 
-            const deckToDelete = decks[activeDeck];
-            if (!deckToDelete) {
-                setErrorMessage('Zu löschendes Deck konnte nicht identifiziert werden.');
-                return;
-            }
+        const deckToDelete = decks[activeDeck];
+        if (!deckToDelete) {
+            setErrorMessage('Zu löschendes Deck konnte nicht identifiziert werden.');
+            return;
+        }
 
-            const dataToSend = {
-                [id]: deckToDelete.name,
-            };
-            
-            // Festhalten der ID des aktiven Decks
-            try {
-                const response = await axios.delete(`http://localhost:8080/decks/delete`, {
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    data: dataToSend
-                });
-    
-                setActiveDeck(null);
-                setIsEditing(false);
+        // Daten werden als ID-Deckname- Paar gespeichert
+        const dataToSend = {
+            [id]: deckToDelete.name,
+        };
 
-                await loadDecks();
-                await loadCards();
-    
-                console.log("Deck erfolgreich gelöscht", response.data);
-    
-            }
-            catch (error) {
-                console.error('Fehler beim Löschen des Decks', error);
-                setErrorMessage('Fehler beim Löschen des Decks: ' + (error.response?.data.message || error.message));
-            }
+        // senden der DELETE-Anfrage an Server
+        try {
+            const response = await axios.delete(`http://localhost:8080/decks/delete`, {
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                data: dataToSend
+            });
+
+            // Beenden des Bearbeitungsmodus
+            setActiveDeck(null);
+            setIsEditing(false);
+
+            await loadDecks();
+            await loadCards();
+
+            console.log("Deck erfolgreich gelöscht", response.data);
+
+        }
+        catch (error) {
+            console.error('Fehler beim Löschen des Decks', error);
+            setErrorMessage('Fehler beim Löschen des Decks: ' + (error.response?.data.message || error.message));
+        }
     };
 
+    // Karten aus dem Deck entfernen
     const handleRemoveCardFromDeck = async(cardName) => {
-        
+
         const deckToUpdate = decks[activeDeck];
         if (!deckToUpdate) {
             setErrorMessage('Aktives Deck konnte nicht identifiziert werden.');
             return;
         }
 
+        // Formulardaten definieren
         const dataToSend = {
             userID: id,
             name: deckToUpdate.name,
             cardNames: [cardName]
         };
 
-
+        // Senden der Anfrage an den Server mit Formulardaten
         try {
             const response = await axios.put(`http://localhost:8080/decks/removeCard`, JSON.stringify(dataToSend), {
                 headers: {
@@ -296,10 +305,11 @@ function Decks() {
 
     }
 
+    // Fehlermeldung zurücksetzen
     const clearErrorMessage = () => setErrorMessage('');
 
     return (
-        
+
         <div className="container">
             <BackButton />
             <h1>Meine Decks</h1>
@@ -310,25 +320,25 @@ function Decks() {
             )}
             <button onClick={handleCreateNewDeck} disabled={isEditing}>Neues Deck erstellen</button>
             <div className="wrap">
-            <div className="deck-list">
-                {decks.map((deck, index) => (
-                    
-                    <div key={index}
-                        className="deck"
-                        onClick={() => selectDeck(index)}>
+                <div className="deck-list">
+                    {decks && decks.length > 0 && decks.map((deck, index) => (
+
+                        <div key={index}
+                             className="deck"
+                             onClick={() => selectDeck(index)}>
                             {deck.name}
-                    </div>
-                    
-                ))}
-            </div>
-            <div className="inside">
-            <div className="cards-left">
+                        </div>
+
+                    ))}
+                </div>
+                <div className="inside">
+                    <div className="cards-left">
                         <h2>Verfügbare Karten</h2>
                         <div className="card-list">
 
                             {myCards.map(card => (
 
-                                <div 
+                                <div
                                     key={card.id}
                                     className="card">
 
@@ -341,34 +351,34 @@ function Decks() {
                                 </div>
 
                             ))}
+
                         </div>
                     </div>
-            {activeDeck !== null && (
-                    
-                    <div className="active-deck-container">
-                        <h2>Aktives Deck: {decks[activeDeck].name}</h2>
-                        <input type="text" value={deckName} onChange={(e) => setDeckName(e.target.value)}/>
-                        <div className="button-container">
-                            <button onClick={handleFinishEditing}>Fertig</button>
-                            <button onClick={handleDeleteDeck}>Deck Löschen</button>
-                            <button onClick={handleSaveDeckName} disabled={!deckName.trim() || deckName === originalDeckName}>Name speichern</button>
+                    {activeDeck !== null && (
+
+                        <div className="active-deck-container">
+                            <h2>Aktives Deck: {decks[activeDeck].name}</h2>
+                            <input type="text" value={deckName} onChange={(e) => setDeckName(e.target.value)}/>
+                            <div className="button-container">
+                                <button onClick={handleFinishEditing}>Fertig</button>
+                                <button onClick={handleDeleteDeck}>Deck Löschen</button>
+                                <button onClick={handleSaveDeckName} disabled={!deckName.trim() || deckName === originalDeckName}>Name speichern</button>
+                            </div>
+                            <div className="card-container">
+                                {decks[activeDeck].cards && decks[activeDeck].cards.map((card, index) => (
+                                    <div key={index} className="card">
+                                        <Card card={card} onCardClick={() => handleRemoveCardFromDeck(card.name)}/>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
-                        <div className="card-container">
-                            {decks[activeDeck].cards.map((card, index) => (
-                                <div key={index} className="card">
-                                    <Card card={card} onCardClick={() => handleRemoveCardFromDeck(card.name)}/>
-                                </div>
-                            ))}
-                        </div>
+                    )}
+                    <div>
                     </div>
-            )}
-            <div>
-            </div>
-            </div>
+                </div>
             </div>
         </div>
-        
+
     );
 }
-
 export default Decks;

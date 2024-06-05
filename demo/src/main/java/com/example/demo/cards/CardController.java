@@ -7,8 +7,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
@@ -43,9 +41,6 @@ public class CardController {
             return ResponseEntity.badRequest().body("At least one card name is required.");
     }
 
-
-
-
     @GetMapping(path = "/findByName/{name}")
     public ResponseEntity<Optional<CardResponse>> findByByName(@PathVariable String name) {
         try {
@@ -65,8 +60,6 @@ public class CardController {
         }
     }
 
-
-
     @GetMapping
     public ResponseEntity<List<CardResponse>> findAll() {
         List<Card> cards = cardRepository.findAll();
@@ -77,5 +70,10 @@ public class CardController {
             return new CardResponse(card.getName(), card.getAttackPoints(), card.getDefensePoints(), card.getDescription(), base64Image, card.getRarity());
         }).collect(Collectors.toList()); // sammelt die Kartenobjekte in einer Liste
         return ResponseEntity.ok(cardResponses);
+    }
+
+    @PostMapping("/{userID}/addCards")
+    public ResponseEntity<String> addCardsInstanzen(@PathVariable Long userID ,@RequestBody List<String> cards) {
+        return cardService.addCardsInstanzen(userID,cards);
     }
 }

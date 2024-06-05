@@ -2,6 +2,7 @@ package com.example.demo.decks;
 
 import com.example.demo.cards.Card;
 import com.example.demo.user.UserAccount;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,7 +20,8 @@ public class Deck {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long Id;
     private String name;
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany
+    @JsonIgnore
     @JoinTable(
             name = "deck_card",
             // deck_id und card_id sind zusammengesetzter Primärschlüssel in Ergebnistabelle
@@ -29,6 +31,7 @@ public class Deck {
     private List<Card> cards;
     @ManyToOne
     @JoinColumn
+    @JsonIgnore
     private UserAccount user;
 
 

@@ -39,7 +39,7 @@
               ) : (
                 <>
                   <img src={`data:image/jpeg;base64,${image}`} className="card-img-top" alt={name} />
-                <div style= {{ position: 'absolute', bottom: '45px', left:0, right:0}}>
+                <div style= {{ position: 'absolute', bottom: '35px', left:0, right:0, textAlign: 'center'}}>
                   <h5 className="card-title text-center">{name}</h5>
                   </div>
                 <div style={{ position: 'absolute', bottom: '10px', left: '10px' }} className="stats-circle defense-points">
@@ -51,8 +51,8 @@
                 </>
               )}
             </div>
-            <div style={{ position: 'absolute', bottom: '10px', left: 0, right: 0, textAlign: 'center' }}>
-                <button onClick={this.toggleCard} className="btn btn-primary btn-sm">
+            <div style={{ position: 'absolute', bottom: '-1px', left: 0, right: 0, textAlign: 'center' }}>
+                <button onClick={this.toggleCard} className="btn btn-primary btn-sm" style={{ marginTop: '5px' }}>
                   {showBack ? 'Vorderseite' : 'Rückseite'}
                 </button>
             </div>
