@@ -1,6 +1,7 @@
 package com.example.demo.decks;
 
 import com.example.demo.cards.Card;
+import com.example.demo.game.PlayerState;
 import com.example.demo.user.UserAccount;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
@@ -33,6 +34,9 @@ public class Deck {
     @JoinColumn
     @JsonIgnore
     private UserAccount user;
+
+    @OneToOne
+    private PlayerState playerState;
 
 
 }
