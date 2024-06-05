@@ -43,10 +43,31 @@ public class CardService {
 
     public String addCards(List<CardRequest> requests) {
         List<String> addedCards = new ArrayList<>();
+        List<UserAccount> allUsers = userAccountRepository.findAll();
         for (CardRequest request : requests) {
             try {
                 saveCard(request);
                 addedCards.add(request.getName());
+
+                // add card for all users
+                for (UserAccount userAccount : allUsers) {
+                    List<CardInstance> allCardInstances = cardInstanceRepository.findByUserAccount(userAccount);
+
+                    boolean cardExists = false;
+
+                    // Check if the card already exists for the user
+                    for (CardInstance cardInstance : allCardInstances) {
+                        if (cardInstance.getCard().getName().equals(request.getName())) {
+                            cardExists = true;
+                            break;
+                        }
+                    }
+
+                    // If the card doesn't exist for the user, add it
+                    if (!cardExists) {
+                        addCardsInstanzen(userAccount.getId(), Collections.singletonList(request.getName()));
+                    }
+                }
             } catch (IllegalStateException e) {
                 System.out.println("Error adding card: " + e.getMessage());
             }
@@ -167,8 +188,8 @@ public class CardService {
                     Card card = cardOptional.get();
 
                     CardInstance cardInstance = new CardInstance();
-                    cardInstance.setCard(card);
 
+                    cardInstance.setCard(card);
                     card.getCardInstance().add(cardInstance);
 
                     cardInstance.setUserAccount(userAccount); // Setzen Sie den UserAccount in der CardInstance

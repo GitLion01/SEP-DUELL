@@ -25,6 +25,8 @@ public class Card {
     private String description;
     private byte[] image;
     private Rarity rarity;
+    //CascadeType.All funktioniert auch , das umfasst :
+    //CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH und CascadeType.DETACH.
     @ManyToMany(mappedBy = "cards", cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     private List<Deck> decks = new ArrayList<>();
     @OneToMany(mappedBy = "card", cascade = CascadeType.ALL, orphanRemoval = true)
