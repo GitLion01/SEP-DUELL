@@ -13,6 +13,7 @@ function Decks() {
     const [deckName, setDeckName] = useState('');
     const [originalDeckName, setCurrentDeckName] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
+    const [deckCards, setDeckCards] = useState([]);
     const [isEditing, setIsEditing] = useState(false);  // Zustand zum Überwachen, ob Änderungen gemacht wurden
 
 
@@ -52,6 +53,12 @@ function Decks() {
         loadData();
     }, [id]);
 
+    useEffect(() => {
+        if (activeDeck !== null) {
+            loadDeckCards(decks[activeDeck]?.name);
+        }
+    }, [decks, activeDeck]);
+
     const loadDecks = async () => {
         try {
             const response = await axios.get(`http://localhost:8080/decks/getUserDecks/${id}`);
@@ -80,6 +87,15 @@ function Decks() {
         console.log('Updated decks:', decks);
     }, [decks]);
 
+    const loadDeckCards = async (deckName) => {
+        try {
+            const response = await axios.get(`http://localhost:8080/decks/cards/${deckName}/${id}`);
+            setDeckCards(response.data);
+        } catch (error) {
+            console.error('Fehler beim Abrufen der Deckkarten:', error);
+        }
+    };
+
     // Funktion zur Generierung eines zufälligen Namens
     const generateRandomName = () => {
         const pres = ["Alpha", "Beta", "Gamma", "Delta", "Epsilon", "Theta", "Kappa", "Lambda", "Omega"];
@@ -105,8 +121,7 @@ function Decks() {
         const newDeck = {
             userID: id, //
             name: generateRandomName(),
-            cardNames: [],
-            cards: []
+            cardNames: []
         };
 
         try {
@@ -160,13 +175,7 @@ function Decks() {
             return;
         }
 
-        // MUSS GEÄNDERT WERDEN NACH BACKEND BEARBEITUNG
-        // Überprüfen, ob das cards Array existiert, andernfalls initialisieren
-        if (!deckToUpdate.cards) {
-            deckToUpdate.cards = [];
-        }
-
-        const cardCountInDeck = deckToUpdate.cards.filter(c => c.name === card.name).length;
+        const cardCountInDeck = deckCards.filter(c => c.name === card.name).length;
         const cardCountInMyCards = myCards.filter(c => c.name === card.name).length;
 
         if (cardCountInDeck >= cardCountInMyCards) {
@@ -288,6 +297,7 @@ function Decks() {
 
             await loadDecks();
             await loadCards();
+            await loadDeckCards(deckName);
 
             console.log("Deck erfolgreich gelöscht", response.data);
 
@@ -324,6 +334,9 @@ function Decks() {
 
             await loadDecks();
             await loadCards();
+
+            await loadDeckCards(deckName);
+
 
             console.log("Karte erfolgreich entfernt", response.data);
 
@@ -375,8 +388,8 @@ function Decks() {
                                 return acc;
                             }, []).map(card => {
                                 let availableCount = myCards.filter(c => c.name === card.name).length;
-                                if (activeDeck !== null && decks[activeDeck] && Array.isArray(decks[activeDeck].cards)) {
-                                    const cardCountInDeck = decks[activeDeck].cards.filter(c => c.name === card.name).length;
+                                if (activeDeck !== null && deckCards) {
+                                    const cardCountInDeck = deckCards.filter(c => c.name === card.name).length;
                                     availableCount -= cardCountInDeck;
                                 }
 
@@ -393,6 +406,7 @@ function Decks() {
                             })}
                         </div>
                     </div>
+
                     {activeDeck !== null && (
 
                         <div className="active-deck-container">
@@ -406,7 +420,7 @@ function Decks() {
                                 </button>
                             </div>
                             <div className="card-container">
-                                {decks[activeDeck].cards && decks[activeDeck].cards.map((card, index) => (
+                                {deckCards.map((card, index) => (
                                     <div key={index} className="card">
                                         <Card card={card} onCardClick={() => handleRemoveCardFromDeck(card.name)}/>
                                     </div>
