@@ -6,8 +6,6 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface GameRepository extends JpaRepository<Game, Long> {
-
-    Optional<Game> findByidAndUserID(Long id, Long userID);
-
+public interface PlayerStateRepository extends JpaRepository<PlayerState, Long> {
+    Optional<PlayerState> findByUserId(Long userID);
 }

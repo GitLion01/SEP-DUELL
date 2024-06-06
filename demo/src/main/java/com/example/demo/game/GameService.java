@@ -1,26 +1,35 @@
 package com.example.demo.game;
 
+import com.example.demo.decks.Deck;
+import com.example.demo.decks.DeckRepository;
+import com.example.demo.game.requests.*;
 import com.example.demo.user.UserAccount;
+import com.example.demo.user.UserAccountRepository;
 import jakarta.persistence.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class GameService {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+   private final GameRepository gameRepository;
+   private final PlayerStateRepository playerStateRepository;
+   private final DeckRepository deckRepository;
 
-    @OneToMany(mappedBy = "game", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<PlayerState> playerStates = new ArrayList<>();
-    private UserAccount currentTurn;
-
-
-
-
+   @Autowired
+    public GameService(GameRepository gameRepository,
+                       PlayerStateRepository playerStateRepository,
+                       DeckRepository deckRepository) {
+        this.gameRepository = gameRepository;
+        this.deckRepository = deckRepository;
+        this.playerStateRepository = playerStateRepository;
+    }
 
 
     public Game joinGame(JoinRequest request) {
@@ -29,9 +38,23 @@ public class GameService {
     }
 
 
-    public Game selectDeck(DeckSelectionRequest request) {
-        // Implementierung
-        return null;
+    public ResponseEntity<Game> selectDeck(DeckSelectionRequest request) {
+
+        Optional<Game> optionalGame = gameRepository.findByidAndUserID(request.getGameID(), request.getUserID());
+        Optional<Deck> optionalDeck = deckRepository.findByNameAndUserId(request.getDeckName(), request.getUserID());
+        Optional<PlayerState> optionalPlayerState = playerStateRepository.findByUserId(request.getUserID());
+
+        if(optionalGame.isPresent() && optionalDeck.isPresent() && optionalPlayerState.isPresent()) {
+            Game game = optionalGame.get();
+            Deck deck = optionalDeck.get();
+            PlayerState playerState = optionalPlayerState.get();
+
+            playerState.setDeck(deck);
+            playerStateRepository.save(playerState);
+            return new ResponseEntity<>(game, HttpStatus.OK);
+        }
+
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
 
@@ -41,13 +64,43 @@ public class GameService {
     }
 
 
-    public Game attack(AttackRequest request) {
+    public Game endTurn(EndTurnRequest request) {
         // Implementierung
         return null;
     }
 
 
-    public Game endTurn(EndTurnRequest request) {
+    public Game attackCard(AttackRequest request) {
+        // Implementierung
+        return null;
+    }
+
+
+    public Game attackUser(Long userA, Long UserB) {
+        // Implementierung
+        return null;
+    }
+
+
+    public Game swapForRare(RareSwapRequest request) {
+        // Implementierung
+        return null;
+    }
+
+
+    public Game swapForLegendary(LegendarySwapRequest request) {
+        // Implementierung
+        return null;
+    }
+
+
+    public Game doNothing(Long userID) {
+        // Implementierung
+        return null;
+    }
+
+
+    public Game terminateMatch(Long gameID) {
         // Implementierung
         return null;
     }

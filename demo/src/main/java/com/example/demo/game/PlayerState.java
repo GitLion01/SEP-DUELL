@@ -4,11 +4,16 @@ import com.example.demo.cards.CardInstance;
 import com.example.demo.decks.Deck;
 import com.example.demo.user.UserAccount;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
 
-
+@NoArgsConstructor
+@Getter
+@Setter
 @Entity
 public class PlayerState {
     @Id

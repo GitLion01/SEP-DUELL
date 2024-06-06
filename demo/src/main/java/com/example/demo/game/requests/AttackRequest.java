@@ -1,4 +1,4 @@
-package com.example.demo.game;
+package com.example.demo.game.requests;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
