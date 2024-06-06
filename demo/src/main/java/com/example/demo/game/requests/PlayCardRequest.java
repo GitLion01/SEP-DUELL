@@ -1,14 +1,13 @@
-package com.example.demo.game;
+package com.example.demo.game.requests;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
-public class DeckSelectionRequest {
+public class PlayCardRequest {
 
     private Long gameID;
-    private Long deckID;
     private Long userID;
-
+    private Long cardInstanceID;
 }

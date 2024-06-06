@@ -1,5 +1,6 @@
 package com.example.demo.game;
 
+import com.example.demo.game.requests.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -36,16 +37,46 @@ public class GameController {
         return gameService.playCard(request);
     }
 
-    @MessageMapping("/attack")
+    @MessageMapping("/attackCard")
     @SendTo("/topic/game")
-    public Game attack(@Payload AttackRequest request) {
-        return gameService.attack(request);
+    public Game attackCard(@Payload AttackRequest request) {
+        return gameService.attackCard(request);
+    }
+
+    @MessageMapping("/attackUser")
+    @SendTo("/topic/game")
+    public Game attackUser(@Payload Long userA, Long userB) {
+        return gameService.attackUser(userA, userB);
     }
 
     @MessageMapping("/endTurn")
     @SendTo("/topic/game")
     public Game endTurn(@Payload EndTurnRequest request) {
         return gameService.endTurn(request);
+    }
+
+    @MessageMapping("/rareSwap")
+    @SendTo("/topic/game")
+    public Game swapForRare(@Payload RareSwapRequest request){
+        return gameService.swapForRare(request);
+    }
+
+    @MessageMapping("/LegendarySwap")
+    @SendTo("/topic/game")
+    public Game swapForLegendary(@Payload LegendarySwapRequest request){
+        return gameService.swapForLegendary(request);
+    }
+
+    @MessageMapping("/doNothing")
+    @SendTo("/topic/game")
+    public Game doNothing(@Payload Long userID){
+        return gameService.doNothing(userID);
+    }
+
+    @MessageMapping("/terminateMatch")
+    @SendTo("/topic/game")
+    public Game terminateMatch(@Payload Long gameID) {
+        return gameService.terminateMatch(gameID);
     }
 
 
