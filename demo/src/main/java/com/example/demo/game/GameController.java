@@ -2,6 +2,7 @@ package com.example.demo.game;
 
 import com.example.demo.game.requests.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
@@ -27,7 +28,7 @@ public class GameController {
 
     @MessageMapping("/selectDeck")
     @SendTo("/topic/game")
-    public Game selectDeck(@Payload DeckSelectionRequest request) {
+    public ResponseEntity<Game> selectDeck(@Payload DeckSelectionRequest request) {
         return gameService.selectDeck(request);
     }
 
