@@ -1,34 +1,41 @@
 /* components/chat/FriendListForChat.css */
 .friend-list-for-chat {
-    width: 300px;
-    border: 1px solid #ccc;
-    padding: 20px;
-    background-color: #ffffff;
-    color: #000000;
-    overflow-y: auto;
-    height: calc(100vh - 100px);
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .friend-list-for-chat h2 {
-    margin-bottom: 20px;
-  }
-  
-  .friend-list-for-chat ul {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-    flex: 1;
-  }
-  
-  .friend-list-for-chat li {
-    cursor: pointer;
-    padding: 10px;
-    border-bottom: 1px solid #ccc;
-  }
-  
-  .friend-list-for-chat li:hover {
-    background-color: #f0f0f0;
-  }
-  
+  width: 300px;
+  border: 1px solid #ccc;
+  padding: 20px;
+  background-color: #ffffff;
+  color: #000000;
+  height: calc(100vh - 100px);
+  display: flex;
+  flex-direction: column;
+}
+
+.friend-list-section {
+  flex: 1;
+  overflow-y: auto; /* Vertikales Scrollen aktivieren */
+  margin-bottom: 10px; /* Abstand zwischen den Containern */
+}
+
+.friend-list-section:last-child {
+  margin-bottom: 0; /* Kein Abstand am Ende des letzten Containers */
+}
+
+.friend-list-section h2 {
+  margin: 0 0 10px 0; /* Abstand zum unteren Rand des Headers */
+}
+
+.friend-list-section ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.friend-list-section li {
+  cursor: pointer;
+  padding: 10px;
+  border-bottom: 1px solid #ccc;
+}
+
+.friend-list-section li:hover {
+  background-color: #f0f0f0;
+}

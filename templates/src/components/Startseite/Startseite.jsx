@@ -56,6 +56,9 @@ class Startseite extends Component {
             <section className="shop">
               <a href="/shop"><h2>SHOP</h2></a>
             </section>
+            <section className="shop">
+              <a href="/chat"><h2>CHAT</h2></a>
+            </section>
           </div>
         </main>
         <footer>
