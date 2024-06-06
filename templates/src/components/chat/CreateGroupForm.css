@@ -1,0 +1,45 @@
+/* components/chat/CreateGroupForm.css */
+.create-group-form {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #ffffff;
+    width: 100%;
+    max-width: 400px;
+  }
+  
+  .create-group-form h2 {
+    margin-bottom: 10px;
+  }
+  
+  .create-group-form input {
+    margin-bottom: 10px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  .friend-selection {
+    margin-bottom: 10px;
+  }
+  
+  .friend-selection label {
+    display: block;
+    margin-bottom: 5px;
+  }
+  
+  .create-group-form button {
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+  }
+  
+  .create-group-form button:hover {
+    background-color: #0056b3;
+  }
+  
