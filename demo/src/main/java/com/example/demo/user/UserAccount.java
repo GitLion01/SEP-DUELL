@@ -1,6 +1,8 @@
 package com.example.demo.user;
 import com.example.demo.cards.CardInstance;
 import com.example.demo.decks.Deck;
+import com.example.demo.game.Game;
+import com.example.demo.game.PlayerState;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
@@ -64,6 +66,15 @@ public class UserAccount implements UserDetails {
     // es gibt immer eine besitzende Seite bei bidirektionalen Beziehung zwischen zwei Entitäten
     @OneToMany(mappedBy = "userAccount")
     private List<CardInstance> userCardInstance=new ArrayList<>();
+
+    @ManyToOne
+    @JoinColumn(name = "game_id")
+    private Game game;
+
+    @OneToOne
+    @JoinColumn(name = "playerState_id")
+    private PlayerState playerState;
+
 
 
 
