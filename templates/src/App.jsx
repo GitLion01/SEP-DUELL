@@ -13,9 +13,7 @@ import ProtectedRoute from './ProtectedRoute.jsx';
 import ShopPage from './components/ShopPage/ShopPage.jsx';
 import ChatPage from './components/chat/ChatPage.jsx';
 import DeckSelection from './components/Duell/DeckSelection.jsx';
-import Duel from './components/Duell/Duel.jsx';
-import { DuelProvider } from './contexts/DuelContext';
-
+import Duel from "./components/Duell/Duel.jsx";
 
 
 
@@ -35,17 +33,6 @@ function App() {
         <Route path="/chat" element={<ProtectedRoute element={ChatPage} />} /> {/* Neue Route für die Chat-Seite */}
 
          {/* Neue Routen für das Duell */}
-        
-        <Route path="/deckselection" element={<ProtectedRoute element={() => (
-          <DuelProvider>
-            <DeckSelection />
-          </DuelProvider>
-        )} />} />
-        <Route path="/duel" element={<ProtectedRoute element={() => (
-          <DuelProvider>
-            <Duel />
-          </DuelProvider>
-        )} />} />
       </Routes>
     </Router>
   );
