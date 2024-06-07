@@ -1,182 +1,63 @@
-import React, { useState, useEffect } from 'react';
-import webSocketService from './WebSocketService';
-import './ChatWindow.css';
-import './ChatBubble.css';
+// components/chat/ChatPage.jsx
+import React, { useState } from 'react'; // useEffect entfernt, da es nicht verwendet wird
+import FriendListForChat from './FriendListForChat'; // Importiert die FriendListForChat-Komponente
+import ChatWindow from './ChatWindow'; // Importiert die ChatWindow-Komponente
+import CreateGroupForm from './CreateGroupForm'; // Importiert die CreateGroupForm-Komponente
+import './ChatPage.css'; // Importiert die CSS-Datei für die ChatPage-Komponente
+import BackButton from '../BackButton';
 
-const generateChatId = (userId, targetId) => {
-  return [userId, targetId].sort().join('-');
-};
+function ChatPage() {
+  const [selectedChat, setSelectedChat] = useState({ friend: null, type: null }); // Zustand für den aktuell ausgewählten Chat (Freund oder Gruppe)
+  const [creatingGroup, setCreatingGroup] = useState(false); // Zustand für das Erstellen einer neuen Gruppe (true/false)
 
-function ChatWindow({ friend, type }) {
-  const [messages, setMessages] = useState({});
-  const [newMessage, setNewMessage] = useState('');
-  const [editingMessage, setEditingMessage] = useState(null);
-  const userId = localStorage.getItem('id');
-  const chatId = generateChatId(userId, friend.id);
+  // const [friends, setFriends] = useState([]); // Entfernt, da es nicht verwendet wird
 
-  // Nachrichten vom Server laden
-  useEffect(() => {
-    const fetchMessages = async () => {
-      const response = await fetch(`http://localhost:8080/messages/${chatId}`);
-      const data = await response.json();
-      setMessages((prevMessages) => ({
-        ...prevMessages,
-        [chatId]: Array.isArray(data) ? data : [] // Ensure data is an array
-      }));
-    };
-
-    fetchMessages();
-  }, [chatId]);
-
-  // WebSocket-Verbindung herstellen und Nachrichten empfangen
-  useEffect(() => {
-    webSocketService.connect();
-
-    const handleMessage = (messageEvent) => {
-      const message = JSON.parse(messageEvent.data);
-      setMessages((prevMessages) => {
-        const updatedMessages = { ...prevMessages };
-        if (!Array.isArray(updatedMessages[message.chatId])) {
-          updatedMessages[message.chatId] = [];
-        }
-        updatedMessages[message.chatId].push(message);
-        return updatedMessages;
-      });
-    };
-
-    webSocketService.socket.addEventListener('message', handleMessage);
-
-    return () => {
-      webSocketService.socket.removeEventListener('message', handleMessage);
-      webSocketService.close();
-    };
-  }, []);
-
-  // Nachricht senden und speichern
-  const handleSendMessage = () => {
-    if (newMessage.trim() !== '') {
-      const message = {
-        sender: userId,
-        receiver: type === 'friend' ? friend.id : null, // Receiver ist nur für private Chats definiert
-        group: type === 'group' ? friend.id : null, // Group ist nur für Gruppenchats definiert
-        text: newMessage,
-        timestamp: new Date().toLocaleTimeString(),
-        chatId: chatId,
-        read: false // Neue Nachrichten sind ungelesen
-      };
-      webSocketService.sendMessage(JSON.stringify(message));
-
-      setMessages((prevMessages) => {
-        const updatedMessages = { ...prevMessages };
-        if (!Array.isArray(updatedMessages[chatId])) {
-          updatedMessages[chatId] = [];
-        }
-        updatedMessages[chatId].push(message);
-        return updatedMessages;
-      });
-      setNewMessage('');
-    }
+  const handleSelect = (friend, type) => {
+    setSelectedChat({ friend, type }); // Setzt den ausgewählten Chat (Freund oder Gruppe) und den Typ (friend/group)
+    setCreatingGroup(false); // Schließt das Gruppen-Erstellen-Formular, wenn ein Chat ausgewählt wird
   };
 
-  // Nachricht bearbeiten
-  const handleEditMessage = (message) => {
-    setEditingMessage(message);
-    setNewMessage(message.text);
+  const handleCreateGroupClick = () => {
+    setCreatingGroup(true); // Aktiviert das Gruppen-Erstellen-Formular
   };
 
-  const handleUpdateMessage = () => {
-    if (editingMessage && newMessage.trim() !== '') {
-      const updatedMessage = { ...editingMessage, text: newMessage };
-      webSocketService.sendMessage(JSON.stringify({ ...updatedMessage, action: 'edit' }));
-
-      setMessages((prevMessages) => {
-        const updatedMessages = { ...prevMessages };
-        updatedMessages[chatId] = updatedMessages[chatId].map(msg => 
-          msg.timestamp === editingMessage.timestamp ? updatedMessage : msg
-        );
-        return updatedMessages;
-      });
-      setEditingMessage(null);
-      setNewMessage('');
-    }
-  };
-
-  // Nachricht löschen
-  const handleDeleteMessage = (message) => {
-    webSocketService.sendMessage(JSON.stringify({ ...message, action: 'delete' }));
-
-    setMessages((prevMessages) => {
-      const updatedMessages = { ...prevMessages };
-      updatedMessages[chatId] = updatedMessages[chatId].filter(msg => msg.timestamp !== message.timestamp);
-      return updatedMessages;
+  const handleCreateGroup = async (newGroup) => {
+    // Backend-Anfrage zum Erstellen einer neuen Gruppe
+    const response = await fetch('http://localhost:8080/groups', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(newGroup), // Sendet die neue Gruppe als JSON an das Backend
     });
-  };
 
-  const handleKeyPress = (event) => {
-    if (event.key === 'Enter') {
-      if (editingMessage) {
-        handleUpdateMessage();
-      } else {
-        handleSendMessage();
-      }
+    if (response.ok) {
+      // const createdGroup = await response.json(); // Entfernt, da es nicht verwendet wird
+      setCreatingGroup(false); // Schließt das Formular nach erfolgreicher Erstellung
+      // Aktualisieren Sie die Gruppenliste
+      // Sie müssen diese Logik möglicherweise anpassen, um die neuen Gruppen zu laden
     }
   };
-
-  // Funktion zum Setzen des Lesestatus
-  const handleReadMessage = (message) => {
-    if (message.sender !== userId && !message.read) {
-      message.read = true;
-      webSocketService.sendMessage(JSON.stringify({ ...message, action: 'read' }));
-
-      setMessages((prevMessages) => {
-        const updatedMessages = { ...prevMessages };
-        updatedMessages[chatId] = updatedMessages[chatId].map(msg =>
-          msg.timestamp === message.timestamp ? { ...msg, read: true } : msg
-        );
-        return updatedMessages;
-      });
-    }
-  };
-
-  const chatMessages = Array.isArray(messages[chatId]) ? messages[chatId] : [];
 
   return (
-    <div className="chat-window">
-      <h2>Chat mit {type === 'friend' ? friend.username : friend.name}</h2>
-      <div className="chat-messages imessage">
-        {chatMessages.map((message, index) => (
-          <p key={index}
-             className={message.sender === userId ? 'from-me' : 'from-them'}
-             onClick={() => handleReadMessage(message)}>
-            {type === 'group' && message.sender !== userId && (
-              <span className="message-sender">{message.senderName}</span>
-            )}
-            <span className="message-text">{message.text}</span>
-            <span className="message-timestamp">{message.timestamp}</span>
-            {message.sender === userId && !message.read && (
-              <div className="message-actions">
-                <button onClick={() => handleEditMessage(message)}>Bearbeiten</button>
-                <button onClick={() => handleDeleteMessage(message)}>Löschen</button>
-              </div>
-            )}
-            {message.read && <span className="message-read-status">Gelesen</span>}
-          </p>
-        ))}
-      </div>
-      <div className="chat-input">
-        <input
-          type="text"
-          value={newMessage}
-          onChange={(e) => setNewMessage(e.target.value)}
-          onKeyPress={handleKeyPress}
-          placeholder="Nachricht..."
+    <div className="chat-page">
+      <BackButton />
+      <h1>Chat</h1>
+      <div className="chat-container">
+        <FriendListForChat
+          onSelect={handleSelect} // Übergibt die handleSelect-Funktion als Prop an FriendListForChat
+          onCreateGroupClick={handleCreateGroupClick} // Übergibt die handleCreateGroupClick-Funktion als Prop an FriendListForChat
         />
-        <button onClick={editingMessage ? handleUpdateMessage : handleSendMessage}>
-          {editingMessage ? 'Update' : 'Send'}
-        </button>
+        {creatingGroup ? ( // Überprüft, ob das Gruppen-Erstellen-Formular angezeigt werden soll
+          <CreateGroupForm friends={[]} onCreateGroup={handleCreateGroup} /> // Zeigt das CreateGroupForm an, wenn creatingGroup true ist
+        ) : (
+          selectedChat.friend && selectedChat.type && ( // Überprüft, ob ein Chat ausgewählt wurde
+            <ChatWindow friend={selectedChat.friend} type={selectedChat.type} /> // Zeigt das ChatWindow an, wenn ein Chat ausgewählt wurde
+          )
+        )}
       </div>
     </div>
   );
 }
 
-export default ChatWindow;
+export default ChatPage; // Exportiert die ChatPage-Komponente als Standardexport

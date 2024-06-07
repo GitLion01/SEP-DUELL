@@ -138,6 +138,7 @@ function Profile() {
   // Profilseite rendern
   return (
     <>
+    <BackButton/>
       <div className="Profile">
         <BackButton/>
         <h1 className="titel"> Mein Profil</h1>
@@ -162,11 +163,6 @@ function Profile() {
           {role !== 'ADMIN' && <p><strong>Leaderboard Punkte:</strong> {leaderbordpunkte}</p>}
           {error && <p className="error">{error}</p>} {/* Fehlermeldung anzeigen falls error != null */}
         </div>
-      </div>
-      <div>
-        <Link to="/startseite">
-          <button className="button" type="button">Home</button>
-        </Link>
       </div>
     </>
   );
