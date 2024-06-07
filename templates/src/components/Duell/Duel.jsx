@@ -1,55 +1,32 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { Client } from '@stomp/stompjs';
-import SockJS from 'sockjs-client';
-import { DuelContext } from './DuelContext';
+import React, { useEffect, useState } from 'react';
 import { toast, ToastContainer } from 'react-toastify';
 
 
-const Duel = () => {
-  const { state, dispatch } = useContext(DuelContext);
-  const [client, setClient] = useState(null);
+const Duel = ({client, gameId}) => {
   const [timer, setTimer] = useState(120);
-  const [currentPlayer, setCurrentPlayer] = useState(state.currentPlayer);
+  const [currentPlayer, setCurrentPlayer] = useState(null);
   const [playerState, setPlayerState] = useState({ handCards: [], fieldCards: [], life: 50 });
   const [opponentState, setOpponentState] = useState({ handCards: [], fieldCards: [], life: 50 });
-  const [gameId, setGameId] = useState(localStorage.getItem('gameId'));
   const id = localStorage.getItem('id');
 
   useEffect(() => {
-    const newClient = new Client({
-      brokerURL: 'ws://localhost:8080/ws',
-      connectHeaders: {
-        login: 'guest',
-        passcode: 'guest',
-      },
-      webSocketFactory: () => new SockJS('http://localhost:8080/ws'),
-      onConnect: () => {
-        newClient.subscribe('/topic/game', (message) => {
-          const action = JSON.parse(message.body);
-          switch (action.type) {
-            case 'STATE_UPDATE':
-              setPlayerState(action.payload.playerState);
-              setOpponentState(action.payload.opponentState);
-              setCurrentPlayer(action.payload.currentPlayer);
-              break;
-            case 'END_TURN':
-              startNewTurn(action.payload.nextPlayer);
-              break;
-            default:
-              break;
-          }
-        });
-      },
-    });
-
-    newClient.activate();
-    setClient(newClient);
-
-    return () => {
-      if (client) {
-        client.deactivate();
-      }
-    };
+    if (client) {
+      client.subscribe('/topic/game', (message) => {
+        const action = JSON.parse(message.body);
+        switch (action.type) {
+          case 'STATE_UPDATE':
+            setPlayerState(action.payload.playerState);
+            setOpponentState(action.payload.opponentState);
+            setCurrentPlayer(action.payload.currentPlayer);
+            break;
+          case 'END_TURN':
+            startNewTurn(action.payload.nextPlayer);
+            break;
+          default:
+            break;
+        }
+      });
+    }
   }, [client]);
 
   useEffect(() => {
@@ -122,7 +99,7 @@ const Duel = () => {
       <div className="player-field">
         <h3>Your Field</h3>
         <div className="cards">
-          {state.playerCards.map(card => (
+          {playerState.fieldCards.map(card => (
             <div key={card.id} className="card">
               <div>{card.name}</div>
               <div>ATK: {card.attack}</div>
@@ -138,7 +115,7 @@ const Duel = () => {
       <div className="opponent-field">
         <h3>Opponent's Field</h3>
         <div className="cards">
-          {state.opponentCards.map(card => (
+          {opponentState.fieldCards.map(card => (
             <div key={card.id} className="card">
               <div>{card.name}</div>
               <div>ATK: {card.attack}</div>
