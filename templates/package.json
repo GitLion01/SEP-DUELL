@@ -52,6 +52,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "css-loader": "^7.1.1",
     "style-loader": "^4.0.0"
   }

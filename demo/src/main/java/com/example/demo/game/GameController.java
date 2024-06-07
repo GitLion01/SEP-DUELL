@@ -1,3 +1,4 @@
+/*
 package com.example.demo.game;
 
 import com.example.demo.game.requests.*;
@@ -40,7 +41,7 @@ public class GameController {
 
     @MessageMapping("/attackCard")
     @SendTo("/topic/game")
-    public Game attackCard(@Payload AttackRequest request) {
+    public ResponseEntity<Game> attackCard(@Payload AttackRequest request) {
         return gameService.attackCard(request);
     }
 
@@ -52,7 +53,7 @@ public class GameController {
 
     @MessageMapping("/endTurn")
     @SendTo("/topic/game")
-    public Game endTurn(@Payload EndTurnRequest request) {
+    public ResponseEntity<Game> endTurn(@Payload EndTurnRequest request) {
         return gameService.endTurn(request);
     }
 
@@ -82,3 +83,4 @@ public class GameController {
 
 
 }
+*/
