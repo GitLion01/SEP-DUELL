@@ -8,69 +8,61 @@ const DeckSelection = ({ onSelectDeck }) => {
   const [selectedDeck, setSelectedDeck] = useState(null);
   const [opponentReady, setOpponentReady] = useState(false);
   const [id, setId] = useState(null);
-  const [gameId, setGameId] = useState(null);
+  const [gameId, setGameId] = useState(localStorage.getItem('gameId'));
+  const [client, setClient] = useState(null);
 
   useEffect(() => {
-    const loadId = async () => {
-        const loadedId = localStorage.getItem('id');
-        if (loadedId) {
-            console.log('Geladene ID aus LocalStorage:', loadedId);  // Debugging
-            setId(loadedId);
-        } else {
-            console.error('Keine userID im LocalStorage gefunden');
+    const loadDecks = async () => {
+      if (id) {
+        try {
+          const decksResponse = await axios.get(`http://localhost:8080/decks/getUserDecks/${id}`);
+          setDecks(decksResponse.data);
+        } catch (error) {
+          console.error('Fehler beim Abrufen der Decks:', error);
         }
+      }
     };
-    loadId();
-}, []);
+    loadDecks();
+  }, [id]);
 
-    useEffect(() => {
-        const loadDecks = async () => {
-            if (id !== null) {
-
-                try {
-                    const decksResponse = await axios.get(`http://localhost:8080/decks/getUserDecks/${id}`);
-                    setDecks(decksResponse.data);
-                } catch (error) {
-                    console.error('Fehler beim Abrufen der Decks:', error);
-                }
-            }
-        };
-        loadDecks();
-    }, [id]);
-
-  const client = new Client({
+  const newClient = new Client({
     brokerURL: 'ws://localhost:8080/ws',
-    connectHeaders: {
-      login: 'guest',
-      passcode: 'guest',
-    },
     webSocketFactory: () => new SockJS('http://localhost:8080/ws'),
     onConnect: () => {
       client.subscribe('/topic/deckSelection', (message) => {
         const response = JSON.parse(message.body);
         if (response.playerId !== id) {
           setOpponentReady(true);
+          setGameId(response.gameId);
+          localStorage.setItem('gameId', response.gameId); // Speichere gameId im LocalStorage
         }
       });
-      client.subscribe('/topic/startDuel', () => {
+      client.subscribe('/topic/startDuel', (message) => {
+        const response = JSON.parse(message.body);
+        setGameId(response.gameId);
+        localStorage.setItem('gameId', response.gameId); // Speichere gameId im LocalStorage
         onSelectDeck(selectedDeck);
       });
     },
   });
 
   useEffect(() => {
-    client.activate();
+    newClient.activate();
 
     return () => {
-      client.deactivate();
+      newClient.deactivate();
     };
-  }, []);
+  }, [id, selectedDeck]);
 
   const handleSelectDeck = (deckId) => {
     setSelectedDeck(deckId);
     client.publish({
       destination: '/app/selectDeck',
-      body: JSON.stringify({ playerId: 'yourPlayerId', deckId }),
+      body: JSON.stringify({ 
+        userID: id, 
+        deckName: deckId, 
+        gameID: gameId
+      }),
     });
   };
 
