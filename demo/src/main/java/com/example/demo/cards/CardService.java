@@ -190,7 +190,7 @@ public class CardService {
                     CardInstance cardInstance = new CardInstance();
 
                     cardInstance.setCard(card);
-                    card.getCardInstance().add(cardInstance);
+                   /* card.getCardInstance().add(cardInstance);*/
 
                     cardInstance.setUserAccount(userAccount); // Setzen Sie den UserAccount in der CardInstance
                     userAccount.getUserCardInstance().add(cardInstance);

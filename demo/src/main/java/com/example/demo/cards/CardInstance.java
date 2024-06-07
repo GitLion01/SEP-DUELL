@@ -17,7 +17,7 @@ public class CardInstance {
     private Long id;
     // sobald ein Deck für das Spiel ausgewählt wird, ändert es sich zu FIELD oder HAND
     // ist eine Karte zerstört, dann wieder zu NONE
-    private CardInstanceLocation location = CardInstanceLocation.NONE;
+    /*private CardInstanceLocation location = CardInstanceLocation.NONE;*/
 
     @ManyToOne
     @JoinColumn(name= "card_id")
