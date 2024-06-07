@@ -51,7 +51,7 @@ public class DeckController {
     public ResponseEntity<String> removeAllCardInstancesFromDeck(@RequestBody DeckRequest request) {
         String result = deckService.removeAllCardsInstancesFromDeck(request);
         HttpStatus status = result.startsWith("Fehler") ? HttpStatus.BAD_REQUEST : HttpStatus.OK;
-        return new ResponseEntity<>(result, status);
+        return new ResponseEntity<>(result, status); // <> leer, weil Java den Typ String ableiten kann
     }
 
     @PutMapping("/removeCard")

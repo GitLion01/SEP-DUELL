@@ -43,20 +43,19 @@ public class RegistrationController {
             @RequestParam("role") boolean isAdmin
     ) {
         try {
-            // Convert date string to Date object
+            // Konvertiert String zu Date
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
             Date dateOfBirth = dateFormat.parse(dateOfBirthStr);
 
             UserRole role = isAdmin ? UserRole.ADMIN : UserRole.USER;
 
-            /*byte[] imageData = image.getBytes();*/
+
             byte[] imageData = null;
             if(image != null){
                 imageData = image.getBytes();
             }
             String registrationResult = registrationService.register(imageData, firstName, lastName, dateOfBirth, username, email, password, role);
 
-            // Based on the registration result, construct and return the appropriate ResponseEntity
             if (registrationResult.startsWith("Error")) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(registrationResult);
             } else {
@@ -73,6 +72,7 @@ public class RegistrationController {
         return userAccountRepository.findAll();
     }
 
+    // damit kann überprüft werden ob der Server funktioniert
     @GetMapping
     public String getStatus(){
         return "Registration Service is up and running but no one knows why or how";

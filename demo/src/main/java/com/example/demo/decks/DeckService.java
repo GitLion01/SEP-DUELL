@@ -6,6 +6,7 @@ import com.example.demo.cards.CardInstanceRepository;
 import com.example.demo.cards.CardRepository;
 import com.example.demo.user.UserAccount;
 import com.example.demo.user.UserAccountRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.http.HttpStatus;
@@ -13,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
+
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -44,32 +46,31 @@ public class DeckService{
 
 
 
-        // Check if the user already has 3 decks
+        // prüfe ob User 3 Decks hat
         int userDeckCount = deckRepository.countByUserId(request.getUserID());
         if (userDeckCount >= 3) {
             return "Error: Maximum of 3 decks per user allowed";
         }
 
-        // Check if a deck with the same name already exists for this user
+        // prüfe ob der User bereits ein Deck mit diesem Namen besitzt
         if (!isDeckNameAvailableForUser(request.getName(), request.getUserID())) {
             return "Error: A deck with the name '" + request.getName() + "' already exists for this user";
         }
 
-
-
         List<String> cardNames = request.getCardNames();
+        // es können maximal 30 Karten auf einmal hinzugefügt werden
         if (cardNames.size() > 30) {
             return "Error: Maximum of 30 cards allowed";
         }
 
         List<Card> cards = new ArrayList<>();
         boolean deckCreated = false;
-        UserAccount user = null; // Deklaration außerhalb des 'if'-Blocks
-        // Check if the user exists in the database
+        UserAccount user = null;
+        // prüft ob der User existiert
         Optional<UserAccount> userOptional = userAccountRepository.findById(request.getUserID());
         if (userOptional.isPresent()) {
-            user = userOptional.get(); // Zuweisung innerhalb des 'if'-Blocks
-            // Iterate through the card names and check if they exist in the database
+            user = userOptional.get();
+            // iteriert über die Kartennamen und prüft welche Karten bereits existieren
             for (String cardName : cardNames) {
                 try {
                     Card card = cardRepository.findByName(cardName).orElseThrow(() -> new Exception("Card not found: " + cardName));
@@ -80,7 +81,7 @@ public class DeckService{
             }
 
             Deck deck = new Deck();
-            deck.setUser(user); // Verwendung des 'user'-Objekts, das außerhalb des 'if'-Blocks deklariert wurde
+            deck.setUser(user);
             deck.setName(request.getName());
             if(!cards.isEmpty()) {
                 deck.setCards(cards);
@@ -98,7 +99,7 @@ public class DeckService{
         }
     }
 
-    // Method to check if a deck name is available for a given user
+    // überprüft, ob ein Deck mit dem Namen für diesen User existiert
     private boolean isDeckNameAvailableForUser(String deckName, Long userId) {
         Optional<Deck> existingDeck = deckRepository.findByNameAndUserId(deckName, userId);
         return existingDeck.isEmpty();
@@ -108,18 +109,18 @@ public class DeckService{
 
     public String updateDeckName(Long userId, String oldName, String newName) {
         try {
-            // Überprüfen, ob der Benutzer existiert
+            // Überprüft, ob der Benutzer existiert
             Optional<UserAccount> optionalUser = userAccountRepository.findById(userId);
             if (optionalUser.isPresent()) {
-                // Überprüfen, ob das Deck existiert und dem Benutzer gehört
+                // Überprüft, ob das Deck existiert und dem Benutzer gehört
                 Optional<Deck> optionalOldDeck = deckRepository.findByNameAndUserId(oldName, userId);
                 if (optionalOldDeck.isPresent()) {
-                    // Überprüfen, ob der neue Name bereits für ein anderes Deck dieses Benutzers verwendet wird
+                    // Überprüft, ob der neue Name bereits für ein anderes Deck dieses Benutzers verwendet wird
                     Optional<Deck> optionalNewDeck = deckRepository.findByNameAndUserId(newName, userId);
                     if (optionalNewDeck.isPresent()) {
                         return "Ein Deck mit dem Namen '" + newName + "' existiert bereits.";
                     } else {
-                        // Aktualisieren Sie den Decknamen
+                        // Aktualisiert den Decknamen
                         Deck deck = optionalOldDeck.get();
                         deck.setName(newName);
                         deckRepository.save(deck);
@@ -166,11 +167,11 @@ public class DeckService{
                     });
                 }
 
-                // Entferne die Karten aus dem Deck über die benannte Abfrage
+                // Entferne die Karten aus dem Deck
                 deckRepository.deleteDeckCardsByDeckIdAndCardIds(deck.getId(), cardIdsToRemove);
 
                 // Aktualisiere die Liste der Karten im Deck
-                deck.getCards().removeIf(card -> cardIdsToRemove.contains(card.getId()));
+                deck.getCards().removeIf(card -> cardIdsToRemove.contains(card.getId())); // removeIf ist ein predicate (lambda benutzbar)
                 deckRepository.save(deck);
 
                 return "Die Karten wurden erfolgreich aus dem Deck entfernt.";
@@ -178,8 +179,8 @@ public class DeckService{
                 throw new RuntimeException("Das Deck wurde nicht gefunden.");
             }
         } catch (Exception e) {
-            System.err.println("Fehler beim Entfernen der Karten aus dem Deck: " + e.getMessage()); // Protokollausgabe hinzufügen
-            e.getMessage(); // Stack-Trace ausgeben
+            System.err.println("Fehler beim Entfernen der Karten aus dem Deck: " + e.getMessage());
+            e.getMessage();
             return "Fehler beim Entfernen der Karten aus dem Deck: " + e.getMessage();
         }
     }
@@ -281,13 +282,13 @@ public class DeckService{
                        deckRepository.save(deck);
                        return "Die Karten wurden erfolgreich dem Deck hinzugefügt.";
                    } else {
-                       throw new RuntimeException("Das Deck kann maximal 30 Karten enthalten.");
+                       return "Das Deck kann maximal 30 Karten enthalten.";
                    }
                } else {
-                   throw new RuntimeException("Das Deck wurde nicht gefunden.");
+                   return "Das Deck wurde nicht gefunden.";
                }
            } else {
-               throw new RuntimeException("Der Benutzer mit der angegebenen ID wurde nicht gefunden.");
+               return "Der Benutzer mit der angegebenen ID wurde nicht gefunden.";
            }
        } catch (Exception e) {
            return "Fehler beim Hinzufügen der Karten zum Deck: " + e.getMessage();

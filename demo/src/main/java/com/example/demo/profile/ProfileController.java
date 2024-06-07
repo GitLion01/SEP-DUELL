@@ -22,12 +22,12 @@ public class ProfileController {
     private final ProfileService profileService;
 
     @GetMapping(path ="/{id}")
-    public ResponseEntity<?> getProfile(@PathVariable Long id) {
+    public ResponseEntity<?> getProfile(@PathVariable Long id) {// Verwendung der Wildcard, da entweder UserAccountResponse oder ResponseEntity.notFound().build() zurückgegeben wird
         Optional<UserAccount> profileOptional = profileService.getProfile(id);
         if (profileOptional.isPresent()) {
             UserAccount profile = profileOptional.get();
 
-            // Konvertieren Sie das Bild in einen Base64-String
+            // Konvertiert das Bild in einen Base64-String
             byte[] image = profile.getImage();
             String imageBase64 = null;
             if(image != null) {
@@ -36,7 +36,7 @@ public class ProfileController {
             //Abrufen der Decks des Users
             List<Deck> decks = profileService.getUserDecks(id);
 
-            // Erstellen Sie ein UserAccountResponse-Objekt mit den Profilinformationen und dem Base64-String des Bildes
+            // Erstellt ein UserAccountResponse-Objekt mit den Profilinformationen und dem Base64-String des Bildes
             UserAccountResponse profileResponse = new UserAccountResponse(
                     profile.getFirstName(),
                     profile.getLastName(),

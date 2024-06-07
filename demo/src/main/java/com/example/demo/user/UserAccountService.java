@@ -1,4 +1,7 @@
 package com.example.demo.user;
+import com.example.demo.cards.Card;
+import com.example.demo.cards.CardRepository;
+import com.example.demo.cards.CardService;
 import com.example.demo.registration.token.ConfirmationToken;
 import com.example.demo.registration.token.ConfirmationTokenRepository;
 import com.example.demo.registration.token.ConfirmationTokenService;
@@ -12,9 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @AllArgsConstructor
 @Service
@@ -25,6 +26,8 @@ public class UserAccountService implements UserDetailsService {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final ConfirmationTokenService confirmationTokenService;
     private final ConfirmationTokenRepository confirmationTokenRepository;
+    private final CardService cardService;
+    private final CardRepository cardRepository;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -37,9 +40,6 @@ public class UserAccountService implements UserDetailsService {
     }
 
 
-    public List<UserAccount> findAll() {
-        return userAccountRepository.findAll();
-    }
 
     public String signUpUser(UserAccount userAccount) {
         boolean userExists = userAccountRepository.findByEmail(userAccount.getEmail()).isPresent();
@@ -65,7 +65,12 @@ public class UserAccountService implements UserDetailsService {
         return token;
     }
 
-    public void enableAppUser(String email) {
+    public void enableAppUser(String email,Long userId) {
+        //give the user if confirmed all the cards from admin panel
+        List<Card> cards= cardRepository.findAll();
+        for(Card card:cards) {
+            cardService.addCardsInstanzen(userId, Collections.singletonList(card.getName()));
+        }
         userAccountRepository.enableAppUser(email);
     }
 
