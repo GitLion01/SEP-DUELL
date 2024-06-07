@@ -1,5 +1,7 @@
 package com.example.demo.game;
 
+import com.example.demo.cards.CardInstance;
+import com.example.demo.cards.CardInstanceRepository;
 import com.example.demo.decks.Deck;
 import com.example.demo.decks.DeckRepository;
 import com.example.demo.game.requests.*;
@@ -21,14 +23,18 @@ public class GameService {
    private final GameRepository gameRepository;
    private final PlayerStateRepository playerStateRepository;
    private final DeckRepository deckRepository;
+    private final UserAccountRepository userAccountRepository;
+    private final CardInstanceRepository cardInstanceRepository;
 
-   @Autowired
+    @Autowired
     public GameService(GameRepository gameRepository,
                        PlayerStateRepository playerStateRepository,
-                       DeckRepository deckRepository) {
+                       DeckRepository deckRepository, UserAccountRepository userAccountRepository, CardInstanceRepository cardInstanceRepository) {
         this.gameRepository = gameRepository;
         this.deckRepository = deckRepository;
         this.playerStateRepository = playerStateRepository;
+        this.userAccountRepository = userAccountRepository;
+        this.cardInstanceRepository = cardInstanceRepository;
     }
 
 
@@ -40,7 +46,7 @@ public class GameService {
 
     public ResponseEntity<Game> selectDeck(DeckSelectionRequest request) {
 
-        Optional<Game> optionalGame = gameRepository.findByidAndUserID(request.getGameID(), request.getUserID());
+        Optional<Game> optionalGame = gameRepository.findByidAndId(request.getGameID(), request.getUserID());
         Optional<Deck> optionalDeck = deckRepository.findByNameAndUserId(request.getDeckName(), request.getUserID());
         Optional<PlayerState> optionalPlayerState = playerStateRepository.findByUserId(request.getUserID());
 
@@ -58,8 +64,12 @@ public class GameService {
     }
 
 
-    public Game playCard(PlayCardRequest request) {
-        // Implementierung
+    public ResponseEntity<Game> playCard(PlayCardRequest request) {
+       Optional<Game> optionalGame = gameRepository.findByidAndId(request.getGameID(), request.getUserID());
+       Optional<UserAccount> optionalUserAccount = userAccountRepository.findById(request.getUserID());
+
+
+
         return null;
     }
 
@@ -104,4 +114,6 @@ public class GameService {
         // Implementierung
         return null;
     }
+
+
 }
