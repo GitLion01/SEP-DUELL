@@ -34,7 +34,7 @@ public class GameController {
 
     @MessageMapping("/playCard")
     @SendTo("/topic/game")
-    public Game playCard(@Payload PlayCardRequest request) {
+    public ResponseEntity<Game> playCard(@Payload PlayCardRequest request) {
         return gameService.playCard(request);
     }
 
