@@ -25,7 +25,7 @@ class Startseite extends Component {
 
   render() {
     const { loggedIn } = this.state;
-    const info = console.log(localStorage.getItem('userRole'))
+    const info = console.log(localStorage.getItem('userRole'));
     if (!loggedIn) {
       console.log("Benutzer ausgeloggt, Weiterleitung zur Login-Seite");
       // Hier können Sie eine Weiterleitung zur Login-Seite implementieren
@@ -35,6 +35,9 @@ class Startseite extends Component {
       <div className="AppStart">
         <header>
           <h1>STARTSEITE</h1>
+          <div className="logout-button">
+            <button onClick={this.handleLogout}>Abmelden</button>
+          </div>
         </header>
         <main>
           <div className="centered-content">
@@ -61,13 +64,6 @@ class Startseite extends Component {
             </section>
           </div>
         </main>
-        <footer>
-          <nav>
-            <ul>
-              <li><a href="/" onClick={this.handleLogout}>Abmelden</a></li>
-            </ul>
-          </nav>
-        </footer>
       </div>
     );
   }

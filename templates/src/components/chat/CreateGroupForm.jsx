@@ -1,6 +1,8 @@
 // components/chat/CreateGroupForm.jsx
 import React, { useState, useEffect, useCallback } from 'react';
 import './CreateGroupForm.css';
+import { ToastContainer, toast } from 'react-toastify';
+
 
 function CreateGroupForm({ onCreateGroup }) {
   const [groupName, setGroupName] = useState('');
@@ -46,10 +48,19 @@ function CreateGroupForm({ onCreateGroup }) {
       setGroupName('');
       setSelectedFriends([]);
     }
+    else {
+      if (groupName.trim() ==='') {
+        toast.error('Bitte Name eingeben')
+      }
+      if (selectedFriends.length === 0) {
+        toast.error('Bitte mindestens einen Freund auswählen')
+      }
+    }
   };
 
   return (
     <form className="create-group-form" onSubmit={handleSubmit}>
+      <ToastContainer />
       <h2>Neue Gruppe erstellen</h2>
       <input
         type="text"

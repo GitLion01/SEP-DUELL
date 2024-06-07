@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import './FriendListForChat.css';
 
-function FriendListForChat({ onSelect, onCreateGroupClick }) {
+function FriendListForChat({ onSelect, onCreateGroupClick, }) {
   const [friends, setFriends] = useState([]);
   const [groups, setGroups] = useState([]);
   const userId = localStorage.getItem('id');

@@ -12,17 +12,26 @@ function ChatWindow({ friend, type }) {
   const [newMessage, setNewMessage] = useState('');
   const [editingMessage, setEditingMessage] = useState(null);
   const userId = localStorage.getItem('id');
+
+  if (!friend || !friend.id) {
+    return <div>Wählen Sie einen Freund oder eine Gruppe aus, um den Chat zu starten</div>;
+  }
+
   const chatId = generateChatId(userId, friend.id);
 
   // Nachrichten vom Server laden
   useEffect(() => {
     const fetchMessages = async () => {
-      const response = await fetch(`http://localhost:8080/messages/${chatId}`);
-      const data = await response.json();
-      setMessages((prevMessages) => ({
-        ...prevMessages,
-        [chatId]: Array.isArray(data) ? data : [] // Ensure data is an array
-      }));
+      try {
+        const response = await fetch(`http://localhost:8080/messages/${chatId}`);
+        const data = await response.json();
+        setMessages((prevMessages) => ({
+          ...prevMessages,
+          [chatId]: Array.isArray(data) ? data : [] // Ensure data is an array
+        }));
+      } catch (error) {
+        console.error("Fehler beim Laden der Nachrichten:", error);
+      }
     };
 
     fetchMessages();
@@ -60,7 +69,7 @@ function ChatWindow({ friend, type }) {
         receiver: type === 'friend' ? friend.id : null,
         group: type === 'group' ? friend.id : null,
         text: newMessage,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), // Format HH:MM
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         chatId: chatId,
         read: false
       };

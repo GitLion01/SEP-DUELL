@@ -1,66 +1,96 @@
 .AppStart {
-
   text-align: center;
+  background-image: url('./startseite.jpg'); /* Absoluter Pfad relativ zur Wurzel des public-Ordners */
   background-size: cover; /* Das Bild wird so skaliert, dass es den gesamten Hintergrund bedeckt */
   background-position: center; /* Das Bild wird zentriert positioniert */
-
-
+  background-repeat: no-repeat; /* Verhindert, dass das Hintergrundbild wiederholt wird */
+  height: 100vh; /* Stellt sicher, dass das Bild die gesamte Höhe des Viewports einnimmt */
+  width: 100vw; /* Stellt sicher, dass das Bild die gesamte Breite des Viewports einnimmt */
+  display: flex;
+  flex-direction: column;
 }
 
 .AppStart header {
-
   color: white;
   padding: 30px;
+  position: relative; /* Positionierungs-Kontext für den Abmelde-Button */
+  background-color: rgba(0, 0, 0, 0); /* Weniger opak */
 }
 
+.AppStart header h1 {
+  text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000; /* Schwarzer Textborder */
+}
 
+.logout-button {
+  position: absolute;
+  top: 30px; /* Gleiche Höhe wie das Padding des Headers */
+  right: 30px; /* Gleiche Breite wie das Padding des Headers */
+}
+
+.logout-button button {
+  padding: 10px 20px;
+  background-color: #3498db; /* Passende Farbe zum Hintergrund */
+  color: white;
+  border: none;
+  border-radius: 10px; /* Abgerundete Ecken */
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.logout-button button:hover {
+  background-color: #2980b9; /* Hintergrundfarbe bei Hover */
+}
 
 .AppStart main {
+  flex: 1; /* Füllt den verfügbaren Raum */
   display: flex;
   justify-content: center; /* Zentriert den Inhalt horizontal */
   align-items: center; /* Zentriert den Inhalt vertikal */
-  height: calc(100vh - 180px); /* Berechnet die Höhe des Inhaltsbereichs des Bildschirms */
-
+  width: 100%; /* Füllt die gesamte Breite */
 }
-
 
 .AppStart .centered-content {
   display: flex;
-  /* flex-direction: column; /* Anordnung des Inhalts in einer Spalte */
-  flex-direction: row;
-  /* padding-right: 30%;*/
-
+  flex-direction: row; /* Anordnung des Inhalts in einer Reihe */
+  flex-wrap: wrap; /* Elemente umbrechen */
+  justify-content: center; /* Zentriert den Inhalt */
+  gap: 20px; /* Mehr Abstand zwischen den Abschnitten */
 }
 
 .AppStart section {
   flex: 1;
+  display: flex; /* Flexbox hinzufügen */
+  justify-content: center; /* Zentriert den Text horizontal */
+  align-items: center; /* Zentriert den Text vertikal */
   padding: 20px;
   border: 1px solid #ccc;
-  border-radius: 5px;
-  margin:  10px;
-  background-color: rgb(1, 1, 29, 0.9);
+  border-radius: 10px;
+  margin: 10px;
+  background-color: rgba(1, 1, 29, 0.8); /* Weniger opak */
   color: white;
+  min-width: 200px; /* Mindestbreite für gleichmäßige Kästchen */
+  max-width: 250px; /* Maximale Breite für gleichmäßige Kästchen */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Schatten für Tiefeneffekt */
+  transition: transform 0.3s;
 }
 
-.AppStart footer {
-  background-color: rgb(1, 1, 17);
-  color: white;
-  padding: 15px;
-  position: fixed;
-  bottom: 0;
-  width: 100%;
+.AppStart section:hover {
+  transform: scale(1.05); /* Leichte Vergrößerung bei Hover */
 }
 
-.AppStart footer nav ul {
-  padding: 0;
-}
-
-.AppStart footer nav ul li {
-  display: inline;
-  margin-right: 10px;
-}
-
-.AppStart footer nav ul li a {
+.AppStart section a {
   color: white;
   text-decoration: none;
+  display: flex; /* Flexbox hinzufügen */
+  justify-content: center; /* Zentriert den Text horizontal */
+  align-items: center; /* Zentriert den Text vertikal */
+  height: 100%; /* Füllt die gesamte Höhe des Abschnitts */
+  width: 100%; /* Füllt die gesamte Breite des Abschnitts */
+}
+
+.AppStart section a h2 {
+  margin: 0;
+  padding: 10px 0;
+  font-size: 1.2em;
+  font-family: 'Arial', sans-serif; /* Schriftstil */
 }
