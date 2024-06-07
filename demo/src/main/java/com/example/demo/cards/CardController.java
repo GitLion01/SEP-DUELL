@@ -22,13 +22,14 @@ public class CardController {
     private final CardRepository cardRepository;
 
     @PostMapping("/upload")
-    public ResponseEntity<?> uploadCardsFromCSV(@RequestParam("file") MultipartFile file) {
-        try {
+    public ResponseEntity<String> uploadCardsFromCSV(@RequestParam("file") MultipartFile file) {
+
             String result = cardService.uploadAndSaveCards(file);
-            return ResponseEntity.ok(result);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Fehler beim Hochladen und Speichern der Karten aus der CSV-Datei.");
-        }
+            if(result.startsWith("Error uploading CSV")) {
+                return ResponseEntity.ok(result);
+            }else {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Fehler beim Hochladen und Speichern der Karten aus der CSV-Datei.");
+            }
     }
 
 
@@ -44,14 +45,15 @@ public class CardController {
     public ResponseEntity<Optional<CardResponse>> findByByName(@PathVariable String name) {
         try {
             Optional<Card> card = cardRepository.findByName(name);
+            // prüft ob die Karte existiert
             if (card.isPresent()) {
                 // Konvertiere das Bild von byte[] zu Base64
                 String base64Image = Base64.getEncoder().encodeToString(card.get().getImage());
                 // Erstelle eine CardResponse mit dem Base64-Bild und anderen Details
                 CardResponse cardResponse = new CardResponse(card.get().getName(), card.get().getAttackPoints(), card.get().getDefensePoints(), card.get().getDescription(), base64Image, card.get().getRarity());
-                return ResponseEntity.ok(Optional.of(cardResponse));
+                return ResponseEntity.ok(Optional.of(cardResponse)); // erstellt eine HTTP-Antwort mit status 200 ok
             } else {
-                return ResponseEntity.notFound().build();
+                return ResponseEntity.notFound().build(); // erstellt eine HTTP-Antwort mit status 404 Not Found
             }
         } catch (Exception e) {
             return ResponseEntity.notFound().build();
@@ -62,11 +64,11 @@ public class CardController {
     public ResponseEntity<List<CardResponse>> findAll() {
         List<Card> cards = cardRepository.findAll();
         List<CardResponse> cardResponses = cards.stream().map(card -> {
-            // Konvertiere das Bild von byte[] zu Base64
+            // Konvertiere das Bild jeder Karte von byte[] zu Base64
             String base64Image = Base64.getEncoder().encodeToString(card.getImage());
             // Erstelle eine CardResponse mit dem Base64-Bild und anderen Details
             return new CardResponse(card.getName(), card.getAttackPoints(), card.getDefensePoints(), card.getDescription(), base64Image, card.getRarity());
-        }).collect(Collectors.toList());
+        }).collect(Collectors.toList()); // sammelt die Kartenobjekte in einer Liste
         return ResponseEntity.ok(cardResponses);
     }
 

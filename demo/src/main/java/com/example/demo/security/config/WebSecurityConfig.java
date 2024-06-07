@@ -31,12 +31,11 @@ public class WebSecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         return http
-                .csrf(AbstractHttpConfigurer::disable)
+                .csrf(AbstractHttpConfigurer::disable) // deaktiviert standardmäßigen csrf-Schutz (Cross-Site Request Forgery)
                 .authorizeHttpRequests(
-                        req -> req.requestMatchers("/**")
-                                .permitAll()
-                                .anyRequest()
-                                .authenticated()
+                        req -> req.requestMatchers("/**") // requirements für anfragende URL
+                                .permitAll()// erlaubt zugriff auf alle URLs
+                                .anyRequest().authenticated() // alle nicht öffentliche URLs benötigen Authentifizierung
                 ).formLogin(form -> form
                         .loginPage("/login")  // Angepasste Login-Seite, kann durch eine eigene ersetzt werden
                         .loginProcessingUrl("/perform_login")  // URL, auf der die Login-Anfrage verarbeitet wird
@@ -49,7 +48,7 @@ public class WebSecurityConfig {
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/login?logout=true"))
                 .userDetailsService(userAccountService)
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // kann man auch auf ALWAYS setzen
                 .build();
     }
 

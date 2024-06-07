@@ -9,7 +9,7 @@
     --placeholder-opacity: 0.7; /* Definiert die Deckkraft des Platzhalters */
 }
 
-body.TwoFact__body {
+.TwoFact__body{
     background-color: rgb(0, 0, 0); 
     background: -ms-linear-gradient(top left, #663faa 0%, #585fd5 100%);
     font-size: 14px;
@@ -50,14 +50,13 @@ body.TwoFact__body {
     padding: 0;
 }
 
-.form__group {
-    margin: 10px 0 0;
-}
+
 
 .form__pincode {
     display: block;
     width: 100%;
     margin: 10px auto 20px;
+    padding-left: 10px;
 }
 
 .form__pincode > label {
@@ -115,9 +114,6 @@ body.TwoFact__body {
     white-space: nowrap;
     transition: all 0.2s ease-in-out;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    user-select: none;
-    -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
-    -webkit-touch-callout: none;
 }
 
 .TwoFact button:active {

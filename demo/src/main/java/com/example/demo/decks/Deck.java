@@ -1,6 +1,7 @@
 package com.example.demo.decks;
 
 import com.example.demo.cards.Card;
+import com.example.demo.game.PlayerState;
 import com.example.demo.user.UserAccount;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
@@ -24,6 +25,7 @@ public class Deck {
     @JsonIgnore
     @JoinTable(
             name = "deck_card",
+            // deck_id und card_id sind zusammengesetzter Primärschlüssel in Ergebnistabelle
             joinColumns = @JoinColumn(name = "deck_id"),
             inverseJoinColumns = @JoinColumn(name = "card_id")
     )
@@ -32,6 +34,9 @@ public class Deck {
     @JoinColumn
     @JsonIgnore
     private UserAccount user;
+
+    @OneToOne
+    private PlayerState playerState;
 
 
 }

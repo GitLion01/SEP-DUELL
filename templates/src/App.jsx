@@ -12,7 +12,8 @@ import Freundeliste from "./components/Freunde/Freundeliste.jsx";
 import ProtectedRoute from './ProtectedRoute.jsx';
 import ShopPage from './components/ShopPage/ShopPage.jsx';
 import ChatPage from './components/chat/ChatPage.jsx';
-
+import DeckSelection from './components/Duell/DeckSelection.jsx';
+import Duel from "./components/Duell/Duel.jsx";
 
 
 
@@ -30,6 +31,8 @@ function App() {
         <Route path="/freundelist" element={<ProtectedRoute element={Freundeliste} />} />
         <Route path="/shop" element={<ProtectedRoute element={ShopPage} />} />
         <Route path="/chat" element={<ProtectedRoute element={ChatPage} />} /> {/* Neue Route für die Chat-Seite */}
+
+         {/* Neue Routen für das Duell */}
       </Routes>
     </Router>
   );
