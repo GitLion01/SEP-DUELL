@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import webSocketService from './WebSocketService';
+import webSocketService from '../Service/WebSocketService'; 
 import './ChatWindow.css';
 import './ChatBubble.css';
 
@@ -39,8 +39,14 @@ function ChatWindow({ friend, type }) {
   useEffect(() => {
     webSocketService.connect();
 
+    return () => {
+      webSocketService.close();
+    };
+  }, []);
+
+  useEffect(() => {
     const handleMessage = (messageEvent) => {
-      const message = JSON.parse(messageEvent.data);
+      const message = JSON.parse(messageEvent.body);
       setMessages((prevMessages) => {
         const updatedMessages = { ...prevMessages };
         if (!Array.isArray(updatedMessages[message.chatId])) {
@@ -51,13 +57,16 @@ function ChatWindow({ friend, type }) {
       });
     };
 
-    webSocketService.socket.addEventListener('message', handleMessage);
+    if (webSocketService.client && webSocketService.connected) {
+      webSocketService.client.subscribe(`/topic/${chatId}`, handleMessage);
+    }
 
     return () => {
-      webSocketService.socket.removeEventListener('message', handleMessage);
-      webSocketService.close();
+      if (webSocketService.client && webSocketService.connected) {
+        webSocketService.client.unsubscribe(`/topic/${chatId}`);
+      }
     };
-  }, []);
+  }, [webSocketService.connected, chatId]);
 
   // Nachricht senden und speichern
   const handleSendMessage = () => {
@@ -71,7 +80,7 @@ function ChatWindow({ friend, type }) {
         chatId: chatId,
         read: false,
       };
-      webSocketService.sendMessage(JSON.stringify(message));
+      webSocketService.sendMessage(`/app/chat/${chatId}`, JSON.stringify(message));
 
       setMessages((prevMessages) => {
         const updatedMessages = { ...prevMessages };
@@ -94,7 +103,7 @@ function ChatWindow({ friend, type }) {
   const handleUpdateMessage = () => {
     if (editingMessage && newMessage.trim() !== '') {
       const updatedMessage = { ...editingMessage, text: newMessage };
-      webSocketService.sendMessage(JSON.stringify({ ...updatedMessage, action: 'edit' }));
+      webSocketService.sendMessage(`/app/chat/${chatId}`, JSON.stringify({ ...updatedMessage, action: 'edit' }));
 
       setMessages((prevMessages) => {
         const updatedMessages = { ...prevMessages };
@@ -110,7 +119,7 @@ function ChatWindow({ friend, type }) {
 
   // Nachricht löschen
   const handleDeleteMessage = (message) => {
-    webSocketService.sendMessage(JSON.stringify({ ...message, action: 'delete' }));
+    webSocketService.sendMessage(`/app/chat/${chatId}`, JSON.stringify({ ...message, action: 'delete' }));
 
     setMessages((prevMessages) => {
       const updatedMessages = { ...prevMessages };
@@ -133,7 +142,7 @@ function ChatWindow({ friend, type }) {
   const handleReadMessage = (message) => {
     if (message.sender !== userId && !message.read) {
       message.read = true;
-      webSocketService.sendMessage(JSON.stringify({ ...message, action: 'read' }));
+      webSocketService.sendMessage(`/app/chat/${chatId}`, JSON.stringify({ ...message, action: 'read' }));
 
       setMessages((prevMessages) => {
         const updatedMessages = { ...prevMessages };
