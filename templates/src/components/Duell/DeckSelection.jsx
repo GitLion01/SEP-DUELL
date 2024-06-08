@@ -3,13 +3,12 @@ import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import axios from 'axios';
 
-const DeckSelection = ({ onSelectDeck }) => {
+const DeckSelection = ({ client }) => {
   const [decks, setDecks] = useState([]);
   const [selectedDeck, setSelectedDeck] = useState(null);
   const [opponentReady, setOpponentReady] = useState(false);
   const [id, setId] = useState(null);
   const [gameId, setGameId] = useState(localStorage.getItem('gameId'));
-  const [client, setClient] = useState(null);
 
   useEffect(() => {
     const loadDecks = async () => {
@@ -25,34 +24,18 @@ const DeckSelection = ({ onSelectDeck }) => {
     loadDecks();
   }, [id]);
 
-  const newClient = new Client({
-    brokerURL: 'ws://localhost:8080/ws',
-    webSocketFactory: () => new SockJS('http://localhost:8080/ws'),
-    onConnect: () => {
+  useEffect(() => {
+    if (client) {
       client.subscribe('/topic/deckSelection', (message) => {
         const response = JSON.parse(message.body);
         if (response.playerId !== id) {
           setOpponentReady(true);
           setGameId(response.gameId);
-          localStorage.setItem('gameId', response.gameId); // Speichere gameId im LocalStorage
+          localStorage.setItem('gameId', response.gameId);
         }
       });
-      client.subscribe('/topic/startDuel', (message) => {
-        const response = JSON.parse(message.body);
-        setGameId(response.gameId);
-        localStorage.setItem('gameId', response.gameId); // Speichere gameId im LocalStorage
-        onSelectDeck(selectedDeck);
-      });
-    },
-  });
-
-  useEffect(() => {
-    newClient.activate();
-
-    return () => {
-      newClient.deactivate();
-    };
-  }, [id, selectedDeck]);
+    }
+  }, [client, id]);
 
   const handleSelectDeck = (deckId) => {
     setSelectedDeck(deckId);
