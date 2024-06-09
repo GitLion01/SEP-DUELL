@@ -1,86 +1,121 @@
-/*
 package com.example.demo.game;
 
 import com.example.demo.game.requests.*;
+import com.example.demo.user.UserAccount;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
-
+@CrossOrigin
 @RestController
 public class GameController {
 
     private final GameService gameService;
+    private final SimpMessagingTemplate messagingTemplate;
 
     @Autowired
-    public GameController(GameService gameService) {
+    public GameController(GameService gameService, SimpMessagingTemplate messagingTemplate) {
         this.gameService = gameService;
+        this.messagingTemplate = messagingTemplate;
     }
 
-    @MessageMapping("/join")
-    @SendTo("/topic/game")
-    public Game joinGame(@Payload JoinRequest request) {
-        return gameService.joinGame(request);
+
+     // "/all/create" oder "/specific/create"
+     // Mapped als "/app/private": Antworten werden an alle User gesendet, die diesen Endbunkt subscribed haben
+
+
+
+
+    @MessageMapping("/createGame")
+    public void createGame(@Payload CreateGameRequest request) {
+        Optional<Game> game = gameService.createGame(request.getUserId());
+        if (game.isPresent()) {
+            messagingTemplate.convertAndSend("/all/gameCreated", game.get());
+        } else {
+            messagingTemplate.convertAndSendToUser(request.getUserId().toString(), "/specific/errors", "Could not create game");
+        }
+    }
+
+    @MessageMapping("/joinGame")
+    public void joinGame(@Payload JoinRequest request) {
+        Optional<Game> game = gameService.joinGame(request.getGameID(), request.getUserID());
+        if (game.isPresent()) {
+            for (UserAccount player : game.get().getPlayers()) {
+                messagingTemplate.convertAndSendToUser(player.getId().toString(), "/specific/gameUpdate", game.get());
+            }
+        } else {
+            messagingTemplate.convertAndSendToUser(request.getUserID().toString(), "/specific/errors", "Could not join game");
+        }
     }
 
     @MessageMapping("/selectDeck")
-    @SendTo("/topic/game")
-    public ResponseEntity<Game> selectDeck(@Payload DeckSelectionRequest request) {
-        return gameService.selectDeck(request);
+    public void selectDeck(@Payload DeckSelectionRequest request) {
+        ResponseEntity<Game> response = gameService.selectDeck(request);
+        if (response.getStatusCode().is2xxSuccessful()) {
+            Game game = response.getBody();
+            if (game != null) {
+                messagingTemplate.convertAndSend("/all/gameUpdate", game);
+            }
+        } else {
+            messagingTemplate.convertAndSendToUser(request.getUserID().toString(), "/specific/errors", "Deck selection failed");
+        }
     }
 
     @MessageMapping("/playCard")
-    @SendTo("/topic/game")
-    public ResponseEntity<Game> playCard(@Payload PlayCardRequest request) {
-        return gameService.playCard(request);
+    public void playCard(@Payload PlayCardRequest request) {
+        ResponseEntity<Game> response = gameService.playCard(request);
+        if (response.getStatusCode().is2xxSuccessful()) {
+            Game game = response.getBody();
+            if (game != null) {
+                messagingTemplate.convertAndSend("/all/gameUpdate", game);
+            }
+        } else {
+            messagingTemplate.convertAndSendToUser(request.getUserID().toString(), "/specific/errors", "Play card failed");
+        }
     }
 
+
     @MessageMapping("/attackCard")
-    @SendTo("/topic/game")
-    public ResponseEntity<Game> attackCard(@Payload AttackRequest request) {
-        return gameService.attackCard(request);
+    public void attackCard(@Payload AttackCardRequest request) {
+
     }
 
     @MessageMapping("/attackUser")
-    @SendTo("/topic/game")
-    public Game attackUser(@Payload Long userA, Long userB) {
-        return gameService.attackUser(userA, userB);
+    public void attackUser(@Payload AttackUserRequest request) {
+
     }
 
     @MessageMapping("/endTurn")
-    @SendTo("/topic/game")
-    public ResponseEntity<Game> endTurn(@Payload EndTurnRequest request) {
-        return gameService.endTurn(request);
+    public void endTurn(@Payload EndTurnRequest request) {
+
     }
 
     @MessageMapping("/rareSwap")
-    @SendTo("/topic/game")
-    public Game swapForRare(@Payload RareSwapRequest request){
-        return gameService.swapForRare(request);
+    public void swapForRare(@Payload RareSwapRequest request) {
+
     }
 
     @MessageMapping("/LegendarySwap")
-    @SendTo("/topic/game")
-    public Game swapForLegendary(@Payload LegendarySwapRequest request){
-        return gameService.swapForLegendary(request);
+    public void swapForLegendary(@Payload LegendarySwapRequest request) {
+
     }
 
     @MessageMapping("/doNothing")
-    @SendTo("/topic/game")
-    public Game doNothing(@Payload Long userID){
-        return gameService.doNothing(userID);
+    public void doNothing(@Payload Long userID) {
+
     }
 
     @MessageMapping("/terminateMatch")
-    @SendTo("/topic/game")
-    public Game terminateMatch(@Payload Long gameID) {
-        return gameService.terminateMatch(gameID);
+    public void terminateMatch(@Payload Long gameID) {
+
     }
-
-
 }
-*/

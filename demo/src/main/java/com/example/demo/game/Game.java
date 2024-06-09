@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 
+import java.util.ArrayList;
 import java.util.List;
 
 @NoArgsConstructor
@@ -21,7 +22,7 @@ public class Game {
 
 
     @OneToMany(mappedBy = "game", cascade = CascadeType.ALL)
-    private List<UserAccount> players;
+    private List<UserAccount> players = new ArrayList<UserAccount>();
 
     // 0 oder 1
     private Integer currentTurn = 0;
@@ -30,6 +31,11 @@ public class Game {
         List<UserAccount> players = this.players;
         Integer currentTurn = this.currentTurn;
         return players.get(currentTurn).equals(user);
+    }
+
+    public void addPlayer(UserAccount player) {
+        this.players.add(player);
+        player.setGame(this);
     }
 
 

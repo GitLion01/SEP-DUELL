@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
-public class AttackRequest {
+public class AttackCardRequest {
 
     private Long gameID;
     private Long userIDAttacker;
