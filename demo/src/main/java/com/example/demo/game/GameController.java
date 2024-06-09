@@ -6,7 +6,6 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RestController;
-import java.util.Optional;
 
 @CrossOrigin
 @RestController
@@ -30,12 +29,12 @@ public class GameController {
 
     @MessageMapping("/createGame")
     public void createGame(@Payload CreateGameRequest request) {
-        Optional<Game> game = gameService.createGame(request.getUserId());
+        /*Optional<Game> game = gameService.createGame(request.getUserId());
         if (game.isPresent()) {
             messagingTemplate.convertAndSend("/all/gameCreated", game.get());
         } else {
             messagingTemplate.convertAndSendToUser(request.getUserId().toString(), "/specific/errors", "Could not create game");
-        }
+        }*/
     }
 
 
