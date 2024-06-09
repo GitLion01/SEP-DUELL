@@ -32,7 +32,7 @@ class LoginPage extends React.Component { // Definieren der LoginPage-Klasse als
           console.log("Login successful!");
           // Speichern der Benutzer-ID im LocalStorage
           localStorage.setItem('id', res.data.id);
-          localStorage.setItem('userRole', res.data.userRole); 
+          localStorage.setItem('userRole', res.data.userRole);
           this.setState({ redirectToHome: true });
         } else if (res.data && res.data.status === 'error') {
           // Fehlgeschlagene Anmeldung
@@ -43,8 +43,6 @@ class LoginPage extends React.Component { // Definieren der LoginPage-Klasse als
           alert('Unerwartete Serverantwort');
         }
       });
-  
-    
   };
 
   render() {
