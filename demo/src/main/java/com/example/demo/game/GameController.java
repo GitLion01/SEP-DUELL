@@ -1,18 +1,11 @@
 package com.example.demo.game;
-
 import com.example.demo.game.requests.*;
-import com.example.demo.user.UserAccount;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
 @CrossOrigin
@@ -45,42 +38,15 @@ public class GameController {
         }
     }
 
-    @MessageMapping("/joinGame")
-    public void joinGame(@Payload JoinRequest request) {
-        Optional<Game> game = gameService.joinGame(request.getGameID(), request.getUserID());
-        if (game.isPresent()) {
-            for (UserAccount player : game.get().getPlayers()) {
-                messagingTemplate.convertAndSendToUser(player.getId().toString(), "/specific/gameUpdate", game.get());
-            }
-        } else {
-            messagingTemplate.convertAndSendToUser(request.getUserID().toString(), "/specific/errors", "Could not join game");
-        }
-    }
 
     @MessageMapping("/selectDeck")
     public void selectDeck(@Payload DeckSelectionRequest request) {
-        ResponseEntity<Game> response = gameService.selectDeck(request);
-        if (response.getStatusCode().is2xxSuccessful()) {
-            Game game = response.getBody();
-            if (game != null) {
-                messagingTemplate.convertAndSend("/all/gameUpdate", game);
-            }
-        } else {
-            messagingTemplate.convertAndSendToUser(request.getUserID().toString(), "/specific/errors", "Deck selection failed");
-        }
+
     }
 
     @MessageMapping("/playCard")
     public void playCard(@Payload PlayCardRequest request) {
-        ResponseEntity<Game> response = gameService.playCard(request);
-        if (response.getStatusCode().is2xxSuccessful()) {
-            Game game = response.getBody();
-            if (game != null) {
-                messagingTemplate.convertAndSend("/all/gameUpdate", game);
-            }
-        } else {
-            messagingTemplate.convertAndSendToUser(request.getUserID().toString(), "/specific/errors", "Play card failed");
-        }
+
     }
 
 
