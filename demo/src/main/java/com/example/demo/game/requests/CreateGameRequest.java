@@ -6,9 +6,6 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public class CreateGameRequest {
-
-    private Long gameId;
-    private Long userId;
-
-
+    private Long userA;
+    private String userB;
 }
