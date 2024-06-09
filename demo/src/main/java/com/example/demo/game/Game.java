@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.ArrayList;
 import java.util.List;
 
 @NoArgsConstructor
@@ -22,7 +24,7 @@ public class Game {
             joinColumns = @JoinColumn(name = "game_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
-    private List<UserAccount> users;
+    private List<UserAccount> users = new ArrayList<>();
 
     private Integer currentTurn = 0;
 

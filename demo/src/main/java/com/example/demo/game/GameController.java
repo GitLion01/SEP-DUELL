@@ -29,12 +29,8 @@ public class GameController {
 
     @MessageMapping("/createGame")
     public void createGame(@Payload CreateGameRequest request) {
-        /*Optional<Game> game = gameService.createGame(request.getUserId());
-        if (game.isPresent()) {
-            messagingTemplate.convertAndSend("/all/gameCreated", game.get());
-        } else {
-            messagingTemplate.convertAndSendToUser(request.getUserId().toString(), "/specific/errors", "Could not create game");
-        }*/
+        GameWithUsersDTO game = gameService.createGame(request);
+        messagingTemplate.convertAndSend("/all/create", game);
     }
 
 

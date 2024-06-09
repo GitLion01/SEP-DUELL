@@ -136,7 +136,7 @@
 -->
 
 
-<!DOCTYPE html>
+<!--<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -209,6 +209,49 @@
     }
 </script>
 </body>
+</html>-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Create Game Client</title>
+</head>
+<body>
+<h1>Create Game</h1>
+<form id="createGameForm">
+    <label for="userA">User A:</label>
+    <input type="text" id="userA" name="userA" required><br><br>
+
+    <label for="userB">User B:</label>
+    <input type="text" id="userB" name="userB" required><br><br>
+
+    <button type="submit">Create Game</button>
+</form>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+<script>
+    const form = document.getElementById('createGameForm');
+
+    form.addEventListener('submit', (event) => {
+        event.preventDefault();
+
+        const formData = new FormData(form);
+        const requestData = {
+            userA: formData.get('userA'),
+            userB: formData.get('userB')
+        };
+
+        const socket = new SockJS('http://localhost:8080/game-websocket');
+        const stompClient = Stomp.over(socket);
+
+        stompClient.connect({}, (frame) => {
+            console.log('Connected to WebSocket');
+            stompClient.send('/app/createGame', {}, JSON.stringify(requestData));
+        });
+    });
+</script>
+</body>
 </html>
-
-
