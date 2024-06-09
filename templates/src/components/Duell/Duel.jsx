@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { toast, ToastContainer } from 'react-toastify';
+import Card from "../card";
 
 
 const Duel = ({client, gameId}) => {
@@ -7,6 +8,9 @@ const Duel = ({client, gameId}) => {
   const [currentPlayer, setCurrentPlayer] = useState(null);
   const [playerState, setPlayerState] = useState({ handCards: [], fieldCards: [], life: 50 });
   const [opponentState, setOpponentState] = useState({ handCards: [], fieldCards: [], life: 50 });
+  const [isAttackMode, setIsAttackMode] = useState(false);
+  const [selectedAttacker, setSelectedAttacker] = useState(null);
+  const [selectedTarget, setSelectedTarget] = useState(null);
   const id = localStorage.getItem('id');
 
   useEffect(() => {
@@ -69,16 +73,43 @@ const Duel = ({client, gameId}) => {
     }
   };
 
-  const handleAttack = (attackingCardId, targetId) => {
-    if (client) {
-      client.publish({
-        destination: '/app/attackCard',
-        body: JSON.stringify({
-          gameID: gameId,
-          attackingCardId,
-          targetId,
-        }),
-      });
+  const handleAttack = () => {
+    if (selectedAttacker !== null) {
+      if (opponentState.fieldCards.length === 0) {
+        // Direkter Angriff auf den Gegner
+        if (client) {
+          client.publish({
+            destination: '/app/attackUser',
+            body: JSON.stringify({ gameId, userA: id, userB: opponentState.userId }),
+          });
+        }
+      } else if (selectedTarget !== null) {
+        // Angriff auf gegnerische Karte
+        if (client) {
+          client.publish({
+            destination: '/app/attackCard',
+            body: JSON.stringify({
+              gameID: gameId,
+              attackingCardIndex: selectedAttacker,
+              targetCardIndex: selectedTarget,
+            }),
+          });
+        }
+      }
+      resetAttackMode();
+    }
+  };
+
+  const selectAttackingCard = (index) => {
+    if (isAttackMode) {
+      setSelectedAttacker(index);
+    }
+  };
+
+  const selectTargetCard = (index) => {
+    if (isAttackMode) {
+      setSelectedTarget(index);
+      handleAttack(); // Führe Angriff aus, wenn Ziel ausgewählt ist
     }
   };
 
@@ -88,7 +119,14 @@ const Duel = ({client, gameId}) => {
         destination: '/app/endTurn',
         body: JSON.stringify({ gameID: gameId, userID: id }),
       });
+      toast.success("Zug Beendet");
     }
+  };
+
+  const resetAttackMode = () => {
+    setIsAttackMode(false);
+    setSelectedAttacker(null);
+    setSelectedTarget(null);
   };
 
   return (
@@ -96,30 +134,28 @@ const Duel = ({client, gameId}) => {
       <div className="timer">
         <h4>Time remaining: {timer} seconds</h4>
       </div>
+      <div className="action-controls">
+        <button onClick={() => setIsAttackMode(true)}>Angreifen</button>
+        {isAttackMode && toast.success("Angriffsmodus aktiviert.")}
+        <button onClick={handleEndTurn}>End Turn</button>
+
+      </div>
       <div className="player-field">
         <h3>Your Field</h3>
         <div className="cards">
-          {playerState.fieldCards.map(card => (
-            <div key={card.id} className="card">
-              <div>{card.name}</div>
-              <div>ATK: {card.attack}</div>
-              <div>DEF: {card.defense}</div>
-              <button onClick={() => handleAttack(card.id, 'opponentId')}>Attack</button>
+          {playerState.fieldCards.map((card, index) => (
+            <div key={index} className="card">
+              <Card card={card} onClick={() => selectAttackingCard(index)}/>
             </div>
           ))}
-        </div>
-        <div>
-          <button onClick={handleEndTurn}>End Turn</button>
         </div>
       </div>
       <div className="opponent-field">
         <h3>Opponent's Field</h3>
         <div className="cards">
-          {opponentState.fieldCards.map(card => (
-            <div key={card.id} className="card">
-              <div>{card.name}</div>
-              <div>ATK: {card.attack}</div>
-              <div>DEF: {card.defense}</div>
+          {opponentState.fieldCards.map((card, index) => (
+            <div key={index} className="card">
+              <Card card={card} onClick={() => selectTargetCard(index)}/>
             </div>
           ))}
         </div>
