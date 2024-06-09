@@ -14,5 +14,4 @@ public class CardResponse {
     private String description;
     private String image; // Hier wird das Bild als Base64-String gespeichert
     private Rarity rarity;
-
 }

@@ -11,8 +11,8 @@ public class AttackCardRequest {
     private Long userIDAttacker;
     private Long userIDDefender;
     // angreifende Karte von Angreifer
-    private Long attackerID;
+    private Long attackerIndex;
     // verteidigende Karte von Verteidiger
-    private Long targetID;
+    private Long targetIndex;
 
 }
