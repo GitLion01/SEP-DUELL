@@ -18,6 +18,7 @@ import DeckSelection from './components/Duell/DeckSelection.jsx';
 import Duel from "./components/Duell/Duel.jsx";
 
 import './index.css';
+import DuelC from "./components/DuelC/DuelC";
 
 
 function App() {
@@ -27,20 +28,25 @@ function App() {
     const newClient = new Client({
       brokerURL: 'ws://localhost:8080/game-websocket',
       webSocketFactory: () => new SockJS('http://localhost:8080/game-websocket'),
+      reconnectDelay: 5000,
       onConnect: () => {
         console.log('Connected to WebSocket server');
       },
-      onDisconnect: () => {
-        console.log('Disconnected from WebSocket server');
-      }
+      onStompError: (frame) => {
+        console.error(`Broker reported error: ${frame.headers['message']}`);
+        console.error(`Additional details: ${frame.body}`);
+      },
+      onWebSocketError: (event) => {
+        console.error('WebSocket error', event);
+      },
+      onWebSocketClose: (event) => {
+        console.error('WebSocket closed', event);
+      },
     });
 
     newClient.activate();
     setClient(newClient);
 
-    return () => {
-      newClient.deactivate();
-    };
   }, []);
 
   if (!client) {
@@ -61,6 +67,7 @@ function App() {
           <Route path="/freundelist" element={<ProtectedRoute element={Freundeliste}/>}/>
           <Route path="/shop" element={<ProtectedRoute element={ShopPage}/>}/>
           <Route path="/chat" element={<ProtectedRoute element={ChatPage}/>}/> {/* Neue Route für die Chat-Seite */}
+          <Route path="/challenge-player" element={<ProtectedRoute element={() => <DuelC client={client} />} />} />
 
           {/* Neue Routen für das Duell */}
 

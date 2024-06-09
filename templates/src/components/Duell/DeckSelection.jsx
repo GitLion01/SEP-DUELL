@@ -43,7 +43,7 @@ const DeckSelection = ({ client }) => {
       destination: '/app/selectDeck',
       body: JSON.stringify({ 
         userID: id, 
-        deckName: deckId, 
+        deckName: deckId,
         gameID: gameId
       }),
     });
