@@ -25,8 +25,8 @@ function App() {
 
   useEffect(() => {
     const newClient = new Client({
-      brokerURL: 'ws://localhost:8080/ws',
-      webSocketFactory: () => new SockJS('http://localhost:8080/ws'),
+      brokerURL: 'ws://localhost:8080/game-websocket',
+      webSocketFactory: () => new SockJS('http://localhost:8080/game-websocket'),
       onConnect: () => {
         console.log('Connected to WebSocket server');
       },
@@ -46,8 +46,6 @@ function App() {
   if (!client) {
     return <div>Loading...</div>;
   }
-
-
 
   return (
       <Router>

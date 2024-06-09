@@ -80,7 +80,12 @@ const Duel = ({client, gameId}) => {
         if (client) {
           client.publish({
             destination: '/app/attackUser',
-            body: JSON.stringify({ gameId, userA: id, userB: opponentState.userId }),
+            body: JSON.stringify({
+              gameId,
+              userIDAttacker: id,
+              userIDDefender: opponentState.userId,
+              attackerIndex: selectedAttacker
+            }),
           });
         }
       } else if (selectedTarget !== null) {
@@ -138,7 +143,6 @@ const Duel = ({client, gameId}) => {
         <button onClick={() => setIsAttackMode(true)}>Angreifen</button>
         {isAttackMode && toast.success("Angriffsmodus aktiviert.")}
         <button onClick={handleEndTurn}>End Turn</button>
-
       </div>
       <div className="player-field">
         <h3>Your Field</h3>
