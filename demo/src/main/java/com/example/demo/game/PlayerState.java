@@ -21,19 +21,27 @@ public class PlayerState {
     private Long Id; //stateID
     private Integer lifePoints = 50;
     private Integer damage;
-    private Integer cardsPlayed;
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+
+
+    @OneToOne(mappedBy = "playerState" , cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "user_id")
     private UserAccount user;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CardInstance> hand = new ArrayList<>();
+    private List<CardInstance> cardsPlayed = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CardInstance> field = new ArrayList<>();
+    private List<CardInstance> handCards = new ArrayList<>();
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CardInstance> fieldCards = new ArrayList<>();
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "deck_id")
     private Deck deck;
+
+
+
 
 }

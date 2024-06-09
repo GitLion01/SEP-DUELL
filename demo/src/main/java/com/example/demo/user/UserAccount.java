@@ -1,7 +1,6 @@
 package com.example.demo.user;
 import com.example.demo.cards.CardInstance;
 import com.example.demo.decks.Deck;
-import com.example.demo.game.Game;
 import com.example.demo.game.PlayerState;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
@@ -40,11 +39,11 @@ public class UserAccount implements UserDetails {
     private UserRole role;
     private Boolean locked = false;
     private Boolean enabled = false;
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Deck> decks = new ArrayList<>();
     private Boolean privateFriendList =false;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     /*to ignore the infinite loop occurring in the serialization ,when join the two tables
     /if a user accepted the friend request*/
     @JsonIgnore
@@ -54,7 +53,8 @@ public class UserAccount implements UserDetails {
             inverseJoinColumns = @JoinColumn(name = "friend_id"))
     private List<UserAccount> friends=new ArrayList<>();
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JsonIgnore
     @JoinTable(
             name = "friend_requests",
             // specify the foreign key columns in the join table.
@@ -64,15 +64,13 @@ public class UserAccount implements UserDetails {
 
     // mappedBy : um das besitzende Seite der Verbindung zu definieren
     // es gibt immer eine besitzende Seite bei bidirektionalen Beziehung zwischen zwei Entitäten
-    @OneToMany(mappedBy = "userAccount")
+    @OneToMany(mappedBy = "userAccount", fetch = FetchType.EAGER)
     private List<CardInstance> userCardInstance=new ArrayList<>();
 
-    @ManyToOne
-    @JoinColumn(name = "game_id")
-    private Game game;
 
-    @OneToOne
-    @JoinColumn(name = "playerState_id")
+
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "player_state_id")
     private PlayerState playerState;
 
 

@@ -60,6 +60,8 @@ public class CardController {
         }
     }
 
+
+
     @GetMapping
     public ResponseEntity<List<CardResponse>> findAll() {
         List<Card> cards = cardRepository.findAll();
@@ -76,4 +78,7 @@ public class CardController {
     public ResponseEntity<String> addCardsInstanzen(@PathVariable Long userID ,@RequestBody List<String> cards) {
         return cardService.addCardsInstanzen(userID,cards);
     }
+
+
+
 }
