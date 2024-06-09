@@ -182,6 +182,8 @@
     function joinGame() {
         const gameId = prompt("Enter Game ID:");
         const userId = prompt("Enter User ID:");
+        console.log("Game ID:", gameId);
+        console.log("User ID:", userId);
         stompClient.send("/app/joinGame", {}, JSON.stringify({gameId: gameId, userId: userId}));
     }
 
