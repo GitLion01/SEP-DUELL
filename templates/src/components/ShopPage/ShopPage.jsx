@@ -88,8 +88,8 @@ class ShopPage extends Component {
 
     setUserCards = async (newCards) => {
         try {
-            const cardIds = newCards.map(card => card.id);
-            const response = await axiosInstance.post(`/cards/${this.state.id}/addCards`, cardIds);
+            const cardNames = newCards.map(card => card.name);  // Extrahiere die Namen der Karten
+            const response = await axiosInstance.post(`/cards/${this.state.id}/addCards`, cardNames);  // Sende die Namen der Karten
             console.log(response);
         } catch (error) {
             console.error(error + ' Fehler beim Senden der neuen Karten');

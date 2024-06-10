@@ -43,18 +43,13 @@ function CreateGroupForm({ onCreateGroup }) {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    if (groupName.trim() !== '' && selectedFriends.length > 0) {
+    if (groupName.trim() && selectedFriends.length) {
       onCreateGroup({ name: groupName, members: selectedFriends });
       setGroupName('');
       setSelectedFriends([]);
-    }
-    else {
-      if (groupName.trim() ==='') {
-        toast.error('Bitte Name eingeben')
-      }
-      if (selectedFriends.length === 0) {
-        toast.error('Bitte mindestens einen Freund auswählen')
-      }
+    } else {
+      if (!groupName.trim()) toast.error('Bitte Name eingeben');
+      if (!selectedFriends.length) toast.error('Bitte mindestens einen Freund auswählen');
     }
   };
 
