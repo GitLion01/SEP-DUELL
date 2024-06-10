@@ -26,7 +26,7 @@ const DeckSelection = ({ client }) => {
 
   useEffect(() => {
     if (client) {
-      client.subscribe('/topic/game', (message) => {
+      client.subscribe('/all/game', (message) => {
         const response = JSON.parse(message.body);
         if (response.playerId !== id) {
           setOpponentReady(true);
