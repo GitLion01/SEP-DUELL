@@ -41,7 +41,7 @@ function CreateGroupForm({ onCreateGroup }) {
     });
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = (event) => { //ruft die handleCreateGroup von ChatPage.jsx 
     event.preventDefault();
     if (groupName.trim() && selectedFriends.length) {
       onCreateGroup({ name: groupName, members: selectedFriends });

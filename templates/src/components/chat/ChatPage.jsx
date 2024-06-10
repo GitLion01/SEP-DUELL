@@ -49,7 +49,7 @@ function ChatPage() {
           onCreateGroupClick={handleCreateGroupClick}
         />
         {creatingGroup ? (
-          <CreateGroupForm onCreateGroup={handleCreateGroup} />
+          <CreateGroupForm onCreateGroup={handleCreateGroup} /> //ruft die handleCreateGroup auf
         ) : (
           selectedChat.chatTarget && selectedChat.type && (
             <ChatWindow chatTarget={selectedChat.chatTarget} type={selectedChat.type} />
