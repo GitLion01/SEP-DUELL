@@ -37,19 +37,15 @@ public class ChatService {
             }
 
             boolean exists = false;
-            System.out.println("Helllllllllllllllllllllllllllllllo");
             for(Chat chat : u1.getUserChat())
             {
-                System.out.println(chat.getId()+"-------------------");
                 if(chat.getUsers().contains(u2)) {
-                    System.out.println("old Chat--------------------------");
                     exists = true;
                     break;
                 }
             }
             if(!exists)
             {
-                System.out.println("new Chat--------------------------");
                 Chat newChat = new Chat();
                 newChat.getUsers().add(u1);
                 newChat.getUsers().add(u2);
