@@ -11,14 +11,16 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
-        config.enableSimpleBroker("/all", "/specific"); // Nachrichten werden an /all oder an /specific gesendet (Base URL für ausgehende Antworten)
-        config.setApplicationDestinationPrefixes("/app/create"); // Präfix für eingehende Nachrichten (Base URL für eingehende Anfragen)
+        config.enableSimpleBroker("/all","/specific","/topic"); // Nachrichten werden an /all oder an /specific gesendet (Base URL für ausgehende Antworten)
+        config.setApplicationDestinationPrefixes("/app/create","/chat"); // Präfix für eingehende Nachrichten (Base URL für eingehende Anfragen)
     }
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/game-websocket").setAllowedOrigins("http://localhost:4000", "http://localhost:3000", "http://localhost:4005", "http://localhost:4001", "http://localhost:63342");// Endpunkte für WebSocket-Verbindung
         registry.addEndpoint("/game-websocket").setAllowedOrigins("http://localhost:4000", "http://localhost:3000", "http://localhost:4005", "http://localhost:4001", "http://localhost:63342").withSockJS(); // falls Browser kein websocket unterstützt
+        registry.addEndpoint("/chat").setAllowedOrigins("*");
+        registry.addEndpoint("/chat").setAllowedOrigins("*").withSockJS();
     }
 
 
