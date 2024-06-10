@@ -162,7 +162,7 @@ function ChatWindow({ chatTarget, type }) {
 
   return (
     <div className="chat-window">
-      <h2>Chat mit {type === 'friend' ? friend.username : friend.name}</h2>
+      <h2>Chat mit {type === 'friend' ? chatTarget.username : chatTarget.name}</h2>
       <div className="chat-messages imessage">
         {chatMessages.map((message, index) => (
           <p
