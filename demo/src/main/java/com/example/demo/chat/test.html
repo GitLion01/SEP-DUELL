@@ -7,9 +7,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
     <script>
         var stompClient = null;
+        var userId = 1; // Set your user ID here
+        var chatId = 1; // Set your chat ID here
 
         function connect() {
-            var socket = new WebSocket('ws://localhost:8080/game-websocket');
+            var socket = new WebSocket('ws://localhost:8080/chat');
             stompClient = Stomp.over(socket);
             stompClient.connect({}, function(frame) {
                 console.log('Connected: ' + frame);
@@ -18,8 +20,13 @@
 
         function sendMessage() {
             var message = document.getElementById('message').value;
-            stompClient.send('/chat/sendMessage', {}, JSON.stringify({ 'message': message }));
-            console.log('Message sent: ' + message);
+            var payload = {
+                'message': message,
+                'chat': { 'id': chatId },
+                'sender': { 'id': userId }
+            };
+            stompClient.send('/chat/sendMessage', {}, JSON.stringify(payload));
+            console.log('Message sent: ' + JSON.stringify(payload));
         }
     </script>
 </head>

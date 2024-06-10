@@ -1,5 +1,7 @@
 package com.example.demo.user;
 import com.example.demo.cards.CardInstance;
+import com.example.demo.chat.Chat;
+import com.example.demo.chat.ChatMessage;
 import com.example.demo.decks.Deck;
 import com.example.demo.game.PlayerState;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -73,7 +75,17 @@ public class UserAccount implements UserDetails {
     @JoinColumn(name = "player_state_id")
     private PlayerState playerState;
 
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JoinColumn(name= "user_message")
+    private List<ChatMessage> userMessage=new ArrayList<>();
 
+    @ManyToMany(fetch = FetchType.EAGER, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @JoinTable(
+            name = "userChat",
+            joinColumns = @JoinColumn(name = "userAccount"),
+            inverseJoinColumns = @JoinColumn(name = "message")
+    )
+    private List<Chat> userChat=new ArrayList<>();
 
 
     public UserAccount(byte[] image,
