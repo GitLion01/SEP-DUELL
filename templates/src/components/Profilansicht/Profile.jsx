@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import Axios from 'axios';
 import './Profile.css';
 import testbild from './testbild.jpg';
+import BackButton from '../BackButton';
 
 // Profil-Seite
 
@@ -137,6 +138,7 @@ function Profile() {
   // Profilseite rendern
   return (
     <>
+    <BackButton/>
       <div className="Profile">
         <h1 className="titel"> Mein Profil</h1>
         <div className="daten">
@@ -160,11 +162,6 @@ function Profile() {
           {role !== 'ADMIN' && <p><strong>Leaderboard Punkte:</strong> {leaderbordpunkte}</p>}
           {error && <p className="error">{error}</p>} {/* Fehlermeldung anzeigen falls error != null */}
         </div>
-      </div>
-      <div>
-        <Link to="/startseite">
-          <button className="button" type="button">Home</button>
-        </Link>
       </div>
     </>
   );

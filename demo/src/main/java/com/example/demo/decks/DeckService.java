@@ -254,10 +254,6 @@ public class DeckService{
 
                Optional<Deck> optionalDeck = deckRepository.findAllDecksByUserIdAndName(request.getUserID(), request.getName());
 
-
-
-
-
                if (optionalDeck.isPresent()) {
                    Deck deck = optionalDeck.get();
                    List<Card> deckCards = deck.getCards();
