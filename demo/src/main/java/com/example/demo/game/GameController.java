@@ -29,10 +29,10 @@ public class GameController {
 
     @MessageMapping("/createGame")
     public void createGame(@Payload CreateGameRequest request) {
+        System.out.println("Received request to create game for users A:" + request.getUserA() + " and B:" + request.getUserB());
         GameWithUsersDTO game = gameService.createGame(request);
-        messagingTemplate.convertAndSendToUser(game.getUsers().get(0).getId().toString(),"/queue/create", game);
-        messagingTemplate.convertAndSendToUser(game.getUsers().get(1).getId().toString(),"/queue/create", game);
-
+        System.out.println("Created game with ID:" + game.getGameId() + " for users A:" + request.getUserA() + " and B:" + request.getUserB());
+        messagingTemplate.convertAndSend("/all/create", game);
     }
 
 
