@@ -8,13 +8,23 @@ const DeckSelection = ({ client }) => {
   const [selectedDeck, setSelectedDeck] = useState(null);
   const [opponentReady, setOpponentReady] = useState(false);
   const [id, setId] = useState(null);
-  const [gameId, setGameId] = useState(localStorage.getItem('gameId'));
+  const [gameId, setGameId] = useState('');
+
+  useEffect(() => {
+    const userId = localStorage.getItem('id');
+    if (userId) {
+      setId(userId);
+    } else {
+      console.error('Keine Benutzer-ID im LocalStorage gefunden.');
+    }
+  }, []);
 
   useEffect(() => {
     const loadDecks = async () => {
       if (id) {
         try {
           const decksResponse = await axios.get(`http://localhost:8080/decks/getUserDecks/${id}`);
+          console.log('Received decks:', decksResponse.data);
           setDecks(decksResponse.data);
         } catch (error) {
           console.error('Fehler beim Abrufen der Decks:', error);
@@ -42,8 +52,7 @@ const DeckSelection = ({ client }) => {
     client.publish({
       destination: '/app/selectDeck',
       body: JSON.stringify({ 
-        userID: id, 
-        deckName: deckId,
+        deckId: deckId,
         gameID: gameId
       }),
     });
@@ -59,18 +68,21 @@ const DeckSelection = ({ client }) => {
   }, [selectedDeck, opponentReady, gameId]);
 
   return (
-    <div>
-      <h2>Select Your Deck</h2>
-      <ul>
-        {decks.map(deck => (
-          <li key={deck.id}>
-            {deck.name}
-            <button onClick={() => handleSelectDeck(deck.id)}>Select</button>
-          </li>
-        ))}
-      </ul>
-      {selectedDeck && <p>Waiting for opponent...</p>}
-    </div>
+      <div>
+        <h2>Select Your Deck</h2>
+        <div className="deck-list">
+          {decks.map((deck, index) => (
+
+              <div key={index}
+                   className="deck"
+                   >
+                {deck.name}
+              </div>
+
+          ))}
+        </div>
+        {selectedDeck && <p>Waiting for opponent...</p>}
+      </div>
   );
 };
 
