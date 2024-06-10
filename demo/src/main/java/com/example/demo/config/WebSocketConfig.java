@@ -12,7 +12,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
         config.enableSimpleBroker("/all", "/specific"); // Nachrichten werden an /all oder an /specific gesendet (Base URL für ausgehende Antworten)
-        config.setApplicationDestinationPrefixes("/app/create"); // Präfix für eingehende Nachrichten (Base URL für eingehende Anfragen)
+        config.setApplicationDestinationPrefixes("/app"); // Präfix für eingehende Nachrichten (Base URL für eingehende Anfragen)
     }
 
     @Override

@@ -32,7 +32,7 @@ public class GameController {
         System.out.println("Received request to create game for users A:" + request.getUserA() + " and B:" + request.getUserB());
         GameWithUsersDTO game = gameService.createGame(request);
         System.out.println("Created game with ID:" + game.getGameId() + " for users A:" + request.getUserA() + " and B:" + request.getUserB());
-        messagingTemplate.convertAndSend("/all", game);
+        messagingTemplate.convertAndSend("/all/create", game);
     }
 
 
