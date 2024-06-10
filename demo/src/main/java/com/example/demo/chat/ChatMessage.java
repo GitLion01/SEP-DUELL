@@ -5,9 +5,6 @@ import com.example.demo.user.UserAccount;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Getter
 @Setter
 @AllArgsConstructor
@@ -24,4 +21,8 @@ public class ChatMessage {
     @ManyToOne
     @JoinColumn(name = "chat_id")
     private Chat chat;
+
+    @ManyToOne
+    @JoinColumn(name = "message_of_user")
+    private UserAccount sender;
 }

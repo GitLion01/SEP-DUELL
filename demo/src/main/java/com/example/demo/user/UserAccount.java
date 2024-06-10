@@ -82,8 +82,8 @@ public class UserAccount implements UserDetails {
     @ManyToMany(fetch = FetchType.EAGER, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     @JoinTable(
             name = "userChat",
-            joinColumns = @JoinColumn(name = "userAccount"),
-            inverseJoinColumns = @JoinColumn(name = "message")
+            joinColumns = @JoinColumn(name = "userAccount_id"),
+            inverseJoinColumns = @JoinColumn(name = "chat_id")
     )
     private List<Chat> userChat=new ArrayList<>();
 
