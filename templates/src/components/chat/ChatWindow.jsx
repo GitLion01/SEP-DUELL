@@ -7,13 +7,12 @@ const generateChatId = (userId, targetId) => {
   return [userId, targetId].sort().join('-');
 };
 
-function ChatWindow({ friend, type }) {
+function ChatWindow({ chatTarget, type }) {
   const [messages, setMessages] = useState({});
   const [newMessage, setNewMessage] = useState('');
   const [editingMessage, setEditingMessage] = useState(null);
   const userId = localStorage.getItem('id');
-
-  const chatId = friend && friend.id ? generateChatId(userId, friend.id) : null;
+  const chatId = chatTarget?.id ? generateChatId(userId, chatTarget.id) : null;
 
   // Nachrichten vom Server laden
   useEffect(() => {
@@ -73,17 +72,17 @@ function ChatWindow({ friend, type }) {
     if (newMessage.trim() !== '') {
       const message = {
         sender: userId,
-        receiver: type === 'friend' ? friend.id : null,
-        group: type === 'group' ? friend.id : null,
+        receiver: type === 'friend' ? chatTarget.id : null,
+        group: type === 'group' ? chatTarget.id : null,
         text: newMessage,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         chatId: chatId,
         read: false,
       };
       webSocketService.sendMessage(`/app/chat/${chatId}`, JSON.stringify(message));
-
-      setMessages((prevMessages) => {
-        const updatedMessages = { ...prevMessages };
+  
+      setMessages(prev => {
+        const updatedMessages = { ...prev };
         if (!Array.isArray(updatedMessages[chatId])) {
           updatedMessages[chatId] = [];
         }
@@ -93,6 +92,7 @@ function ChatWindow({ friend, type }) {
       setNewMessage('');
     }
   };
+  
 
   // Nachricht bearbeiten
   const handleEditMessage = (message) => {
@@ -156,13 +156,13 @@ function ChatWindow({ friend, type }) {
 
   const chatMessages = Array.isArray(messages[chatId]) ? messages[chatId] : [];
 
-  if (!friend || !friend.id) {
+  if (!chatTarget || !chatTarget.id) {
     return <div>Wählen Sie einen Freund oder eine Gruppe aus, um den Chat zu starten</div>;
   }
 
   return (
     <div className="chat-window">
-      <h2>Chat mit {type === 'friend' ? friend.username : friend.name}</h2>
+      <h2>Chat mit {type === 'friend' ? chatTarget.username : chatTarget.name}</h2>
       <div className="chat-messages imessage">
         {chatMessages.map((message, index) => (
           <p
@@ -222,3 +222,8 @@ function ChatWindow({ friend, type }) {
 }
 
 export default ChatWindow;
+
+
+//Wie lösen wir das mit der ChatId? 
+//Wie Unterscheidung, ob Nachricht an Freund oder Gruppe geschickt wird?
+//Nachrichten anzeigen für die Nachrichten die man bekommt 

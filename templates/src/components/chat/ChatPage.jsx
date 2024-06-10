@@ -7,13 +7,13 @@ import './ChatPage.css'; // Importiert die CSS-Datei für die ChatPage-Komponent
 import BackButton from '../BackButton';
 
 function ChatPage() {
-  const [selectedChat, setSelectedChat] = useState({ friend: null, type: null }); // Zustand für den aktuell ausgewählten Chat (Freund oder Gruppe)
+  const [selectedChat, setSelectedChat] = useState({ chatTarget: null, type: null });
   const [creatingGroup, setCreatingGroup] = useState(false); // Zustand für das Erstellen einer neuen Gruppe (true/false)
 
   // const [friends, setFriends] = useState([]); // Entfernt, da es nicht verwendet wird
 
-  const handleSelect = (friend, type) => {
-    setSelectedChat({ friend, type }); // Setzt den ausgewählten Chat (Freund oder Gruppe) und den Typ (friend/group)
+  const handleSelect = (chatTarget, type) => {
+    setSelectedChat({ chatTarget, type }); // Setzt den ausgewählten Chat (Freund oder Gruppe) und den Typ (friend/group)
     setCreatingGroup(false); // Schließt das Gruppen-Erstellen-Formular, wenn ein Chat ausgewählt wird
   };
 
@@ -45,14 +45,14 @@ function ChatPage() {
       <h1>Chat</h1>
       <div className="chat-container">
         <FriendListForChat
-          onSelect={handleSelect} // Übergibt die handleSelect-Funktion als Prop an FriendListForChat
-          onCreateGroupClick={handleCreateGroupClick} // Übergibt die handleCreateGroupClick-Funktion als Prop an FriendListForChat
+          onSelect={handleSelect}
+          onCreateGroupClick={handleCreateGroupClick}
         />
-        {creatingGroup ? ( // Überprüft, ob das Gruppen-Erstellen-Formular angezeigt werden soll
-          <CreateGroupForm friends={[]} onCreateGroup={handleCreateGroup} /> // Zeigt das CreateGroupForm an, wenn creatingGroup true ist
+        {creatingGroup ? (
+          <CreateGroupForm onCreateGroup={handleCreateGroup} />
         ) : (
-          selectedChat.friend && selectedChat.type && ( // Überprüft, ob ein Chat ausgewählt wurde
-            <ChatWindow friend={selectedChat.friend} type={selectedChat.type} /> // Zeigt das ChatWindow an, wenn ein Chat ausgewählt wurde
+          selectedChat.chatTarget && selectedChat.type && (
+            <ChatWindow chatTarget={selectedChat.chatTarget} type={selectedChat.type} />
           )
         )}
       </div>
