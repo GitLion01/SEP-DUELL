@@ -1,15 +1,16 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { WebSocketContext} from "../../WebSocketProvider";// Importiere den WebSocketContext
 
-function DuelC({ client }) {
+
+function DuelC() {
     const [username, setUsername] = useState('');
-    const [isClientConnected, setIsClientConnected] = useState(false);
-    const navigate = useNavigate();
+    const { client } = useContext(WebSocketContext);
     const userID = localStorage.getItem('id');
 
     const handleChallenge = () => {
-        if (username && isClientConnected) {
+        if (username && client && client.connected) {
             // Nachricht an den WebSocket-Server senden
             client.publish({
                 destination: '/app/createGame',
@@ -20,28 +21,6 @@ function DuelC({ client }) {
             toast.error("Bitte geben Sie einen gültigen Benutzernamen ein und stellen Sie sicher, dass die Verbindung aktiv ist.");
         }
     };
-
-    useEffect(() => {
-        const checkConnection = () => {
-            if (client && client.connected) {
-                setIsClientConnected(true);
-                console.log("Client verbunden");
-                const subscription = client.subscribe('/all/create', (message) => {
-                    const response = JSON.parse(message.body);
-                    if (response.gameId) {
-                        localStorage.setItem('gameId', response.gameId);
-                        navigate('/deck-selection'); // Weiterleitung zur Deckauswahl
-                    }
-                });
-                // Cleanup function
-                return () => subscription.unsubscribe();
-            } else {
-                setTimeout(checkConnection, 100); // Erneut nach 100ms überprüfen
-            }
-        };
-
-        checkConnection(); // Verbindung überprüfen
-    }, [client, navigate]);
 
     return (
         <div>
