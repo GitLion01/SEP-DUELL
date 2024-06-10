@@ -48,6 +48,7 @@ public class GameService {
 
 
     public GameWithUsersDTO createGame(CreateGameRequest request) {
+        System.out.println("Creating game for users A:" + request.getUserA() + " and B:" + request.getUserB());
         UserAccount userA = userAccountRepository.findById(request.getUserA())
                 .orElseThrow(() -> new IllegalArgumentException("User A not found"));
         UserAccount userB = userAccountRepository.findByUsername(request.getUserB())
@@ -66,7 +67,9 @@ public class GameService {
         Game newGame = new Game();
         newGame.getUsers().add(userA);
         newGame.getUsers().add(userB);
+        System.out.println("vor speichern");
         gameRepository.save(newGame);
+        System.out.println("Game gespeichert");
 
         return new GameWithUsersDTO(newGame.getId(), Arrays.asList(userA, userB));
     }
