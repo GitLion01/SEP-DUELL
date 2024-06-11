@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Test</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <script>
+        var stompClient = null;
+        var userId = 1; // Set your user ID here
+        var chatId = 1; // Set your chat ID here
+        var messageIdToEdit = 2;
+
+        function connect() {
+            var socket = new WebSocket('ws://localhost:8080/chat');
+            stompClient = Stomp.over(socket);
+            stompClient.connect({}, function(frame) {
+                console.log('Connected: ' + frame);
+            });
+        }
+
+        function sendMessage() {
+            var message = document.getElementById('message').value;
+            var payload = {
+                'message': message,
+                'chat': { 'id': chatId },
+                'sender': { 'id': userId }
+            };
+            stompClient.send('/chat/sendMessage', {}, JSON.stringify(payload));
+            console.log('Message sent: ' + JSON.stringify(payload));
+        }
+
+        function editMessage() {
+            var message = document.getElementById('message').value;
+            var payload = {
+                'id': messageIdToEdit,
+                'message': message,
+                'chat': { 'id': chatId },
+                'sender': { 'id': userId }
+            };
+            stompClient.send('/chat/editMessage', {}, JSON.stringify(payload));
+            console.log('Message edited: ' + JSON.stringify(payload));
+        }
+
+        function deleteMessage() {
+            var payload = {
+                'id': messageIdToEdit,
+                'chat': { 'id': chatId },
+                'sender': { 'id': userId }
+            };
+            stompClient.send('/chat/deleteMessage', {}, JSON.stringify(payload));
+            console.log('Message deleted: ' + JSON.stringify(payload));
+        }
+
+        function selectMessageForEditing(messageId, currentMessage) {
+            messageIdToEdit = messageId;
+            document.getElementById('message').value = currentMessage;
+        }
+    </script>
+</head>
+<body>
+<h1>WebSocket Test</h1>
+<textarea id="message" rows="4" cols="50">Enter your message here...</textarea><br>
+<button onclick="sendMessage()">Send Message</button>
+<button onclick="editMessage()">Edit Message</button>
+<button onclick="deleteMessage()">Delete Message</button>
+
+<div id="messages">
+    <!-- Example messages for demonstration -->
+    <div onclick="selectMessageForEditing(1, 'This is a test message 1')">This is a test message 1</div>
+    <div onclick="selectMessageForEditing(2, 'This is a test message 2')">This is a test message 2</div>
+    <div onclick="selectMessageForEditing(3, 'This is a test message 3')">This is a test message 3</div>
+</div>
+
+<script>
+    connect();
+</script>
+</body>
+</html>

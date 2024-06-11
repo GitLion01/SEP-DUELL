@@ -27,4 +27,16 @@ public class ChatController {
         chatService.sendMessage(chatMessage);
     }
 
+    @MessageMapping("/editMessage")
+    public void editMessage(@Payload ChatMessage chatMessage)
+    {
+        chatService.editMessage(chatMessage);
+    }
+
+    @MessageMapping("/deleteMessage")
+    public void deleteMessage(@Payload ChatMessage chatMessage)
+    {
+        chatService.deleteMessage(chatMessage);
+    }
+
 }
