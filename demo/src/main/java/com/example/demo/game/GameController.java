@@ -1,5 +1,6 @@
 package com.example.demo.game;
 import com.example.demo.game.requests.*;
+import com.example.demo.user.UserAccount;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -12,12 +13,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class GameController {
 
     private final GameService gameService;
-    private final SimpMessagingTemplate messagingTemplate;
+
 
     @Autowired
-    public GameController(GameService gameService, SimpMessagingTemplate messagingTemplate) {
+    public GameController(GameService gameService) {
         this.gameService = gameService;
-        this.messagingTemplate = messagingTemplate;
     }
 
 
@@ -29,16 +29,14 @@ public class GameController {
 
     @MessageMapping("/createGame")
     public void createGame(@Payload CreateGameRequest request) {
-        System.out.println("Received request to create game for users A:" + request.getUserA() + " and B:" + request.getUserB());
-        GameWithUsersDTO game = gameService.createGame(request);
-        System.out.println("Created game with ID:" + game.getGameId() + " for users A:" + request.getUserA() + " and B:" + request.getUserB());
-        messagingTemplate.convertAndSend("/all/create", game);
+        gameService.createGame(request);
+
     }
 
 
     @MessageMapping("/selectDeck")
     public void selectDeck(@Payload DeckSelectionRequest request) {
-
+        gameService.selectDeck(request);
     }
 
     @MessageMapping("/playCard")
