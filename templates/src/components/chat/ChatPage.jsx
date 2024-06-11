@@ -15,6 +15,10 @@ function ChatPage() {
   const handleSelect = (chatTarget, type) => {
     setSelectedChat({ chatTarget, type }); // Setzt den ausgewählten Chat (Freund oder Gruppe) und den Typ (friend/group)
     setCreatingGroup(false); // Schließt das Gruppen-Erstellen-Formular, wenn ein Chat ausgewählt wird
+    console.log(localStorage.getItem('id'))
+    if (type === 'friend') {
+      createChat(localStorage.getItem('id'), chatTarget.id); 
+    }
   };
 
   const handleCreateGroupClick = () => {
@@ -36,6 +40,22 @@ function ChatPage() {
       setCreatingGroup(false); // Schließt das Formular nach erfolgreicher Erstellung
       // Aktualisieren Sie die Gruppenliste
       // Sie müssen diese Logik möglicherweise anpassen, um die neuen Gruppen zu laden
+    }
+  };
+
+
+  const createChat = async (userId1, userId2) => {
+    const response = await fetch(`http://localhost:8080/create.chat?userId1=${userId1}&userId2=${userId2}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (response.ok) {
+      console.log('Chat wurde erstellt');
+    } else {
+      console.error('Fehler beim Chat erstellen');
     }
   };
 
