@@ -1,6 +1,10 @@
 package com.example.demo.config;
+
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
+import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.config.annotation.*;
 
 
@@ -9,10 +13,13 @@ import org.springframework.web.socket.config.annotation.*;
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
 
+
+
+
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
-        config.enableSimpleBroker("/all","/specific","/user"); // Nachrichten werden an /all oder an /specific gesendet (Base URL für ausgehende Antworten)
-        config.setApplicationDestinationPrefixes("/app/create","/chat"); // Präfix für eingehende Nachrichten (Base URL für eingehende Anfragen)
+        config.enableSimpleBroker("/all", "/user","/specific"); // Nachrichten werden an /all oder an /specific gesendet (Base URL für ausgehende Antworten)
+        config.setApplicationDestinationPrefixes("/app"); // Präfix für eingehende Nachrichten (Base URL für eingehende Anfragen)
         config.setUserDestinationPrefix("/user");
     }
 
@@ -20,14 +27,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/game-websocket").setAllowedOrigins("http://localhost:4000", "http://localhost:3000", "http://localhost:4005", "http://localhost:4001", "http://localhost:63342");// Endpunkte für WebSocket-Verbindung
         registry.addEndpoint("/game-websocket").setAllowedOrigins("http://localhost:4000", "http://localhost:3000", "http://localhost:4005", "http://localhost:4001", "http://localhost:63342").withSockJS(); // falls Browser kein websocket unterstützt
-        registry.addEndpoint("/chat").setAllowedOrigins("*");
-        registry.addEndpoint("/chat").setAllowedOrigins("*").withSockJS();
     }
 
-
-
-
-    /*@Override
+    @Override
     public void configureWebSocketTransport(WebSocketTransportRegistration registration) {
         registration.addDecoratorFactory(handler -> {
             if (handler instanceof MyWebSocketHandler) {
@@ -47,7 +49,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
             }
         });
     }
-*/
+
 
 
 
