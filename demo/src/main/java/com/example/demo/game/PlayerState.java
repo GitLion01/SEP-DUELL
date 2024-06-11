@@ -21,6 +21,7 @@ public class PlayerState {
     private Long Id; //stateID
     private Integer lifePoints = 50;
     private Integer damage;
+    private Boolean ready = false;
 
 
 

@@ -1,25 +1,13 @@
 package com.example.demo.game;
-
-import com.example.demo.cards.CardInstance;
-import com.example.demo.cards.CardInstanceRepository;
-import com.example.demo.cards.Rarity;
 import com.example.demo.decks.Deck;
 import com.example.demo.decks.DeckRepository;
 import com.example.demo.game.requests.*;
 import com.example.demo.user.UserAccount;
 import com.example.demo.user.UserAccountRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.simp.stomp.StompCommand;
-import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
-import org.springframework.messaging.support.GenericMessage;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.security.Principal;
 import java.util.*;
 
 @Transactional
@@ -27,27 +15,27 @@ import java.util.*;
 public class GameService {
 
     private final GameRepository gameRepository;
-    private final PlayerStateRepository playerStateRepository;
     private final DeckRepository deckRepository;
     private final UserAccountRepository userAccountRepository;
-    private final CardInstanceRepository cardInstanceRepository;
+    private final SimpMessagingTemplate messagingTemplate;
+    private final PlayerStateRepository playerStateRepository;
 
     @Autowired
     public GameService(GameRepository gameRepository,
-                       PlayerStateRepository playerStateRepository,
                        DeckRepository deckRepository,
                        UserAccountRepository userAccountRepository,
-                       CardInstanceRepository cardInstanceRepository) {
+                       SimpMessagingTemplate messagingTemplate,
+                       PlayerStateRepository playerStateRepository) {
         this.gameRepository = gameRepository;
-        this.playerStateRepository = playerStateRepository;
         this.deckRepository = deckRepository;
         this.userAccountRepository = userAccountRepository;
-        this.cardInstanceRepository = cardInstanceRepository;
+        this.messagingTemplate = messagingTemplate;
+        this.playerStateRepository = playerStateRepository;
     }
 
 
 
-    public GameWithUsersDTO createGame(CreateGameRequest request) {
+    public void createGame(CreateGameRequest request) {
         System.out.println("Creating game for users A:" + request.getUserA() + " and B:" + request.getUserB());
         UserAccount userA = userAccountRepository.findById(request.getUserA())
                 .orElseThrow(() -> new IllegalArgumentException("User A not found"));
@@ -71,7 +59,10 @@ public class GameService {
         gameRepository.save(newGame);
         System.out.println("Game gespeichert");
 
-        return new GameWithUsersDTO(newGame.getId(), Arrays.asList(userA, userB));
+
+            for(UserAccount user : newGame.getUsers()) {
+                messagingTemplate.convertAndSendToUser(user.getId().toString(), "/queue/create", newGame);
+            }
     }
 
 
@@ -81,8 +72,34 @@ public class GameService {
 
 
 
-    public Game selectDeck(DeckSelectionRequest request) {
-        return null;
+    public void selectDeck(DeckSelectionRequest request) {
+        Optional<Game> optionalGame = gameRepository.findById(request.getGameId());
+        Optional<Deck> optionalDeck = deckRepository.findById(request.getDeckId());
+
+        if(optionalGame.isEmpty() || optionalDeck.isEmpty()) {
+            return;
+        }
+
+        Game game = optionalGame.get();
+        Deck deck = optionalDeck.get();
+        UserAccount user = deck.getUser();
+        user.getPlayerState().setDeck(deck);
+        user.getPlayerState().setReady(true);
+        userAccountRepository.save(user);
+
+        // überprüft ob in beiden PlayerStates der Spieler ready auf true gesetzt ist
+        for(UserAccount userAccount : game.getUsers()) {
+            if(!userAccount.getPlayerState().getReady()){
+                break;
+            }
+            game.setReady(true);
+        }
+        gameRepository.save(game);
+
+        for(UserAccount player : game.getUsers()) {
+            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/selectDeck", game);
+        }
+
     }
 
     public Game playCard(PlayCardRequest request) {
