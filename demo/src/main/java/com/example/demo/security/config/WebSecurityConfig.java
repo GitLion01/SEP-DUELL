@@ -48,7 +48,7 @@ public class WebSecurityConfig {
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/login?logout=true"))
                 .userDetailsService(userAccountService)
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // kann man auch auf ALWAYS setzen
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.ALWAYS)) // kann man auch auf ALWAYS setzen
                 .build();
     }
 

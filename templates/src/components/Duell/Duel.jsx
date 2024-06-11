@@ -9,26 +9,34 @@ const Duel = ({client, gameId}) => {
   const [playerState, setPlayerState] = useState({ handCards: [], fieldCards: [], life: 50 });
   const [opponentState, setOpponentState] = useState({ handCards: [], fieldCards: [], life: 50 });
   const [isAttackMode, setIsAttackMode] = useState(false);
+  const [isSetCardMode, setIsSetCardMode] = useState(false); // Zustand für das Setzen von Karten
   const [selectedAttacker, setSelectedAttacker] = useState(null);
   const [selectedTarget, setSelectedTarget] = useState(null);
   const id = localStorage.getItem('id');
 
   useEffect(() => {
     if (client) {
-      client.subscribe('/topic/game', (message) => {
+      client.subscribe('/all/game', (message) => {
         const action = JSON.parse(message.body);
-        switch (action.type) {
-          case 'STATE_UPDATE':
-            setPlayerState(action.payload.playerState);
-            setOpponentState(action.payload.opponentState);
-            setCurrentPlayer(action.payload.currentPlayer);
-            break;
-          case 'END_TURN':
-            startNewTurn(action.payload.nextPlayer);
-            break;
-          default:
-            break;
-        }
+        useEffect(() => {
+          if (client) {
+            client.subscribe('/all/game', (message) => {
+              const action = JSON.parse(message.body);
+              if (action.game) {
+                const game = action.game;
+                if (game.users[0].id === id) {
+                  setPlayerState(game.users[0].playerState);
+                  setOpponentState(game.users[1].playerState);
+                  }
+                else {
+                  setPlayerState(game.users[1].playerState);
+                  setOpponentState(game.users[0].playerState);
+                }
+                setCurrentTurn(game.currentTurn);
+              }
+            });
+          }
+        }, [client]);
       });
     }
   }, [client]);
@@ -118,6 +126,20 @@ const Duel = ({client, gameId}) => {
     }
   };
 
+  const handleSetCard = (index) => {
+    if (isSetCardMode) {
+      client.publish({
+        destination: '/app/playCard',
+        body: JSON.stringify({
+          gameID: gameId,
+          userID: id,
+          cardIndex: index
+        }),
+      });
+      setIsSetCardMode(false); // Deaktivieren des Setzkartenmodus
+    }
+  };
+
   const handleEndTurn = () => {
     if (client) {
       client.publish({
@@ -135,37 +157,47 @@ const Duel = ({client, gameId}) => {
   };
 
   return (
-    <div className="duel-container">
-      <div className="timer">
-        <h4>Time remaining: {timer} seconds</h4>
-      </div>
-      <div className="action-controls">
-        <button onClick={() => setIsAttackMode(true)}>Angreifen</button>
-        {isAttackMode && toast.success("Angriffsmodus aktiviert.")}
-        <button onClick={handleEndTurn}>End Turn</button>
-      </div>
-      <div className="player-field">
-        <h3>Your Field</h3>
-        <div className="cards">
-          {playerState.fieldCards.map((card, index) => (
-            <div key={index} className="card">
-              <Card card={card} onClick={() => selectAttackingCard(index)}/>
-            </div>
-          ))}
+      <div className="duel-container">
+        <div className="timer">
+          <h4>Time remaining: {timer} seconds</h4>
         </div>
-      </div>
-      <div className="opponent-field">
-        <h3>Opponent's Field</h3>
-        <div className="cards">
-          {opponentState.fieldCards.map((card, index) => (
-            <div key={index} className="card">
-              <Card card={card} onClick={() => selectTargetCard(index)}/>
-            </div>
-          ))}
+        <div className="action-controls">
+          <button onClick={() => setIsAttackMode(true)}>Angreifen</button>
+          {isAttackMode && toast.success("Angriffsmodus aktiviert.")}
+          <button onClick={handleEndTurn}>End Turn</button>
         </div>
+        <div className="player-field">
+          <h3>Your Field</h3>
+          <div className="cards">
+            {playerState.fieldCards.map((card, index) => (
+                <div key={index} className="card">
+                  <Card card={card} onClick={() => selectAttackingCard(index)}/>
+                </div>
+            ))}
+          </div>
+        </div>
+        <div className="player-hand">
+          <h3>Your Hand</h3>
+          <div className="cards">
+            {playerState.handCards.map((card, index) => (
+                <div key={index} className="card">
+                  <Card card={card} onClick={() => handleSetCard(index)}/>
+                </div>
+            ))}
+          </div>
+        </div>
+        <div className="opponent-field">
+          <h3>Opponent's Field</h3>
+          <div className="cards">
+            {opponentState.fieldCards.map((card, index) => (
+                <div key={index} className="card">
+                  <Card card={card} onClick={() => selectTargetCard(index)}/>
+                </div>
+            ))}
+          </div>
+        </div>
+        <ToastContainer/>
       </div>
-      <ToastContainer />
-    </div>
   );
 };
 

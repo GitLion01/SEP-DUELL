@@ -9,6 +9,10 @@ export const WebSocketProvider = ({ children }) => {
     const [client, setClient] = useState(null);
 
     useEffect(() => {
+
+        const userId = parseInt(localStorage.getItem('id')); // ID des aktuellen Benutzers als Zahl
+
+
         const newClient = new Client({
             brokerURL: 'ws://localhost:8080/game-websocket',
             webSocketFactory: () => new SockJS('http://localhost:8080/game-websocket'),
@@ -19,7 +23,12 @@ export const WebSocketProvider = ({ children }) => {
                 // Subscribe für globale Herausforderung
                 newClient.subscribe('/all/create', (message) => {
                     const response = JSON.parse(message.body);
-                    if (response.gameId) {
+                    console.log("Received response:", response)
+
+                    // Finde den Benutzer im Array
+                    const userInGame = response.users.find(user => user.id === userId);
+
+                    if (response.gameId && userInGame) {
                         localStorage.setItem('gameId', response.gameId);
                         window.dispatchEvent(new CustomEvent('gameCreated', { detail: response.gameId }));
                     }
