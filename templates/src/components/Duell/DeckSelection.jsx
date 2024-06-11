@@ -37,10 +37,10 @@ const DeckSelection = ({ client }) => {
 
   useEffect(() => {
     if (client) {
-      client.subscribe('/all/game', (message) => {
+      client.subscribe(`/user/${id}/queue/game`, (message) => {
         const response = JSON.parse(message.body);
         // Überprüfe, ob beide Spieler bereit sind
-        if (response.game.id === gameId && response.status === 'BOTH_READY') {
+        if (response.game.id === gameId && response.game.ready) {
           navigate('/duel'); // Redirect to duel page
         }
       });

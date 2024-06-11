@@ -5,44 +5,39 @@ import Card from "../card";
 
 const Duel = ({client, gameId}) => {
   const [timer, setTimer] = useState(120);
-  const [currentPlayer, setCurrentPlayer] = useState(null);
   const [playerState, setPlayerState] = useState({ handCards: [], fieldCards: [], life: 50 });
   const [opponentState, setOpponentState] = useState({ handCards: [], fieldCards: [], life: 50 });
   const [isAttackMode, setIsAttackMode] = useState(false);
   const [isSetCardMode, setIsSetCardMode] = useState(false); // Zustand für das Setzen von Karten
   const [selectedAttacker, setSelectedAttacker] = useState(null);
   const [selectedTarget, setSelectedTarget] = useState(null);
+  const [currentTurn, setCurrentTurn] = useState(0); // currentTurn-Index
   const id = localStorage.getItem('id');
 
   useEffect(() => {
     if (client) {
-      client.subscribe('/all/game', (message) => {
+      client.subscribe(`/user/${id}/queue/game`, (message) => {
         const action = JSON.parse(message.body);
-        useEffect(() => {
-          if (client) {
-            client.subscribe('/all/game', (message) => {
-              const action = JSON.parse(message.body);
-              if (action.game) {
-                const game = action.game;
-                if (game.users[0].id === id) {
-                  setPlayerState(game.users[0].playerState);
-                  setOpponentState(game.users[1].playerState);
-                  }
-                else {
-                  setPlayerState(game.users[1].playerState);
-                  setOpponentState(game.users[0].playerState);
-                }
-                setCurrentTurn(game.currentTurn);
-              }
-            });
+        if (action.game) {
+          const game = action.game;
+          if (game.users[0].id === id) {
+            setPlayerState(game.users[0].playerState);
+            setOpponentState(game.users[1].playerState);
           }
-        }, [client]);
+          else {
+            setPlayerState(game.users[1].playerState);
+            setOpponentState(game.users[0].playerState);
+          }
+          if (game.currentTurn !== currentTurn) {
+            setCurrentTurn(game.currentTurn);
+            resetTimer(); // Setze den Timer zurück, wenn sich der currentTurn ändert
+          }        }
       });
     }
   }, [client]);
 
   useEffect(() => {
-    if (timer > 0 && currentPlayer === id) {
+    if (timer > 0 && currentTurn === id) {
       const interval = setInterval(() => {
         setTimer((prev) => {
           if (prev === 11) {
@@ -58,16 +53,19 @@ const Duel = ({client, gameId}) => {
 
       return () => clearInterval(interval);
     }
-  }, [timer, currentPlayer, id]);
+  }, [timer, currentTurn, id]);
 
-  const startNewTurn = (player) => {
-    setCurrentPlayer(player);
+  const resetTimer = () => {
     setTimer(120);
+  };
+
+  const handleEndTurn = () => {
     if (client) {
       client.publish({
-        destination: '/app/drawCard',
-        body: JSON.stringify({ userID: id, gameID: gameId }),
+        destination: '/app/endTurn',
+        body: JSON.stringify({ gameID: gameId, userID: id }),
       });
+      toast.success("Zug Beendet");
     }
   };
 
@@ -137,16 +135,6 @@ const Duel = ({client, gameId}) => {
         }),
       });
       setIsSetCardMode(false); // Deaktivieren des Setzkartenmodus
-    }
-  };
-
-  const handleEndTurn = () => {
-    if (client) {
-      client.publish({
-        destination: '/app/endTurn',
-        body: JSON.stringify({ gameID: gameId, userID: id }),
-      });
-      toast.success("Zug Beendet");
     }
   };
 
