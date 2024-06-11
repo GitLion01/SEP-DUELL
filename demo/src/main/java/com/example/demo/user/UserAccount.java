@@ -76,10 +76,13 @@ public class UserAccount implements UserDetails {
     private PlayerState playerState;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JsonIgnore
     @JoinColumn(name= "user_message")
     private List<ChatMessage> userMessage=new ArrayList<>();
 
+
     @ManyToMany(fetch = FetchType.EAGER, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @JsonIgnore
     @JoinTable(
             name = "userChat",
             joinColumns = @JoinColumn(name = "userAccount_id"),
