@@ -7,7 +7,7 @@ import lombok.Getter;
 @Getter
 public class PlayCardRequest {
 
-    private Long gameID;
-    private Long userID;
-    private Long cardInstanceID;
+    private Long gameId;
+    private Long userId;
+    private Long cardIndex;
 }

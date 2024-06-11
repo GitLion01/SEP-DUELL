@@ -1,4 +1,5 @@
 package com.example.demo.game;
+import com.example.demo.cards.Card;
 import com.example.demo.decks.Deck;
 import com.example.demo.decks.DeckRepository;
 import com.example.demo.game.requests.*;
@@ -82,9 +83,18 @@ public class GameService {
 
         Game game = optionalGame.get();
         Deck deck = optionalDeck.get();
+        List<Card> cards = deck.getCards();
+        Collections.shuffle(cards); // mischt das Deck
+        deck.setCards(cards); // neu gemischte Liste an Karten setzen
         UserAccount user = deck.getUser();
         user.getPlayerState().setDeck(deck);
         user.getPlayerState().setReady(true);
+
+        // setzt initial 5 Karten aus dem gemischten Deck auf die Hand
+        for(int i = 0; i<5; i++){
+            user.getPlayerState().getHandCards().add(deck.getCards().get(i));
+        }
+
         userAccountRepository.save(user);
 
         // überprüft ob in beiden PlayerStates der Spieler ready auf true gesetzt ist
@@ -102,8 +112,8 @@ public class GameService {
 
     }
 
-    public Game playCard(PlayCardRequest request) {
-        return null;
+    public void playCard(PlayCardRequest request) {
+
     }
 
     public Game endTurn(EndTurnRequest request) {
