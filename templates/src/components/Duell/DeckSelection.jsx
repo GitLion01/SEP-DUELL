@@ -58,6 +58,12 @@ const DeckSelection = ({ client }) => {
     });
   };
 
+  const terminateGame = () => {
+    client.publish({
+      destination: '/app/terminate'
+    })
+  }
+
   useEffect(() => {
     if (selectedDeck) {
       client.publish({
