@@ -30,7 +30,6 @@ public class GameController {
     @MessageMapping("/createGame")
     public void createGame(@Payload CreateGameRequest request) {
         gameService.createGame(request);
-
     }
 
 
@@ -41,7 +40,7 @@ public class GameController {
 
     @MessageMapping("/playCard")
     public void playCard(@Payload PlayCardRequest request) {
-
+        gameService.playCard(request);
     }
 
 
