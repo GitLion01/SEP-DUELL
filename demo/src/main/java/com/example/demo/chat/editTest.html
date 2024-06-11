@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Test</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <script>
+        var stompClient = null;
+        var userId = 1; // Set your user ID here
+        var chatId = 1; // Set your chat ID here
+
+        function connect() {
+            var socket = new WebSocket('ws://localhost:8080/chat');
+            stompClient = Stomp.over(socket);
+            stompClient.connect({}, function(frame) {
+                console.log('Connected: ' + frame);
+            });
+        }
+
+        function sendMessage() {
+            var message = document.getElementById('message').value;
+            var payload = {
+                'message': message,
+                'chat': { 'id': chatId },
+                'sender': { 'id': userId }
+            };
+            stompClient.send('/chat/sendMessage', {}, JSON.stringify(payload));
+            console.log('Message sent: ' + JSON.stringify(payload));
+        }
+
+        function editMessage() {
+            var message = document.getElementById('message').value;
+            var payload = {
+                'id': 4, // ID of the message to edit
+                'message': message,
+                'chat': { 'id': chatId },
+                'sender': { 'id': userId }
+            };
+            stompClient.send('/chat/editMessage', {}, JSON.stringify(payload));
+            console.log('Message edited: ' + JSON.stringify(payload));
+        }
+
+        function selectMessageForEditing() {
+            var currentMessage = "This is the current message with ID 1"; // Placeholder for the current message
+            document.getElementById('message').value = currentMessage;
+        }
+    </script>
+</head>
+<body>
+<h1>WebSocket Test</h1>
+<textarea id="message" rows="4" cols="50">Enter your message here...</textarea><br>
+<button onclick="sendMessage()">Send Message</button>
+<button onclick="editMessage()">Edit Message</button>
+<button onclick="selectMessageForEditing()">Select Message for Editing</button>
+
+<script>
+    connect();
+</script>
+</body>
+</html>
