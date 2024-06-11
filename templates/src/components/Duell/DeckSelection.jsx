@@ -1,19 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { Client } from '@stomp/stompjs';
-import SockJS from 'sockjs-client';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const DeckSelection = ({ client }) => {
   const [decks, setDecks] = useState([]);
   const [selectedDeck, setSelectedDeck] = useState(null);
-  const [opponentReady, setOpponentReady] = useState(false);
   const [id, setId] = useState(null);
   const [gameId, setGameId] = useState('');
+  const navigate = useNavigate(); // Use navigate to redirect
 
   useEffect(() => {
     const userId = localStorage.getItem('id');
-    if (userId) {
+    const gId = localStorage.getItem('gameId');
+    if (userId && gId) {
       setId(userId);
+      setGameId(gId);
     } else {
       console.error('Keine Benutzer-ID im LocalStorage gefunden.');
     }
@@ -38,10 +39,9 @@ const DeckSelection = ({ client }) => {
     if (client) {
       client.subscribe('/all/game', (message) => {
         const response = JSON.parse(message.body);
-        if (response.playerId !== id) {
-          setOpponentReady(true);
-          setGameId(response.gameId);
-          localStorage.setItem('gameId', response.gameId);
+        // Überprüfe, ob beide Spieler bereit sind
+        if (response.game.id === gameId && response.status === 'BOTH_READY') {
+          navigate('/duel'); // Redirect to duel page
         }
       });
     }
@@ -59,13 +59,13 @@ const DeckSelection = ({ client }) => {
   };
 
   useEffect(() => {
-    if (selectedDeck && opponentReady) {
+    if (selectedDeck) {
       client.publish({
         destination: '/app/startDuel',
         body: JSON.stringify({ gameId }),
       });
     }
-  }, [selectedDeck, opponentReady, gameId]);
+  }, [selectedDeck, gameId]);
 
   return (
       <div>
