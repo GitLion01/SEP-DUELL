@@ -30,7 +30,9 @@ public class GameController {
     @MessageMapping("/createGame")
     public void createGame(@Payload CreateGameRequest request) {
         GameWithUsersDTO game = gameService.createGame(request);
-        messagingTemplate.convertAndSend("/all/create", game);
+        messagingTemplate.convertAndSendToUser(game.getUsers().get(0).getId().toString(),"/queue/create", game);
+        messagingTemplate.convertAndSendToUser(game.getUsers().get(1).getId().toString(),"/queue/create", game);
+
     }
 
 

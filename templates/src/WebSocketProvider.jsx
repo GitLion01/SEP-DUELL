@@ -21,14 +21,14 @@ export const WebSocketProvider = ({ children }) => {
                 console.log('Connected to WebSocket server');
 
                 // Subscribe für globale Herausforderung
-                newClient.subscribe('/all/create', (message) => {
+                newClient.subscribe(`/user/${userId}/queue/create`, (message) => {
                     const response = JSON.parse(message.body);
                     console.log("Received response:", response)
 
                     // Finde den Benutzer im Array
-                    const userInGame = response.users.find(user => user.id === userId);
+                    // const userInGame = response.users.find(user => user.id === userId);
 
-                    if (response.gameId && userInGame) {
+                    if (response.gameId) {
                         localStorage.setItem('gameId', response.gameId);
                         window.dispatchEvent(new CustomEvent('gameCreated', { detail: response.gameId }));
                     }
