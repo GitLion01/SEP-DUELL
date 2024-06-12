@@ -7,12 +7,12 @@ import lombok.Getter;
 @Getter
 public class AttackCardRequest {
 
-    private Long gameID;
-    private Long userIDAttacker;
-    private Long userIDDefender;
+    private Long gameId;
+    private Long userIdAttacker;
+    private Long userIdDefender;
     // angreifende Karte von Angreifer
-    private Long attackerIndex;
+    private int attackerIndex;
     // verteidigende Karte von Verteidiger
-    private Long targetIndex;
+    private int targetIndex;
 
 }
