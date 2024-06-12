@@ -17,9 +17,8 @@ public class ChatService {
 
     private final UserAccountRepository userAccountRepository;
     private final ChatRepository chatRepository;
-    private ChatMessageRepository chatMessageRepository;
-    private SimpMessagingTemplate messagingTemplate;
-
+    private final ChatMessageRepository chatMessageRepository;
+    private final SimpMessagingTemplate messagingTemplate;
 
     public void createChat(Long userId1,Long userId2)
     {
@@ -68,7 +67,12 @@ public class ChatService {
                     //we do not need to add it in the chatMessageRepository  it will be added automatically
                     chatRepository.save(chat);
                     chatMessage.setId(chat.getMessages().get(chat.getMessages().size() - 1).getId());
-                    messagingTemplate.convertAndSend("/topic", convertToDTO(chatMessage));
+
+                    Long id= chat.getUsers().get(0).getId();
+                    if(chat.getUsers().get(0).getId().equals(chatMessage.getSender().getId()))
+                        id = chat.getUsers().get(1).getId();
+
+                    messagingTemplate.convertAndSendToUser(id.toString(),"/queue/messages", convertToDTO(chatMessage));//messagingTemplate.convertAndSend("/topic", convertToDTO(chatMessage));
                     break;
                 }
             }

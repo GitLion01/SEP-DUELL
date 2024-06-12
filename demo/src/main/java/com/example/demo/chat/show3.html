@@ -20,24 +20,28 @@
     </style>
     <script>
         var stompClient = null;
-        var userId = 1;
-        var chatId = 1; // Set your chat ID here
+        var userId = 3; // Set the logged-in user's ID here
+        var chatId = 3; // Set your chat ID here
         var messageIdToEdit = 17;
+
         function connect() {
             var socket = new WebSocket('ws://localhost:8080/chat');
             stompClient = Stomp.over(socket);
             stompClient.connect({}, function(frame) {
                 console.log('Connected: ' + frame);
 
-                // Subscribe to message updates
-                stompClient.subscribe('/topic', function(messageOutput) {
+                // Subscribe to user-specific message updates
+                stompClient.subscribe(`/user/${userId}/queue/messages`, function(messageOutput) {
                     console.log('Message received: ', messageOutput.body);
                     showMessage(JSON.parse(messageOutput.body));
                 });
+
+
             }, function(error) {
                 console.log('STOMP error: ' + error);
             });
         }
+
 
         function sendMessage() {
             var message = document.getElementById('message').value;
@@ -52,14 +56,14 @@
         }
 
         function showMessage(message) {
+            console.log('Message displayed: ', message);
             var chat = document.getElementById('chat');
             var messageElement = document.createElement('div');
             messageElement.className = 'message';
             messageElement.innerHTML = `
         <strong>User ${1}:</strong> ${message.message}
         <button onclick="selectMessageForEditing(${message.id}, '${message.message}')">Edit</button>
-        <button onclick="deleteMessage(${message.id})">Delete</button>
-    `;
+        <button onclick="deleteMessage(${message.id})">Delete</button>`;
             chat.appendChild(messageElement);
             console.log('Message displayed: ', message);
         }
@@ -92,8 +96,6 @@
             messageIdToEdit = messageId;
             document.getElementById('message').value = currentMessage;
         }
-
-
 
         window.onload = function() {
             connect();
