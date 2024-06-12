@@ -5,36 +5,39 @@ import Card from "../card";
 
 const Duel = ({client, gameId}) => {
   const [timer, setTimer] = useState(120);
-  const [currentPlayer, setCurrentPlayer] = useState(null);
   const [playerState, setPlayerState] = useState({ handCards: [], fieldCards: [], life: 50 });
   const [opponentState, setOpponentState] = useState({ handCards: [], fieldCards: [], life: 50 });
   const [isAttackMode, setIsAttackMode] = useState(false);
+  const [isSetCardMode, setIsSetCardMode] = useState(false); // Zustand für das Setzen von Karten
   const [selectedAttacker, setSelectedAttacker] = useState(null);
   const [selectedTarget, setSelectedTarget] = useState(null);
+  const [currentTurn, setCurrentTurn] = useState(0); // currentTurn-Index
   const id = localStorage.getItem('id');
 
   useEffect(() => {
     if (client) {
-      client.subscribe('/topic/game', (message) => {
+      client.subscribe(`/user/${id}/queue/game`, (message) => {
         const action = JSON.parse(message.body);
-        switch (action.type) {
-          case 'STATE_UPDATE':
-            setPlayerState(action.payload.playerState);
-            setOpponentState(action.payload.opponentState);
-            setCurrentPlayer(action.payload.currentPlayer);
-            break;
-          case 'END_TURN':
-            startNewTurn(action.payload.nextPlayer);
-            break;
-          default:
-            break;
-        }
+        if (action.game) {
+          const game = action.game;
+          if (game.users[0].id === id) {
+            setPlayerState(game.users[0].playerState);
+            setOpponentState(game.users[1].playerState);
+          }
+          else {
+            setPlayerState(game.users[1].playerState);
+            setOpponentState(game.users[0].playerState);
+          }
+          if (game.currentTurn !== currentTurn) {
+            setCurrentTurn(game.currentTurn);
+            resetTimer(); // Setze den Timer zurück, wenn sich der currentTurn ändert
+          }        }
       });
     }
   }, [client]);
 
   useEffect(() => {
-    if (timer > 0 && currentPlayer === id) {
+    if (timer > 0 && currentTurn === id) {
       const interval = setInterval(() => {
         setTimer((prev) => {
           if (prev === 11) {
@@ -50,16 +53,19 @@ const Duel = ({client, gameId}) => {
 
       return () => clearInterval(interval);
     }
-  }, [timer, currentPlayer, id]);
+  }, [timer, currentTurn, id]);
 
-  const startNewTurn = (player) => {
-    setCurrentPlayer(player);
+  const resetTimer = () => {
     setTimer(120);
+  };
+
+  const handleEndTurn = () => {
     if (client) {
       client.publish({
-        destination: '/app/drawCard',
-        body: JSON.stringify({ userID: id, gameID: gameId }),
+        destination: '/app/endTurn',
+        body: JSON.stringify({ gameID: gameId, userID: id }),
       });
+      toast.success("Zug Beendet");
     }
   };
 
@@ -118,13 +124,17 @@ const Duel = ({client, gameId}) => {
     }
   };
 
-  const handleEndTurn = () => {
-    if (client) {
+  const handleSetCard = (index) => {
+    if (isSetCardMode) {
       client.publish({
-        destination: '/app/endTurn',
-        body: JSON.stringify({ gameID: gameId, userID: id }),
+        destination: '/app/playCard',
+        body: JSON.stringify({
+          gameID: gameId,
+          userID: id,
+          cardIndex: index
+        }),
       });
-      toast.success("Zug Beendet");
+      setIsSetCardMode(false); // Deaktivieren des Setzkartenmodus
     }
   };
 
@@ -135,37 +145,47 @@ const Duel = ({client, gameId}) => {
   };
 
   return (
-    <div className="duel-container">
-      <div className="timer">
-        <h4>Time remaining: {timer} seconds</h4>
-      </div>
-      <div className="action-controls">
-        <button onClick={() => setIsAttackMode(true)}>Angreifen</button>
-        {isAttackMode && toast.success("Angriffsmodus aktiviert.")}
-        <button onClick={handleEndTurn}>End Turn</button>
-      </div>
-      <div className="player-field">
-        <h3>Your Field</h3>
-        <div className="cards">
-          {playerState.fieldCards.map((card, index) => (
-            <div key={index} className="card">
-              <Card card={card} onClick={() => selectAttackingCard(index)}/>
-            </div>
-          ))}
+      <div className="duel-container">
+        <div className="timer">
+          <h4>Time remaining: {timer} seconds</h4>
         </div>
-      </div>
-      <div className="opponent-field">
-        <h3>Opponent's Field</h3>
-        <div className="cards">
-          {opponentState.fieldCards.map((card, index) => (
-            <div key={index} className="card">
-              <Card card={card} onClick={() => selectTargetCard(index)}/>
-            </div>
-          ))}
+        <div className="action-controls">
+          <button onClick={() => setIsAttackMode(true)}>Angreifen</button>
+          {isAttackMode && toast.success("Angriffsmodus aktiviert.")}
+          <button onClick={handleEndTurn}>End Turn</button>
         </div>
+        <div className="player-field">
+          <h3>Your Field</h3>
+          <div className="cards">
+            {playerState.fieldCards.map((card, index) => (
+                <div key={index} className="card">
+                  <Card card={card} onClick={() => selectAttackingCard(index)}/>
+                </div>
+            ))}
+          </div>
+        </div>
+        <div className="player-hand">
+          <h3>Your Hand</h3>
+          <div className="cards">
+            {playerState.handCards.map((card, index) => (
+                <div key={index} className="card">
+                  <Card card={card} onClick={() => handleSetCard(index)}/>
+                </div>
+            ))}
+          </div>
+        </div>
+        <div className="opponent-field">
+          <h3>Opponent's Field</h3>
+          <div className="cards">
+            {opponentState.fieldCards.map((card, index) => (
+                <div key={index} className="card">
+                  <Card card={card} onClick={() => selectTargetCard(index)}/>
+                </div>
+            ))}
+          </div>
+        </div>
+        <ToastContainer/>
       </div>
-      <ToastContainer />
-    </div>
   );
 };
 

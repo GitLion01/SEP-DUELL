@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 
@@ -19,63 +19,52 @@ import Duel from "./components/Duell/Duel.jsx";
 
 import './index.css';
 import DuelC from "./components/DuelC/DuelC";
+import {WebSocketProvider} from "./WebSocketProvider";
 
 
 function App() {
-  const [client, setClient] = useState(null);
-
-  useEffect(() => {
-    const newClient = new Client({
-      brokerURL: 'ws://localhost:8080/game-websocket',
-      webSocketFactory: () => new SockJS('http://localhost:8080/game-websocket'),
-      reconnectDelay: 5000,
-      onConnect: () => {
-        console.log('Connected to WebSocket server');
-      },
-      onStompError: (frame) => {
-        console.error(`Broker reported error: ${frame.headers['message']}`);
-        console.error(`Additional details: ${frame.body}`);
-      },
-      onWebSocketError: (event) => {
-        console.error('WebSocket error', event);
-      },
-      onWebSocketClose: (event) => {
-        console.error('WebSocket closed', event);
-      },
-    });
-
-    newClient.activate();
-    setClient(newClient);
-
-  }, []);
-
-  if (!client) {
-    return <div>Loading...</div>;
-  }
-
   return (
       <Router>
-        <Routes>
-          <Route path="/" element={<LoginPage/>}/>
-          <Route path="/registration" element={<Register/>}/>
-          <Route path="/startseite" element={<ProtectedRoute
-              element={Startseite}/>}/> {/* Die Namen der Seiten müssen groß geschrieben werden, damit das klappt*/}
-          <Route path="/2fa" element={<TwoFaktorAuthenfication/>}/>
-          <Route path="/profil" element={<ProtectedRoute element={Profile}/>}/>
-          <Route path="/admin" element={<ProtectedRoute element={AdminPanel} requiredRole="ADMIN"/>}/>
-          <Route path="/decks" element={<ProtectedRoute element={Decks}/>}/>
-          <Route path="/freundelist" element={<ProtectedRoute element={Freundeliste}/>}/>
-          <Route path="/shop" element={<ProtectedRoute element={ShopPage}/>}/>
-          <Route path="/chat" element={<ProtectedRoute element={ChatPage}/>}/> {/* Neue Route für die Chat-Seite */}
-          <Route path="/challenge-player" element={<ProtectedRoute element={() => <DuelC client={client} />} />} />
-
-          {/* Neue Routen für das Duell */}
-
-          <Route path="/deck-selection" element={<ProtectedRoute element={() => <DeckSelection client={client} />} />} />
-          <Route path="/duel" element={<ProtectedRoute element={() => <Duel client={client} />} />} />
-
-        </Routes>
+        <WebSocketProvider>
+          <AppRoutes />
+        </WebSocketProvider>
       </Router>
+  );
+}
+
+function AppRoutes() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const handleGameCreated = (event) => {
+      const gameId = event.detail;
+      console.log(`Navigating to /deck-selection with gameId: ${gameId}`);
+      navigate('/deck-selection');
+    };
+
+    window.addEventListener('gameCreated', handleGameCreated);
+
+    return () => {
+      window.removeEventListener('gameCreated', handleGameCreated);
+    };
+  }, [navigate]);
+
+  return (
+      <Routes>
+        <Route path="/" element={<LoginPage />} />
+        <Route path="/registration" element={<Register />} />
+        <Route path="/startseite" element={<ProtectedRoute element={Startseite} />} />
+        <Route path="/2fa" element={<TwoFaktorAuthenfication />} />
+        <Route path="/profil" element={<ProtectedRoute element={Profile} />} />
+        <Route path="/admin" element={<ProtectedRoute element={AdminPanel} requiredRole="ADMIN" />} />
+        <Route path="/decks" element={<ProtectedRoute element={Decks} />} />
+        <Route path="/freundelist" element={<ProtectedRoute element={Freundeliste} />} />
+        <Route path="/shop" element={<ProtectedRoute element={ShopPage} />} />
+        <Route path="/chat" element={<ProtectedRoute element={ChatPage} />} />
+        <Route path="/challenge-player" element={<ProtectedRoute element={DuelC} />} />
+        <Route path="/deck-selection" element={<ProtectedRoute element={DeckSelection} />} />
+        <Route path="/duel" element={<ProtectedRoute element={Duel} />} />
+      </Routes>
   );
 }
 export default App;
