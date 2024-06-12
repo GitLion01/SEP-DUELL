@@ -226,4 +226,4 @@ export default ChatWindow;
 
 //Wie lösen wir das mit der ChatId? 
 //Wie Unterscheidung, ob Nachricht an Freund oder Gruppe geschickt wird?
-//Nachrichten anzeigen für die Nachrichten die man bekommt 
+//Nachrichten anzeigen für die Nachrichten die man bekommt wh

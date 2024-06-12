@@ -23,14 +23,19 @@ public class CardController {
 
     @PostMapping("/upload")
     public ResponseEntity<String> uploadCardsFromCSV(@RequestParam("file") MultipartFile file) {
-
+        try {
             String result = cardService.uploadAndSaveCards(file);
             if(result.startsWith("Error uploading CSV")) {
-                return ResponseEntity.ok(result);
-            }else {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Fehler beim Hochladen und Speichern der Karten aus der CSV-Datei.");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(result);
             }
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            // Loggen Sie den Fehler für Debugging-Zwecke
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Fehler beim Hochladen und Speichern der Karten aus der CSV-Datei: " + e.getMessage());
+        }
     }
+
 
 
     @PostMapping(path = "/delete")
