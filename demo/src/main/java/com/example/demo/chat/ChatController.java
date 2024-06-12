@@ -27,11 +27,7 @@ public class ChatController {
         chatService.sendMessage(chatMessage);
     }
 
-    @MessageMapping("/send-private-message")
-    public void sendPrivateMessage(@Payload ChatMessage chatMessage)
-    {
-        chatService.sendMessage(chatMessage);
-    }
+
 
     @MessageMapping("/editMessage")
     public void editMessage(@Payload ChatMessage chatMessage)

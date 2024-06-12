@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import webSocketService from '../Service/WebSocketService'; 
+import React, { useState, useEffect, useContext } from 'react';
+import { WebSocketContext} from "../../WebSocketProvider";
 import './ChatWindow.css';
 import './ChatBubble.css';
 
@@ -12,7 +12,8 @@ function ChatWindow({ chatTarget, type }) {
   const [newMessage, setNewMessage] = useState('');
   const [editingMessage, setEditingMessage] = useState(null);
   const userId = localStorage.getItem('id');
-  const chatId = chatTarget?.id ? generateChatId(userId, chatTarget.id) : null;
+  const chatId = generateChatId(userId, chatTarget.id);
+  const { chatClient } = useContext(WebSocketContext);
 
   // Nachrichten vom Server laden
   useEffect(() => {
@@ -36,51 +37,32 @@ function ChatWindow({ chatTarget, type }) {
 
   // WebSocket-Verbindung herstellen und Nachrichten empfangen
   useEffect(() => {
-    webSocketService.connect();
-
-    return () => {
-      webSocketService.close();
-    };
-  }, []);
-
-  useEffect(() => {
-    const handleMessage = (messageEvent) => {
-      const message = JSON.parse(messageEvent.body);
-      setMessages((prevMessages) => {
-        const updatedMessages = { ...prevMessages };
-        if (!Array.isArray(updatedMessages[message.chatId])) {
-          updatedMessages[message.chatId] = [];
-        }
-        updatedMessages[message.chatId].push(message);
-        return updatedMessages;
+    if (chatClient && chatId) {
+      chatClient.subscribe(`/topic/${chatId}`, (message) => {
+        const receivedMessage = JSON.parse(message.body);
+        setMessages((prevMessages) => {
+          const updatedMessages = { ...prevMessages };
+          if (!Array.isArray(updatedMessages[receivedMessage.chat.id])) {
+            updatedMessages[receivedMessage.chat.id] = [];
+          }
+          updatedMessages[receivedMessage.chat.id].push(receivedMessage);
+          return updatedMessages;
+        });
       });
-    };
-
-    if (webSocketService.client && webSocketService.connected) {
-      webSocketService.client.subscribe(`/topic/${chatId}`, handleMessage);
     }
-
-    return () => {
-      if (webSocketService.client && webSocketService.connected) {
-        webSocketService.client.unsubscribe(`/topic/${chatId}`);
-      }
-    };
-  }, [webSocketService.connected, chatId]);
+  }, [chatClient, chatId]);
 
   // Nachricht senden und speichern
   const handleSendMessage = () => {
     if (newMessage.trim() !== '') {
       const message = {
-        sender: userId,
-        receiver: type === 'friend' ? chatTarget.id : null,
-        group: type === 'group' ? chatTarget.id : null,
-        text: newMessage,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        chatId: chatId,
-        read: false,
+        id: null, // ID wird vom Backend gesetzt
+        message: newMessage,
+        chat: { id: chatId },
+        sender: { id: userId }
       };
-      webSocketService.sendMessage(`/app/chat/${chatId}`, JSON.stringify(message));
-  
+      chatClient.publish({ destination: '/chat/sendMessage', body: JSON.stringify(message) });
+
       setMessages(prev => {
         const updatedMessages = { ...prev };
         if (!Array.isArray(updatedMessages[chatId])) {
@@ -92,23 +74,22 @@ function ChatWindow({ chatTarget, type }) {
       setNewMessage('');
     }
   };
-  
 
   // Nachricht bearbeiten
   const handleEditMessage = (message) => {
     setEditingMessage(message);
-    setNewMessage(message.text);
+    setNewMessage(message.message);
   };
 
   const handleUpdateMessage = () => {
     if (editingMessage && newMessage.trim() !== '') {
-      const updatedMessage = { ...editingMessage, text: newMessage };
-      webSocketService.sendMessage(`/app/chat/${chatId}`, JSON.stringify({ ...updatedMessage, action: 'edit' }));
+      const updatedMessage = { ...editingMessage, message: newMessage };
+      chatClient.publish({ destination: '/chat/editMessage', body: JSON.stringify(updatedMessage) });
 
       setMessages((prevMessages) => {
         const updatedMessages = { ...prevMessages };
         updatedMessages[chatId] = updatedMessages[chatId].map((msg) =>
-          msg.timestamp === editingMessage.timestamp ? updatedMessage : msg
+          msg.id === editingMessage.id ? updatedMessage : msg
         );
         return updatedMessages;
       });
@@ -119,11 +100,11 @@ function ChatWindow({ chatTarget, type }) {
 
   // Nachricht löschen
   const handleDeleteMessage = (message) => {
-    webSocketService.sendMessage(`/app/chat/${chatId}`, JSON.stringify({ ...message, action: 'delete' }));
+    chatClient.publish({ destination: '/chat/deleteMessage', body: JSON.stringify(message) });
 
     setMessages((prevMessages) => {
       const updatedMessages = { ...prevMessages };
-      updatedMessages[chatId] = updatedMessages[chatId].filter((msg) => msg.timestamp !== message.timestamp);
+      updatedMessages[chatId] = updatedMessages[chatId].filter((msg) => msg.id !== message.id);
       return updatedMessages;
     });
   };
@@ -140,14 +121,14 @@ function ChatWindow({ chatTarget, type }) {
 
   // Funktion zum Setzen des Lesestatus
   const handleReadMessage = (message) => {
-    if (message.sender !== userId && !message.read) {
-      message.read = true;
-      webSocketService.sendMessage(`/app/chat/${chatId}`, JSON.stringify({ ...message, action: 'read' }));
+    if (message.sender.id !== userId && !message.read) {
+      const updatedMessage = { ...message, read: true };
+      chatClient.publish({ destination: '/chat/readMessage', body: JSON.stringify(updatedMessage) });
 
       setMessages((prevMessages) => {
         const updatedMessages = { ...prevMessages };
         updatedMessages[chatId] = updatedMessages[chatId].map((msg) =>
-          msg.timestamp === message.timestamp ? { ...msg, read: true } : msg
+          msg.id === message.id ? { ...msg, read: true } : msg
         );
         return updatedMessages;
       });
@@ -167,13 +148,13 @@ function ChatWindow({ chatTarget, type }) {
         {chatMessages.map((message, index) => (
           <p
             key={index}
-            className={message.sender === userId ? 'from-me' : 'from-them'}
+            className={message.sender.id === userId ? 'from-me' : 'from-them'}
             onClick={() => handleReadMessage(message)}
           >
-            {type === 'group' && message.sender !== userId && (
-              <span className="message-sender">{message.senderName}</span>
+            {type === 'group' && message.sender.id !== userId && (
+              <span className="message-sender">{message.sender.username}</span>
             )}
-            <span className="message-text">{message.text}</span>
+            <span className="message-text">{message.message}</span>
             <div className="message-actions">
               <button onClick={() => handleEditMessage(message)}>
                 <svg
@@ -222,8 +203,3 @@ function ChatWindow({ chatTarget, type }) {
 }
 
 export default ChatWindow;
-
-
-//Wie lösen wir das mit der ChatId? 
-//Wie Unterscheidung, ob Nachricht an Freund oder Gruppe geschickt wird?
-//Nachrichten anzeigen für die Nachrichten die man bekommt wh

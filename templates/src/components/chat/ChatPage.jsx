@@ -5,6 +5,8 @@ import ChatWindow from './ChatWindow'; // Importiert die ChatWindow-Komponente
 import CreateGroupForm from './CreateGroupForm'; // Importiert die CreateGroupForm-Komponente
 import './ChatPage.css'; // Importiert die CSS-Datei für die ChatPage-Komponente
 import BackButton from '../BackButton';
+import { WebSocketProvider } from '../../WebSocketProvider';
+
 
 function ChatPage() {
   const [selectedChat, setSelectedChat] = useState({ chatTarget: null, type: null });
