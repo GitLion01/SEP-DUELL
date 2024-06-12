@@ -38,9 +38,14 @@ public class GameController {
         gameService.selectDeck(request);
     }
 
-    @MessageMapping("/playCard")
-    public void playCard(@Payload PlayCardRequest request) {
-        gameService.playCard(request);
+    @MessageMapping("/drawCard")
+    public void drawCard(@Payload DrawCardRequest request) {
+        gameService.drawCard(request);
+    }
+
+    @MessageMapping("/placeCard")
+    public void placeCard(@Payload PlaceCardRequest request) {
+        gameService.placeCard(request);
     }
 
 
