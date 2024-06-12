@@ -5,9 +5,9 @@ import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
-public class PlayCardRequest {
+public class PlaceCardRequest {
 
     private Long gameId;
     private Long userId;
-    private Long cardIndex;
+    private int cardIndex;
 }

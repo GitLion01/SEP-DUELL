@@ -30,17 +30,18 @@ public class PlayerState {
     @JoinColumn(name = "user_id")
     private UserAccount user;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @Transient
     private List<Card> cardsPlayed = new ArrayList<>();
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @Transient
     private List<Card> handCards = new ArrayList<>();
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @Transient
     private List<Card> fieldCards = new ArrayList<>();
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "deck_id")
+    // Deck ist nicht mit Deck Tabelle verbunden, Änderungen beeinflussen die Deck Tabelle nicht und sind
+    // nur für den Lebenszyklus des Programms gespeichert (wird der server neu gestartet sind die Änderungen verworfen
+    @Transient
     private Deck deck;
 
 
