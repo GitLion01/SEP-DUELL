@@ -51,36 +51,32 @@ public class GameController {
 
     @MessageMapping("/attackCard")
     public void attackCard(@Payload AttackCardRequest request) {
-
+        gameService.attackCard(request);
     }
 
     @MessageMapping("/attackUser")
     public void attackUser(@Payload AttackUserRequest request) {
-
+        gameService.attackUser(request);
     }
 
     @MessageMapping("/endTurn")
     public void endTurn(@Payload EndTurnRequest request) {
-
+        gameService.endTurn(request);
     }
 
     @MessageMapping("/rareSwap")
     public void swapForRare(@Payload RareSwapRequest request) {
-
+        gameService.swapForRare(request);
     }
 
     @MessageMapping("/LegendarySwap")
     public void swapForLegendary(@Payload LegendarySwapRequest request) {
-
+        gameService.swapForLegendary(request);
     }
 
-    @MessageMapping("/doNothing")
-    public void doNothing(@Payload Long userID) {
-
-    }
 
     @MessageMapping("/terminateMatch")
-    public void terminateMatch(@Payload Long gameID) {
-
+    public void terminateMatch(@Payload Long gameId, Long userA, Long userB) {
+        gameService.terminateMatch(gameId, userA, userB);
     }
 }

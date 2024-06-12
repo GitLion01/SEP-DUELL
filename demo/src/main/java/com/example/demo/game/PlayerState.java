@@ -23,6 +23,7 @@ public class PlayerState {
     private Integer lifePoints = 50;
     private Integer damage;
     private Boolean ready = false;
+    private Boolean winner = false;
 
 
 

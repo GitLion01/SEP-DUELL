@@ -1,5 +1,6 @@
 package com.example.demo.game;
 import com.example.demo.cards.Card;
+import com.example.demo.cards.Rarity;
 import com.example.demo.decks.Deck;
 import com.example.demo.decks.DeckRepository;
 import com.example.demo.game.requests.*;
@@ -160,7 +161,8 @@ public class GameService {
         }
 
         userAccount.getPlayerState().getFieldCards().add(userAccount.getPlayerState().getHandCards().get(request.getCardIndex())); // Fügt Karte aus Hand dem Feld hinzu
-        userAccount.getPlayerState().getHandCards().remove(request.getCardIndex()); // Löscht Karte aus Hand
+        Card removed = userAccount.getPlayerState().getHandCards().remove(request.getCardIndex()); // Löscht Karte aus Hand
+        userAccount.getPlayerState().getCardsPlayed().add(removed); // Fügt die Karte den gespielten Karten hinzu
 
         game.setCurrentTurn(game.getUsers().get(0).equals(userAccount) ? 1 : 0);
 
@@ -172,35 +174,212 @@ public class GameService {
     }
 
 
-    public Game endTurn(EndTurnRequest request) {
-        return null;
+    public void endTurn(EndTurnRequest request) {
+        Optional<Game> optionalGame = gameRepository.findById(request.getGameID());
+        Optional<UserAccount> optionalUserAccount = userAccountRepository.findById(request.getUserID());
+
+        if(optionalGame.isEmpty() || optionalUserAccount.isEmpty()) {
+            return;
+        }
+
+        Game game = optionalGame.get();
+        UserAccount userAccount = optionalUserAccount.get();
+        if(!game.getUsers().get(game.getCurrentTurn()).equals(userAccount)){
+            return;
+        }
+
+        game.setCurrentTurn(game.getUsers().get(0).equals(userAccount) ? 1 : 0);
+
+        gameRepository.save(game);
+
+        for(UserAccount player : game.getUsers()) {
+            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/endTurn", game);
+        }
     }
 
-    public Game attackCard(AttackCardRequest request) {
-        return null;
+    public void attackCard(AttackCardRequest request) {
+        Optional<Game> optionalGame = gameRepository.findById(request.getGameId());
+        Optional<UserAccount> optionalAttacker = userAccountRepository.findById(request.getUserIdAttacker());
+        Optional<UserAccount> optionalDefender = userAccountRepository.findById(request.getUserIdDefender());
+
+        if(optionalGame.isEmpty() || optionalAttacker.isEmpty() || optionalDefender.isEmpty()) {
+            return;
+        }
+
+        Game game = optionalGame.get();
+        UserAccount attacker = optionalAttacker.get();
+        UserAccount defender = optionalDefender.get();
+        if(!game.getUsers().get(game.getCurrentTurn()).equals(attacker) || defender.getPlayerState().getFieldCards().isEmpty()){
+            return;
+        }
+        Card attackerCard = attacker.getPlayerState().getHandCards().get(request.getAttackerIndex());
+        Card target = defender.getPlayerState().getHandCards().get(request.getTargetIndex());
+
+        if(attackerCard.getAttackPoints() > target.getDefensePoints()){
+            defender.getPlayerState().getFieldCards().remove(request.getTargetIndex()); // entfernt die Karte vom Feld des Gegners
+            attacker.getPlayerState().setDamage(attacker.getPlayerState().getDamage() + attackerCard.getDefensePoints()); // erhöht den Damage Counter des Angreifers
+        }else{
+            target.setDefensePoints(target.getDefensePoints() - attackerCard.getAttackPoints()); // zieht Angriffspunkte von Verteidigungspunkte ab
+            attacker.getPlayerState().setDamage(attacker.getPlayerState().getDamage() + attackerCard.getAttackPoints()); // erhöht den Damage Counter des Angreifers
+        }
+
+        game.setCurrentTurn(game.getUsers().get(0).equals(attacker) ? 1 : 0);
+
+        gameRepository.save(game);
+
+        for(UserAccount player : game.getUsers()) {
+            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/attackCard", game);
+        }
+
     }
 
-    public Game attackUser(AttackUserRequest request) {
-       return null;
+    public void attackUser(AttackUserRequest request) {
+        Optional<Game> optionalGame = gameRepository.findById(request.getGameId());
+        Optional<UserAccount> optionalAttacker = userAccountRepository.findById(request.getAttackerId());
+        Optional<UserAccount> optionalDefender = userAccountRepository.findById(request.getDefenderId());
+
+        if(optionalGame.isEmpty() || optionalAttacker.isEmpty() || optionalDefender.isEmpty()) {
+            return;
+        }
+
+        Game game = optionalGame.get();
+        UserAccount attacker = optionalAttacker.get();
+        UserAccount defender = optionalDefender.get();
+        if(!game.getUsers().get(game.getCurrentTurn()).equals(attacker) || !defender.getPlayerState().getFieldCards().isEmpty()){
+            return;
+        }
+        Card attackerCard = attacker.getPlayerState().getHandCards().get(request.getAttackerCardIndex());
+
+        if(attackerCard.getAttackPoints() > defender.getPlayerState().getLifePoints()){
+            attacker.getPlayerState().setDamage(attacker.getPlayerState().getDamage() + attackerCard.getDefensePoints()); // erhöht den Damage Counter des Angreifers
+            attacker.getPlayerState().setWinner(true);
+            terminateMatch(request.getGameId(), attacker.getId(), defender.getId());
+        }else{
+            defender.getPlayerState().setLifePoints((defender.getPlayerState().getLifePoints() - attackerCard.getAttackPoints())); // zieht Angriffspunkte von Lebenspunkte ab
+            attacker.getPlayerState().setDamage(attacker.getPlayerState().getDamage() + attackerCard.getAttackPoints()); // erhöht den Damage Counter des Angreifers
+        }
+
+        game.setCurrentTurn(game.getUsers().get(0).equals(attacker) ? 1 : 0);
+
+        gameRepository.save(game);
+
+        for(UserAccount player : game.getUsers()) {
+            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/attackUser", game);
+        }
+
     }
 
-    public Game swapForRare(RareSwapRequest request) {
-        // Implementierung
-        return null;
+    public void swapForRare(RareSwapRequest request) {
+        Optional<Game> optionalGame = gameRepository.findById(request.getGameId());
+        Optional<UserAccount> optionalUser = userAccountRepository.findById(request.getUserId());
+
+        if(optionalGame.isEmpty() || optionalUser.isEmpty()) {
+            return;
+        }
+
+        Game game = optionalGame.get();
+        UserAccount user = optionalUser.get();
+        if(!game.getUsers().get(0).equals(user) || request.getNormalCardsIndex().size() != 2) {
+            return;
+        }
+
+        List<Card> hand = user.getPlayerState().getHandCards();
+        List<Card> field = user.getPlayerState().getFieldCards();
+        Card normal1 = field.get(request.getNormalCardsIndex().get(0));
+        Card normal2 = field.get(request.getNormalCardsIndex().get(1));
+        Card rare = hand.get(request.getRareCardIndex());
+
+        if(rare.getRarity() == Rarity.RARE){
+            return;
+        }
+
+        user.getPlayerState().getFieldCards().remove(normal1);
+        user.getPlayerState().getFieldCards().remove(normal2);
+        user.getPlayerState().getFieldCards().add(rare);
+        user.getPlayerState().getHandCards().remove(rare);
+
+        game.setCurrentTurn(game.getUsers().get(0).equals(user) ? 1 : 0);
+
+        gameRepository.save(game);
+
+        for(UserAccount player : game.getUsers()) {
+            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/swapForRare", game);
+        }
+
     }
 
-    public Game swapForLegendary(LegendarySwapRequest request) {
-        // Implementierung
-        return null;
+    public void swapForLegendary(LegendarySwapRequest request) {
+        Optional<Game> optionalGame = gameRepository.findById(request.getGameId());
+        Optional<UserAccount> optionalUser = userAccountRepository.findById(request.getUserId());
+
+        if(optionalGame.isEmpty() || optionalUser.isEmpty()) {
+            return;
+        }
+
+        Game game = optionalGame.get();
+        UserAccount user = optionalUser.get();
+        if(!game.getUsers().get(0).equals(user) || request.getNormalCardsIndex().size() != 3) {
+            return;
+        }
+        List<Card> hand = user.getPlayerState().getHandCards();
+        List<Card> field = user.getPlayerState().getFieldCards();
+        Card card1 = field.get(request.getNormalCardsIndex().get(0));
+        Card card2 = field.get(request.getNormalCardsIndex().get(1));
+        Card card3 = field.get(request.getNormalCardsIndex().get(2));
+        Card legendary = hand.get(request.getLegendaryCardIndex());
+
+        if(legendary.getRarity() == Rarity.LEGENDARY){
+            return;
+        }
+
+        user.getPlayerState().getFieldCards().remove(card1);
+        user.getPlayerState().getFieldCards().remove(card2);
+        user.getPlayerState().getFieldCards().remove(card3);
+        user.getPlayerState().getFieldCards().add(legendary);
+        user.getPlayerState().getHandCards().remove(legendary);
+
+        game.setCurrentTurn(game.getUsers().get(0).equals(user) ? 1 : 0);
+
+        gameRepository.save(game);
+
+        for(UserAccount player : game.getUsers()) {
+            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/swapForLegendary", game);
+        }
+
+
     }
 
-    public Game doNothing(Long userID) {
-        // Implementierung
-        return null;
-    }
 
-    public static void terminateMatch(Long gameID) {
-        // Implementierung
+    public void terminateMatch(Long gameId, Long userA, Long userB) {
+        Optional<Game> optionalGame = gameRepository.findById(gameId);
+        Optional<UserAccount> optionalUserA = userAccountRepository.findById(userA);
+        Optional<UserAccount> optionalUserB = userAccountRepository.findById(userB);
+
+        if(optionalGame.isEmpty() || optionalUserA.isEmpty() || optionalUserB.isEmpty()) {
+            return;
+        }
+
+        Game game = optionalGame.get();
+        UserAccount user1 = optionalUserA.get();
+        UserAccount user2 = optionalUserB.get();
+
+        if(user1.getPlayerState().getWinner()){
+            user1.setSepCoins(user1.getSepCoins() + 100);
+            user1.setLeaderboardPoints(user1.getLeaderboardPoints() + Math.max(50, user2.getLeaderboardPoints() - user1.getLeaderboardPoints()));
+            user2.setLeaderboardPoints(user2.getLeaderboardPoints() - Math.max(50, (user2.getLeaderboardPoints() - user1.getLeaderboardPoints()) / 2 ));
+        }else{
+            user2.setSepCoins(user2.getSepCoins() + 100);
+            user2.setLeaderboardPoints(user2.getLeaderboardPoints() + Math.max(50, user2.getLeaderboardPoints() - user1.getLeaderboardPoints()));
+            user1.setLeaderboardPoints(user1.getLeaderboardPoints() - Math.max(50, (user2.getLeaderboardPoints() - user1.getLeaderboardPoints()) / 2 ));
+        }
+        gameRepository.save(game);
+
+        for(UserAccount player : game.getUsers()) {
+            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/terminateMatch", game);
+        }
+
+        //TODO: Löschen des Games in Game Tabelle und in game_users (WICHTIG!!! -> NACHDEM game an Client gesendet wird)
+
     }
 
 
