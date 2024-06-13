@@ -2,7 +2,7 @@ package com.example.demo.config;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.web.socket.config.annotation.*;
-import org.springframework.web.socket.WebSocketSession;
+
 
 @Configuration
 @EnableWebSocketMessageBroker
@@ -11,8 +11,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
-        config.enableSimpleBroker("/all","/specific","/topic","/user"); // Nachrichten werden an /all oder an /specific gesendet (Base URL für ausgehende Antworten)
-        config.setApplicationDestinationPrefixes("/app","/chat"); // Präfix für eingehende Nachrichten (Base URL für eingehende Anfragen)
+        config.enableSimpleBroker("/all","/specific","/user"); // Nachrichten werden an /all oder an /specific gesendet (Base URL für ausgehende Antworten)
+        config.setApplicationDestinationPrefixes("/app/create","/chat"); // Präfix für eingehende Nachrichten (Base URL für eingehende Anfragen)
         config.setUserDestinationPrefix("/user");
     }
 
@@ -47,7 +47,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
             }
         });
     }
-
+*/
 
 
 
