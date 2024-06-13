@@ -2,10 +2,9 @@ package com.example.demo.chat;
 import lombok.AllArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 
 @CrossOrigin
@@ -21,16 +20,21 @@ public class ChatController {
         chatService.createChat(userId1,userId2);
     }
 
+    @PostMapping("/create.group")
+    public void createGroup(@RequestBody List<Long> userIds, @RequestParam String groupName){
+        chatService.createGroup(userIds,groupName);
+    }
+
     @MessageMapping("/sendMessage")
     public void sendMessage(@Payload ChatMessage chatMessage)
     {
         chatService.sendMessage(chatMessage);
     }
 
-    @MessageMapping("/send-private-message")
-    public void sendPrivateMessage(@Payload ChatMessage chatMessage)
+    @MessageMapping("/send-group-message")
+    public void sendGroupMessage(@Payload ChatMessage chatMessage)
     {
-        chatService.sendMessage(chatMessage);
+        chatService.sendGroupMessage(chatMessage);
     }
 
     @MessageMapping("/editMessage")

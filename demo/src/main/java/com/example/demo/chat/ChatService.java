@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -19,21 +20,15 @@ public class ChatService {
     private final ChatRepository chatRepository;
     private final ChatMessageRepository chatMessageRepository;
     private final SimpMessagingTemplate messagingTemplate;
+    private final GroupRepository groupRepository;
 
-    public void createChat(Long userId1,Long userId2)
-    {
+    public void createChat(Long userId1,Long userId2) {
         Optional<UserAccount> user1 = userAccountRepository.findById(userId1);
         Optional<UserAccount> user2 = userAccountRepository.findById(userId2);
         if(user1.isPresent() && user2.isPresent())
         {
             UserAccount u1 = user1.get();
             UserAccount u2 = user2.get();
-
-            // Debugging: Print user chats
-            System.out.println("User1 Chats: " + u1.getUserChat().size());
-            for (Chat chat : u1.getUserChat()) {
-                System.out.println("Chat ID: " + chat.getId());
-            }
 
             boolean exists = false;
             for(Chat chat : u1.getUserChat())
@@ -57,8 +52,19 @@ public class ChatService {
         }
     }
 
-    public void sendMessage(ChatMessage chatMessage)
-    {
+    public void createGroup(List<Long> userIds,String groupName){
+        Group group = new Group();
+        group.setName(groupName);
+        for(Long userId : userIds)
+        {
+            UserAccount userAccount = userAccountRepository.findById(userId).get();
+            group.getUsers().add(userAccount);
+            userAccount.getUserChat().add(group);
+        }
+        groupRepository.save(group);
+    }
+
+    public void sendMessage(ChatMessage chatMessage) {
         try {
             for (Chat chat : chatRepository.findAll()) {
                 if (Objects.equals(chatMessage.getChat().getId(), chat.getId()))
@@ -72,11 +78,32 @@ public class ChatService {
                     if(chat.getUsers().get(0).getId().equals(chatMessage.getSender().getId()))
                         id = chat.getUsers().get(1).getId();
 
-                    messagingTemplate.convertAndSendToUser(id.toString(),"/queue/messages", convertToDTO(chatMessage));//messagingTemplate.convertAndSend("/topic", convertToDTO(chatMessage));
+                    messagingTemplate.convertAndSendToUser(id.toString(),"/queue/messages", convertToDTO(chatMessage));
                     break;
                 }
             }
 
+        }
+        catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    public void sendGroupMessage(ChatMessage chatMessage) {
+        try{
+            for (Group group : groupRepository.findAll()) {
+                if(Objects.equals(chatMessage.getChat().getId(), group.getId()))
+                {
+                    group.getMessages().add(chatMessage);
+                    groupRepository.save(group);
+                    chatMessage.setId(group.getMessages().get(group.getMessages().size() - 1).getId());
+                    for(UserAccount userAccount : group.getUsers())
+                    {
+                        messagingTemplate.convertAndSendToUser(userAccount.getId().toString(),"/queue/messages", convertToDTO(chatMessage));
+                    }
+                    break;
+                }
+            }
         }
         catch (Exception e) {
             System.out.println(e.getMessage());
@@ -118,4 +145,6 @@ public class ChatService {
         dto.setSenderId(chatMessage.getSender().getId());
         return dto;
     }
+
+
 }
