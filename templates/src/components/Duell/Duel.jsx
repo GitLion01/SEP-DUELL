@@ -3,46 +3,41 @@ import { toast, ToastContainer } from 'react-toastify';
 import Card from "../card";
 
 
-const Duel = ({client, gameId}) => {
+const Duel = ({client, gameId, game}) => {
   const [timer, setTimer] = useState(120);
-  const [currentPlayer, setCurrentPlayer] = useState(null);
   const [playerState, setPlayerState] = useState({ handCards: [], fieldCards: [], life: 50 });
   const [opponentState, setOpponentState] = useState({ handCards: [], fieldCards: [], life: 50 });
   const [isAttackMode, setIsAttackMode] = useState(false);
   const [isSetCardMode, setIsSetCardMode] = useState(false); // Zustand für das Setzen von Karten
   const [selectedAttacker, setSelectedAttacker] = useState(null);
   const [selectedTarget, setSelectedTarget] = useState(null);
+  const [currentTurn, setCurrentTurn] = useState(0); // currentTurn-Index
   const id = localStorage.getItem('id');
 
   useEffect(() => {
     if (client) {
-      client.subscribe('/all/game', (message) => {
+      client.subscribe(`/user/${id}/queue/game`, (message) => {
         const action = JSON.parse(message.body);
-        useEffect(() => {
-          if (client) {
-            client.subscribe('/all/game', (message) => {
-              const action = JSON.parse(message.body);
-              if (action.game) {
-                const game = action.game;
-                if (game.users[0].id === id) {
-                  setPlayerState(game.users[0].playerState);
-                  setOpponentState(game.users[1].playerState);
-                  }
-                else {
-                  setPlayerState(game.users[1].playerState);
-                  setOpponentState(game.users[0].playerState);
-                }
-                setCurrentTurn(game.currentTurn);
-              }
-            });
+        if (action) {
+          const game = action;
+          if (action.users[0].id === id) {
+            setPlayerState(game.users[0].playerState);
+            setOpponentState(game.users[1].playerState);
           }
-        }, [client]);
+          else {
+            setPlayerState(game.users[1].playerState);
+            setOpponentState(game.users[0].playerState);
+          }
+          if (game.currentTurn !== currentTurn) {
+            setCurrentTurn(game.currentTurn);
+            resetTimer(); // Setze den Timer zurück, wenn sich der currentTurn ändert
+          }        }
       });
     }
   }, [client]);
 
   useEffect(() => {
-    if (timer > 0 && currentPlayer === id) {
+    if (timer > 0) {
       const interval = setInterval(() => {
         setTimer((prev) => {
           if (prev === 11) {
@@ -58,16 +53,19 @@ const Duel = ({client, gameId}) => {
 
       return () => clearInterval(interval);
     }
-  }, [timer, currentPlayer, id]);
+  }, [timer, currentTurn, id]);
 
-  const startNewTurn = (player) => {
-    setCurrentPlayer(player);
+  const resetTimer = () => {
     setTimer(120);
+  };
+
+  const handleEndTurn = () => {
     if (client) {
       client.publish({
-        destination: '/app/drawCard',
-        body: JSON.stringify({ userID: id, gameID: gameId }),
+        destination: '/app/endTurn',
+        body: JSON.stringify({ gameID: gameId, userID: id }),
       });
+      toast.success("Zug Beendet");
     }
   };
 
@@ -140,16 +138,6 @@ const Duel = ({client, gameId}) => {
     }
   };
 
-  const handleEndTurn = () => {
-    if (client) {
-      client.publish({
-        destination: '/app/endTurn',
-        body: JSON.stringify({ gameID: gameId, userID: id }),
-      });
-      toast.success("Zug Beendet");
-    }
-  };
-
   const resetAttackMode = () => {
     setIsAttackMode(false);
     setSelectedAttacker(null);
@@ -162,6 +150,7 @@ const Duel = ({client, gameId}) => {
           <h4>Time remaining: {timer} seconds</h4>
         </div>
         <div className="action-controls">
+          <button onClick={() => setIsSetCardMode(true)}>Karte einsetzen</button>
           <button onClick={() => setIsAttackMode(true)}>Angreifen</button>
           {isAttackMode && toast.success("Angriffsmodus aktiviert.")}
           <button onClick={handleEndTurn}>End Turn</button>
@@ -171,7 +160,7 @@ const Duel = ({client, gameId}) => {
           <div className="cards">
             {playerState.fieldCards.map((card, index) => (
                 <div key={index} className="card">
-                  <Card card={card} onClick={() => selectAttackingCard(index)}/>
+                  <Card card={card} onCardClick={() => selectAttackingCard(index)}/>
                 </div>
             ))}
           </div>
@@ -181,7 +170,7 @@ const Duel = ({client, gameId}) => {
           <div className="cards">
             {playerState.handCards.map((card, index) => (
                 <div key={index} className="card">
-                  <Card card={card} onClick={() => handleSetCard(index)}/>
+                  <Card card={card} onCardClick={() => handleSetCard(index)}/>
                 </div>
             ))}
           </div>
@@ -191,7 +180,7 @@ const Duel = ({client, gameId}) => {
           <div className="cards">
             {opponentState.fieldCards.map((card, index) => (
                 <div key={index} className="card">
-                  <Card card={card} onClick={() => selectTargetCard(index)}/>
+                  <Card card={card} onCardClick={() => selectTargetCard(index)}/>
                 </div>
             ))}
           </div>

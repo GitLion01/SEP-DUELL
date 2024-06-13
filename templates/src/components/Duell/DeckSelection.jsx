@@ -1,17 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect, useContext} from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { WebSocketContext} from "../../WebSocketProvider";
 
-const DeckSelection = ({ client }) => {
+const DeckSelection = () => {
+  const { client } = useContext(WebSocketContext); // Verwende den Kontext
   const [decks, setDecks] = useState([]);
   const [selectedDeck, setSelectedDeck] = useState(null);
   const [id, setId] = useState(null);
   const [gameId, setGameId] = useState('');
+  const [game, setGame] = useState(null);
   const navigate = useNavigate(); // Use navigate to redirect
 
   useEffect(() => {
     const userId = localStorage.getItem('id');
     const gId = localStorage.getItem('gameId');
+    console.log(gId);
     if (userId && gId) {
       setId(userId);
       setGameId(gId);
@@ -36,42 +40,41 @@ const DeckSelection = ({ client }) => {
   }, [id]);
 
   useEffect(() => {
-    if (client) {
-      client.subscribe('/all/game', (message) => {
+    if (client && client.connected) {
+      const subscription = client.subscribe(`/user/${id}/queue/selectDeck`, (message) => {
         const response = JSON.parse(message.body);
-        // Überprüfe, ob beide Spieler bereit sind
-        if (response.game.id === gameId && response.status === 'BOTH_READY') {
-          navigate('/duel'); // Redirect to duel page
+        console.log(response.ready);
+        if (response.id === gameId && response.ready) {
+          setGame(response);
+          navigate('/duel');
         }
       });
+      //return () => subscription.unsubscribe(); // Cleanup function
     }
-  }, [client, id]);
+  }, [client, id, gameId, navigate]);
+
 
   const handleSelectDeck = (deckId) => {
-    setSelectedDeck(deckId);
-    client.publish({
-      destination: '/app/selectDeck',
-      body: JSON.stringify({ 
-        deckId: deckId,
-        gameID: gameId
-      }),
-    });
+    if (client && client.connected) { // Überprüfe, ob client existiert und verbunden ist
+      setSelectedDeck(deckId);
+      client.publish({
+        destination: '/app/selectDeck',
+        body: JSON.stringify({
+          gameId: gameId,
+          deckId: deckId
+        }),
+      });
+    } else {
+      console.error('WebSocket client ist nicht verbunden.');
+    }
   };
+
 
   const terminateGame = () => {
     client.publish({
       destination: '/app/terminate'
     })
   }
-
-  useEffect(() => {
-    if (selectedDeck) {
-      client.publish({
-        destination: '/app/startDuel',
-        body: JSON.stringify({ gameId }),
-      });
-    }
-  }, [selectedDeck, gameId]);
 
   return (
       <div>
@@ -80,7 +83,7 @@ const DeckSelection = ({ client }) => {
           {decks.map((deck, index) => (
 
               <div key={index}
-                   className="deck"
+                   className="deck" onClick={() => handleSelectDeck(deck.id)}
                    >
                 {deck.name}
               </div>

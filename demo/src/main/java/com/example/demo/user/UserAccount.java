@@ -92,6 +92,8 @@ public class UserAccount implements UserDetails {
         this.email = email;
         this.password = password;
         this.role = role;
+        this.playerState = new PlayerState();
+
 
     }
 
@@ -110,6 +112,7 @@ public class UserAccount implements UserDetails {
         this.email = email;
         this.password = password;
         this.role = role;
+        this.playerState = new PlayerState();
 
     }
 
