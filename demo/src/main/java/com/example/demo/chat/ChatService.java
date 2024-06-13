@@ -5,6 +5,7 @@ import com.example.demo.user.UserAccount;
 import com.example.demo.user.UserAccountRepository;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import org.apache.catalina.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -120,7 +121,9 @@ public class ChatService {
         chatMessageRepository.save(existingMessage);
         updateChatWithEditedMessage(existingMessage);
 
-        messagingTemplate.convertAndSend("/topic", convertToChatMessageDTO(existingMessage));
+        for(UserAccount user : existingMessage.getChat().getUsers()) {
+            messagingTemplate.convertAndSendToUser(user.getId().toString(), "/queue/messages", convertToChatMessageDTO(existingMessage));
+        }
     }
 
     public void updateChatWithEditedMessage(ChatMessage chatMessage) {
@@ -137,6 +140,10 @@ public class ChatService {
             Chat chat = chatRepository.findById(chatMessage.getChat().getId()).get();
             //no need to use ChatMessageRepository because of Casecad.All
             chat.getMessages().remove(message.get());
+            message.get().setMessage("");
+            for(UserAccount user : chat.getUsers()) {
+                messagingTemplate.convertAndSendToUser(user.getId().toString(), "/queue/messages", convertToChatMessageDTO(message.get()));
+            }
         }
     }
 
