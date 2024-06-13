@@ -54,6 +54,20 @@ public class GameService {
             System.out.println("User with id: " + userA.getId() + " already in a game");
         }
 
+        PlayerState playerState = new PlayerState();
+
+        userA.setPlayerState(new PlayerState());
+        playerState.setUser(userA);
+        playerStateRepository.save(playerState);
+        userAccountRepository.save(userA);
+
+        userB.setPlayerState(new PlayerState());
+        playerState.setUser(userB);
+        playerStateRepository.save(playerState);
+        userAccountRepository.save(userB);
+
+
+
         Game newGame = new Game();
         newGame.getUsers().add(userA);
         newGame.getUsers().add(userB);
@@ -87,6 +101,9 @@ public class GameService {
         List<Card> cards = deck.getCards();
         Collections.shuffle(deck.getCards()); // mischt das Deck
         UserAccount user = deck.getUser();
+
+
+
         user.getPlayerState().setDeck(deck);
         user.getPlayerState().setReady(true);
 
@@ -279,6 +296,7 @@ public class GameService {
 
         Game game = optionalGame.get();
         UserAccount user = optionalUser.get();
+
         if(!game.getUsers().get(0).equals(user) || request.getNormalCardsIndex().size() != 2) {
             return;
         }
