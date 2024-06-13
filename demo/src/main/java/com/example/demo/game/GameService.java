@@ -54,19 +54,6 @@ public class GameService {
             System.out.println("User with id: " + userA.getId() + " already in a game");
         }
 
-        PlayerState playerState = new PlayerState();
-
-        userA.setPlayerState(new PlayerState());
-        playerState.setUser(userA);
-        playerStateRepository.save(playerState);
-        userAccountRepository.save(userA);
-
-        userB.setPlayerState(new PlayerState());
-        playerState.setUser(userB);
-        playerStateRepository.save(playerState);
-        userAccountRepository.save(userB);
-
-
 
         Game newGame = new Game();
         newGame.getUsers().add(userA);
