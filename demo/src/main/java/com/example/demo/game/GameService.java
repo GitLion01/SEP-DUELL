@@ -139,7 +139,7 @@ public class GameService {
         gameRepository.save(game);
 
         for(UserAccount player : game.getUsers()) {
-            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/drawCard", game);
+            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", game);
         }
 
 
@@ -156,7 +156,7 @@ public class GameService {
 
         Game game = optionalGame.get();
         UserAccount userAccount = optionalUserAccount.get();
-        if(!game.getUsers().get(game.getCurrentTurn()).equals(userAccount)){// prüft ob der User am zug ist
+        if(!game.getUsers().get(game.getCurrentTurn()).equals(userAccount) || userAccount.getPlayerState().getFieldCards().size() > 5){// prüft ob der User am zug ist
             return;
         }
 
@@ -169,7 +169,7 @@ public class GameService {
         gameRepository.save(game);
 
         for(UserAccount player : game.getUsers()) {
-            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/drawCard", game);
+            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", game);
         }
     }
 
@@ -193,7 +193,7 @@ public class GameService {
         gameRepository.save(game);
 
         for(UserAccount player : game.getUsers()) {
-            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/endTurn", game);
+            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", game);
         }
     }
 
@@ -228,7 +228,7 @@ public class GameService {
         gameRepository.save(game);
 
         for(UserAccount player : game.getUsers()) {
-            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/attackCard", game);
+            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", game);
         }
 
     }
@@ -264,7 +264,7 @@ public class GameService {
         gameRepository.save(game);
 
         for(UserAccount player : game.getUsers()) {
-            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/attackUser", game);
+            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", game);
         }
 
     }
@@ -303,7 +303,7 @@ public class GameService {
         gameRepository.save(game);
 
         for(UserAccount player : game.getUsers()) {
-            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/swapForRare", game);
+            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", game);
         }
 
     }
@@ -343,7 +343,7 @@ public class GameService {
         gameRepository.save(game);
 
         for(UserAccount player : game.getUsers()) {
-            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/swapForLegendary", game);
+            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", game);
         }
 
 
@@ -369,14 +369,16 @@ public class GameService {
             user2.setLeaderboardPoints(user2.getLeaderboardPoints() - Math.max(50, (user2.getLeaderboardPoints() - user1.getLeaderboardPoints()) / 2 ));
         }else{
             user2.setSepCoins(user2.getSepCoins() + 100);
-            user2.setLeaderboardPoints(user2.getLeaderboardPoints() + Math.max(50, user2.getLeaderboardPoints() - user1.getLeaderboardPoints()));
-            user1.setLeaderboardPoints(user1.getLeaderboardPoints() - Math.max(50, (user2.getLeaderboardPoints() - user1.getLeaderboardPoints()) / 2 ));
+            user2.setLeaderboardPoints(user2.getLeaderboardPoints() + Math.max(50, user1.getLeaderboardPoints() - user2.getLeaderboardPoints()));
+            user1.setLeaderboardPoints(user1.getLeaderboardPoints() - Math.max(50, (user1.getLeaderboardPoints() - user2.getLeaderboardPoints()) / 2 ));
         }
         gameRepository.save(game);
 
         for(UserAccount player : game.getUsers()) {
-            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/terminateMatch", game);
+            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", game);
         }
+
+        gameRepository.delete(game);
 
         //TODO: Löschen des Games in Game Tabelle und in game_users (WICHTIG!!! -> NACHDEM game an Client gesendet wird)
 

@@ -19,7 +19,7 @@ public class Game {
     private Long id;
     private Boolean ready = false;
 
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinTable(
             name = "game_users",
             joinColumns = @JoinColumn(name = "game_id"),
