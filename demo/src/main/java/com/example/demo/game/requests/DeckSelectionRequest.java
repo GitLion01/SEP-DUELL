@@ -7,8 +7,7 @@ import lombok.Getter;
 @Getter
 public class DeckSelectionRequest {
 
-    private Long gameID;
-    private String deckName;
-    private Long userID;
+    private Long gameId;
+    private Long deckId;
 
 }

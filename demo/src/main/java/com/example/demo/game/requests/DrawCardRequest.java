@@ -5,10 +5,8 @@ import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
-public class AttackUserRequest {
+public class DrawCardRequest {
 
     private Long gameId;
-    private Long attackerId;
-    private Long defenderId;
-    private int attackerCardIndex;
+    private Long userId;
 }

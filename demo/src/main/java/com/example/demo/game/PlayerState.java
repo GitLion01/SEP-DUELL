@@ -1,5 +1,6 @@
 package com.example.demo.game;
 
+import com.example.demo.cards.Card;
 import com.example.demo.cards.CardInstance;
 import com.example.demo.decks.Deck;
 import com.example.demo.user.UserAccount;
@@ -21,6 +22,8 @@ public class PlayerState {
     private Long Id; //stateID
     private Integer lifePoints = 50;
     private Integer damage;
+    private Boolean ready = false;
+    private Boolean winner = false;
 
 
 
@@ -28,17 +31,18 @@ public class PlayerState {
     @JoinColumn(name = "user_id")
     private UserAccount user;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CardInstance> cardsPlayed = new ArrayList<>();
+    @Transient
+    private List<Card> cardsPlayed = new ArrayList<>();
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CardInstance> handCards = new ArrayList<>();
+    @Transient
+    private List<Card> handCards = new ArrayList<>();
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CardInstance> fieldCards = new ArrayList<>();
+    @Transient
+    private List<Card> fieldCards = new ArrayList<>();
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "deck_id")
+    // Deck ist nicht mit Deck Tabelle verbunden, Änderungen beeinflussen die Deck Tabelle nicht und sind
+    // nur für den Lebenszyklus des Programms gespeichert (wird der server neu gestartet sind die Änderungen verworfen
+    @Transient
     private Deck deck;
 
 
