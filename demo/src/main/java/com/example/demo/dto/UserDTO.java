@@ -19,7 +19,11 @@ public class UserDTO {
     private Integer leaderboardPoints;
 
     // Konstruktoren, Getter und Setter
-    public UserDTO() {
+    public UserDTO( String username,long id,String firstName,String lastName) {
+        this.username = username;
+        this.id = id;
+        this.firstName = firstName;
+        this.lastName = lastName;
     }
 
     public UserDTO(String username, String image, long id, String firstName, String lastName, List<UserAccount> friends,Integer leaderboardPoints) {

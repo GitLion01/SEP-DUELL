@@ -50,7 +50,7 @@
                 'chat': { 'id': chatId },
                 'sender': { 'id': userId }
             };
-            stompClient.send('/chat/send-group-message', {}, JSON.stringify(payload));
+            stompClient.send('/chat/sendMessage', {}, JSON.stringify(payload));
             console.log('Message sent: ' + JSON.stringify(payload));
             document.getElementById('message').value = '';
         }
