@@ -139,7 +139,7 @@ public class GameService {
         gameRepository.save(game);
 
         for(UserAccount player : game.getUsers()) {
-            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/drawCard", game);
+            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", game);
         }
 
 
@@ -169,7 +169,7 @@ public class GameService {
         gameRepository.save(game);
 
         for(UserAccount player : game.getUsers()) {
-            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/drawCard", game);
+            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", game);
         }
     }
 
@@ -193,7 +193,7 @@ public class GameService {
         gameRepository.save(game);
 
         for(UserAccount player : game.getUsers()) {
-            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/endTurn", game);
+            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", game);
         }
     }
 
@@ -228,7 +228,7 @@ public class GameService {
         gameRepository.save(game);
 
         for(UserAccount player : game.getUsers()) {
-            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/attackCard", game);
+            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", game);
         }
 
     }
