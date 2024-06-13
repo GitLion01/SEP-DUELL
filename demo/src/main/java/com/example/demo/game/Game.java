@@ -1,5 +1,6 @@
 package com.example.demo.game;
 import com.example.demo.user.UserAccount;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,12 +20,13 @@ public class Game {
     private Long id;
     private Boolean ready = false;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinTable(
             name = "game_users",
             joinColumns = @JoinColumn(name = "game_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
+    @JsonIgnore
     private List<UserAccount> users = new ArrayList<>();
 
     private Integer currentTurn = 0;

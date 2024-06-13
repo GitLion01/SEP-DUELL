@@ -4,6 +4,7 @@ import com.example.demo.cards.Card;
 import com.example.demo.cards.CardInstance;
 import com.example.demo.decks.Deck;
 import com.example.demo.user.UserAccount;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -28,21 +29,24 @@ public class PlayerState {
 
 
     @OneToOne(mappedBy = "playerState" , cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     @JoinColumn(name = "user_id")
     private UserAccount user;
 
-    @Transient
-    private List<Card> cardsPlayed = new ArrayList<>();
+    @OneToMany
+    private List<CardInstance> cardsPlayed = new ArrayList<>();
 
-    @Transient
-    private List<Card> handCards = new ArrayList<>();
+    @OneToMany
+    private List<CardInstance> handCards = new ArrayList<>();
 
-    @Transient
-    private List<Card> fieldCards = new ArrayList<>();
+    @OneToMany
+    private List<CardInstance> fieldCards = new ArrayList<>();
 
     // Deck ist nicht mit Deck Tabelle verbunden, Änderungen beeinflussen die Deck Tabelle nicht und sind
     // nur für den Lebenszyklus des Programms gespeichert (wird der server neu gestartet sind die Änderungen verworfen
-    @Transient
+    @OneToOne
+    @JsonIgnore
+    @JoinColumn(name = "deck_id")
     private Deck deck;
 
 
