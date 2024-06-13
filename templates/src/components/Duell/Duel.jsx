@@ -3,7 +3,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import Card from "../card";
 
 
-const Duel = ({client, gameId}) => {
+const Duel = ({client, gameId, game}) => {
   const [timer, setTimer] = useState(120);
   const [playerState, setPlayerState] = useState({ handCards: [], fieldCards: [], life: 50 });
   const [opponentState, setOpponentState] = useState({ handCards: [], fieldCards: [], life: 50 });
@@ -18,9 +18,9 @@ const Duel = ({client, gameId}) => {
     if (client) {
       client.subscribe(`/user/${id}/queue/game`, (message) => {
         const action = JSON.parse(message.body);
-        if (action.game) {
-          const game = action.game;
-          if (game.users[0].id === id) {
+        if (action) {
+          const game = action;
+          if (action.users[0].id === id) {
             setPlayerState(game.users[0].playerState);
             setOpponentState(game.users[1].playerState);
           }
@@ -37,7 +37,7 @@ const Duel = ({client, gameId}) => {
   }, [client]);
 
   useEffect(() => {
-    if (timer > 0 && currentTurn === id) {
+    if (timer > 0) {
       const interval = setInterval(() => {
         setTimer((prev) => {
           if (prev === 11) {
@@ -150,6 +150,7 @@ const Duel = ({client, gameId}) => {
           <h4>Time remaining: {timer} seconds</h4>
         </div>
         <div className="action-controls">
+          <button onClick={() => setIsSetCardMode(true)}>Karte einsetzen</button>
           <button onClick={() => setIsAttackMode(true)}>Angreifen</button>
           {isAttackMode && toast.success("Angriffsmodus aktiviert.")}
           <button onClick={handleEndTurn}>End Turn</button>
@@ -159,7 +160,7 @@ const Duel = ({client, gameId}) => {
           <div className="cards">
             {playerState.fieldCards.map((card, index) => (
                 <div key={index} className="card">
-                  <Card card={card} onClick={() => selectAttackingCard(index)}/>
+                  <Card card={card} onCardClick={() => selectAttackingCard(index)}/>
                 </div>
             ))}
           </div>
@@ -169,7 +170,7 @@ const Duel = ({client, gameId}) => {
           <div className="cards">
             {playerState.handCards.map((card, index) => (
                 <div key={index} className="card">
-                  <Card card={card} onClick={() => handleSetCard(index)}/>
+                  <Card card={card} onCardClick={() => handleSetCard(index)}/>
                 </div>
             ))}
           </div>
@@ -179,7 +180,7 @@ const Duel = ({client, gameId}) => {
           <div className="cards">
             {opponentState.fieldCards.map((card, index) => (
                 <div key={index} className="card">
-                  <Card card={card} onClick={() => selectTargetCard(index)}/>
+                  <Card card={card} onCardClick={() => selectTargetCard(index)}/>
                 </div>
             ))}
           </div>
