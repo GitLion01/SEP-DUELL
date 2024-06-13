@@ -85,7 +85,7 @@ const DeckSelection = () => {
               <div key={index}
                    className="deck" onClick={() => handleSelectDeck(deck.id)}
                    >
-                {deck.id}
+                {deck.name}
               </div>
 
           ))}
