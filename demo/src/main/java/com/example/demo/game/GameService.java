@@ -53,8 +53,6 @@ public class GameService {
         if (gameRepository.existsByUsersContaining(userB)) {
             System.out.println("User with id: " + userA.getId() + " already in a game");
         }
-
-
         Game newGame = new Game();
         newGame.getUsers().add(userA);
         newGame.getUsers().add(userB);
