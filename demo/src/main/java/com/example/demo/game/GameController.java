@@ -29,7 +29,9 @@ public class GameController {
 
     @MessageMapping("/createGame")
     public void createGame(@Payload CreateGameRequest request) {
+        System.out.println("ANFRAGE IN CONTROLLER EINGETROFFEN");
         gameService.createGame(request);
+        System.out.println("ANFRAGE BEARBEITET");
     }
 
 

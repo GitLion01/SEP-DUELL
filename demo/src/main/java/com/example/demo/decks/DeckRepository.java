@@ -30,6 +30,9 @@ public interface DeckRepository extends JpaRepository<Deck, Long> {
 
     Optional<Deck> findByNameAndUser(String deckName, UserAccount user);
 
+    @Query(value = "SELECT * FROM deck WHERE id = :deckId AND user_id = :userId", nativeQuery = true)
+    Optional<Deck> findByDeckIdAndUserId(Long deckId, Long userId);
+
     Optional<Deck> findAllDecksByUserIdAndName(Long userId, String deckName);
 
     Optional<Deck> findByNameAndUserId(String deckName, Long userId);

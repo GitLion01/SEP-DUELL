@@ -9,5 +9,6 @@ public class DeckSelectionRequest {
 
     private Long gameId;
     private Long deckId;
+    private Long userId;
 
 }

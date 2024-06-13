@@ -97,6 +97,8 @@ public class DeckService{
         } else {
             return "Error: Deck could not be created";
         }
+
+
     }
 
     // überprüft, ob ein Deck mit dem Namen für diesen User existiert
@@ -253,10 +255,6 @@ public class DeckService{
                UserAccount user = optionalUser.get();
 
                Optional<Deck> optionalDeck = deckRepository.findAllDecksByUserIdAndName(request.getUserID(), request.getName());
-
-
-
-
 
                if (optionalDeck.isPresent()) {
                    Deck deck = optionalDeck.get();

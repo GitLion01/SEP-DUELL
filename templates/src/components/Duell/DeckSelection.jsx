@@ -61,7 +61,8 @@ const DeckSelection = () => {
         destination: '/app/selectDeck',
         body: JSON.stringify({
           gameId: gameId,
-          deckId: deckId
+          deckId: deckId,
+          userId: id
         }),
       });
     } else {
