@@ -15,7 +15,6 @@ import java.util.List;
 public class ChatController {
 
     private final ChatService chatService;
-    private final ChatRepository chatRepository;
 
     @PostMapping("/create.chat")
     public ResponseEntity<Long> createChat(@RequestParam Long userId1, @RequestParam Long userId2)
@@ -48,10 +47,11 @@ public class ChatController {
     }
 
     @MessageMapping("/onChat")
-    public void onChat(@Payload ChatMessage chatMessage,@Header("userId") String userIdHeader)
+    public void onChat(@Payload ChatMessage chatMessage,@Header("userId") String userIdHeader,@Header("chatId") String chatIdHeader)
     {
         Long userId =  Long.parseLong(userIdHeader);
-        chatService.sendMessage(chatMessage,userId);
+        Long ChatId = Long.parseLong(chatIdHeader);
+        chatService.sendMessage(chatMessage,userId,ChatId);
     }
 
     /*@MessageMapping("/send-group-message")
