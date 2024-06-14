@@ -13,4 +13,5 @@ public interface GameRepository extends JpaRepository<Game, Long> {
 
     boolean existsByUsersContaining(UserAccount user);
 
+
 }
