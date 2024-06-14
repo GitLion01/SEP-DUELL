@@ -13,6 +13,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
+
 @Transactional
 @Service
 public class GameService {
@@ -22,6 +30,11 @@ public class GameService {
     private final UserAccountRepository userAccountRepository;
     private final SimpMessagingTemplate messagingTemplate;
     private final PlayerStateRepository playerStateRepository;
+
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    private ScheduledFuture<?> timeoutTask;
+    // Ein ReentrantLock wird verwendet, um sicherzustellen, dass nur ein Thread zur gleichen Zeit auf kritische Abschnitte zugreifen kann
+    private final Lock gameLock = new ReentrantLock();
 
     @Autowired
     public GameService(GameRepository gameRepository,
@@ -76,10 +89,14 @@ public class GameService {
         gameRepository.save(newGame);
         System.out.println("Game gespeichert");
 
+        List<UserAccount> users = newGame.getUsers();
 
-            for(UserAccount user : newGame.getUsers()) {
-                messagingTemplate.convertAndSendToUser(user.getId().toString(), "/queue/create", newGame);
-            }
+
+        for(UserAccount user : newGame.getUsers()) {
+            messagingTemplate.convertAndSendToUser(user.getId().toString(), "/queue/create", Arrays.asList(newGame, users));
+        }
+
+        resetTimer(newGame.getId());
     }
 
 
@@ -159,6 +176,8 @@ public class GameService {
             messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/selectDeck", game);
         }
 
+        resetTimer(game.getId());
+
     }
 
 
@@ -196,6 +215,10 @@ public class GameService {
             messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", game);
         }
 
+        // Starte den Timer am Ende der Methode
+        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+        scheduler.schedule(() -> handleTimeout(request.getGameId()), 120, TimeUnit.SECONDS);
+
 
     }
 
@@ -225,6 +248,8 @@ public class GameService {
         for(UserAccount player : game.getUsers()) {
             messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", game);
         }
+
+        resetTimer(game.getId());
     }
 
 
@@ -249,6 +274,8 @@ public class GameService {
         for(UserAccount player : game.getUsers()) {
             messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", game);
         }
+
+        resetTimer(game.getId());
     }
 
     public void attackCard(AttackCardRequest request) {
@@ -285,6 +312,8 @@ public class GameService {
             messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", game);
         }
 
+        resetTimer(game.getId());
+
     }
 
     public void attackUser(AttackUserRequest request) {
@@ -320,6 +349,8 @@ public class GameService {
         for(UserAccount player : game.getUsers()) {
             messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", game);
         }
+
+        resetTimer(game.getId());
 
     }
 
@@ -361,6 +392,8 @@ public class GameService {
             messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", game);
         }
 
+        resetTimer(game.getId());
+
     }
 
     public void swapForLegendary(LegendarySwapRequest request) {
@@ -401,43 +434,87 @@ public class GameService {
             messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", game);
         }
 
+        resetTimer(game.getId());
+
 
     }
 
 
     public void terminateMatch(Long gameId, Long userA, Long userB) {
-        Optional<Game> optionalGame = gameRepository.findById(gameId);
-        Optional<UserAccount> optionalUserA = userAccountRepository.findById(userA);
-        Optional<UserAccount> optionalUserB = userAccountRepository.findById(userB);
+        gameLock.lock(); // stellt sicher, dass nur ein Thread zur gleichen Zeit ausgeführt wird
+        try {
+            Optional<Game> optionalGame = gameRepository.findById(gameId);
+            Optional<UserAccount> optionalUserA = userAccountRepository.findById(userA);
+            Optional<UserAccount> optionalUserB = userAccountRepository.findById(userB);
 
-        if(optionalGame.isEmpty() || optionalUserA.isEmpty() || optionalUserB.isEmpty()) {
-            return;
+            if (optionalGame.isEmpty() || optionalUserA.isEmpty() || optionalUserB.isEmpty()) {
+                return;
+            }
+
+            Game game = optionalGame.get();
+            UserAccount user1 = optionalUserA.get();
+            UserAccount user2 = optionalUserB.get();
+
+            // Flag setzen damit isTerminated Variable auf true gesetzt wird
+            if(game.getIsTerminated()){
+                return;
+            }
+            game.setIsTerminated(true);
+
+            if (user1.getPlayerState().getWinner()) {
+                user1.setSepCoins(user1.getSepCoins() + 100);
+                user1.setLeaderboardPoints(user1.getLeaderboardPoints() + Math.max(50, user2.getLeaderboardPoints() - user1.getLeaderboardPoints()));
+                user2.setLeaderboardPoints(user2.getLeaderboardPoints() - Math.max(50, (user2.getLeaderboardPoints() - user1.getLeaderboardPoints()) / 2));
+            } else {
+                user2.setSepCoins(user2.getSepCoins() + 100);
+                user2.setLeaderboardPoints(user2.getLeaderboardPoints() + Math.max(50, user1.getLeaderboardPoints() - user2.getLeaderboardPoints()));
+                user1.setLeaderboardPoints(user1.getLeaderboardPoints() - Math.max(50, (user1.getLeaderboardPoints() - user2.getLeaderboardPoints()) / 2));
+            }
+            gameRepository.save(game);
+
+            for (UserAccount player : game.getUsers()) {
+                messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", game);
+            }
+
+            gameRepository.delete(game);
+
+            //TODO: Alle Daten zurücksetzten (Deck, Cards, etc)
+        }finally {
+            gameLock.unlock();
         }
-
-        Game game = optionalGame.get();
-        UserAccount user1 = optionalUserA.get();
-        UserAccount user2 = optionalUserB.get();
-
-        if(user1.getPlayerState().getWinner()){
-            user1.setSepCoins(user1.getSepCoins() + 100);
-            user1.setLeaderboardPoints(user1.getLeaderboardPoints() + Math.max(50, user2.getLeaderboardPoints() - user1.getLeaderboardPoints()));
-            user2.setLeaderboardPoints(user2.getLeaderboardPoints() - Math.max(50, (user2.getLeaderboardPoints() - user1.getLeaderboardPoints()) / 2 ));
-        }else{
-            user2.setSepCoins(user2.getSepCoins() + 100);
-            user2.setLeaderboardPoints(user2.getLeaderboardPoints() + Math.max(50, user1.getLeaderboardPoints() - user2.getLeaderboardPoints()));
-            user1.setLeaderboardPoints(user1.getLeaderboardPoints() - Math.max(50, (user1.getLeaderboardPoints() - user2.getLeaderboardPoints()) / 2 ));
-        }
-        gameRepository.save(game);
-
-        for(UserAccount player : game.getUsers()) {
-            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", game);
-        }
-
-        gameRepository.delete(game);
-
-        //TODO: Alle Daten zurücksetzten (Deck, Cards, etc)
-
     }
+
+
+    public void handleTimeout(Long gameId) {
+        gameLock.lock(); // stellt sicher, dass nur ein Thread zur gleichen Zeit ausgeführt wird
+        try {
+            Optional<Game> optionalGame = gameRepository.findById(gameId);
+            if (optionalGame.isPresent()) {
+                Game game = optionalGame.get();
+                if(!game.getIsTerminated()) {
+                    game.setIsTerminated(true);
+                    gameRepository.save(game);
+                    System.out.println("Timeout für Spiel " + gameId + " erreicht.");
+                    terminateMatch(gameId, game.getUsers().getFirst().getId(), game.getUsers().getLast().getId());
+                }
+            }
+        }finally {
+            gameLock.unlock();
+        }
+    }
+
+    private void resetTimer(Long gameId) {
+        gameLock.lock(); // stellt sicher, dass nur ein Thread zur gleichen Zeit ausgeführt wird
+        try {
+            if (timeoutTask != null) {
+                timeoutTask.cancel(false);
+            }
+            timeoutTask = scheduler.schedule(() -> handleTimeout(gameId), 120, TimeUnit.SECONDS);
+        } finally {
+            gameLock.unlock();
+        }
+    }
+
 
 
 }
