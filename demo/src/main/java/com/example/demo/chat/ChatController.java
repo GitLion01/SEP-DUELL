@@ -1,6 +1,7 @@
 package com.example.demo.chat;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.web.bind.annotation.*;
@@ -47,10 +48,10 @@ public class ChatController {
     }
 
     @MessageMapping("/onChat")
-    public void onChat(@Payload ChatMessage chatMessage)
+    public void onChat(@Payload ChatMessage chatMessage,@Header("userId") String userIdHeader)
     {
-        chatService.messageReceived(chatMessage);
-        chatService.sendMessage(chatMessage);
+        Long userId =  Long.parseLong(userIdHeader);
+        chatService.sendMessage(chatMessage,userId);
     }
 
     /*@MessageMapping("/send-group-message")
