@@ -38,7 +38,12 @@ public class UserAccount implements UserDetails {
     private Integer sepCoins = 500;
     private byte[] image;
 
-    private String status = "offline"; // Standardstatus ist offline
+    private String status = "offline"; // Standardstatus ist offline -> online, im Duell, offline
+    private String duelStatus = "available"; // Neuer Status für Duell: available, in_duel, challenged
+
+    @ManyToOne                              //für Duell Herausforderung von
+    @JoinColumn(name = "challenger_id")
+    private UserAccount challenger; // Der Benutzer, der diesen Benutzer herausgefordert hat
 
     @Enumerated(EnumType.STRING)
     private UserRole role;
@@ -185,4 +190,22 @@ public class UserAccount implements UserDetails {
         return this.enabled;
     }
 
+
+    // Neue Methoden für Duell Herausforderung
+
+    public boolean canChallenge(UserAccount other) {
+        return this != other && this.isOnline() && other.isOnline() && !this.isInDuel() && !other.isInDuel() && this.hasDeck() && other.hasDeck();
+    }
+
+    public boolean isOnline() {
+        return "online".equals(this.status);
+    }
+
+    public boolean isInDuel() {
+        return "in_duel".equals(this.duelStatus);
+    }
+
+    public boolean hasDeck() {
+        return !this.decks.isEmpty();
+    }
 }
