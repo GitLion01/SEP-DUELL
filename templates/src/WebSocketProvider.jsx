@@ -7,6 +7,8 @@ export const WebSocketContext = createContext();
 
 export const WebSocketProvider = ({ children }) => {
     const [client, setClient] = useState(null);
+    const [game, setGame] = useState(null);
+    const [users, setUsers] = useState([]);
 
     useEffect(() => {
 
@@ -58,7 +60,7 @@ export const WebSocketProvider = ({ children }) => {
     }, []);
 
     return (
-        <WebSocketContext.Provider value={{ client }}>
+        <WebSocketContext.Provider value={{ client, game, setGame, users, setUsers }}>
             {children}
         </WebSocketContext.Provider>
     );

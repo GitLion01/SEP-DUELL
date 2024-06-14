@@ -1,13 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import { toast, ToastContainer } from 'react-toastify';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import Card from "../card";
+import {WebSocketContext} from "../../WebSocketProvider";
 
 
 const Duel = () => {
   const location = useLocation(); // Verwenden Sie useLocation, um auf den übergebenen Zustand zuzugreifen
   const navigate = useNavigate();
-  const { client, gameId, game, users } = location.state || {}; // Extrahieren Sie die Daten aus dem Zustand
+  const { client, game, users } = useContext(WebSocketContext);
 
   const [timer, setTimer] = useState(120);
   const [playerState, setPlayerState] = useState(null);
@@ -18,11 +19,14 @@ const Duel = () => {
   const [selectedTarget, setSelectedTarget] = useState(null);
   const [currentTurn, setCurrentTurn] = useState(0);
   const id = localStorage.getItem('id');
+  const gameId = localStorage.getItem('gameId');
 
 
   // Initialisieren des Spielerzustands aus dem übergebenen Zustand
   useEffect(() => {
+    console.log('Location state in Duel:', location.state);
     if (users) {
+      console.log('user: ', users);
       if (users[0].id === parseInt(id)) {
         setPlayerState(users[0].playerState);
         setOpponentState(users[1].playerState);
@@ -32,7 +36,8 @@ const Duel = () => {
       }
       setCurrentTurn(game.currentTurn); // initialisieren Sie den currentTurn
     }
-
+    console.log('playerState nach initial',playerState);
+    console.log('opponent state nach intial: ',playerState);
   }, [users, game, id]);
 
   useEffect(() => {
