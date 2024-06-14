@@ -69,20 +69,22 @@ public class ChatService {
         return new ResponseEntity<>(group.getId(),HttpStatus.OK);
     }
 
-    public void sendMessage(ChatMessage chatMessage) {
+    public void sendMessage(ChatMessage chatMessage,Long userId) {
         try {
             for (Chat chat : chatRepository.findAll()) {
                 if (Objects.equals(chatMessage.getChat().getId(), chat.getId()))
                 {
+                    if(!chatMessage.getSender().getId().equals(userId))
+                        chatMessage.setRead(true);
                     chat.getMessages().add(chatMessage);
                     //we do not need to add it in the chatMessageRepository  it will be added automatically
                     chatRepository.save(chat);
                     chatMessage.setId(chat.getMessages().get(chat.getMessages().size() - 1).getId());
                     //or chatMessage = chatRepository.findeById(chatRepository.save(chat).getId()).get()
 
-                    for(UserAccount userAccount : chat.getUsers())
+                    for(int i=chat.getUsers().size()-1;i>=0;i--)
                     {
-                        messagingTemplate.convertAndSendToUser(userAccount.getId().toString(),"/queue/messages", convertToChatMessageDTO(chatMessage));
+                        messagingTemplate.convertAndSendToUser(chat.getUsers().get(i).getId().toString(),"/queue/messages", convertToChatMessageDTO(chatMessage));
                     }
                     break;
                 }
@@ -118,12 +120,14 @@ public class ChatService {
     public void editMessage(ChatMessage chatMessage) {
         ChatMessage existingMessage = chatMessageRepository.findById(chatMessage.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Message not found"));
-        existingMessage.setMessage(chatMessage.getMessage());
-        chatMessageRepository.save(existingMessage);
-        updateChatWithEditedMessage(existingMessage);
+        if(!existingMessage.isRead()) {
+            existingMessage.setMessage(chatMessage.getMessage());
+            chatMessageRepository.save(existingMessage);
+            updateChatWithEditedMessage(existingMessage);
 
-        for(UserAccount user : existingMessage.getChat().getUsers()) {
-            messagingTemplate.convertAndSendToUser(user.getId().toString(), "/queue/messages", convertToChatMessageDTO(existingMessage));
+            for (UserAccount user : existingMessage.getChat().getUsers()) {
+                messagingTemplate.convertAndSendToUser(user.getId().toString(), "/queue/messages", convertToChatMessageDTO(existingMessage));
+            }
         }
     }
 
@@ -138,12 +142,14 @@ public class ChatService {
     public void deleteMessage(ChatMessage chatMessage) {
         Optional<ChatMessage> message = chatMessageRepository.findById(chatMessage.getId());
         if(message.isPresent()) {
-            Chat chat = chatRepository.findById(chatMessage.getChat().getId()).get();
-            //no need to use ChatMessageRepository because of Casecad.All
-            chat.getMessages().remove(message.get());
-            message.get().setMessage("");
-            for(UserAccount user : chat.getUsers()) {
-                messagingTemplate.convertAndSendToUser(user.getId().toString(), "/queue/messages", convertToChatMessageDTO(message.get()));
+            if(!message.get().isRead()) {
+                Chat chat = chatRepository.findById(chatMessage.getChat().getId()).get();
+                //no need to use ChatMessageRepository because of Casecad.All
+                chat.getMessages().remove(message.get());
+                message.get().setMessage("");
+                for (UserAccount user : chat.getUsers()) {
+                    messagingTemplate.convertAndSendToUser(user.getId().toString(), "/queue/messages", convertToChatMessageDTO(message.get()));
+                }
             }
         }
     }
@@ -221,11 +227,6 @@ public class ChatService {
                 continue;
             messagingTemplate.convertAndSendToUser(user.getId().toString(), "/queue/messages", "on Chat?");
         }
-    }
-
-    public void messageReceived(ChatMessage chatMessage) {
-            ChatMessage message= chatMessageRepository.findById(chatMessage.getId()).get();
-            message.setRead(true);
     }
 
 }
