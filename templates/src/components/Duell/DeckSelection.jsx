@@ -43,8 +43,10 @@ const DeckSelection = () => {
     if (client && client.connected) {
       const subscription = client.subscribe(`/user/${id}/queue/selectDeck`, (message) => {
         const response = JSON.parse(message.body);
+        console.log(response);
         console.log(response.ready);
-        if (response.id === gameId && response.ready) {
+        if (response.id === gameId && response.ready === true) {
+          localStorage.setItem('game', response);
           setGame(response);
           navigate('/duel');
         }

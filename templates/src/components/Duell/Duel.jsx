@@ -5,14 +5,25 @@ import Card from "../card";
 
 const Duel = ({client, gameId, game}) => {
   const [timer, setTimer] = useState(120);
-  const [playerState, setPlayerState] = useState({ handCards: [], fieldCards: [], life: 50 });
-  const [opponentState, setOpponentState] = useState({ handCards: [], fieldCards: [], life: 50 });
+  const [playerState, setPlayerState] = useState(null);
+  const [opponentState, setOpponentState] = useState(null);
   const [isAttackMode, setIsAttackMode] = useState(false);
   const [isSetCardMode, setIsSetCardMode] = useState(false); // Zustand für das Setzen von Karten
   const [selectedAttacker, setSelectedAttacker] = useState(null);
   const [selectedTarget, setSelectedTarget] = useState(null);
   const [currentTurn, setCurrentTurn] = useState(0); // currentTurn-Index
   const id = localStorage.getItem('id');
+
+  useEffect(() => {
+    if (game.users[0].id === id) {
+      setPlayerState(game.users[0].playerState);
+      setOpponentState(game.users[1].playerState);
+    }
+    else {
+      setPlayerState(game.users[1].playerState);
+      setOpponentState(game.users[0].playerState);
+    }
+  }, [id]);
 
   useEffect(() => {
     if (client) {
