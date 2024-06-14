@@ -34,16 +34,18 @@ public class PlayerState {
     private UserAccount user;
 
     @OneToMany
-    private List<CardInstance> cardsPlayed = new ArrayList<>();
+    private List<PlayerCard> cardsPlayed = new ArrayList<>();
 
     @OneToMany
-    private List<CardInstance> handCards = new ArrayList<>();
+    private List<PlayerCard> handCards = new ArrayList<>();
 
     @OneToMany
-    private List<CardInstance> fieldCards = new ArrayList<>();
+    private List<PlayerCard> fieldCards = new ArrayList<>();
 
-    // Deck ist nicht mit Deck Tabelle verbunden, Änderungen beeinflussen die Deck Tabelle nicht und sind
-    // nur für den Lebenszyklus des Programms gespeichert (wird der server neu gestartet sind die Änderungen verworfen
+    @OneToMany
+    private List<PlayerCard> deckClone = new ArrayList<>();
+
+
     @OneToOne
     @JsonIgnore
     @JoinColumn(name = "deck_id")

@@ -7,7 +7,7 @@ import {WebSocketContext} from "../../WebSocketProvider";
 
 const Duel = () => {
   const navigate = useNavigate();
-  const { client, game, users } = useContext(WebSocketContext);
+  const { client, game, setGame, users, setUsers } = useContext(WebSocketContext);
 
   const [timer, setTimer] = useState(120);
   const [playerState, setPlayerState] = useState(null);
@@ -23,7 +23,6 @@ const Duel = () => {
 
   // Initialisieren des Spielerzustands aus dem übergebenen Zustand
   useEffect(() => {
-    console.log('Location state in Duel:', location.state);
     if (users) {
       console.log('user: ', users);
       if (users[0].id === parseInt(id)) {
@@ -40,9 +39,21 @@ const Duel = () => {
   }, [users, game, id]);
 
   useEffect(() => {
+    if (users[0].id === id) {
+      setPlayerState(users[0].playerState);
+      setOpponentState(users[1].playerState);
+    }
+    else {
+      setPlayerState(users[1].playerState);
+      setOpponentState(users[0].playerState);
+    }
+  }, [id]);
+
+  useEffect(() => {
     if (client) {
       client.subscribe(`/user/${id}/queue/game`, (message) => {
         const response = JSON.parse(message.body);
+
         if (response) {
           if (response[1][0].id === id) {
             setPlayerState(response[1][0].playerState);
@@ -58,7 +69,7 @@ const Duel = () => {
           }        }
       });
     }
-  }, [client]);
+  }, [client, game, users]);
 
   useEffect(() => {
     if (timer > 0) {
@@ -182,9 +193,9 @@ const Duel = () => {
         <div className="player-field">
           <h3>Your Field</h3>
           <div className="cards">
-            {playerState?.fieldCards?.map((card, index) => (
+            {playerState?.fieldCards?.map((playerCard, index) => (
                 <div key={index} className="card">
-                  <Card card={card} onCardClick={() => selectAttackingCard(index)}/>
+                  <Card card={playerCard} onCardClick={() => selectAttackingCard(index)}/>
                 </div>
             ))}
           </div>
@@ -192,9 +203,9 @@ const Duel = () => {
         <div className="player-hand">
           <h3>Your Hand</h3>
           <div className="cards">
-            {playerState?.handCards?.map((card, index) => (
+            {playerState?.handCards?.map((playerCard, index) => (
                 <div key={index} className="card">
-                  <Card card={card} onCardClick={() => handleSetCard(index)}/>
+                  <Card card={playerCard} onCardClick={() => handleSetCard(index)}/>
                 </div>
             ))}
           </div>
@@ -202,9 +213,9 @@ const Duel = () => {
         <div className="opponent-field">
           <h3>Opponent's Field</h3>
           <div className="cards">
-            {opponentState?.fieldCards?.map((card, index) => (
+            {opponentState?.fieldCards?.map((playerCard, index) => (
                 <div key={index} className="card">
-                  <Card card={card} onCardClick={() => selectTargetCard(index)}/>
+                  <Card card={playerCard} onCardClick={() => selectTargetCard(index)}/>
                 </div>
             ))}
           </div>

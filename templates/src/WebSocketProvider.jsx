@@ -30,9 +30,9 @@ export const WebSocketProvider = ({ children }) => {
                     // Finde den Benutzer im Array
                     // const userInGame = response.users.find(user => user.id === userId);
 
-                    if (response.id) {
-                        localStorage.setItem('gameId', response.id);
-                        window.dispatchEvent(new CustomEvent('gameCreated', { detail: response.id }));
+                    if (response[0].id) {
+                        localStorage.setItem('gameId', response[0].id);
+                        window.dispatchEvent(new CustomEvent('gameCreated', { detail: response[0].id }));
                     }
                 });
             },
