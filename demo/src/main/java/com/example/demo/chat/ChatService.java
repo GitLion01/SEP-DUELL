@@ -24,6 +24,7 @@ public class ChatService {
     private final SimpMessagingTemplate messagingTemplate;
     private final GroupRepository groupRepository;
 
+
     public ResponseEntity<Long> createChat(Long userId1,Long userId2) {
         Optional<UserAccount> user1 = userAccountRepository.findById(userId1);
         Optional<UserAccount> user2 = userAccountRepository.findById(userId2);
@@ -68,20 +69,22 @@ public class ChatService {
         return new ResponseEntity<>(group.getId(),HttpStatus.OK);
     }
 
-    public void sendMessage(ChatMessage chatMessage) {
+    public void sendMessage(ChatMessage chatMessage,Long userId) {
         try {
             for (Chat chat : chatRepository.findAll()) {
                 if (Objects.equals(chatMessage.getChat().getId(), chat.getId()))
                 {
+                    if(!chatMessage.getSender().getId().equals(userId))
+                        chatMessage.setRead(true);
                     chat.getMessages().add(chatMessage);
                     //we do not need to add it in the chatMessageRepository  it will be added automatically
                     chatRepository.save(chat);
                     chatMessage.setId(chat.getMessages().get(chat.getMessages().size() - 1).getId());
                     //or chatMessage = chatRepository.findeById(chatRepository.save(chat).getId()).get()
 
-                    for(UserAccount userAccount : chat.getUsers())
+                    for(int i=chat.getUsers().size()-1;i>=0;i--)
                     {
-                        messagingTemplate.convertAndSendToUser(userAccount.getId().toString(),"/queue/messages", convertToChatMessageDTO(chatMessage));
+                        messagingTemplate.convertAndSendToUser(chat.getUsers().get(i).getId().toString(),"/queue/messages", convertToChatMessageDTO(chatMessage));
                     }
                     break;
                 }
@@ -117,12 +120,14 @@ public class ChatService {
     public void editMessage(ChatMessage chatMessage) {
         ChatMessage existingMessage = chatMessageRepository.findById(chatMessage.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Message not found"));
-        existingMessage.setMessage(chatMessage.getMessage());
-        chatMessageRepository.save(existingMessage);
-        updateChatWithEditedMessage(existingMessage);
+        if(!existingMessage.isRead()) {
+            existingMessage.setMessage(chatMessage.getMessage());
+            chatMessageRepository.save(existingMessage);
+            updateChatWithEditedMessage(existingMessage);
 
-        for(UserAccount user : existingMessage.getChat().getUsers()) {
-            messagingTemplate.convertAndSendToUser(user.getId().toString(), "/queue/messages", convertToChatMessageDTO(existingMessage));
+            for (UserAccount user : existingMessage.getChat().getUsers()) {
+                messagingTemplate.convertAndSendToUser(user.getId().toString(), "/queue/messages", convertToChatMessageDTO(existingMessage));
+            }
         }
     }
 
@@ -137,12 +142,14 @@ public class ChatService {
     public void deleteMessage(ChatMessage chatMessage) {
         Optional<ChatMessage> message = chatMessageRepository.findById(chatMessage.getId());
         if(message.isPresent()) {
-            Chat chat = chatRepository.findById(chatMessage.getChat().getId()).get();
-            //no need to use ChatMessageRepository because of Casecad.All
-            chat.getMessages().remove(message.get());
-            message.get().setMessage("");
-            for(UserAccount user : chat.getUsers()) {
-                messagingTemplate.convertAndSendToUser(user.getId().toString(), "/queue/messages", convertToChatMessageDTO(message.get()));
+            if(!message.get().isRead()) {
+                Chat chat = chatRepository.findById(chatMessage.getChat().getId()).get();
+                //no need to use ChatMessageRepository because of Casecad.All
+                chat.getMessages().remove(message.get());
+                message.get().setMessage("");
+                for (UserAccount user : chat.getUsers()) {
+                    messagingTemplate.convertAndSendToUser(user.getId().toString(), "/queue/messages", convertToChatMessageDTO(message.get()));
+                }
             }
         }
     }
@@ -153,6 +160,8 @@ public class ChatService {
         dto.setMessage(chatMessage.getMessage());
         dto.setChatId(chatMessage.getChat().getId());
         dto.setSenderId(chatMessage.getSender().getId());
+        dto.setSenderName(chatMessage.getSender().getUsername());
+        dto.setRead(chatMessage.isRead());
         return dto;
     }
 
@@ -192,11 +201,32 @@ public class ChatService {
         return new GroupDTO(group.getId(),group.getName(),listUsers);
     }
 
-   public ResponseEntity<List<ChatMessageDTO>> getMessages(Long ChatId) {
-        Chat chat = chatRepository.findById(ChatId).get();
+    public ResponseEntity<List<ChatMessageDTO>> getMessages(Long chatId,Long userID) {
+        Chat chat = chatRepository.findById(chatId).get();
         List<ChatMessageDTO> messagesDTO = new ArrayList<>();
+        setReadTrue(chatId,userID);
         for(ChatMessage chatMessage : chat.getMessages())
             messagesDTO.add(convertToChatMessageDTO(chatMessage));
         return new ResponseEntity<>(messagesDTO, HttpStatus.OK);
    }
+
+    public void setReadTrue(Long chatId,Long userID){
+        Chat chat = chatRepository.findById(chatId).get();
+        for(ChatMessage chatMessage : chat.getMessages())
+        {
+            if(Objects.equals(chatMessage.getSender().getId(), userID))
+                continue;
+            chatMessage.setRead(true);
+        }
+    }
+
+    public void checkOnline(ChatMessage chatMessage) {
+        List<UserAccount> users =chatMessage.getChat().getUsers();
+        for(UserAccount user : users) {
+            if(user.getId().equals(chatMessage.getSender().getId()))
+                continue;
+            messagingTemplate.convertAndSendToUser(user.getId().toString(), "/queue/messages", "on Chat?");
+        }
+    }
+
 }
