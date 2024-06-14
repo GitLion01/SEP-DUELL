@@ -37,6 +37,9 @@ public class UserAccount implements UserDetails {
     private Integer leaderboardPoints = 0;
     private Integer sepCoins = 500;
     private byte[] image;
+
+    private String status = "offline"; // Standardstatus ist offline
+
     @Enumerated(EnumType.STRING)
     private UserRole role;
     private Boolean locked = false;

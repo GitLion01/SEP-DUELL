@@ -33,6 +33,9 @@ const Startseite = () => {
         <div className="logout-button">
           <button onClick={handleLogout}>Abmelden</button>
         </div>
+        <div className="leaderboard-button"> {/* Neue Zeile */}
+          <button onClick={() => navigate('/leaderboard')}>Leaderboard</button> {/* Neue Zeile */}
+        </div> {/* Neue Zeile */}
       </header>
       <main>
         <div className="centered-content">
