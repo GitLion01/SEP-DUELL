@@ -68,13 +68,14 @@ public class ChatService {
         return new ResponseEntity<>(group.getId(),HttpStatus.OK);
     }
 
-    public void sendMessage(ChatMessage chatMessage,Long userId) {
+    public void sendMessage(ChatMessage chatMessage,Long userId,Long ChatId) {
         try {
             for (Chat chat : chatRepository.findAll()) {
                 if (Objects.equals(chatMessage.getChat().getId(), chat.getId()))
                 {
-                    if(!chatMessage.getSender().getId().equals(userId))
+                    if(!chatMessage.getSender().getId().equals(userId) && chatMessage.getChat().getId().equals(ChatId)) {
                         chatMessage.setRead(true);
+                    }
                     chat.getMessages().add(chatMessage);
                     //we do not need to add it in the chatMessageRepository  it will be added automatically
                     chatRepository.save(chat);
