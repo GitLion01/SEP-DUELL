@@ -76,6 +76,7 @@ public class GameService {
         gameRepository.save(newGame);
         System.out.println("Game gespeichert");
 
+
             for(UserAccount user : newGame.getUsers()) {
                 messagingTemplate.convertAndSendToUser(user.getId().toString(), "/queue/create", newGame);
             }
@@ -105,7 +106,6 @@ public class GameService {
         List<Card> cards = deck.getCards();
         Collections.shuffle(deck.getCards()); // mischt das Deck
         List<CardInstance> cardInstances = new ArrayList<>();
-        index = 1L;
         for(Card card : cards){
             CardInstance cardInstance = new CardInstance();
             cardInstance.setId(index);
@@ -128,7 +128,7 @@ public class GameService {
         while (iterator.hasNext() && count < 5) {
             CardInstance card = iterator.next(); // Hohlt die nächste Karte aus dem Deck
             user.getPlayerState().getHandCards().add(card); // Fügt die Karte der Hand des Spielers hinzu
-            // Entfernt die Karte aus dem Deck
+            deckIndex++;
             count++; // Inkrementiert den Zähler für die Anzahl der gezogenen Karten
         }
 
@@ -154,12 +154,9 @@ public class GameService {
 
         gameRepository.save(game);
 
-        List<UserAccount> users = game.getUsers();
-
-
         for(UserAccount player : game.getUsers()) {
             System.out.println("Player: " + player.getId());
-            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/selectDeck", Arrays.asList(game, users));
+            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/selectDeck", game);
         }
 
     }
@@ -176,7 +173,7 @@ public class GameService {
 
         Game game = optionalGame.get();
         UserAccount userAccount = optionalUserAccount.get();
-        if(!game.getUsers().get(game.getCurrentTurn()).equals(userAccount)){// prüft ob der User am zug ist
+        if(!game.getUsers().get(game.getCurrentTurn()).equals(userAccount) || deckIndex == userAccount.getPlayerState().getDeck().getCards().size()){// prüft ob der User am zug ist
             return;
         }
         Deck deck = userAccount.getPlayerState().getDeck();
