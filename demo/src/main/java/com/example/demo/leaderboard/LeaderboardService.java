@@ -31,3 +31,4 @@ public class LeaderboardService {
         messagingTemplate.convertAndSend("/topic/leaderboard", user);   ///topic/leaderboard   //user-Objekt = alle user nicht eine einzelne userid
     }
 }
+//test test
