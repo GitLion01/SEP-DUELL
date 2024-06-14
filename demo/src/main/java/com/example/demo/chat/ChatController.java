@@ -27,8 +27,7 @@ public class ChatController {
     }
 
     @GetMapping("/get.messages")
-    public ResponseEntity<List<ChatMessageDTO>> getChat(@RequestParam Long chatId)
-    {
+    public ResponseEntity<List<ChatMessageDTO>> getChat(@RequestParam Long chatId) {
         return chatService.getMessages(chatId);
     }
 
