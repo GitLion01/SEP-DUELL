@@ -21,7 +21,16 @@ const LeaderboardPage = () => {
                 console.log('Connected to WebSocket server');
                 newClient.subscribe('/topic/leaderboard', message => {
                     const updatedUser = JSON.parse(message.body);
-                    setLeaderboard(prev => prev.map(user => user.id === updatedUser.id ? updatedUser : user));
+                    setLeaderboard(prev => {
+                        const index = prev.findIndex(user => user.id === updatedUser.id);
+                        if (index !== -1) {
+                            const updatedLeaderboard = [...prev];
+                            updatedLeaderboard[index] = updatedUser;
+                            return updatedLeaderboard;
+                        } else {
+                            return [...prev, updatedUser];
+                        }
+                    });
                 });
             },
             onStompError: (frame) => {
