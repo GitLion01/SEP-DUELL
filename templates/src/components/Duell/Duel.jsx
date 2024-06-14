@@ -40,6 +40,17 @@ const Duel = () => {
   }, [users, game, id]);
 
   useEffect(() => {
+    if (game.users[0].id === id) {
+      setPlayerState(game.users[0].playerState);
+      setOpponentState(game.users[1].playerState);
+    }
+    else {
+      setPlayerState(game.users[1].playerState);
+      setOpponentState(game.users[0].playerState);
+    }
+  }, [id]);
+
+  useEffect(() => {
     if (client) {
       client.subscribe(`/user/${id}/queue/game`, (message) => {
         const response = JSON.parse(message.body);

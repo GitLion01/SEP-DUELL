@@ -3,12 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { WebSocketContext} from "../../WebSocketProvider";
 
-const  DeckSelection = () => {
-  const { client, setGame, setUsers } = useContext(WebSocketContext); // Verwende den Kontext
+const DeckSelection = () => {
+  const { client } = useContext(WebSocketContext); // Verwende den Kontext
   const [decks, setDecks] = useState([]);
   const [selectedDeck, setSelectedDeck] = useState(null);
   const [id, setId] = useState(null);
   const [gameId, setGameId] = useState('');
+  const [game, setGame] = useState(null);
   const navigate = useNavigate(); // Use navigate to redirect
 
   useEffect(() => {
@@ -42,24 +43,18 @@ const  DeckSelection = () => {
     if (client && client.connected) {
       const subscription = client.subscribe(`/user/${id}/queue/selectDeck`, (message) => {
         const response = JSON.parse(message.body);
-        console.log('Users in game: ', response[1]);
-        setUsers(response[1]);
-        setGame(response[0]);
-
-        console.log('response from server: ', response);
-        console.log('users saved in State: ', response[1]);
-        console.log('game saved in State: ', response[0]);
-
-        if (response[0].ready === true) {
+        console.log(response);
+        console.log(response.ready);
+        if (response.id === gameId && response.ready === true) {
+          localStorage.setItem('game', response);
+          setGame(response);
           navigate('/duel');
         }
       });
-
-      return () => subscription.unsubscribe(); // Cleanup function
+      //return () => subscription.unsubscribe(); // Cleanup function
     }
   }, [client, id, gameId, navigate]);
 
-  // Überwachung der Statusänderungen von game und users
 
   const handleSelectDeck = (deckId) => {
     if (client && client.connected) { // Überprüfe, ob client existiert und verbunden ist

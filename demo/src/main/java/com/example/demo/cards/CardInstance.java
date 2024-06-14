@@ -1,5 +1,4 @@
 package com.example.demo.cards;
-import com.example.demo.decks.Deck;
 import com.example.demo.game.PlayerState;
 import com.example.demo.user.UserAccount;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -7,8 +6,6 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.ArrayList;
-import java.util.List;
 
 @Getter
 @Setter
