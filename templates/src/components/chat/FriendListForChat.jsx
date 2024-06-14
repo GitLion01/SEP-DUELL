@@ -13,12 +13,6 @@ function FriendListForChat({ onSelect, onCreateGroupClick, fetchGroups}) {
     return await response.json();
   }, [userId]);
 
-  const fetchGroups = useCallback(async () => {
-    const url = `http://localhost:8080/get.groups?userId=${userId}`;
-    const response = await fetch(url);
-    if (!response.ok) throw new Error('Network response was not ok');
-    return await response.json();
-  }, [userId]);
 
   useEffect(() => {
     const fetchData = async () => {
