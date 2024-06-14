@@ -25,4 +25,6 @@ public class ChatMessage {
     @ManyToOne
     @JoinColumn(name = "message_of_user")
     private UserAccount sender;
+
+    private boolean read;
 }

@@ -16,6 +16,7 @@ public class ChatController {
     private final ChatService chatService;
 
     @PostMapping("/create.chat")
+    //der sender ist userId1
     public ResponseEntity<Long> createChat(@RequestParam Long userId1, @RequestParam Long userId2)
     {
         return chatService.createChat(userId1,userId2);
@@ -27,9 +28,9 @@ public class ChatController {
     }
 
     @GetMapping("/get.messages")
-    public ResponseEntity<List<ChatMessageDTO>> getChat(@RequestParam Long chatId)
+    public ResponseEntity<List<ChatMessageDTO>> getChat(@RequestParam Long chatId,@RequestParam Long userID)
     {
-        return chatService.getMessages(chatId);
+        return chatService.getMessages(chatId,userID);
     }
 
     @GetMapping("/get.groups")
@@ -61,6 +62,16 @@ public class ChatController {
     public void deleteMessage(@Payload ChatMessage chatMessage)
     {
         chatService.deleteMessage(chatMessage);
+    }
+
+    @PutMapping("/setRead")
+    public void setRead(@RequestParam Long chatId,@RequestParam Long userID){
+        chatService.setReadTrue(chatId, userID);
+    }
+
+    @MessageMapping("/message-received")
+    public void messageReceived(@Payload ChatMessage chatMessage,Long userID) {
+        chatService.messageReceived(chatMessage,userID);
     }
 
 }
