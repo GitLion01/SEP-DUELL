@@ -18,7 +18,7 @@ function ChatWindow({ chatTarget, type, chatId }) {
       id: message.id,
       message: message.message,
       chat: { id: message.chatId },
-      sender: { id: message.senderId },
+      sender: { id: message.senderId, username: message.senderUsername }, // Benutzername hinzufügen
       timestamp: message.timestamp,
       read: message.read
     };
@@ -144,7 +144,7 @@ function ChatWindow({ chatTarget, type, chatId }) {
 
   return (
     <div className="chat-window">
-      <h2>Chat mit {type === 'friend' ? chatTarget.username : chatTarget.name}</h2>
+      <h2>{type === 'friend' ? 'Chat mit: ' + chatTarget.username : 'Gruppe: ' + chatTarget.name}</h2>
       <div className="chat-messages imessage">
         {messages.length === 0 ? (
           <p>Keine Nachrichten vorhanden.</p>

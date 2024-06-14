@@ -1,10 +1,8 @@
-// components/chat/CreateGroupForm.jsx
 import React, { useState, useEffect, useCallback } from 'react';
 import './CreateGroupForm.css';
 import { ToastContainer, toast } from 'react-toastify';
 
-
-function CreateGroupForm({ onCreateGroup }) {
+function CreateGroupForm({ onCreateGroup, fetchGroups }) {
   const [groupName, setGroupName] = useState('');
   const [selectedFriends, setSelectedFriends] = useState([]);
   const [friends, setFriends] = useState([]);
@@ -33,18 +31,20 @@ function CreateGroupForm({ onCreateGroup }) {
 
   const handleFriendToggle = (friend) => {
     setSelectedFriends((prevSelectedFriends) => {
-      if (prevSelectedFriends.includes(friend)) {
-        return prevSelectedFriends.filter(f => f !== friend);
+      if (prevSelectedFriends.includes(friend.id)) {
+        return prevSelectedFriends.filter(f => f !== friend.id);
       } else {
-        return [...prevSelectedFriends, friend];
+        return [...prevSelectedFriends, friend.id];
       }
     });
   };
 
-  const handleSubmit = (event) => { //ruft die handleCreateGroup von ChatPage.jsx 
+  const handleSubmit = async (event) => {
     event.preventDefault();
     if (groupName.trim() && selectedFriends.length) {
-      onCreateGroup({ name: groupName, members: selectedFriends });
+      const newGroup = { name: groupName, userIds: [parseInt(userId), ...selectedFriends] };
+      await onCreateGroup(newGroup);
+      fetchGroups();
       setGroupName('');
       setSelectedFriends([]);
     } else {
@@ -71,7 +71,7 @@ function CreateGroupForm({ onCreateGroup }) {
               type="checkbox"
               value={friend.id}
               onChange={() => handleFriendToggle(friend)}
-              checked={selectedFriends.includes(friend)}
+              checked={selectedFriends.includes(friend.id)}
             />
             {friend.username}
           </label>
