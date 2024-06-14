@@ -76,7 +76,6 @@ public class GameService {
         gameRepository.save(newGame);
         System.out.println("Game gespeichert");
 
-
             for(UserAccount user : newGame.getUsers()) {
                 messagingTemplate.convertAndSendToUser(user.getId().toString(), "/queue/create", newGame);
             }
@@ -87,7 +86,8 @@ public class GameService {
 
 
 
-    private Long index = 1L; // damit in jeder methode der index => id aktuelle bleibt
+    private Long index; // damit in jeder methode der index => id aktuelle bleibt
+    private int deckIndex = 0;
 
     public void selectDeck(DeckSelectionRequest request) {
         System.out.println("SERVICE ERREICHT");
@@ -105,6 +105,7 @@ public class GameService {
         List<Card> cards = deck.getCards();
         Collections.shuffle(deck.getCards()); // mischt das Deck
         List<CardInstance> cardInstances = new ArrayList<>();
+        index = 1L;
         for(Card card : cards){
             CardInstance cardInstance = new CardInstance();
             cardInstance.setId(index);
@@ -127,7 +128,7 @@ public class GameService {
         while (iterator.hasNext() && count < 5) {
             CardInstance card = iterator.next(); // Hohlt die nächste Karte aus dem Deck
             user.getPlayerState().getHandCards().add(card); // Fügt die Karte der Hand des Spielers hinzu
-            iterator.remove(); // Entfernt die Karte aus dem Deck
+            // Entfernt die Karte aus dem Deck
             count++; // Inkrementiert den Zähler für die Anzahl der gezogenen Karten
         }
 
@@ -153,9 +154,12 @@ public class GameService {
 
         gameRepository.save(game);
 
+        List<UserAccount> users = game.getUsers();
+
+
         for(UserAccount player : game.getUsers()) {
             System.out.println("Player: " + player.getId());
-            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/selectDeck", game);
+            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/selectDeck", Arrays.asList(game, users));
         }
 
     }
@@ -178,7 +182,8 @@ public class GameService {
         Deck deck = userAccount.getPlayerState().getDeck();
         List<CardInstance> handCards = userAccount.getPlayerState().getHandCards();
 
-        Card card = deck.getCards().get(0);
+        Card card = deck.getCards().get(deckIndex);
+        deckIndex++;
         CardInstance cardInstance = new CardInstance();
         cardInstance.setId(index);
         cardInstance.setCard(card);

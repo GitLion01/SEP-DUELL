@@ -1,35 +1,55 @@
 import React, { useEffect, useState } from 'react';
 import { toast, ToastContainer } from 'react-toastify';
+import { useLocation, useNavigate } from 'react-router-dom';
 import Card from "../card";
 
 
-const Duel = ({client, gameId, game}) => {
+const Duel = () => {
+  const location = useLocation(); // Verwenden Sie useLocation, um auf den übergebenen Zustand zuzugreifen
+  const navigate = useNavigate();
+  const { client, gameId, game, users } = location.state || {}; // Extrahieren Sie die Daten aus dem Zustand
+
   const [timer, setTimer] = useState(120);
-  const [playerState, setPlayerState] = useState({ handCards: [], fieldCards: [], life: 50 });
-  const [opponentState, setOpponentState] = useState({ handCards: [], fieldCards: [], life: 50 });
+  const [playerState, setPlayerState] = useState(null);
+  const [opponentState, setOpponentState] = useState(null);
   const [isAttackMode, setIsAttackMode] = useState(false);
-  const [isSetCardMode, setIsSetCardMode] = useState(false); // Zustand für das Setzen von Karten
+  const [isSetCardMode, setIsSetCardMode] = useState(false);
   const [selectedAttacker, setSelectedAttacker] = useState(null);
   const [selectedTarget, setSelectedTarget] = useState(null);
-  const [currentTurn, setCurrentTurn] = useState(0); // currentTurn-Index
+  const [currentTurn, setCurrentTurn] = useState(0);
   const id = localStorage.getItem('id');
+
+
+  // Initialisieren des Spielerzustands aus dem übergebenen Zustand
+  useEffect(() => {
+    if (users) {
+      if (users[0].id === parseInt(id)) {
+        setPlayerState(users[0].playerState);
+        setOpponentState(users[1].playerState);
+      } else {
+        setPlayerState(users[1].playerState);
+        setOpponentState(users[0].playerState);
+      }
+      setCurrentTurn(game.currentTurn); // initialisieren Sie den currentTurn
+    }
+
+  }, [users, game, id]);
 
   useEffect(() => {
     if (client) {
       client.subscribe(`/user/${id}/queue/game`, (message) => {
-        const action = JSON.parse(message.body);
-        if (action) {
-          const game = action;
-          if (action.users[0].id === id) {
-            setPlayerState(game.users[0].playerState);
-            setOpponentState(game.users[1].playerState);
+        const response = JSON.parse(message.body);
+        if (response) {
+          if (response[1][0].id === id) {
+            setPlayerState(response[1][0].playerState);
+            setOpponentState(response[1][1].playerState);
           }
           else {
-            setPlayerState(game.users[1].playerState);
-            setOpponentState(game.users[0].playerState);
+            setPlayerState(response[1][1].playerState);
+            setPlayerState(response[1][0].playerState);
           }
-          if (game.currentTurn !== currentTurn) {
-            setCurrentTurn(game.currentTurn);
+          if (response[0].currentTurn !== currentTurn) {
+            setCurrentTurn(response[0].currentTurn);
             resetTimer(); // Setze den Timer zurück, wenn sich der currentTurn ändert
           }        }
       });
@@ -158,7 +178,7 @@ const Duel = ({client, gameId, game}) => {
         <div className="player-field">
           <h3>Your Field</h3>
           <div className="cards">
-            {playerState.fieldCards.map((card, index) => (
+            {playerState?.fieldCards?.map((card, index) => (
                 <div key={index} className="card">
                   <Card card={card} onCardClick={() => selectAttackingCard(index)}/>
                 </div>
@@ -168,7 +188,7 @@ const Duel = ({client, gameId, game}) => {
         <div className="player-hand">
           <h3>Your Hand</h3>
           <div className="cards">
-            {playerState.handCards.map((card, index) => (
+            {playerState?.handCards?.map((card, index) => (
                 <div key={index} className="card">
                   <Card card={card} onCardClick={() => handleSetCard(index)}/>
                 </div>
@@ -178,7 +198,7 @@ const Duel = ({client, gameId, game}) => {
         <div className="opponent-field">
           <h3>Opponent's Field</h3>
           <div className="cards">
-            {opponentState.fieldCards.map((card, index) => (
+            {opponentState?.fieldCards?.map((card, index) => (
                 <div key={index} className="card">
                   <Card card={card} onCardClick={() => selectTargetCard(index)}/>
                 </div>
