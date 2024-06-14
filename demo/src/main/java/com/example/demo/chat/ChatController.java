@@ -14,9 +14,9 @@ import java.util.List;
 public class ChatController {
 
     private final ChatService chatService;
+    private final ChatRepository chatRepository;
 
     @PostMapping("/create.chat")
-    //der sender ist userId1
     public ResponseEntity<Long> createChat(@RequestParam Long userId1, @RequestParam Long userId2)
     {
         return chatService.createChat(userId1,userId2);
@@ -43,6 +43,13 @@ public class ChatController {
     @MessageMapping("/sendMessage")
     public void sendMessage(@Payload ChatMessage chatMessage)
     {
+        chatService.checkOnline(chatMessage);
+    }
+
+    @MessageMapping("/onChat")
+    public void onChat(@Payload ChatMessage chatMessage)
+    {
+        chatService.messageReceived(chatMessage);
         chatService.sendMessage(chatMessage);
     }
 
@@ -62,16 +69,6 @@ public class ChatController {
     public void deleteMessage(@Payload ChatMessage chatMessage)
     {
         chatService.deleteMessage(chatMessage);
-    }
-
-    @PutMapping("/setRead")
-    public void setRead(@RequestParam Long chatId,@RequestParam Long userID){
-        chatService.setReadTrue(chatId, userID);
-    }
-
-    @MessageMapping("/message-received")
-    public void messageReceived(@Payload ChatMessage chatMessage,Long userID) {
-        chatService.messageReceived(chatMessage,userID);
     }
 
 }

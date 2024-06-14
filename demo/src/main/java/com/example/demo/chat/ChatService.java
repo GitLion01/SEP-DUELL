@@ -155,6 +155,7 @@ public class ChatService {
         dto.setChatId(chatMessage.getChat().getId());
         dto.setSenderId(chatMessage.getSender().getId());
         dto.setSenderName(chatMessage.getSender().getUsername());
+        dto.setRead(chatMessage.isRead());
         return dto;
     }
 
@@ -197,9 +198,9 @@ public class ChatService {
     public ResponseEntity<List<ChatMessageDTO>> getMessages(Long chatId,Long userID) {
         Chat chat = chatRepository.findById(chatId).get();
         List<ChatMessageDTO> messagesDTO = new ArrayList<>();
+        setReadTrue(chatId,userID);
         for(ChatMessage chatMessage : chat.getMessages())
             messagesDTO.add(convertToChatMessageDTO(chatMessage));
-        setReadTrue(chatId,userID);
         return new ResponseEntity<>(messagesDTO, HttpStatus.OK);
    }
 
@@ -213,11 +214,18 @@ public class ChatService {
         }
     }
 
-    public void messageReceived(ChatMessage chatMessage,Long userID) {
-        if(!chatMessage.getSender().getId().equals(userID)) {
-            ChatMessage message= chatMessageRepository.findById(chatMessage.getId()).get();
-            message.setRead(true);
-            messagingTemplate.convertAndSendToUser(chatMessage.getSender().getId().toString(),"/queue/messages", convertToChatMessageDTO(chatMessage));
+    public void checkOnline(ChatMessage chatMessage) {
+        List<UserAccount> users =chatMessage.getChat().getUsers();
+        for(UserAccount user : users) {
+            if(user.getId().equals(chatMessage.getSender().getId()))
+                continue;
+            messagingTemplate.convertAndSendToUser(user.getId().toString(), "/queue/messages", "on Chat?");
         }
     }
+
+    public void messageReceived(ChatMessage chatMessage) {
+            ChatMessage message= chatMessageRepository.findById(chatMessage.getId()).get();
+            message.setRead(true);
+    }
+
 }
