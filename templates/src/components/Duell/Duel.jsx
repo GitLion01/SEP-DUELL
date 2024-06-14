@@ -6,7 +6,6 @@ import {WebSocketContext} from "../../WebSocketProvider";
 
 
 const Duel = () => {
-  const location = useLocation(); // Verwenden Sie useLocation, um auf den übergebenen Zustand zuzugreifen
   const navigate = useNavigate();
   const { client, game, users } = useContext(WebSocketContext);
 
