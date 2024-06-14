@@ -4,13 +4,11 @@ import axios from 'axios';
 import { WebSocketContext} from "../../WebSocketProvider";
 
 const  DeckSelection = () => {
-  const { client } = useContext(WebSocketContext); // Verwende den Kontext
+  const { client, setGame, setUsers } = useContext(WebSocketContext); // Verwende den Kontext
   const [decks, setDecks] = useState([]);
   const [selectedDeck, setSelectedDeck] = useState(null);
   const [id, setId] = useState(null);
   const [gameId, setGameId] = useState('');
-  const [game, setGame] = useState(null);
-  const [users, setUsers] = useState([]);
   const navigate = useNavigate(); // Use navigate to redirect
 
   useEffect(() => {
@@ -62,10 +60,6 @@ const  DeckSelection = () => {
   }, [client, id, gameId, navigate]);
 
   // Überwachung der Statusänderungen von game und users
-  useEffect(() => {
-    console.log('Updated game:', game);
-    console.log('Updated users:', users);
-  }, [game, users]);
 
   const handleSelectDeck = (deckId) => {
     if (client && client.connected) { // Überprüfe, ob client existiert und verbunden ist

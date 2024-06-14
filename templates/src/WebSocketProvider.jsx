@@ -7,7 +7,8 @@ export const WebSocketContext = createContext();
 
 export const WebSocketProvider = ({ children }) => {
     const [client, setClient] = useState(null);
-    const [chatClient, setChatClient] = useState(null); 
+    const [game, setGame] = useState(null);
+    const [users, setUsers] = useState([]);
 
     useEffect(() => {
 
@@ -49,41 +50,17 @@ export const WebSocketProvider = ({ children }) => {
 
         newClient.activate();
         setClient(newClient);
-        
-        const newChatClient = new Client({
-            brokerURL: 'ws://localhost:8080/chat',
-            webSocketFactory: () => new SockJS('http://localhost:8080/chat'),
-            reconnectDelay: 5000,
-            onConnect: () => {
-                console.log('Connected to chat WebSocket server');
-            },
-            onStompError: (frame) => {
-                console.error(`Chat broker reported error: ${frame.headers['message']}`);
-                console.error(`Additional details: ${frame.body}`);
-            },
-            onWebSocketError: (event) => {
-                console.error('Chat WebSocket error', event);
-            },
-            onWebSocketClose: (event) => {
-                console.error('Chat WebSocket closed', event);
-            },
-        });
-
-        newChatClient.activate();
-        setChatClient(newChatClient);
 
         return () => {
             if (newClient) {
                 newClient.deactivate();
             }
-            if (newChatClient) {
-                newChatClient.deactivate();
-            }
         };
+
     }, []);
 
     return (
-        <WebSocketContext.Provider value={{ client, chatClient }}>
+        <WebSocketContext.Provider value={{ client, game, setGame, users, setUsers }}>
             {children}
         </WebSocketContext.Provider>
     );
