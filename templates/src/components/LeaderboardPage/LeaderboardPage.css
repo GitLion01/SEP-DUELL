@@ -1,0 +1,53 @@
+/* src/components/LeaderboardPage/LeaderboardPage.css */
+.leaderboard {
+    width: 80%;
+    margin: auto;
+    text-align: center;
+    color: white; /* Setzt die Textfarbe auf weiß */
+}
+
+.leaderboard h1 {
+    color: white; /* Setzt die Textfarbe des Titels auf weiß */
+}
+
+.leaderboard-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.leaderboard-table th, .leaderboard-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    color: black; /* Setzt die Textfarbe der Tabellenzellen auf schwarz */
+    background-color: white; /* Setzt den Hintergrund der Tabellenzellen auf weiß */
+}
+
+.leaderboard-table th {
+    background-color: #4CAF50; /* Grüner Hintergrund für die Tabellenüberschriften */
+    color: white; /* Weißer Text für die Tabellenüberschriften */
+}
+
+.leaderboard-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.leaderboard-table tr:hover {
+    background-color: #ddd;
+}
+
+.leaderboard-table td.status {
+    text-transform: capitalize;
+}
+
+.status.online {
+    color: green;
+}
+
+.status.offline {
+    color: red;
+}
+
+.status.im-duell {
+    color: orange;
+}
