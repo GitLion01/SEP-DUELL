@@ -5,7 +5,6 @@ import com.example.demo.user.UserAccount;
 import com.example.demo.user.UserAccountRepository;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
-import org.apache.catalina.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -225,7 +224,7 @@ public class ChatService {
         for(UserAccount user : users) {
             if(user.getId().equals(chatMessage.getSender().getId()))
                 continue;
-            messagingTemplate.convertAndSendToUser(user.getId().toString(), "/queue/messages", "on Chat?");
+            messagingTemplate.convertAndSendToUser(user.getId().toString(), "/queue/messages", "on Chat?"+convertToChatMessageDTO(chatMessage));
         }
     }
 
