@@ -13,8 +13,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
-        config.enableSimpleBroker("/all","/specific","/user"); // Nachrichten werden an /all oder an /specific gesendet (Base URL für ausgehende Antworten)
-        config.setApplicationDestinationPrefixes("/app/create","/chat"); // Präfix für eingehende Nachrichten (Base URL für eingehende Anfragen)
+        config.enableSimpleBroker("/all","/specific","/user", "/topic"); // Nachrichten werden an /all oder an /specific gesendet (Base URL für ausgehende Antworten)
+        config.setApplicationDestinationPrefixes("/app/create","/chat", "/app"); // Präfix für eingehende Nachrichten (Base URL für eingehende Anfragen)
         config.setUserDestinationPrefix("/user");
     }
 

@@ -96,8 +96,8 @@ public class LoginController {
                 .orElse("Invalid token");
     }
 
-    @PostMapping("/logout")
-    public ResponseEntity<Map<String, String>> logout(@RequestBody Long userId) {
+    @PostMapping("/logout/{userId}")
+    public ResponseEntity<Map<String, String>> logout(@PathVariable Long userId) {
         leaderboardService.updateUserStatus(userId, "offline");
         SecurityContextHolder.clearContext();
         return ResponseEntity.ok(Map.of("status", "success", "message", "Logout successful."));
