@@ -24,6 +24,7 @@ public class ChatService {
     private final SimpMessagingTemplate messagingTemplate;
     private final GroupRepository groupRepository;
 
+
     public ResponseEntity<Long> createChat(Long userId1,Long userId2) {
         Optional<UserAccount> user1 = userAccountRepository.findById(userId1);
         Optional<UserAccount> user2 = userAccountRepository.findById(userId2);
@@ -153,6 +154,7 @@ public class ChatService {
         dto.setMessage(chatMessage.getMessage());
         dto.setChatId(chatMessage.getChat().getId());
         dto.setSenderId(chatMessage.getSender().getId());
+        dto.setSenderName(chatMessage.getSender().getUsername());
         return dto;
     }
 
@@ -192,11 +194,30 @@ public class ChatService {
         return new GroupDTO(group.getId(),group.getName(),listUsers);
     }
 
-   public ResponseEntity<List<ChatMessageDTO>> getMessages(Long ChatId) {
-        Chat chat = chatRepository.findById(ChatId).get();
+    public ResponseEntity<List<ChatMessageDTO>> getMessages(Long chatId,Long userID) {
+        Chat chat = chatRepository.findById(chatId).get();
         List<ChatMessageDTO> messagesDTO = new ArrayList<>();
         for(ChatMessage chatMessage : chat.getMessages())
             messagesDTO.add(convertToChatMessageDTO(chatMessage));
+        setReadTrue(chatId,userID);
         return new ResponseEntity<>(messagesDTO, HttpStatus.OK);
    }
+
+    public void setReadTrue(Long chatId,Long userID){
+        Chat chat = chatRepository.findById(chatId).get();
+        for(ChatMessage chatMessage : chat.getMessages())
+        {
+            if(Objects.equals(chatMessage.getSender().getId(), userID))
+                continue;
+            chatMessage.setRead(true);
+        }
+    }
+
+    public void messageReceived(ChatMessage chatMessage,Long userID) {
+        if(!chatMessage.getSender().getId().equals(userID)) {
+            ChatMessage message= chatMessageRepository.findById(chatMessage.getId()).get();
+            message.setRead(true);
+            messagingTemplate.convertAndSendToUser(chatMessage.getSender().getId().toString(),"/queue/messages", convertToChatMessageDTO(chatMessage));
+        }
+    }
 }

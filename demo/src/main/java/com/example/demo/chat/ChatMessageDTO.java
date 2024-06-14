@@ -15,4 +15,5 @@ public class ChatMessageDTO {
     private String message;
     private Long chatId;
     private Long senderId;
+    private String senderName;
 }
