@@ -34,13 +34,16 @@ public class PlayerState {
     private UserAccount user;
 
     @OneToMany
-    private List<CardInstance> cardsPlayed = new ArrayList<>();
+    private List<PlayerCard> cardsPlayed = new ArrayList<>();
 
     @OneToMany
-    private List<CardInstance> handCards = new ArrayList<>();
+    private List<PlayerCard> handCards = new ArrayList<>();
 
     @OneToMany
-    private List<CardInstance> fieldCards = new ArrayList<>();
+    private List<PlayerCard> fieldCards = new ArrayList<>();
+
+    @OneToMany
+    private List<PlayerCard> deckClone = new ArrayList<>();
 
 
     @OneToOne

@@ -13,12 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+
 
 
 @Transactional
@@ -31,10 +26,7 @@ public class GameService {
     private final SimpMessagingTemplate messagingTemplate;
     private final PlayerStateRepository playerStateRepository;
 
-    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-    private ScheduledFuture<?> timeoutTask;
-    // Ein ReentrantLock wird verwendet, um sicherzustellen, dass nur ein Thread zur gleichen Zeit auf kritische Abschnitte zugreifen kann
-    private final Lock gameLock = new ReentrantLock();
+
 
     @Autowired
     public GameService(GameRepository gameRepository,
@@ -96,7 +88,6 @@ public class GameService {
             messagingTemplate.convertAndSendToUser(user.getId().toString(), "/queue/create", Arrays.asList(newGame, users));
         }
 
-        resetTimer(newGame.getId());
     }
 
 
@@ -122,32 +113,49 @@ public class GameService {
         Deck deck = optionalDeck.get();
         List<Card> cards = deck.getCards();
         Collections.shuffle(deck.getCards()); // mischt das Deck
-        List<CardInstance> cardInstances = new ArrayList<>();
+        List<PlayerCard> playerCards = new ArrayList<>();
+        // Klonen der Card ind PlayerCard
         for(Card card : cards){
-            CardInstance cardInstance = new CardInstance();
-            cardInstance.setId(index);
-            cardInstance.setCard(card);
-            cardInstances.add(cardInstance);
-            index++;
+            PlayerCard playerCard = new PlayerCard();
+            playerCard.setName(card.getName());
+            playerCard.setAttackPoints(card.getAttackPoints());
+            playerCard.setDefensePoints(card.getDefensePoints());
+            playerCard.setDescription(card.getDescription());
+            playerCard.setImage(card.getImage());
+            playerCard.setRarity(card.getRarity());
+            playerCard.setPlayerState(deck.getUser().getPlayerState());
+            playerCards.add(playerCard);
         }
+
 
 
         System.out.println("VOR DECK SETZEN");
         UserAccount user = deck.getUser();
         user.getPlayerState().setDeck(deck);
         user.getPlayerState().setReady(true);
+        //Fortan wird mit diesem Deck Klon gearbeitet
+        user.getPlayerState().setDeckClone(playerCards);
 
         System.out.println("NACH DECK SETZEN");
 
         // setzt initial 5 Karten aus dem gemischten Deck auf die Hand
-        Iterator<CardInstance> iterator = cardInstances.iterator();
+        Iterator<PlayerCard> iterator = user.getPlayerState().getDeckClone().iterator();
         int count = 0;
         while (iterator.hasNext() && count < 5) {
-            CardInstance card = iterator.next(); // Hohlt die nächste Karte aus dem Deck
+            PlayerCard playerCard = iterator.next(); // Hohlt die nächste Karte aus dem Deck
+            user.getPlayerState().getHandCards().add(playerCard); // Fügt die Karte der Hand des Spielers hinzu
+            user.getPlayerState().getDeckClone().remove(playerCard);
+            count++; // Inkrementiert den Zähler für die Anzahl der gezogenen Karten
+        }
+
+        /*Iterator<PlayerCard> iterator = playerCards.iterator();
+        int count = 0;
+        while (iterator.hasNext() && count < 5) {
+            PlayerCard card = iterator.next(); // Hohlt die nächste Karte aus dem Deck
             user.getPlayerState().getHandCards().add(card); // Fügt die Karte der Hand des Spielers hinzu
             deckIndex++;
             count++; // Inkrementiert den Zähler für die Anzahl der gezogenen Karten
-        }
+        }*/
 
         System.out.println("VOR SPEICHERN DES USERS");
         playerStateRepository.save(user.getPlayerState());
@@ -176,7 +184,6 @@ public class GameService {
             messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/selectDeck", game);
         }
 
-        resetTimer(game.getId());
 
     }
 
@@ -196,16 +203,20 @@ public class GameService {
             return;
         }
         Deck deck = userAccount.getPlayerState().getDeck();
-        List<CardInstance> handCards = userAccount.getPlayerState().getHandCards();
+        List<PlayerCard> handCards = userAccount.getPlayerState().getHandCards();
 
-        Card card = deck.getCards().get(deckIndex);
+
+        // ersetzt den unteren Kommentar
+        handCards.add(deck.getUser().getPlayerState().getDeckClone().get(0));
+        deck.getUser().getPlayerState().getDeckClone().remove(0);
+
+        /*Card card = deck.getCards().get(deckIndex);
         deckIndex++;
-        CardInstance cardInstance = new CardInstance();
-        cardInstance.setId(index);
-        cardInstance.setCard(card);
+        PlayerCard playerCard = new PlayerCard();
+        playerCard.setCard(card);
 
         handCards.add(cardInstance);
-        deck.getCards().remove(deck.getCards().get(0));
+        deck.getCards().remove(deck.getCards().get(0));*/
 
         game.setCurrentTurn(game.getUsers().get(0).equals(userAccount) ? 1 : 0);
 
@@ -215,9 +226,7 @@ public class GameService {
             messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", game);
         }
 
-        // Starte den Timer am Ende der Methode
-        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-        scheduler.schedule(() -> handleTimeout(request.getGameId()), 120, TimeUnit.SECONDS);
+
 
 
     }
@@ -238,7 +247,7 @@ public class GameService {
         }
 
         userAccount.getPlayerState().getFieldCards().add(userAccount.getPlayerState().getHandCards().get(request.getCardIndex())); // Fügt Karte aus Hand dem Feld hinzu
-        CardInstance removed = userAccount.getPlayerState().getHandCards().remove(request.getCardIndex()); // Löscht Karte aus Hand
+        PlayerCard removed = userAccount.getPlayerState().getHandCards().remove(request.getCardIndex()); // Löscht Karte aus Hand
         userAccount.getPlayerState().getCardsPlayed().add(removed); // Fügt die Karte den gespielten Karten hinzu
 
         game.setCurrentTurn(game.getUsers().get(0).equals(userAccount) ? 1 : 0);
@@ -249,7 +258,6 @@ public class GameService {
             messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", game);
         }
 
-        resetTimer(game.getId());
     }
 
 
@@ -275,7 +283,6 @@ public class GameService {
             messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", game);
         }
 
-        resetTimer(game.getId());
     }
 
     public void attackCard(AttackCardRequest request) {
@@ -293,15 +300,15 @@ public class GameService {
         if(!game.getUsers().get(game.getCurrentTurn()).equals(attacker) || defender.getPlayerState().getFieldCards().isEmpty()){
             return;
         }
-        CardInstance attackerCard = attacker.getPlayerState().getHandCards().get(request.getAttackerIndex());
-        CardInstance target = defender.getPlayerState().getHandCards().get(request.getTargetIndex());
+        PlayerCard attackerCard = attacker.getPlayerState().getHandCards().get(request.getAttackerIndex());
+        PlayerCard target = defender.getPlayerState().getHandCards().get(request.getTargetIndex());
 
-        if(attackerCard.getCard().getAttackPoints() > target.getCard().getDefensePoints()){
+        if(attackerCard.getAttackPoints() > target.getDefensePoints()){
             defender.getPlayerState().getFieldCards().remove(request.getTargetIndex()); // entfernt die Karte vom Feld des Gegners
-            attacker.getPlayerState().setDamage(attacker.getPlayerState().getDamage() + attackerCard.getCard().getDefensePoints()); // erhöht den Damage Counter des Angreifers
+            attacker.getPlayerState().setDamage(attacker.getPlayerState().getDamage() + attackerCard.getDefensePoints()); // erhöht den Damage Counter des Angreifers
         }else{
-            target.getCard().setDefensePoints(target.getCard().getDefensePoints() - attackerCard.getCard().getAttackPoints()); // zieht Angriffspunkte von Verteidigungspunkte ab
-            attacker.getPlayerState().setDamage(attacker.getPlayerState().getDamage() + attackerCard.getCard().getAttackPoints()); // erhöht den Damage Counter des Angreifers
+            target.setDefensePoints(target.getDefensePoints() - attackerCard.getAttackPoints()); // zieht Angriffspunkte von Verteidigungspunkte ab
+            attacker.getPlayerState().setDamage(attacker.getPlayerState().getDamage() + attackerCard.getAttackPoints()); // erhöht den Damage Counter des Angreifers
         }
 
         game.setCurrentTurn(game.getUsers().get(0).equals(attacker) ? 1 : 0);
@@ -312,7 +319,6 @@ public class GameService {
             messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", game);
         }
 
-        resetTimer(game.getId());
 
     }
 
@@ -331,15 +337,15 @@ public class GameService {
         if(!game.getUsers().get(game.getCurrentTurn()).equals(attacker) || !defender.getPlayerState().getFieldCards().isEmpty()){
             return;
         }
-        CardInstance attackerCard = attacker.getPlayerState().getHandCards().get(request.getAttackerCardIndex());
+        PlayerCard attackerCard = attacker.getPlayerState().getHandCards().get(request.getAttackerCardIndex());
 
-        if(attackerCard.getCard().getAttackPoints() > defender.getPlayerState().getLifePoints()){
-            attacker.getPlayerState().setDamage(attacker.getPlayerState().getDamage() + attackerCard.getCard().getDefensePoints()); // erhöht den Damage Counter des Angreifers
+        if(attackerCard.getAttackPoints() > defender.getPlayerState().getLifePoints()){
+            attacker.getPlayerState().setDamage(attacker.getPlayerState().getDamage() + attackerCard.getDefensePoints()); // erhöht den Damage Counter des Angreifers
             attacker.getPlayerState().setWinner(true);
             terminateMatch(request.getGameId(), attacker.getId(), defender.getId());
         }else{
-            defender.getPlayerState().setLifePoints((defender.getPlayerState().getLifePoints() - attackerCard.getCard().getAttackPoints())); // zieht Angriffspunkte von Lebenspunkte ab
-            attacker.getPlayerState().setDamage(attacker.getPlayerState().getDamage() + attackerCard.getCard().getAttackPoints()); // erhöht den Damage Counter des Angreifers
+            defender.getPlayerState().setLifePoints((defender.getPlayerState().getLifePoints() - attackerCard.getAttackPoints())); // zieht Angriffspunkte von Lebenspunkte ab
+            attacker.getPlayerState().setDamage(attacker.getPlayerState().getDamage() + attackerCard.getAttackPoints()); // erhöht den Damage Counter des Angreifers
         }
 
         game.setCurrentTurn(game.getUsers().get(0).equals(attacker) ? 1 : 0);
@@ -350,7 +356,7 @@ public class GameService {
             messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", game);
         }
 
-        resetTimer(game.getId());
+
 
     }
 
@@ -369,13 +375,13 @@ public class GameService {
             return;
         }
 
-        List<CardInstance> hand = user.getPlayerState().getHandCards();
-        List<CardInstance> field = user.getPlayerState().getFieldCards();
-        CardInstance normal1 = field.get(request.getNormalCardsIndex().get(0));
-        CardInstance normal2 = field.get(request.getNormalCardsIndex().get(1));
-        CardInstance rare = hand.get(request.getRareCardIndex());
+        List<PlayerCard> hand = user.getPlayerState().getHandCards();
+        List<PlayerCard> field = user.getPlayerState().getFieldCards();
+        PlayerCard normal1 = field.get(request.getNormalCardsIndex().get(0));
+        PlayerCard normal2 = field.get(request.getNormalCardsIndex().get(1));
+        PlayerCard rare = hand.get(request.getRareCardIndex());
 
-        if(rare.getCard().getRarity() == Rarity.RARE){
+        if(rare.getRarity() == Rarity.RARE){
             return;
         }
 
@@ -392,7 +398,6 @@ public class GameService {
             messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", game);
         }
 
-        resetTimer(game.getId());
 
     }
 
@@ -409,14 +414,14 @@ public class GameService {
         if(!game.getUsers().get(0).equals(user) || request.getNormalCardsIndex().size() != 3) {
             return;
         }
-        List<CardInstance> hand = user.getPlayerState().getHandCards();
-        List<CardInstance> field = user.getPlayerState().getFieldCards();
-        CardInstance card1 = field.get(request.getNormalCardsIndex().get(0));
-        CardInstance card2 = field.get(request.getNormalCardsIndex().get(1));
-        CardInstance card3 = field.get(request.getNormalCardsIndex().get(2));
-        CardInstance legendary = hand.get(request.getLegendaryCardIndex());
+        List<PlayerCard> hand = user.getPlayerState().getHandCards();
+        List<PlayerCard> field = user.getPlayerState().getFieldCards();
+        PlayerCard card1 = field.get(request.getNormalCardsIndex().get(0));
+        PlayerCard card2 = field.get(request.getNormalCardsIndex().get(1));
+        PlayerCard card3 = field.get(request.getNormalCardsIndex().get(2));
+        PlayerCard legendary = hand.get(request.getLegendaryCardIndex());
 
-        if(legendary.getCard().getRarity() == Rarity.LEGENDARY){
+        if(legendary.getRarity() == Rarity.LEGENDARY){
             return;
         }
 
@@ -434,15 +439,14 @@ public class GameService {
             messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", game);
         }
 
-        resetTimer(game.getId());
+
 
 
     }
 
 
     public void terminateMatch(Long gameId, Long userA, Long userB) {
-        gameLock.lock(); // stellt sicher, dass nur ein Thread zur gleichen Zeit ausgeführt wird
-        try {
+
             Optional<Game> optionalGame = gameRepository.findById(gameId);
             Optional<UserAccount> optionalUserA = userAccountRepository.findById(userA);
             Optional<UserAccount> optionalUserB = userAccountRepository.findById(userB);
@@ -479,41 +483,11 @@ public class GameService {
             gameRepository.delete(game);
 
             //TODO: Alle Daten zurücksetzten (Deck, Cards, etc)
-        }finally {
-            gameLock.unlock();
-        }
+
     }
 
 
-    public void handleTimeout(Long gameId) {
-        gameLock.lock(); // stellt sicher, dass nur ein Thread zur gleichen Zeit ausgeführt wird
-        try {
-            Optional<Game> optionalGame = gameRepository.findById(gameId);
-            if (optionalGame.isPresent()) {
-                Game game = optionalGame.get();
-                if(!game.getIsTerminated()) {
-                    game.setIsTerminated(true);
-                    gameRepository.save(game);
-                    System.out.println("Timeout für Spiel " + gameId + " erreicht.");
-                    terminateMatch(gameId, game.getUsers().getFirst().getId(), game.getUsers().getLast().getId());
-                }
-            }
-        }finally {
-            gameLock.unlock();
-        }
-    }
 
-    private void resetTimer(Long gameId) {
-        gameLock.lock(); // stellt sicher, dass nur ein Thread zur gleichen Zeit ausgeführt wird
-        try {
-            if (timeoutTask != null) {
-                timeoutTask.cancel(false);
-            }
-            timeoutTask = scheduler.schedule(() -> handleTimeout(gameId), 120, TimeUnit.SECONDS);
-        } finally {
-            gameLock.unlock();
-        }
-    }
 
 
 
