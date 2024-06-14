@@ -87,7 +87,8 @@ public class GameService {
 
 
 
-    private Long index = 1L; // damit in jeder methode der index => id aktuelle bleibt
+    private Long index; // damit in jeder methode der index => id aktuelle bleibt
+    private int deckIndex = 0;
 
     public void selectDeck(DeckSelectionRequest request) {
         System.out.println("SERVICE ERREICHT");
@@ -127,7 +128,7 @@ public class GameService {
         while (iterator.hasNext() && count < 5) {
             CardInstance card = iterator.next(); // Hohlt die nächste Karte aus dem Deck
             user.getPlayerState().getHandCards().add(card); // Fügt die Karte der Hand des Spielers hinzu
-            iterator.remove(); // Entfernt die Karte aus dem Deck
+            deckIndex++;
             count++; // Inkrementiert den Zähler für die Anzahl der gezogenen Karten
         }
 
@@ -172,13 +173,14 @@ public class GameService {
 
         Game game = optionalGame.get();
         UserAccount userAccount = optionalUserAccount.get();
-        if(!game.getUsers().get(game.getCurrentTurn()).equals(userAccount)){// prüft ob der User am zug ist
+        if(!game.getUsers().get(game.getCurrentTurn()).equals(userAccount) || deckIndex == userAccount.getPlayerState().getDeck().getCards().size()){// prüft ob der User am zug ist
             return;
         }
         Deck deck = userAccount.getPlayerState().getDeck();
         List<CardInstance> handCards = userAccount.getPlayerState().getHandCards();
 
-        Card card = deck.getCards().get(0);
+        Card card = deck.getCards().get(deckIndex);
+        deckIndex++;
         CardInstance cardInstance = new CardInstance();
         cardInstance.setId(index);
         cardInstance.setCard(card);
