@@ -9,7 +9,6 @@ function ChatWindow({ chatTarget, type, chatId }) {
   const [editingMessageId, setEditingMessageId] = useState(null);
   const userId = parseInt(localStorage.getItem('id'), 10);
   const { chatClient } = useContext(WebSocketContext);
-  var counter = 0; 
 
   const normalizeMessage = (message) => {
     if (!message.senderId || !message.chatId) {
@@ -43,21 +42,23 @@ function ChatWindow({ chatTarget, type, chatId }) {
     if (chatClient && chatId) {
       const subscription = chatClient.subscribe(`/user/${userId}/queue/messages`, (message) => {
         const messageBody = message.body;
-        const normalizedMessage = normalizeMessage(messageBody)
-        console.log('Received message from WebSocket:', normalizedMessage); // Log received message from WebSocket
-        counter ++; 
-        if (counter%2===0) {
-          console.log("Received on Chat notification:", messageBody);
-        
+        const messageObject = JSON.parse(messageBody);
+        if (messageObject.onChat ==="on Chat") {
+
+          const message = {
+            id: messageObject.id,
+            message: messageObject.message,
+            chat: {id : messageObject.chatId},
+            sender: {id : messageObject.senderId}
+          };
           chatClient.publish({
             destination: '/chat/onChat',
-            body: JSON.stringify(normalizedMessage),
+            body: JSON.stringify(message),
             headers: {
               'userId': userId.toString(),
               'chatId': chatId.toString()
             }
           });
-          console.log("Sent message to /chat/onChat:", normalizedMessage);
         } else {
           const receivedMessage = JSON.parse(messageBody);
           const normalizedMessage = normalizeMessage(receivedMessage);
@@ -77,15 +78,15 @@ function ChatWindow({ chatTarget, type, chatId }) {
           }
         }
       });
-  
+
       fetchMessages();
-  
+
       return () => {
         subscription.unsubscribe();
       };
     }
   }, [chatClient, chatId, userId]);
-  
+
 
   
 

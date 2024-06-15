@@ -5,7 +5,6 @@ import com.example.demo.user.UserAccount;
 import com.example.demo.user.UserAccountRepository;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
-import org.apache.catalina.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -71,23 +70,15 @@ public class ChatService {
 
     public void sendMessage(ChatMessage chatMessage,Long userId,Long chatId) {
         System.out.println("start sendMessage in ChatService");
+        System.out.println(chatMessage.getMessage());
         try {
             for (Chat chat : chatRepository.findAll()) {
                 if (Objects.equals(chatMessage.getChat().getId(), chat.getId()))
                 {
-                    if(!chatMessage.getSender().getId().equals(userId) && chatMessage.getChat().getId().equals(chatId))
+                    if(!chatMessage.getSender().getId().equals(userId))
                         chatMessage.setRead(true);
-                    chat.getMessages().add(chatMessage);
-                    System.out.println("Saving chat message: " + chatMessage); // Debugging-Ausgabe
-                    //we do not need to add it in the chatMessageRepository  it will be added automatically
-                    chatRepository.save(chat);
-                    chatMessage.setId(chat.getMessages().get(chat.getMessages().size() - 1).getId());
-                    //or chatMessage = chatRepository.findeById(chatRepository.save(chat).getId()).get()
-
-                    for(int i=chat.getUsers().size()-1;i>=0;i--)
-                    {
-                        messagingTemplate.convertAndSendToUser(chat.getUsers().get(i).getId().toString(),"/queue/messages", convertToChatMessageDTO(chatMessage));
-                    }
+                    chatMessageRepository.save(chatMessage);
+                    messagingTemplate.convertAndSendToUser(userId.toString(),"/queue/messages", convertToChatMessageDTO(chatMessage));
                     break;
                 }
             }
@@ -225,14 +216,33 @@ public class ChatService {
     public void checkOnline(ChatMessage chatMessage) {
         System.out.println("Checking if users are online for message: " + chatMessage.getMessage());
         Chat chat = chatRepository.findById(chatMessage.getChat().getId()).get();
+
+        chat.getMessages().add(chatMessage);
+        //we do not need to add it in the chatMessageRepository  it will be added automatically
+        chatRepository.save(chat);
+        chatMessage.setId(chat.getMessages().get(chat.getMessages().size() - 1).getId());
+        //or chatMessage = chatRepository.findeById(chatRepository.save(chat).getId()).get()
+
         List<UserAccount> users =chat.getUsers();
         for(UserAccount user : users) {
-            if(user.getId().equals(chatMessage.getSender().getId())) {
+            if(user.getId().equals(chatMessage.getSender().getId()))
                 continue;
-            }
-            System.out.println("Sending on Chat request to user: " + user.getId());
-            messagingTemplate.convertAndSendToUser(user.getId().toString(), "/queue/messages", convertToChatMessageDTO(chatMessage));
+            messagingTemplate.convertAndSendToUser(user.getId().toString(), "/queue/messages", convertToChatMessageDTO2(chatMessage));
         }
+        messagingTemplate.convertAndSendToUser(chatMessage.getSender().getId().toString(), "/queue/messages", convertToChatMessageDTO2(chatMessage));
+
+    }
+
+    private Object convertToChatMessageDTO2(ChatMessage chatMessage) {
+        ChatMessageDTO dto = new ChatMessageDTO();
+        dto.setId(chatMessage.getId());
+        dto.setMessage(chatMessage.getMessage());
+        dto.setChatId(chatMessage.getChat().getId());
+        dto.setSenderId(chatMessage.getSender().getId());
+        dto.setSenderName(chatMessage.getSender().getUsername());
+        dto.setRead(chatMessage.isRead());
+        dto.setOnChat("on Chat");
+        return dto;
     }
 
 }
