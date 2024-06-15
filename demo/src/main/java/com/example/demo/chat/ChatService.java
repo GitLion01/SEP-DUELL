@@ -69,14 +69,16 @@ public class ChatService {
         return new ResponseEntity<>(group.getId(),HttpStatus.OK);
     }
 
-    public void sendMessage(ChatMessage chatMessage,Long userId) {
+    public void sendMessage(ChatMessage chatMessage,Long userId,Long chatId) {
+        System.out.println("start sendMessage in ChatService");
         try {
             for (Chat chat : chatRepository.findAll()) {
                 if (Objects.equals(chatMessage.getChat().getId(), chat.getId()))
                 {
-                    if(!chatMessage.getSender().getId().equals(userId))
+                    if(!chatMessage.getSender().getId().equals(userId) && chatMessage.getChat().getId().equals(chatId))
                         chatMessage.setRead(true);
                     chat.getMessages().add(chatMessage);
+                    System.out.println("Saving chat message: " + chatMessage); // Debugging-Ausgabe
                     //we do not need to add it in the chatMessageRepository  it will be added automatically
                     chatRepository.save(chat);
                     chatMessage.setId(chat.getMessages().get(chat.getMessages().size() - 1).getId());
@@ -92,7 +94,7 @@ public class ChatService {
 
         }
         catch (Exception e) {
-            System.out.println(e.getMessage());
+            System.out.println("Error saving chat message: " + e.getMessage());
         }
     }
 
@@ -221,11 +223,15 @@ public class ChatService {
     }
 
     public void checkOnline(ChatMessage chatMessage) {
-        List<UserAccount> users =chatMessage.getChat().getUsers();
+        System.out.println("Checking if users are online for message: " + chatMessage.getMessage());
+        Chat chat = chatRepository.findById(chatMessage.getChat().getId()).get();
+        List<UserAccount> users =chat.getUsers();
         for(UserAccount user : users) {
-            if(user.getId().equals(chatMessage.getSender().getId()))
+            if(user.getId().equals(chatMessage.getSender().getId())) {
                 continue;
-            messagingTemplate.convertAndSendToUser(user.getId().toString(), "/queue/messages", "on Chat?");
+            }
+            System.out.println("Sending on Chat request to user: " + user.getId());
+            messagingTemplate.convertAndSendToUser(user.getId().toString(), "/queue/messages", convertToChatMessageDTO(chatMessage));
         }
     }
 

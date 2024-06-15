@@ -44,14 +44,20 @@ public class ChatController {
     @MessageMapping("/sendMessage")
     public void sendMessage(@Payload ChatMessage chatMessage)
     {
+        System.out.println("Start sendMessage");
+        System.out.println("Received message: " + chatMessage.getMessage());
         chatService.checkOnline(chatMessage);
     }
 
     @MessageMapping("/onChat")
-    public void onChat(@Payload ChatMessage chatMessage,@Header("userId") String userIdHeader)
+    public void onChat(@Payload ChatMessage chatMessage,@Header("userId") String userIdHeader,@Header("chatId") String chatIdHeader)
     {
+        System.out.println("-----------------------------------------------------");
         Long userId =  Long.parseLong(userIdHeader);
-        chatService.sendMessage(chatMessage,userId);
+        Long chatId = Long.parseLong(chatIdHeader);
+        System.out.println("Processing onChat for userId: " + userId + " and chatId: " + chatId);
+        System.out.println("Received message in onChat: " + chatMessage.getMessage());
+        chatService.sendMessage(chatMessage,userId,chatId);
     }
 
     /*@MessageMapping("/send-group-message")
