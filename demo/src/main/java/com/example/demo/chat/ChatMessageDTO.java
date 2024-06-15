@@ -17,4 +17,5 @@ public class ChatMessageDTO {
     private Long senderId;
     private String senderName;
     private boolean read;
+    private String onChat;
 }
