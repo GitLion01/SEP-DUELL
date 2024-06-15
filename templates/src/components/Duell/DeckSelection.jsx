@@ -4,7 +4,7 @@ import axios from 'axios';
 import { WebSocketContext} from "../../WebSocketProvider";
 
 const  DeckSelection = () => {
-  const { client, setGame, setUsers } = useContext(WebSocketContext); // Verwende den Kontext
+  const { client, setGame, users, setUsers } = useContext(WebSocketContext); // Verwende den Kontext
   const [decks, setDecks] = useState([]);
   const [selectedDeck, setSelectedDeck] = useState(null);
   const [id, setId] = useState(null);
@@ -15,7 +15,7 @@ const  DeckSelection = () => {
     const userId = localStorage.getItem('id');
     const gId = localStorage.getItem('gameId');
     console.log(gId);
-    if (userId && gId) {
+    if (userId && gId && id === null) {
       setId(userId);
       setGameId(gId);
     } else {
@@ -42,10 +42,17 @@ const  DeckSelection = () => {
     if (client && client.connected) {
       const subscription = client.subscribe(`/user/${id}/queue/selectDeck`, (message) => {
         const response = JSON.parse(message.body);
-        console.log('Users in game: ', response[1]);
-        setUsers(response[1]);
-        setGame(response[0]);
+        /*
+          const user1 = users[0].deck = response[0];
+          const user2 = users[1].deck = response[1];
+          setUsers([user1, user2]);
 
+         */
+
+        setUsers(response[1]);
+
+
+        console.log('Users in game: ', response[1]);
         console.log('response from server: ', response);
         console.log('users saved in State: ', response[1]);
         console.log('game saved in State: ', response[0]);
