@@ -26,6 +26,8 @@ export const WebSocketProvider = ({ children }) => {
                 newClient.subscribe(`/user/${userId}/queue/create`, (message) => {
                     const response = JSON.parse(message.body);
                     console.log("Received response:", response)
+                    setGame(response[0]);
+                    setUsers(response[1]);
 
                     // Finde den Benutzer im Array
                     // const userInGame = response.users.find(user => user.id === userId);

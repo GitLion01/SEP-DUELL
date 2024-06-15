@@ -9,7 +9,7 @@ import './duel.css';
 const Duel = () => {
   const navigate = useNavigate();
   const { client, game, setGame, users, setUsers } = useContext(WebSocketContext);
-  const id = localStorage.getItem('id');
+  const [id, setId] = useState(null);
   const gameId = localStorage.getItem('gameId');
   const [timer, setTimer] = useState(120);
   const [playerState, setPlayerState] = useState(null);
@@ -18,28 +18,36 @@ const Duel = () => {
   const [isSetCardMode, setIsSetCardMode] = useState(false);
   const [selectedAttacker, setSelectedAttacker] = useState(null);
   const [selectedTarget, setSelectedTarget] = useState(null);
-  const [currentTurn, setCurrentTurn] = useState(0);
+  const [currentTurn, setCurrentTurn] = useState(game.currentTurn);
   const [cardDrawn, setCardDrawn] = useState(false);
 
+  useEffect(() => {
+    if (id === null) {
+      setId(localStorage.getItem('id'));
+    }
+  }, []);
 
 
   // Initialisieren des Spielerzustands aus dem übergebenen Zustand
   useEffect(() => {
-    if (users) {
+    if (users && game) {
       console.log('user: ', users);
-      if (users[0].id === parseInt(id)) {
-        setPlayerState(users[0].playerState);
-        setOpponentState(users[1].playerState);
-      } else {
-        setPlayerState(users[1].playerState);
-        setOpponentState(users[0].playerState);
-      }
-      setCurrentTurn(game.currentTurn); // initialisieren Sie den currentTurn
-      console.log('playerState nach initial',playerState);
-      console.log('opponent state nach intial: ',playerState);
-    }
+      const currentUser = users.find(user => user.id === parseInt(id));
+      const opponentUser = users.find(user => user.id !== parseInt(id));
 
-  }, [id, users, game]);
+      if (currentUser) {
+        setPlayerState(currentUser.playerState);
+      }
+      if (opponentUser) {
+        setOpponentState(opponentUser.playerState);
+      }
+
+      // setCurrentTurn(game.currentTurn); // initialisieren Sie den currentTurn
+
+      console.log('playerState nach initial', playerState);
+      console.log('opponent state nach intial: ', opponentState);
+    }
+  }, [id]);
 
   /*
   useEffect(() => {
@@ -55,28 +63,31 @@ const Duel = () => {
 
    */
 
-    if (client) {
+  useEffect(() => {
+    //if (client) {
       client.subscribe(`/user/${id}/queue/game`, (message) => {
         const response = JSON.parse(message.body);
-        setGame(response[0]);
-        setUsers(response[1]);
-        if (response) {
+
+        console.log("dönerbude");
+        if (message) {
           if (response[1][0].id === parseInt(id)) {
             setPlayerState(response[1][0].playerState);
             setOpponentState(response[1][1].playerState);
           }
           else {
             setPlayerState(response[1][1].playerState);
-            setPlayerState(response[1][0].playerState);
+            setOpponentState(response[1][0].playerState);
           }
-          if (response[0].currentTurn !== currentTurn) {
             setCurrentTurn(response[0].currentTurn);
             if (response[1][currentTurn].id === parseInt(id)) {
             }
             //resetTimer(); // Setze den Timer zurück, wenn sich der currentTurn ändert
-          }        }
+
+        }
       });
-    }
+   // }
+  }, [id]);
+
 
 
    /*
@@ -200,6 +211,7 @@ const Duel = () => {
           userId: id
         })
       })
+      console.log("cardDrawn", cardDrawn);
       if(users[currentTurn].id === parseInt(id)) {
         setCardDrawn(true);
       }
