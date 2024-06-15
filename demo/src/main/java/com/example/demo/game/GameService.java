@@ -1,6 +1,5 @@
 package com.example.demo.game;
 import com.example.demo.cards.Card;
-import com.example.demo.cards.CardInstance;
 import com.example.demo.cards.Rarity;
 import com.example.demo.decks.Deck;
 import com.example.demo.decks.DeckRepository;
@@ -28,13 +27,13 @@ public class GameService {
     private final PlayerCardRepository playerCardRepository;
 
 
-
     @Autowired
     public GameService(GameRepository gameRepository,
                        DeckRepository deckRepository,
                        UserAccountRepository userAccountRepository,
                        SimpMessagingTemplate messagingTemplate,
-                       PlayerStateRepository playerStateRepository, PlayerCardRepository playerCardRepository) {
+                       PlayerStateRepository playerStateRepository,
+                       PlayerCardRepository playerCardRepository)  {
         this.gameRepository = gameRepository;
         this.deckRepository = deckRepository;
         this.userAccountRepository = userAccountRepository;
@@ -88,7 +87,6 @@ public class GameService {
 
         for(UserAccount user : newGame.getUsers()) {
             messagingTemplate.convertAndSendToUser(user.getId().toString(), "/queue/create", Arrays.asList(newGame, users));
-            System.out.println("an client gesendet");
         }
 
     }
@@ -148,16 +146,12 @@ public class GameService {
         Iterator<PlayerCard> iterator = user.getPlayerState().getDeckClone().iterator();
         int count = 0;
         List<PlayerCard> cardsToRemove = new ArrayList<>();
-
         while (iterator.hasNext() && count < 5) {
             PlayerCard playerCard = iterator.next(); // Hohlt die nächste Karte aus dem Deck
             user.getPlayerState().getHandCards().add(playerCard); // Fügt die Karte der Hand des Spielers hinzu
             cardsToRemove.add(playerCard);
             count++; // Inkrementiert den Zähler für die Anzahl der gezogenen Karten
         }
-
-        user.getPlayerState().getDeckClone().removeAll(cardsToRemove);
-
         /*Iterator<PlayerCard> iterator = playerCards.iterator();
         int count = 0;
         while (iterator.hasNext() && count < 5) {
@@ -166,6 +160,7 @@ public class GameService {
             deckIndex++;
             count++; // Inkrementiert den Zähler für die Anzahl der gezogenen Karten
         }*/
+        user.getPlayerState().getDeckClone().removeAll(cardsToRemove);
 
         System.out.println("VOR SPEICHERN DES USERS");
         playerStateRepository.save(user.getPlayerState());
@@ -189,11 +184,10 @@ public class GameService {
 
         gameRepository.save(game);
 
-        List<UserAccount> users = game.getUsers();
-
+        List<Deck> decks = Arrays.asList(game.getUsers().getFirst().getPlayerState().getDeck(), game.getUsers().getLast().getPlayerState().getDeck());
         for(UserAccount player : game.getUsers()) {
             System.out.println("Player: " + player.getId());
-            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/selectDeck", Arrays.asList(game, users));
+            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/selectDeck", decks);
         }
 
 
@@ -211,7 +205,7 @@ public class GameService {
 
         Game game = optionalGame.get();
         UserAccount userAccount = optionalUserAccount.get();
-        if(!game.getUsers().get(game.getCurrentTurn()).equals(userAccount) || deckIndex == userAccount.getPlayerState().getDeck().getCards().size()){// prüft ob der User am zug ist
+        if(!game.getUsers().get(game.getCurrentTurn()).equals(userAccount)){// prüft ob der User am zug ist
             return;
         }
         Deck deck = userAccount.getPlayerState().getDeck();
@@ -219,8 +213,8 @@ public class GameService {
 
 
         // ersetzt den unteren Kommentar
-        handCards.add(deck.getUser().getPlayerState().getDeckClone().get(0));
-        deck.getUser().getPlayerState().getDeckClone().remove(0);
+        handCards.add(deck.getUser().getPlayerState().getDeckClone().remove(0));
+
 
         /*Card card = deck.getCards().get(deckIndex);
         deckIndex++;
@@ -230,15 +224,18 @@ public class GameService {
         handCards.add(cardInstance);
         deck.getCards().remove(deck.getCards().get(0));*/
 
+        game.setCurrentTurn(game.getUsers().get(0).equals(userAccount) ? 1 : 0);
+
         gameRepository.save(game);
 
         List<UserAccount> users = game.getUsers();
 
-
         for(UserAccount player : game.getUsers()) {
             messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", Arrays.asList(game, users));
-            System.out.println("Karte wurde gezogen" + player.getId());
         }
+
+
+
 
     }
 
@@ -261,11 +258,11 @@ public class GameService {
         PlayerCard removed = userAccount.getPlayerState().getHandCards().remove(request.getCardIndex()); // Löscht Karte aus Hand
         userAccount.getPlayerState().getCardsPlayed().add(removed); // Fügt die Karte den gespielten Karten hinzu
 
+        game.setCurrentTurn(game.getUsers().get(0).equals(userAccount) ? 1 : 0);
 
         gameRepository.save(game);
 
         List<UserAccount> users = game.getUsers();
-
 
         for(UserAccount player : game.getUsers()) {
             messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", Arrays.asList(game, users));
@@ -294,10 +291,8 @@ public class GameService {
 
         List<UserAccount> users = game.getUsers();
 
-
         for(UserAccount player : game.getUsers()) {
             messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", Arrays.asList(game, users));
-            System.out.println("Zug beendet" + player.getId());
         }
 
     }
@@ -328,6 +323,7 @@ public class GameService {
             attacker.getPlayerState().setDamage(attacker.getPlayerState().getDamage() + attackerCard.getAttackPoints()); // erhöht den Damage Counter des Angreifers
         }
 
+        game.setCurrentTurn(game.getUsers().get(0).equals(attacker) ? 1 : 0);
 
         gameRepository.save(game);
 
@@ -366,6 +362,7 @@ public class GameService {
             attacker.getPlayerState().setDamage(attacker.getPlayerState().getDamage() + attackerCard.getAttackPoints()); // erhöht den Damage Counter des Angreifers
         }
 
+        game.setCurrentTurn(game.getUsers().get(0).equals(attacker) ? 1 : 0);
 
         gameRepository.save(game);
 
@@ -409,6 +406,8 @@ public class GameService {
         user.getPlayerState().getFieldCards().add(rare);
         user.getPlayerState().getHandCards().remove(rare);
 
+        game.setCurrentTurn(game.getUsers().get(0).equals(user) ? 1 : 0);
+
         gameRepository.save(game);
 
         List<UserAccount> users = game.getUsers();
@@ -450,6 +449,8 @@ public class GameService {
         user.getPlayerState().getFieldCards().add(legendary);
         user.getPlayerState().getHandCards().remove(legendary);
 
+        game.setCurrentTurn(game.getUsers().get(0).equals(user) ? 1 : 0);
+
         gameRepository.save(game);
 
         List<UserAccount> users = game.getUsers();
@@ -478,16 +479,17 @@ public class GameService {
             UserAccount user1 = optionalUserA.get();
             UserAccount user2 = optionalUserB.get();
 
-        if(user1.getPlayerState().getWinner()){
-            user1.setSepCoins(user1.getSepCoins() + 100);
-            user1.setLeaderboardPoints(user1.getLeaderboardPoints() + Math.max(50, user2.getLeaderboardPoints() - user1.getLeaderboardPoints()));
-            user2.setLeaderboardPoints(user2.getLeaderboardPoints() - Math.max(50, (user2.getLeaderboardPoints() - user1.getLeaderboardPoints()) / 2 ));
-        }else{
-            user2.setSepCoins(user2.getSepCoins() + 100);
-            user2.setLeaderboardPoints(user2.getLeaderboardPoints() + Math.max(50, user1.getLeaderboardPoints() - user2.getLeaderboardPoints()));
-            user1.setLeaderboardPoints(user1.getLeaderboardPoints() - Math.max(50, (user1.getLeaderboardPoints() - user2.getLeaderboardPoints()) / 2 ));
-        }
-        gameRepository.save(game);
+
+            if (user1.getPlayerState().getWinner()) {
+                user1.setSepCoins(user1.getSepCoins() + 100);
+                user1.setLeaderboardPoints(user1.getLeaderboardPoints() + Math.max(50, user2.getLeaderboardPoints() - user1.getLeaderboardPoints()));
+                user2.setLeaderboardPoints(user2.getLeaderboardPoints() - Math.max(50, (user2.getLeaderboardPoints() - user1.getLeaderboardPoints()) / 2));
+            } else {
+                user2.setSepCoins(user2.getSepCoins() + 100);
+                user2.setLeaderboardPoints(user2.getLeaderboardPoints() + Math.max(50, user1.getLeaderboardPoints() - user2.getLeaderboardPoints()));
+                user1.setLeaderboardPoints(user1.getLeaderboardPoints() - Math.max(50, (user1.getLeaderboardPoints() - user2.getLeaderboardPoints()) / 2));
+            }
+            gameRepository.save(game);
 
         List<UserAccount> users = game.getUsers();
 
