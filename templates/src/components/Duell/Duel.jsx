@@ -11,6 +11,8 @@ const Duel = () => {
   const { client, game, setGame, users, setUsers } = useContext(WebSocketContext);
   const [id, setId] = useState(null);
   const gameId = localStorage.getItem('gameId');
+  const currentUser = users.find(user => user.id === parseInt(id));
+  const opponentUser = users.find(user => user.id !== parseInt(id));
   const [timer, setTimer] = useState(120);
   const [playerState, setPlayerState] = useState(null);
   const [opponentState, setOpponentState] = useState(null);
@@ -125,6 +127,7 @@ const Duel = () => {
       if (cardDrawn) {
         setCardDrawn(false);
       }
+      resetAttackMode()
     }
   };
 
@@ -137,30 +140,20 @@ const Duel = () => {
     }
   };
 
+  /*
   const handleAttack = () => {
     if (selectedAttacker !== null) {
-      if (opponentState.fieldCards.length === 0) {
-        // Direkter Angriff auf den Gegner
-        if (client) {
-          client.publish({
-            destination: '/app/attackUser',
-            body: JSON.stringify({
-              gameId,
-              userIDAttacker: id,
-              userIDDefender: opponentState.userId,
-              attackerIndex: selectedAttacker
-            }),
-          });
-        }
-      } else if (selectedTarget !== null) {
+      if (selectedTarget !== null) {
         // Angriff auf gegnerische Karte
         if (client) {
           client.publish({
             destination: '/app/attackCard',
             body: JSON.stringify({
-              gameID: gameId,
-              attackingCardIndex: selectedAttacker,
-              targetCardIndex: selectedTarget,
+              gameId: gameId,
+              userIdAttacker: id,
+              userIdDefender: opponentUser.id,
+              attackerIndex: selectedAttacker,
+              targetIndex: selectedTarget
             }),
           });
         }
@@ -169,23 +162,77 @@ const Duel = () => {
     }
   };
 
-  const selectAttackingCard = (index) => {
-    if (isAttackMode) {
-      setSelectedAttacker(index);
+   */
+
+  const handleAttack = () => {
+    if (opponentState.fieldCards.length === 0) {
+      console.log("der sollte jetzt angreifen");
+
+        console.log("angreifer wurde ausgewählt");
+        client.publish({
+          destination: '/app/attackUser',
+          body: JSON.stringify({
+            gameId: gameId,
+            attackerId: id,
+            defenderId: opponentUser.id,
+            attackerCardIndex: selectedAttacker
+          }),
+        });
+        console.log("gegner wird angegriffen");
+
+
     }
+    else {
+      console.log(selectedAttacker, selectedTarget);
+      //if (selectedTarget && selectedAttacker) {
+        console.log("gegnerkarte wird angegriffen");
+        client.publish({
+          destination: '/app/attackCard',
+          body: JSON.stringify({
+            gameId: gameId,
+            userIdAttacker: id,
+            userIdDefender: opponentUser.id,
+            attackerIndex: selectedAttacker,
+            targetIndex: selectedTarget
+          }),
+        });
+      //}
+    }
+  }
+
+  const selectAttackingCard = (index) => {
+    //if (isAttackMode) {
+      setSelectedAttacker(index);
+      console.log("angreifende karte wird ausgewählt")
+    //}
   };
 
-  const selectTargetCard = (index) => {
-    if (isAttackMode) {
-      setSelectedTarget(index);
-      handleAttack(); // Führe Angriff aus, wenn Ziel ausgewählt ist
+  useEffect(() => {
+    if (selectedAttacker !== null) {
+      console.log('Selected Attacker:', selectedAttacker);
+      // Führe hier weitere Logik aus, wenn erforderlich
     }
+  }, [selectedAttacker]);
+
+  useEffect(() => {
+    if (selectedTarget !== null) {
+      console.log('Selected Target:', selectedTarget);
+      // Führe hier weitere Logik aus, wenn erforderlich
+    }
+  }, [selectedTarget]);
+
+  const selectTargetCard = (index) => {
+    //if (isAttackMode) {
+      setSelectedTarget(index);
+      console.log("jetzt wird die karte angegriffen ", selectedTarget);
+      //handleAttack(); // Führe Angriff aus, wenn Ziel ausgewählt ist
+    //}
   };
 
   const handleSetCard = (index) => {
     if (isSetCardMode) {
       client.publish({
-        destination: '/app/playCard',
+        destination: '/app/placeCard',
         body: JSON.stringify({
           gameId: gameId,
           userId: id,
@@ -230,7 +277,7 @@ const Duel = () => {
         <div className="player-actions">
           <button onClick={() => handleDrawCard()}>Karte Ziehen</button>
           <button onClick={() => setIsSetCardMode(true)}>Karte einsetzen</button>
-          <button onClick={() => setIsAttackMode(true)}>Angreifen</button>
+          <button onClick={() => handleAttack()}>Angreifen</button>
           <button onClick={handleEndTurn}>End Turn</button>
         </div>
         <div className="field">
