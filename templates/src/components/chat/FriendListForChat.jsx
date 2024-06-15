@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import './FriendListForChat.css';
 
-function FriendListForChat({ onSelect, onCreateGroupClick, }) {
+function FriendListForChat({ onSelect, onCreateGroupClick, fetchGroups}) {
   const [friends, setFriends] = useState([]);
   const [groups, setGroups] = useState([]);
   const userId = localStorage.getItem('id');
@@ -13,12 +13,6 @@ function FriendListForChat({ onSelect, onCreateGroupClick, }) {
     return await response.json();
   }, [userId]);
 
-  const fetchGroups = useCallback(async () => {
-    const url = `http://localhost:8080/grouplist/${userId}`;
-    const response = await fetch(url);
-    if (!response.ok) throw new Error('Network response was not ok');
-    return await response.json();
-  }, [userId]);
 
   useEffect(() => {
     const fetchData = async () => {

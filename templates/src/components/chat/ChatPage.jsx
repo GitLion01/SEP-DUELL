@@ -1,41 +1,68 @@
-// components/chat/ChatPage.jsx
-import React, { useState } from 'react'; // useEffect entfernt, da es nicht verwendet wird
-import FriendListForChat from './FriendListForChat'; // Importiert die FriendListForChat-Komponente
-import ChatWindow from './ChatWindow'; // Importiert die ChatWindow-Komponente
-import CreateGroupForm from './CreateGroupForm'; // Importiert die CreateGroupForm-Komponente
-import './ChatPage.css'; // Importiert die CSS-Datei für die ChatPage-Komponente
+import React, { useState, useCallback } from 'react';
+import FriendListForChat from './FriendListForChat';
+import ChatWindow from './ChatWindow';
+import CreateGroupForm from './CreateGroupForm';
+import './ChatPage.css';
 import BackButton from '../BackButton';
 
 function ChatPage() {
   const [selectedChat, setSelectedChat] = useState({ chatTarget: null, type: null });
-  const [creatingGroup, setCreatingGroup] = useState(false); // Zustand für das Erstellen einer neuen Gruppe (true/false)
+  const [creatingGroup, setCreatingGroup] = useState(false);
+  const [chatId, setChatId] = useState(null);
+  const userId = localStorage.getItem('id');
 
-  // const [friends, setFriends] = useState([]); // Entfernt, da es nicht verwendet wird
+  const fetchGroups = useCallback(async () => {
+    const url = `http://localhost:8080/get.groups?userId=${userId}`;
+    const response = await fetch(url);
+    if (!response.ok) throw new Error('Network response was not ok');
+    return await response.json();
+  }, [userId]);
 
-  const handleSelect = (chatTarget, type) => {
-    setSelectedChat({ chatTarget, type }); // Setzt den ausgewählten Chat (Freund oder Gruppe) und den Typ (friend/group)
-    setCreatingGroup(false); // Schließt das Gruppen-Erstellen-Formular, wenn ein Chat ausgewählt wird
+  const handleSelect = async (chatTarget, type) => {
+    setSelectedChat({ chatTarget, type });
+    setCreatingGroup(false);
+    if (type === 'friend') {
+      await createChat(localStorage.getItem('id'), chatTarget.id);
+    } else if (type === 'group') {
+      setChatId(chatTarget.id); // Setze die Chat-ID für die Gruppe
+    }
   };
 
   const handleCreateGroupClick = () => {
-    setCreatingGroup(true); // Aktiviert das Gruppen-Erstellen-Formular
+    setCreatingGroup(true);
   };
 
   const handleCreateGroup = async (newGroup) => {
-    // Backend-Anfrage zum Erstellen einer neuen Gruppe
-    const response = await fetch('http://localhost:8080/groups', {
+    const response = await fetch(`http://localhost:8080/create.group?groupName=${encodeURIComponent(newGroup.name)}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(newGroup), // Sendet die neue Gruppe als JSON an das Backend
+      body: JSON.stringify(newGroup.userIds),
     });
 
     if (response.ok) {
-      // const createdGroup = await response.json(); // Entfernt, da es nicht verwendet wird
-      setCreatingGroup(false); // Schließt das Formular nach erfolgreicher Erstellung
-      // Aktualisieren Sie die Gruppenliste
-      // Sie müssen diese Logik möglicherweise anpassen, um die neuen Gruppen zu laden
+      setCreatingGroup(false);
+      await fetchGroups(); // Aktualisiere die Gruppenliste nach erfolgreicher Erstellung
+    } else {
+      console.error('Fehler beim Erstellen der Gruppe');
+    }
+  };
+
+  const createChat = async (userId1, userId2) => {
+    const response = await fetch(`http://localhost:8080/create.chat?userId1=${userId1}&userId2=${userId2}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (response.ok) {
+      const chatId = await response.json();
+      setChatId(chatId);
+      console.log('Chat wurde erstellt oder gefunden:', chatId);
+    } else {
+      console.error('Fehler beim Chat erstellen');
     }
   };
 
@@ -47,12 +74,14 @@ function ChatPage() {
         <FriendListForChat
           onSelect={handleSelect}
           onCreateGroupClick={handleCreateGroupClick}
+          fetchGroups={fetchGroups} // Übergabe von fetchGroups als Prop
         />
         {creatingGroup ? (
-          <CreateGroupForm onCreateGroup={handleCreateGroup} />
+          <CreateGroupForm onCreateGroup={handleCreateGroup}
+          fetchGroups ={fetchGroups} />
         ) : (
-          selectedChat.chatTarget && selectedChat.type && (
-            <ChatWindow chatTarget={selectedChat.chatTarget} type={selectedChat.type} />
+          selectedChat.chatTarget && selectedChat.type && chatId && (
+            <ChatWindow chatTarget={selectedChat.chatTarget} type={selectedChat.type} chatId={chatId} />
           )
         )}
       </div>
@@ -60,4 +89,4 @@ function ChatPage() {
   );
 }
 
-export default ChatPage; // Exportiert die ChatPage-Komponente als Standardexport
+export default ChatPage;
