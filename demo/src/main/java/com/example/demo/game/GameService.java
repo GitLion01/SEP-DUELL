@@ -152,6 +152,8 @@ public class GameService {
             cardsToRemove.add(playerCard);
             count++; // Inkrementiert den Zähler für die Anzahl der gezogenen Karten
         }
+
+
         /*Iterator<PlayerCard> iterator = playerCards.iterator();
         int count = 0;
         while (iterator.hasNext() && count < 5) {
@@ -184,10 +186,10 @@ public class GameService {
 
         gameRepository.save(game);
 
-        List<Deck> decks = Arrays.asList(game.getUsers().getFirst().getPlayerState().getDeck(), game.getUsers().getLast().getPlayerState().getDeck());
+        List<UserAccount> users = game.getUsers();
         for(UserAccount player : game.getUsers()) {
             System.out.println("Player: " + player.getId());
-            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/selectDeck", decks);
+            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/selectDeck", Arrays.asList(game, users));
         }
 
 
@@ -224,14 +226,15 @@ public class GameService {
         handCards.add(cardInstance);
         deck.getCards().remove(deck.getCards().get(0));*/
 
-        game.setCurrentTurn(game.getUsers().get(0).equals(userAccount) ? 1 : 0);
 
         gameRepository.save(game);
 
         List<UserAccount> users = game.getUsers();
 
         for(UserAccount player : game.getUsers()) {
+            System.out.println(" BEVOR Player: " + player.getId());
             messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", Arrays.asList(game, users));
+            System.out.println(" DANACH Player: " + player.getId());
         }
 
 
@@ -258,7 +261,6 @@ public class GameService {
         PlayerCard removed = userAccount.getPlayerState().getHandCards().remove(request.getCardIndex()); // Löscht Karte aus Hand
         userAccount.getPlayerState().getCardsPlayed().add(removed); // Fügt die Karte den gespielten Karten hinzu
 
-        game.setCurrentTurn(game.getUsers().get(0).equals(userAccount) ? 1 : 0);
 
         gameRepository.save(game);
 
@@ -292,7 +294,9 @@ public class GameService {
         List<UserAccount> users = game.getUsers();
 
         for(UserAccount player : game.getUsers()) {
+            System.out.println(" BEVOR Player: " + player.getId());
             messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", Arrays.asList(game, users));
+            System.out.println(" DANACH Player: " + player.getId());
         }
 
     }
@@ -323,7 +327,7 @@ public class GameService {
             attacker.getPlayerState().setDamage(attacker.getPlayerState().getDamage() + attackerCard.getAttackPoints()); // erhöht den Damage Counter des Angreifers
         }
 
-        game.setCurrentTurn(game.getUsers().get(0).equals(attacker) ? 1 : 0);
+
 
         gameRepository.save(game);
 
@@ -362,7 +366,7 @@ public class GameService {
             attacker.getPlayerState().setDamage(attacker.getPlayerState().getDamage() + attackerCard.getAttackPoints()); // erhöht den Damage Counter des Angreifers
         }
 
-        game.setCurrentTurn(game.getUsers().get(0).equals(attacker) ? 1 : 0);
+
 
         gameRepository.save(game);
 
@@ -397,7 +401,7 @@ public class GameService {
         PlayerCard normal2 = field.get(request.getNormalCardsIndex().get(1));
         PlayerCard rare = hand.get(request.getRareCardIndex());
 
-        if(rare.getRarity() == Rarity.RARE){
+        if(rare.getRarity() != Rarity.RARE){
             return;
         }
 
@@ -406,7 +410,7 @@ public class GameService {
         user.getPlayerState().getFieldCards().add(rare);
         user.getPlayerState().getHandCards().remove(rare);
 
-        game.setCurrentTurn(game.getUsers().get(0).equals(user) ? 1 : 0);
+
 
         gameRepository.save(game);
 
@@ -439,7 +443,7 @@ public class GameService {
         PlayerCard card3 = field.get(request.getNormalCardsIndex().get(2));
         PlayerCard legendary = hand.get(request.getLegendaryCardIndex());
 
-        if(legendary.getRarity() == Rarity.LEGENDARY){
+        if(legendary.getRarity() != Rarity.LEGENDARY){
             return;
         }
 
@@ -449,7 +453,7 @@ public class GameService {
         user.getPlayerState().getFieldCards().add(legendary);
         user.getPlayerState().getHandCards().remove(legendary);
 
-        game.setCurrentTurn(game.getUsers().get(0).equals(user) ? 1 : 0);
+
 
         gameRepository.save(game);
 
