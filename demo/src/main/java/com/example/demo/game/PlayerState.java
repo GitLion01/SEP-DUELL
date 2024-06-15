@@ -22,7 +22,7 @@ public class PlayerState {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long Id; //stateID
     private Integer lifePoints = 50;
-    private Integer damage;
+    private Integer damage = 0;
     private Boolean ready = false;
     private Boolean winner = false;
 

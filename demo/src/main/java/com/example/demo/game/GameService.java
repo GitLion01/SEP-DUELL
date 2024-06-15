@@ -241,7 +241,9 @@ public class GameService {
 
         Game game = optionalGame.get();
         UserAccount userAccount = optionalUserAccount.get();
-        if(!game.getUsers().get(game.getCurrentTurn()).equals(userAccount) || userAccount.getPlayerState().getFieldCards().size() > 5){// prüft ob der User am zug ist
+        if(!game.getUsers().get(game.getCurrentTurn()).equals(userAccount) ||
+                userAccount.getPlayerState().getFieldCards().size() > 5 ||
+                userAccount.getPlayerState().getHandCards().get(request.getCardIndex()).getRarity() != Rarity.NORMAL) {// prüft ob der User am zug ist
             return;
         }
 
