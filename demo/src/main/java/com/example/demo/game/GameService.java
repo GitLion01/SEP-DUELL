@@ -230,16 +230,15 @@ public class GameService {
         handCards.add(cardInstance);
         deck.getCards().remove(deck.getCards().get(0));*/
 
-        game.setCurrentTurn(game.getUsers().get(0).equals(userAccount) ? 1 : 0);
-
         gameRepository.save(game);
 
+        List<UserAccount> users = game.getUsers();
+
+
         for(UserAccount player : game.getUsers()) {
-            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", game);
+            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", Arrays.asList(game, users));
+            System.out.println("Karte wurde gezogen" + player.getId());
         }
-
-
-
 
     }
 
@@ -262,12 +261,14 @@ public class GameService {
         PlayerCard removed = userAccount.getPlayerState().getHandCards().remove(request.getCardIndex()); // Löscht Karte aus Hand
         userAccount.getPlayerState().getCardsPlayed().add(removed); // Fügt die Karte den gespielten Karten hinzu
 
-        game.setCurrentTurn(game.getUsers().get(0).equals(userAccount) ? 1 : 0);
 
         gameRepository.save(game);
 
+        List<UserAccount> users = game.getUsers();
+
+
         for(UserAccount player : game.getUsers()) {
-            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", game);
+            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", Arrays.asList(game, users));
         }
 
     }
@@ -291,8 +292,12 @@ public class GameService {
 
         gameRepository.save(game);
 
+        List<UserAccount> users = game.getUsers();
+
+
         for(UserAccount player : game.getUsers()) {
-            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", game);
+            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", Arrays.asList(game, users));
+            System.out.println("Zug beendet" + player.getId());
         }
 
     }
@@ -323,12 +328,13 @@ public class GameService {
             attacker.getPlayerState().setDamage(attacker.getPlayerState().getDamage() + attackerCard.getAttackPoints()); // erhöht den Damage Counter des Angreifers
         }
 
-        game.setCurrentTurn(game.getUsers().get(0).equals(attacker) ? 1 : 0);
 
         gameRepository.save(game);
 
+        List<UserAccount> users = game.getUsers();
+
         for(UserAccount player : game.getUsers()) {
-            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", game);
+            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", Arrays.asList(game, users));
         }
 
 
@@ -360,12 +366,13 @@ public class GameService {
             attacker.getPlayerState().setDamage(attacker.getPlayerState().getDamage() + attackerCard.getAttackPoints()); // erhöht den Damage Counter des Angreifers
         }
 
-        game.setCurrentTurn(game.getUsers().get(0).equals(attacker) ? 1 : 0);
 
         gameRepository.save(game);
 
+        List<UserAccount> users = game.getUsers();
+
         for(UserAccount player : game.getUsers()) {
-            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", game);
+            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", Arrays.asList(game, users));
         }
 
 
@@ -402,12 +409,12 @@ public class GameService {
         user.getPlayerState().getFieldCards().add(rare);
         user.getPlayerState().getHandCards().remove(rare);
 
-        game.setCurrentTurn(game.getUsers().get(0).equals(user) ? 1 : 0);
-
         gameRepository.save(game);
 
+        List<UserAccount> users = game.getUsers();
+
         for(UserAccount player : game.getUsers()) {
-            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", game);
+            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", Arrays.asList(game, users));
         }
 
 
@@ -443,12 +450,12 @@ public class GameService {
         user.getPlayerState().getFieldCards().add(legendary);
         user.getPlayerState().getHandCards().remove(legendary);
 
-        game.setCurrentTurn(game.getUsers().get(0).equals(user) ? 1 : 0);
-
         gameRepository.save(game);
 
+        List<UserAccount> users = game.getUsers();
+
         for(UserAccount player : game.getUsers()) {
-            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", game);
+            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", Arrays.asList(game, users));
         }
 
 
@@ -482,8 +489,10 @@ public class GameService {
         }
         gameRepository.save(game);
 
+        List<UserAccount> users = game.getUsers();
+
             for (UserAccount player : game.getUsers()) {
-                messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", game);
+                messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", Arrays.asList(game, users));
             }
 
             gameRepository.delete(game);
