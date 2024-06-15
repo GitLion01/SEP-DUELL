@@ -9,24 +9,24 @@ function ChatWindow({ chatTarget, type, chatId }) {
   const [editingMessageId, setEditingMessageId] = useState(null);
   const userId = parseInt(localStorage.getItem('id'), 10);
   const { chatClient } = useContext(WebSocketContext);
+  var counter = 0; 
 
   const normalizeMessage = (message) => {
-    if (!message.id || !message.senderId || !message.chatId) {
+    if (!message.senderId || !message.chatId) {
       return null;
     }
     return {
       id: message.id,
       message: message.message,
       chat: { id: message.chatId },
-      sender: { id: message.senderId, username: message.senderUsername }, // Benutzername hinzufügen
-      timestamp: message.timestamp,
+      sender: { id: message.senderId, username: message.senderUsername },
       read: message.read
     };
   };
 
   const fetchMessages = async () => {
     try {
-      const response = await fetch(`http://localhost:8080/get.messages?chatId=${chatId}`);
+      const response = await fetch(`http://localhost:8080/get.messages?chatId=${chatId}&userID=${userId}`);
       if (response.ok) {
         const data = await response.json();
         const normalizedMessages = data.map(normalizeMessage);
@@ -42,40 +42,62 @@ function ChatWindow({ chatTarget, type, chatId }) {
   useEffect(() => {
     if (chatClient && chatId) {
       const subscription = chatClient.subscribe(`/user/${userId}/queue/messages`, (message) => {
-        const receivedMessage = JSON.parse(message.body);
-        const normalizedMessage = normalizeMessage(receivedMessage);
-        if (normalizedMessage && normalizedMessage.chat.id === chatId) {
-          setMessages((prevMessages) => {
-            const messageIndex = prevMessages.findIndex(msg => msg.id === normalizedMessage.id);
-            if (messageIndex !== -1) {
-              const updatedMessages = [...prevMessages];
-              updatedMessages[messageIndex] = normalizedMessage;
-              return updatedMessages;
-            } else {
-              return [...prevMessages, normalizedMessage];
+        const messageBody = message.body;
+        const normalizedMessage = normalizeMessage(messageBody)
+        console.log('Received message from WebSocket:', normalizedMessage); // Log received message from WebSocket
+        counter ++; 
+        if (counter%2===0) {
+          console.log("Received on Chat notification:", messageBody);
+        
+          chatClient.publish({
+            destination: '/chat/onChat',
+            body: JSON.stringify(normalizedMessage),
+            headers: {
+              'userId': userId.toString(),
+              'chatId': chatId.toString()
             }
           });
+          console.log("Sent message to /chat/onChat:", normalizedMessage);
         } else {
-          console.error("Received message is missing required properties or is invalid:", receivedMessage);
+          const receivedMessage = JSON.parse(messageBody);
+          const normalizedMessage = normalizeMessage(receivedMessage);
+          if (normalizedMessage && normalizedMessage.chat.id === chatId) {
+            setMessages((prevMessages) => {
+              const messageIndex = prevMessages.findIndex(msg => msg.id === normalizedMessage.id);
+              if (messageIndex !== -1) {
+                const updatedMessages = [...prevMessages];
+                updatedMessages[messageIndex] = normalizedMessage;
+                return updatedMessages;
+              } else {
+                return [...prevMessages, normalizedMessage];
+              }
+            });
+          } else {
+            console.error("Received message is missing required properties or is invalid:", receivedMessage);
+          }
         }
       });
-
+  
       fetchMessages();
-
+  
       return () => {
         subscription.unsubscribe();
       };
     }
   }, [chatClient, chatId, userId]);
+  
+
+  
 
   const handleSendMessage = () => {
     if (newMessage.trim() !== '') {
       const message = {
-        id: null, // Temporäre ID wird vom Server gesetzt
+        id: null,
         message: newMessage,
         chat: { id: chatId },
         sender: { id: userId }
       };
+      console.log('Sending message:', JSON.stringify(message)); // Log the message being sent
 
       chatClient.publish({ destination: '/chat/sendMessage', body: JSON.stringify(message) });
       setNewMessage('');
@@ -111,8 +133,7 @@ function ChatWindow({ chatTarget, type, chatId }) {
 
     chatClient.publish({ destination: '/chat/deleteMessage', body: JSON.stringify(message) });
 
-    // Nachrichten nach dem Löschen neu laden
-    setTimeout(fetchMessages, 100); // Leichte Verzögerung, um sicherzustellen, dass die Nachricht gelöscht wurde
+    setTimeout(fetchMessages, 100);
   };
 
   const handleKeyPress = (event) => {
