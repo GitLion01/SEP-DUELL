@@ -10,6 +10,13 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
 
     @Override
+    public void configureWebSocketTransport(WebSocketTransportRegistration registration) {
+        registration.setMessageSizeLimit(10 * 1024 * 1024); // 10MB
+        registration.setSendBufferSizeLimit(100 * 1024 * 1024); // 10MB
+    }
+
+
+    @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
         config.enableSimpleBroker("/all", "/specific"); // Nachrichten werden an /all oder an /specific gesendet (Base URL für ausgehende Antworten)
         config.setApplicationDestinationPrefixes("/app"); // Präfix für eingehende Nachrichten (Base URL für eingehende Anfragen)
