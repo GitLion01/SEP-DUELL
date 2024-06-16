@@ -77,7 +77,6 @@ public class ChatService {
                 {
                     if(!chatMessage.getSender().getId().equals(userId))
                         chatMessage.setRead(true);
-                    chatMessage.getSender().setUsername(userAccountRepository.findById(chatMessage.getSender().getId()).get().getUsername());
                     chatMessageRepository.save(chatMessage);
                     messagingTemplate.convertAndSendToUser(userId.toString(),"/queue/messages", convertToChatMessageDTO(chatMessage));
                     break;
@@ -217,7 +216,9 @@ public class ChatService {
     public void checkOnline(ChatMessage chatMessage) {
         System.out.println("Checking if users are online for message: " + chatMessage.getMessage());
         Chat chat = chatRepository.findById(chatMessage.getChat().getId()).get();
-        if (!chat.getMessages().contains(chatMessage)) {
+
+        if(!chat.getMessages().contains(chatMessage)) {
+            System.out.println("bin hier");
             chat.getMessages().add(chatMessage);
             //we do not need to add it in the chatMessageRepository  it will be added automatically
             chatRepository.save(chat);
