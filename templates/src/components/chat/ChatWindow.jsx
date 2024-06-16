@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import { WebSocketContext } from "../../WebSocketProvider";
 import './ChatWindow.css';
 import './ChatBubble.css';
@@ -9,6 +9,7 @@ function ChatWindow({ chatTarget, type, chatId }) {
   const [editingMessageId, setEditingMessageId] = useState(null);
   const userId = parseInt(localStorage.getItem('id'), 10);
   const { chatClient } = useContext(WebSocketContext);
+  const messagesEndRef = useRef(null);
 
   const normalizeMessage = (message) => {
     if (!message.senderId || !message.chatId) {
@@ -18,7 +19,7 @@ function ChatWindow({ chatTarget, type, chatId }) {
       id: message.id,
       message: message.message,
       chat: { id: message.chatId },
-      sender: { id: message.senderId, username: message.senderUsername },
+      sender: { id: message.senderId, username: message.senderName }, // Verwende message.senderName
       read: message.read
     };
   };
@@ -29,7 +30,10 @@ function ChatWindow({ chatTarget, type, chatId }) {
       if (response.ok) {
         const data = await response.json();
         const normalizedMessages = data.map(normalizeMessage);
-        setMessages(normalizedMessages.filter(message => message.chat.id === chatId));
+        const sortedMessages = normalizedMessages
+          .filter(message => message.chat.id === chatId)
+          .sort((a, b) => a.id - b.id);
+        setMessages(sortedMessages);
       } else {
         console.error('Failed to fetch messages:', response.statusText);
       }
@@ -43,13 +47,12 @@ function ChatWindow({ chatTarget, type, chatId }) {
       const subscription = chatClient.subscribe(`/user/${userId}/queue/messages`, (message) => {
         const messageBody = message.body;
         const messageObject = JSON.parse(messageBody);
-        if (messageObject.onChat ==="on Chat") {
-
+        if (messageObject.onChat === "on Chat") {
           const message = {
             id: messageObject.id,
             message: messageObject.message,
-            chat: {id : messageObject.chatId},
-            sender: {id : messageObject.senderId}
+            chat: { id: messageObject.chatId },
+            sender: { id: messageObject.senderId, username: messageObject.senderName }
           };
           chatClient.publish({
             destination: '/chat/onChat',
@@ -70,7 +73,8 @@ function ChatWindow({ chatTarget, type, chatId }) {
                 updatedMessages[messageIndex] = normalizedMessage;
                 return updatedMessages;
               } else {
-                return [...prevMessages, normalizedMessage];
+                const newMessages = [...prevMessages, normalizedMessage].sort((a, b) => a.id - b.id);
+                return newMessages;
               }
             });
           } else {
@@ -87,8 +91,11 @@ function ChatWindow({ chatTarget, type, chatId }) {
     }
   }, [chatClient, chatId, userId]);
 
-
-  
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages]);
 
   const handleSendMessage = () => {
     if (newMessage.trim() !== '') {
@@ -178,11 +185,11 @@ function ChatWindow({ chatTarget, type, chatId }) {
               onClick={() => handleReadMessage(message)}
             >
               {type === 'group' && message.sender && message.sender.id !== userId && (
-                <span className="message-sender">{message.sender.username}</span>
+                <span className="message-sender">{message.sender.username}: </span>
               )}
               <span className="message-text">{message.message}</span>
               <div className="message-actions">
-                {message.sender.id === userId && (
+                {message.sender.id === userId && !message.read && (
                   <>
                     <button onClick={() => handleEditMessage(message.id, message.message)}>
                       <svg
@@ -210,12 +217,15 @@ function ChatWindow({ chatTarget, type, chatId }) {
                     </button>
                   </>
                 )}
+                {message.sender.id === userId && message.read && (
+                  <span className="message-read-status">Gelesen</span>
+                )}
                 <span className="message-timestamp">{message.timestamp}</span>
               </div>
-              {message.read && <span className="message-read-status">Gelesen</span>}
             </p>
           ))
         )}
+        <div ref={messagesEndRef} />
       </div>
       <div className="chat-input">
         <input
