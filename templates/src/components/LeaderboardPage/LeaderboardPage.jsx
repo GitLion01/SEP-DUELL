@@ -13,22 +13,27 @@ const LeaderboardPage = () => {
     const [countdown, setCountdown] = useState(null);
     const [isChallengeDisabled, setIsChallengeDisabled] = useState(false);
     const [activeDuel, setActiveDuel] = useState(null);
-    const [currentUser, setCurrentUser] = useState('');
+    const [currentUserData, setCurrentUserData] = useState(null); 
 
     useEffect(() => { ///////!!!!!!!!!!!!!!!!!!!!!!!!!
         // Abrufen des aktuellen Benutzers aus dem lokalen Speicher
-        const username = localStorage.getItem('id');
-        setCurrentUser(username);
+        const userId = parseInt(localStorage.getItem('id'), 10);
+      
+        
 
 
         // Konsolenausgabe zur Überprüfung des abgerufenen Benutzernamens
-        console.log('Aktueller Benutzername:', username);
+        console.log('Aktueller UserId:', userId);
+        console.log(leaderboard); 
 
 
         fetch('http://localhost:8080/leaderboard')
             .then(response => response.json())
-            .then(data => setLeaderboard(data));
-
+            .then(data => { 
+                setLeaderboard(data);
+                const userData = data.find(user => user.id === userId)
+                setCurrentUserData(userData);
+            })
         const newClient = new Client({
             brokerURL: 'ws://localhost:8080/game-websocket',
             webSocketFactory: () => new SockJS('http://localhost:8080/game-websocket'),
@@ -73,12 +78,15 @@ const LeaderboardPage = () => {
 
         newClient.activate();
         setClient(newClient);
-
+        console.log(leaderboard); 
         return () => {
             if (client) {
                 client.deactivate();
             }
         };
+
+        
+
     }, []);
 
     useEffect(() => {
@@ -93,16 +101,11 @@ const LeaderboardPage = () => {
     }, [countdown]);
 
     //zum überprüfen ob ich dieser user bin
-    const handleChallenge = (username) => {
-        if (username === currentUser) {
-            alert('Du kannst dich nicht selbst herausfordern!');
-            return;
-        }
-
+    const handleChallenge = (userId, username) => {        
         if (client) {
             client.publish({
                 destination: '/app/challenge',  //PLATZHALTER
-                body: JSON.stringify({ challenger: currentUser, challenged: username })//!!!!!!!Platzhalter
+                body: JSON.stringify({ challenger: currentUserData.id, challenged: userId })//!!!!!!!Platzhalter
             });
             alert(`Du hast ${username} zu einem Duell herausgefordert!`);
         }
@@ -112,14 +115,14 @@ const LeaderboardPage = () => {
         if (client) {
             client.publish({
                 destination: '/app/accept-challenge',  //PLATZHALTER
-                body: JSON.stringify({ challenger: challenger, challenged: currentUser })
+                body: JSON.stringify({ challenger: challenger, challenged: currentUserData.id })
             });
         }
         alert(`Du hast die Herausforderung von ${challenger} akzeptiert!`);
         setNotifications(notifications.filter(n => n.challenger !== challenger));
         setCountdown(null); // Countdown stoppen
         setIsChallengeDisabled(false); // Herausforderungsbutton wieder aktivieren
-        setActiveDuel({ challenger, challenged: currentUser }); // Aktives Duell setzen
+        setActiveDuel({ challenger, challenged: currentUserData.id }); // Aktives Duell setzen
     };
 
     const handleRejectChallenge = (challenger) => {
@@ -163,8 +166,8 @@ const LeaderboardPage = () => {
                         <td>
                             <button
                                 className="challenge-button"
-                                onClick={() => handleChallenge(user.username)}
-                                disabled={user.status !== 'online' || isChallengeDisabled || user.username === currentUser}
+                                onClick={() => handleChallenge(user.id, user.username)}
+                                disabled={user.status !== 'online' || isChallengeDisabled || user.id === currentUserData.id || currentUserData.decks.length===0  || user.decks.length === 0 }
                             >
                                 Duell herausfordern
                             </button>
