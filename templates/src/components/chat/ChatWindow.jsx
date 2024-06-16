@@ -19,7 +19,7 @@ function ChatWindow({ chatTarget, type, chatId }) {
       id: message.id,
       message: message.message,
       chat: { id: message.chatId },
-      sender: { id: message.senderId, username: message.senderName }, // Verwende message.senderName
+      sender: { id: message.senderId, username: message.senderName },
       read: message.read
     };
   };
@@ -62,18 +62,21 @@ function ChatWindow({ chatTarget, type, chatId }) {
               'chatId': chatId.toString()
             }
           });
-        } else {
+        } else { 
           const receivedMessage = JSON.parse(messageBody);
+          console.log(receivedMessage);
           const normalizedMessage = normalizeMessage(receivedMessage);
           if (normalizedMessage && normalizedMessage.chat.id === chatId) {
             setMessages((prevMessages) => {
               const messageIndex = prevMessages.findIndex(msg => msg.id === normalizedMessage.id);
               if (messageIndex !== -1) {
+                console.log(messages);
                 const updatedMessages = [...prevMessages];
                 updatedMessages[messageIndex] = normalizedMessage;
                 return updatedMessages;
               } else {
                 const newMessages = [...prevMessages, normalizedMessage].sort((a, b) => a.id - b.id);
+                console.log(messages);
                 return newMessages;
               }
             });
@@ -154,19 +157,6 @@ function ChatWindow({ chatTarget, type, chatId }) {
     }
   };
 
-  const handleReadMessage = (message) => {
-    if (message.sender.id !== userId && !message.read) {
-      const updatedMessage = { ...message, read: true };
-      chatClient.publish({ destination: '/chat/readMessage', body: JSON.stringify(updatedMessage) });
-
-      setMessages((prevMessages) =>
-        prevMessages.map((msg) =>
-          msg.id === message.id ? { ...msg, read: true } : msg
-        )
-      );
-    }
-  };
-
   if (!chatTarget || !chatTarget.id) {
     return <div>Wählen Sie einen Freund oder eine Gruppe aus, um den Chat zu starten</div>;
   }
@@ -182,7 +172,6 @@ function ChatWindow({ chatTarget, type, chatId }) {
             <p
               key={index}
               className={message.sender && message.sender.id === userId ? 'from-me' : 'from-them'}
-              onClick={() => handleReadMessage(message)}
             >
               {type === 'group' && message.sender && message.sender.id !== userId && (
                 <span className="message-sender">{message.sender.username}: </span>
