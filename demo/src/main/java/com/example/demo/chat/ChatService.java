@@ -217,12 +217,14 @@ public class ChatService {
         System.out.println("Checking if users are online for message: " + chatMessage.getMessage());
         Chat chat = chatRepository.findById(chatMessage.getChat().getId()).get();
 
-        chat.getMessages().add(chatMessage);
-        //we do not need to add it in the chatMessageRepository  it will be added automatically
-        chatRepository.save(chat);
-        chatMessage.setId(chat.getMessages().get(chat.getMessages().size() - 1).getId());
-        //or chatMessage = chatRepository.findeById(chatRepository.save(chat).getId()).get()
-
+        if(!chat.getMessages().contains(chatMessage)) {
+            System.out.println("bin hier");
+            chat.getMessages().add(chatMessage);
+            //we do not need to add it in the chatMessageRepository  it will be added automatically
+            chatRepository.save(chat);
+            chatMessage.setId(chat.getMessages().get(chat.getMessages().size() - 1).getId());
+            //or chatMessage = chatRepository.findeById(chatRepository.save(chat).getId()).get()
+        }
         List<UserAccount> users =chat.getUsers();
         for(UserAccount user : users) {
             if(user.getId().equals(chatMessage.getSender().getId()))
