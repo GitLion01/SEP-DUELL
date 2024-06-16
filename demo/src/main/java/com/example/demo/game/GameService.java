@@ -317,8 +317,8 @@ public class GameService {
         Game game = optionalGame.get();
         UserAccount attacker = optionalAttacker.get();
         UserAccount defender = optionalDefender.get();
-        PlayerCard attackerCard = attacker.getPlayerState().getHandCards().get(request.getAttackerIndex());
-        PlayerCard target = defender.getPlayerState().getHandCards().get(request.getTargetIndex());
+        PlayerCard attackerCard = attacker.getPlayerState().getFieldCards().get(request.getAttackerIndex());
+        PlayerCard target = defender.getPlayerState().getFieldCards().get(request.getTargetIndex());
 
         if(!game.getUsers().get(game.getCurrentTurn()).equals(attacker) ||
                 defender.getPlayerState().getFieldCards().isEmpty() ||
@@ -329,20 +329,39 @@ public class GameService {
 
         //TODO: Wenn Verteidigungspunkte des Gegners höher sind als meine Angriffspunkte, dann wird meine Karte zerstört (quasi Konter)
 
-        if(attackerCard.getAttackPoints() > target.getDefensePoints()){
-            defender.getPlayerState().getFieldCards().remove(request.getTargetIndex()); // entfernt die Karte vom Feld des Gegners
-            attacker.getPlayerState().setDamage(attacker.getPlayerState().getDamage() + target.getDefensePoints()); // erhöht den Damage Counter des Angreifers
-        }else{
-            target.setDefensePoints(target.getDefensePoints() - attackerCard.getAttackPoints());
-            Integer damage = attackerCard.getDefensePoints();
-            attackerCard.setDefensePoints(attackerCard.getDefensePoints() - target.getAttackPoints());
-            if(attackerCard.getDefensePoints() < 0){
-                attacker.getPlayerState().getFieldCards().remove(request.getTargetIndex());
-                defender.getPlayerState().setDamage(defender.getPlayerState().getDamage() + damage);
-            }else{
-                defender.getPlayerState().setDamage(defender.getPlayerState().getDamage() + attackerCard.getAttackPoints());
+        // Angriffslogik
+        System.out.println("Start des Angriffs");
+
+        // Angriffspunkte von C1 von Verteidigungspunkten von C2 abziehen
+        int remainingTargetDefense = target.getDefensePoints() - attackerCard.getAttackPoints();
+        System.out.println("RemainingTargetDefense " + remainingTargetDefense);
+        if (remainingTargetDefense < 0) {
+            // C2 wird zerstört und vom Spielfeld entfernt
+            defender.getPlayerState().getFieldCards().remove(request.getTargetIndex());
+            System.out.println("Target wurde entfernt");
+        } else {
+            // C2 überlebt den Angriff, setze neue Verteidigungspunkte
+            target.setDefensePoints(remainingTargetDefense);
+        }
+
+        // Wenn C2 nicht zerstört wurde, dann kontert C2
+        if (remainingTargetDefense >= 0) {
+            int remainingAttackerDefense = attackerCard.getDefensePoints() - target.getAttackPoints();
+            if (remainingAttackerDefense < 0) {
+                // C1 wird zerstört und vom Spielfeld entfernt
+                attacker.getPlayerState().getFieldCards().remove(request.getAttackerIndex());
+                System.out.println("Attacker wurde entfernt");
+            } else {
+                // C1 überlebt den Konter, setze neue Verteidigungspunkte
+                attackerCard.setDefensePoints(remainingAttackerDefense);
             }
         }
+
+        playerCardRepository.save(attackerCard);
+        playerCardRepository.save(target);
+
+        playerStateRepository.save(game.getUsers().get(0).getPlayerState());
+        playerStateRepository.save(game.getUsers().get(1).getPlayerState());
 
 
 
