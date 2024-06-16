@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -27,6 +28,11 @@ public interface UserAccountRepository extends JpaRepository<UserAccount, Long> 
     void deleteByEmail(String email);
 
     boolean existsByUsername(String username);
+
+    @Modifying
+    @Transactional
+    @Query(value = "UPDATE user_account SET player_state_id = NULL WHERE id IN (:userIds)", nativeQuery = true)
+    void updatePlayerStateToNullByUserIds(@Param("userIds") List<Long> userIds);
 
 
 }

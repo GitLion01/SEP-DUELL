@@ -40,9 +40,8 @@ public class PlayerCard {
 
     @ManyToOne
     private PlayerState playerState;
-
-
-
+    private Boolean hasAttacked = false;
+    private Boolean sacrificed = false;
 
     public PlayerCard(String name,
                 Integer attackPoints,
