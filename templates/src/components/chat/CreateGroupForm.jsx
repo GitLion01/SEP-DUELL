@@ -44,7 +44,7 @@ function CreateGroupForm({ onCreateGroup, fetchGroups }) {
     if (groupName.trim() && selectedFriends.length) {
       const newGroup = { name: groupName, userIds: [parseInt(userId), ...selectedFriends] };
       await onCreateGroup(newGroup);
-      fetchGroups();
+      await fetchGroups(); // Aktualisiere die Gruppenliste nach erfolgreicher Erstellung
       setGroupName('');
       setSelectedFriends([]);
     } else {

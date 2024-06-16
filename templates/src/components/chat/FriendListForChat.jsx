@@ -1,9 +1,8 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import './FriendListForChat.css';
 
-function FriendListForChat({ onSelect, onCreateGroupClick, fetchGroups}) {
+function FriendListForChat({ onSelect, onCreateGroupClick, fetchGroups, groups }) {
   const [friends, setFriends] = useState([]);
-  const [groups, setGroups] = useState([]);
   const userId = localStorage.getItem('id');
 
   const fetchFriends = useCallback(async () => {
@@ -13,21 +12,18 @@ function FriendListForChat({ onSelect, onCreateGroupClick, fetchGroups}) {
     return await response.json();
   }, [userId]);
 
-
   useEffect(() => {
     const fetchData = async () => {
       try {
         const friendsResponse = await fetchFriends();
         setFriends(friendsResponse);
-        const groupsResponse = await fetchGroups();
-        setGroups(groupsResponse);
       } catch (error) {
         console.error('Fetch failed:', error.message);
       }
     };
 
     fetchData();
-  }, [fetchFriends, fetchGroups]);
+  }, [fetchFriends]);
 
   return (
     <div className="friend-list-for-chat">
