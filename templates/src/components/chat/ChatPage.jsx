@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import FriendListForChat from './FriendListForChat';
 import ChatWindow from './ChatWindow';
 import CreateGroupForm from './CreateGroupForm';
@@ -9,6 +9,7 @@ function ChatPage() {
   const [selectedChat, setSelectedChat] = useState({ chatTarget: null, type: null });
   const [creatingGroup, setCreatingGroup] = useState(false);
   const [chatId, setChatId] = useState(null);
+  const [groups, setGroups] = useState([]); // Zustand für Gruppen
   const userId = localStorage.getItem('id');
 
   const fetchGroups = useCallback(async () => {
@@ -17,6 +18,15 @@ function ChatPage() {
     if (!response.ok) throw new Error('Network response was not ok');
     return await response.json();
   }, [userId]);
+
+  useEffect(() => {
+    const loadGroups = async () => {
+      const groups = await fetchGroups();
+      setGroups(groups); // Gruppen in den Zustand schreiben
+    };
+
+    loadGroups();
+  }, [fetchGroups]);
 
   const handleSelect = async (chatTarget, type) => {
     setSelectedChat({ chatTarget, type });
@@ -43,7 +53,8 @@ function ChatPage() {
 
     if (response.ok) {
       setCreatingGroup(false);
-      await fetchGroups(); // Aktualisiere die Gruppenliste nach erfolgreicher Erstellung
+      const groups = await fetchGroups(); // Aktualisiere die Gruppenliste nach erfolgreicher Erstellung
+      setGroups(groups); // Gruppen in den Zustand schreiben
     } else {
       console.error('Fehler beim Erstellen der Gruppe');
     }
@@ -74,11 +85,10 @@ function ChatPage() {
         <FriendListForChat
           onSelect={handleSelect}
           onCreateGroupClick={handleCreateGroupClick}
-          fetchGroups={fetchGroups} // Übergabe von fetchGroups als Prop
+          groups={groups} // Übergabe der Gruppen als Prop
         />
         {creatingGroup ? (
-          <CreateGroupForm onCreateGroup={handleCreateGroup}
-          fetchGroups ={fetchGroups} />
+          <CreateGroupForm onCreateGroup={handleCreateGroup} fetchGroups={fetchGroups} />
         ) : (
           selectedChat.chatTarget && selectedChat.type && chatId && (
             <ChatWindow chatTarget={selectedChat.chatTarget} type={selectedChat.type} chatId={chatId} />
