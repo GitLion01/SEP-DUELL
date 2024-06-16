@@ -71,7 +71,7 @@ public class GameController {
         gameService.swapForRare(request);
     }
 
-    @MessageMapping("/LegendarySwap")
+    @MessageMapping("/legendarySwap")
     public void swapForLegendary(@Payload LegendarySwapRequest request) {
         gameService.swapForLegendary(request);
     }

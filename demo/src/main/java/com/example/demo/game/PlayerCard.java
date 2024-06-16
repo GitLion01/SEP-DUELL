@@ -42,9 +42,8 @@ public class PlayerCard {
     @ManyToOne
     @JsonIgnore
     private PlayerState playerState;
-
-
-
+    private Boolean hasAttacked = false;
+    private Boolean sacrificed = false;
 
     public PlayerCard(String name,
                 Integer attackPoints,
