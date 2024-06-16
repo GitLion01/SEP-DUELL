@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import Card from "../card";
 import {WebSocketContext} from "../../WebSocketProvider";
 import './duel.css';
+import SwapModal from "./SwapModal";
 
 
 const Duel = () => {
@@ -11,17 +12,23 @@ const Duel = () => {
   const { client, game, setGame, users, setUsers } = useContext(WebSocketContext);
   const [id, setId] = useState(null);
   const gameId = localStorage.getItem('gameId');
-  const currentUser = users.find(user => user.id === parseInt(id));
-  const opponentUser = users.find(user => user.id !== parseInt(id));
   const [timer, setTimer] = useState(120);
+  //const currentUser = users.find(user => user.id === parseInt(id));
+  //const opponentUser = users.find(user => user.id !== parseInt(id));
   const [playerState, setPlayerState] = useState(null);
   const [opponentState, setOpponentState] = useState(null);
   const [isAttackMode, setIsAttackMode] = useState(false);
   const [isSetCardMode, setIsSetCardMode] = useState(false);
+  const [isRareSwapMode, setIsRareSwapMode] = useState(false);
+  const [isLegendarySwapMode, setIsLegendarySwapMode] = useState(false);
   const [selectedAttacker, setSelectedAttacker] = useState(null);
   const [selectedTarget, setSelectedTarget] = useState(null);
-  const [currentTurn, setCurrentTurn] = useState(game.currentTurn);
+  const [currentTurn, setCurrentTurn] = useState(game?.currentTurn || 0);
   const [cardDrawn, setCardDrawn] = useState(false);
+  const [selectedCards, setSelectedCards] = useState([]);
+  const [selectedHandCard, setSelectedHandCard] = useState(null);
+
+
 
   useEffect(() => {
     if (id === null) {
@@ -43,13 +50,14 @@ const Duel = () => {
       if (opponentUser) {
         setOpponentState(opponentUser.playerState);
       }
-
+      resetAttackMode();
+      setCardDrawn(false);
       // setCurrentTurn(game.currentTurn); // initialisieren Sie den currentTurn
 
       console.log('playerState nach initial', playerState);
       console.log('opponent state nach intial: ', opponentState);
     }
-  }, [id]);
+  }, [id, users, game]);
 
   /*
   useEffect(() => {
@@ -66,29 +74,33 @@ const Duel = () => {
    */
 
   useEffect(() => {
-    //if (client) {
-      client.subscribe(`/user/${id}/queue/game`, (message) => {
+    if (client && client.connected && id) {
+      const subscription = client.subscribe(`/user/${id}/queue/game`, (message) => {
         const response = JSON.parse(message.body);
 
-        console.log("dönerbude");
-        if (message) {
+        if (response) {
           if (response[1][0].id === parseInt(id)) {
             setPlayerState(response[1][0].playerState);
             setOpponentState(response[1][1].playerState);
-          }
-          else {
+          } else {
             setPlayerState(response[1][1].playerState);
             setOpponentState(response[1][0].playerState);
           }
-            setCurrentTurn(response[0].currentTurn);
-            if (response[1][currentTurn].id === parseInt(id)) {
-            }
-            //resetTimer(); // Setze den Timer zurück, wenn sich der currentTurn ändert
+          setCurrentTurn(response[0].currentTurn);
+
+          // Speichern des Spiels und der Benutzer im Speicher
+          sessionStorage.setItem('game', JSON.stringify(response[0]));
+          sessionStorage.setItem('users', JSON.stringify(response[1]));
 
         }
       });
-   // }
-  }, [id]);
+
+      // Cleanup Subscription
+      return () => {
+        if (subscription) subscription.unsubscribe();
+      };
+    }
+  }, [client, id]);
 
 
 
@@ -174,7 +186,7 @@ const Duel = () => {
           body: JSON.stringify({
             gameId: gameId,
             attackerId: id,
-            defenderId: opponentUser.id,
+            defenderId: users.find(user => user.id !== parseInt(id)).id,
             attackerCardIndex: selectedAttacker
           }),
         });
@@ -191,7 +203,7 @@ const Duel = () => {
           body: JSON.stringify({
             gameId: gameId,
             userIdAttacker: id,
-            userIdDefender: opponentUser.id,
+            userIdDefender: users.find(user => user.id !== parseInt(id)).id,
             attackerIndex: selectedAttacker,
             targetIndex: selectedTarget
           }),
@@ -266,18 +278,65 @@ const Duel = () => {
     else { toast.error("Karte bereits gezogen");}
   }
 
+  const handleRareSwap = () => {
+    if (selectedCards.length === 2 && selectedHandCard !== null && playerState.handCards[selectedHandCard].rarity === 'RARE') {
+      console.log("normalCardsIndex ", selectedCards);
+      console.log("selectedHandCard ", selectedHandCard);
+
+      client.publish({
+        destination: '/app/rareSwap',
+        body: JSON.stringify({
+          gameId: gameId,
+          userId: id,
+          normalCardsIndex: selectedCards,
+          rareCardIndex: selectedHandCard
+        }),
+      });
+      setIsRareSwapMode(false);
+      setSelectedCards([]);
+      setSelectedHandCard(null);
+    } else {
+      toast.error("Wählen Sie 2 Karten vom Spielfeld und eine seltene Karte aus der Hand.");
+    }
+  };
+
+  const handleLegendarySwap = () => {
+    if (selectedCards.length === 3 && selectedHandCard !== null && playerState.handCards[selectedHandCard].rarity === 'LEGENDARY') {
+      console.log("normalCardsIndex ", selectedCards);
+      console.log("selectedHandCard ", selectedHandCard);
+      client.publish({
+        destination: '/app/legendarySwap',
+        body: JSON.stringify({
+          gameId: gameId,
+          userId: id,
+          normalCardsIndex: selectedCards,
+          legendaryCardIndex: selectedHandCard
+        }),
+      });
+      console.log("Gesendete KartenIndexListe ", selectedCards)
+      console.log("Gesendete LegendaryCardIndex ", selectedHandCard)
+      setIsLegendarySwapMode(false);
+      setSelectedCards([]);
+      setSelectedHandCard(null);
+    } else {
+      toast.error("Wählen Sie 3 Karten vom Spielfeld und eine legendäre Karte aus der Hand.");
+    }
+  };
+
   return (
       <div className="duel-container">
         <div className="timer">
           <h4>{timer} seconds</h4>
         </div>
         <div className="currentTurn">
-          <h4>{users[currentTurn].username}</h4>
+          <h4>{users[currentTurn]?.username}</h4>
         </div>
         <div className="player-actions">
           <button onClick={() => handleDrawCard()}>Karte Ziehen</button>
           <button onClick={() => setIsSetCardMode(true)}>Karte einsetzen</button>
           <button onClick={() => handleAttack()}>Angreifen</button>
+          <button onClick={() => setIsRareSwapMode(true)}>Rare Swap</button>
+          <button onClick={() => setIsLegendarySwapMode(true)}>Legendary Swap</button>
           <button onClick={handleEndTurn}>End Turn</button>
         </div>
         <div className="field">
@@ -311,9 +370,35 @@ const Duel = () => {
             <h4>LP: {playerState?.lifePoints}</h4>
           </div>
         </div>
+        <SwapModal
+            isOpen={isRareSwapMode}
+            onRequestClose={() => setIsRareSwapMode(false)}
+            onConfirm={handleRareSwap}
+            title="Wähle 2 Karten zum Opfern und eine seltene Karte aus der Hand"
+            selectedCards={selectedCards}
+            setSelectedCards={setSelectedCards}
+            playerCards={playerState?.fieldCards || []}
+            handCards={playerState?.handCards || []}
+            setSelectedHandCard={setSelectedHandCard}
+            selectedHandCard={selectedHandCard}
+            requiredFieldCards={2}
+        />
+        <SwapModal
+            isOpen={isLegendarySwapMode}
+            onRequestClose={() => setIsLegendarySwapMode(false)}
+            onConfirm={handleLegendarySwap}
+            title="Wähle 3 Karten zum Opfern und eine legendäre Karte aus der Hand"
+            selectedCards={selectedCards}
+            setSelectedCards={setSelectedCards}
+            playerCards={playerState?.fieldCards || []}
+            handCards={playerState?.handCards || []}
+            setSelectedHandCard={setSelectedHandCard}
+            selectedHandCard={selectedHandCard}
+            requiredFieldCards={3}
+        />
         <ToastContainer/>
       </div>
   );
-};
+}
 
 export default Duel;
