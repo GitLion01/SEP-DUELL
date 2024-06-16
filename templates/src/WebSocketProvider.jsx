@@ -1,5 +1,4 @@
 import React, { createContext, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 
@@ -11,9 +10,7 @@ export const WebSocketProvider = ({ children }) => {
     const [users, setUsers] = useState([]);
 
     useEffect(() => {
-
         const userId = parseInt(localStorage.getItem('id')); // ID des aktuellen Benutzers als Zahl
-
 
         const newClient = new Client({
             brokerURL: 'ws://localhost:8080/game-websocket',
@@ -22,6 +19,16 @@ export const WebSocketProvider = ({ children }) => {
             onConnect: () => {
                 console.log('Connected to WebSocket server');
 
+                // Wiederherstellung von Spiel und Benutzern aus dem Speicher
+                const storedGame = sessionStorage.getItem('game');
+                const storedUsers = sessionStorage.getItem('users');
+                if (storedGame) {
+                    setGame(JSON.parse(storedGame));
+                }
+                if (storedUsers) {
+                    setUsers(JSON.parse(storedUsers));
+                }
+
                 // Subscribe für globale Herausforderung
                 newClient.subscribe(`/user/${userId}/queue/create`, (message) => {
                     const response = JSON.parse(message.body);
@@ -29,8 +36,9 @@ export const WebSocketProvider = ({ children }) => {
                     setGame(response[0]);
                     setUsers(response[1]);
 
-                    // Finde den Benutzer im Array
-                    // const userInGame = response.users.find(user => user.id === userId);
+                    // Speichern des Spiels und der Benutzer im Speicher
+                    sessionStorage.setItem('game', JSON.stringify(response[0]));
+                    sessionStorage.setItem('users', JSON.stringify(response[1]));
 
                     if (response.id) {
                         localStorage.setItem('gameId', response.id);
