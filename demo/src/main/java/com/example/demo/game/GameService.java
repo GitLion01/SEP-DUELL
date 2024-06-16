@@ -244,6 +244,8 @@ public class GameService {
 
     public void placeCard(PlaceCardRequest request){
 
+        //TODO: Nur normale Karten dürfen von Hand auf das Feld gesetzt werden; andere müssen eingetauscht werden
+
         Optional<Game> optionalGame = gameRepository.findById(request.getGameId());
         Optional<UserAccount> optionalUserAccount = userAccountRepository.findById(request.getUserId());
 
@@ -253,7 +255,7 @@ public class GameService {
 
         Game game = optionalGame.get();
         UserAccount userAccount = optionalUserAccount.get();
-        if(!game.getUsers().get(game.getCurrentTurn()).equals(userAccount) || userAccount.getPlayerState().getFieldCards().size() > 5){// prüft ob der User am zug ist
+        if(!game.getUsers().get(game.getCurrentTurn()).equals(userAccount) || userAccount.getPlayerState().getFieldCards().size() > 5 || userAccount.getPlayerState().getHandCards().get(request.getCardIndex()).getRarity() != Rarity.NORMAL){// prüft ob der User am zug ist
             return;
         }
 
@@ -271,6 +273,7 @@ public class GameService {
         }
 
     }
+
 
 
     public void endTurn(EndTurnRequest request) {
@@ -302,6 +305,7 @@ public class GameService {
     }
 
     public void attackCard(AttackCardRequest request) {
+
         Optional<Game> optionalGame = gameRepository.findById(request.getGameId());
         Optional<UserAccount> optionalAttacker = userAccountRepository.findById(request.getUserIdAttacker());
         Optional<UserAccount> optionalDefender = userAccountRepository.findById(request.getUserIdDefender());
@@ -313,18 +317,31 @@ public class GameService {
         Game game = optionalGame.get();
         UserAccount attacker = optionalAttacker.get();
         UserAccount defender = optionalDefender.get();
-        if(!game.getUsers().get(game.getCurrentTurn()).equals(attacker) || defender.getPlayerState().getFieldCards().isEmpty()){
-            return;
-        }
         PlayerCard attackerCard = attacker.getPlayerState().getHandCards().get(request.getAttackerIndex());
         PlayerCard target = defender.getPlayerState().getHandCards().get(request.getTargetIndex());
 
+        if(!game.getUsers().get(game.getCurrentTurn()).equals(attacker) ||
+                defender.getPlayerState().getFieldCards().isEmpty() ||
+                attacker.getPlayerState().getFieldCards().contains(target)){
+            return;
+        }
+
+
+        //TODO: Wenn Verteidigungspunkte des Gegners höher sind als meine Angriffspunkte, dann wird meine Karte zerstört (quasi Konter)
+
         if(attackerCard.getAttackPoints() > target.getDefensePoints()){
             defender.getPlayerState().getFieldCards().remove(request.getTargetIndex()); // entfernt die Karte vom Feld des Gegners
-            attacker.getPlayerState().setDamage(attacker.getPlayerState().getDamage() + attackerCard.getDefensePoints()); // erhöht den Damage Counter des Angreifers
+            attacker.getPlayerState().setDamage(attacker.getPlayerState().getDamage() + target.getDefensePoints()); // erhöht den Damage Counter des Angreifers
         }else{
-            target.setDefensePoints(target.getDefensePoints() - attackerCard.getAttackPoints()); // zieht Angriffspunkte von Verteidigungspunkte ab
-            attacker.getPlayerState().setDamage(attacker.getPlayerState().getDamage() + attackerCard.getAttackPoints()); // erhöht den Damage Counter des Angreifers
+            target.setDefensePoints(target.getDefensePoints() - attackerCard.getAttackPoints());
+            Integer damage = attackerCard.getDefensePoints();
+            attackerCard.setDefensePoints(attackerCard.getDefensePoints() - target.getAttackPoints());
+            if(attackerCard.getDefensePoints() < 0){
+                attacker.getPlayerState().getFieldCards().remove(request.getTargetIndex());
+                defender.getPlayerState().setDamage(defender.getPlayerState().getDamage() + damage);
+            }else{
+                defender.getPlayerState().setDamage(defender.getPlayerState().getDamage() + attackerCard.getAttackPoints());
+            }
         }
 
 
@@ -341,6 +358,9 @@ public class GameService {
     }
 
     public void attackUser(AttackUserRequest request) {
+
+        //TODO: Darf nicht im ersten zug gemacht werden, weil gegner noch keine Chance hatte Karten auf Feld zu setzen;
+
         Optional<Game> optionalGame = gameRepository.findById(request.getGameId());
         Optional<UserAccount> optionalAttacker = userAccountRepository.findById(request.getAttackerId());
         Optional<UserAccount> optionalDefender = userAccountRepository.findById(request.getDefenderId());
