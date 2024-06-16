@@ -11,7 +11,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
-import java.util.stream.Collectors;
+
 
 
 @Transactional
@@ -405,17 +405,17 @@ public class GameService {
         if(!game.getUsers().get(game.getCurrentTurn()).equals(attacker) || !defender.getPlayerState().getFieldCards().isEmpty() || game.getFirstRound()){
             return;
         }
-        PlayerCard attackerCard = attacker.getPlayerState().getHandCards().get(request.getAttackerCardIndex());
+        PlayerCard attackerCard = attacker.getPlayerState().getFieldCards().get(request.getAttackerCardIndex());
 
         if(attackerCard.getHasAttacked()){
             return;
         }
 
+        int remainingLifePoints = defender.getPlayerState().getLifePoints() - attackerCard.getAttackPoints();
         if(attackerCard.getAttackPoints() > defender.getPlayerState().getLifePoints()){
             attacker.getPlayerState().setDamage(attacker.getPlayerState().getDamage() + attackerCard.getDefensePoints()); // erhöht den Damage Counter des Angreifers
             attacker.getPlayerState().setWinner(true);
             playerStateRepository.save(attacker.getPlayerState());
-            terminateMatch(request.getGameId(), attacker.getId(), defender.getId());
         }else{
             defender.getPlayerState().setLifePoints((defender.getPlayerState().getLifePoints() - attackerCard.getAttackPoints())); // zieht Angriffspunkte von Lebenspunkte ab
             attacker.getPlayerState().setDamage(attacker.getPlayerState().getDamage() + attackerCard.getAttackPoints()); // erhöht den Damage Counter des Angreifers
@@ -424,15 +424,19 @@ public class GameService {
 
         attackerCard.setHasAttacked(true);
 
+        playerCardRepository.save(attackerCard);
         playerStateRepository.save(game.getUsers().get(0).getPlayerState());
         playerStateRepository.save(game.getUsers().get(1).getPlayerState());
-        playerCardRepository.save(attackerCard);
         gameRepository.save(game);
 
         List<UserAccount> users = game.getUsers();
 
         for(UserAccount player : game.getUsers()) {
             messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", Arrays.asList(game, users));
+        }
+
+        if(remainingLifePoints < 0){
+            terminateMatch(request.getGameId(), attacker.getId(), defender.getId());
         }
 
     }
@@ -606,7 +610,10 @@ public class GameService {
             }
 
 
-
+            playerStateRepository.save(user1.getPlayerState());
+            playerStateRepository.save(user2.getPlayerState());
+            userAccountRepository.save(user1);
+            userAccountRepository.save(user2);
             gameRepository.save(game);
 
             List<UserAccount> users = game.getUsers();
