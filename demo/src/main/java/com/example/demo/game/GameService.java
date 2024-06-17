@@ -349,10 +349,13 @@ public class GameService {
         if (remainingTargetDefense < 0) {
             // C2 wird zerstört und vom Spielfeld entfernt
             defender.getPlayerState().getFieldCards().remove(request.getTargetIndex());
+            attacker.getPlayerState().setDamage(attacker.getPlayerState().getDamage() + target.getDefensePoints() + 1);
+            target.setDefensePoints(-1);
             System.out.println("Target wurde entfernt");
         } else {
             // C2 überlebt den Angriff, setze neue Verteidigungspunkte
             target.setDefensePoints(remainingTargetDefense);
+            attacker.getPlayerState().setDamage(attacker.getPlayerState().getDamage() + attackerCard.getAttackPoints());
         }
 
         // Wenn C2 nicht zerstört wurde, dann kontert C2
@@ -414,7 +417,7 @@ public class GameService {
         int remainingLifePoints = defender.getPlayerState().getLifePoints() - attackerCard.getAttackPoints();
         if(attackerCard.getAttackPoints() > defender.getPlayerState().getLifePoints()){
             attacker.getPlayerState().setDamage(attacker.getPlayerState().getDamage() + defender.getPlayerState().getLifePoints() + 1); // erhöht den Damage Counter des Angreifers
-            defender.getPlayerState().setDamage(-1);
+            defender.getPlayerState().setLifePoints(-1);
             attacker.getPlayerState().setWinner(true);
             playerStateRepository.save(attacker.getPlayerState());
         }else{
