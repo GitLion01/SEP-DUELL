@@ -579,7 +579,7 @@ public class GameService {
 
 
             Integer sepCoins = 100;
-            Integer leaderBoardPointWinner;
+            Integer leaderBoardPointsWinner;
             Integer leaderBoardPointsLoser;
             Integer damageWinner;
             Integer damageLoser;
@@ -590,21 +590,22 @@ public class GameService {
 
 
 
-
+            Integer lbPoints1 = user1.getLeaderboardPoints();
+            Integer lbPoints2 = user2.getLeaderboardPoints();
             if (user1.getPlayerState().getWinner()) {
                 user1.setSepCoins(user1.getSepCoins() + 100);
-                user1.setLeaderboardPoints(user1.getLeaderboardPoints() + Math.max(50, user2.getLeaderboardPoints() - user1.getLeaderboardPoints()));
-                user2.setLeaderboardPoints(user2.getLeaderboardPoints() - Math.max(50, (user2.getLeaderboardPoints() - user1.getLeaderboardPoints()) / 2));
-                leaderBoardPointWinner = Math.max(50, user2.getLeaderboardPoints() - user1.getLeaderboardPoints());
-                leaderBoardPointsLoser = Math.max(50, (user2.getLeaderboardPoints() - user1.getLeaderboardPoints()) / 2);
+                user1.setLeaderboardPoints(lbPoints1 + Math.max(50, lbPoints2 - lbPoints1));
+                user2.setLeaderboardPoints(lbPoints2 - Math.max(50, (lbPoints2 - lbPoints1) / 2));
+                leaderBoardPointsWinner = Math.max(50, lbPoints2 - lbPoints1);
+                leaderBoardPointsLoser = Math.max(50, (lbPoints2 - lbPoints1) / 2);
                 damageWinner = user1.getPlayerState().getDamage();
                 damageLoser = user2.getPlayerState().getDamage();
             } else {
                 user2.setSepCoins(user2.getSepCoins() + 100);
-                user2.setLeaderboardPoints(user2.getLeaderboardPoints() + Math.max(50, user1.getLeaderboardPoints() - user2.getLeaderboardPoints()));
-                user1.setLeaderboardPoints(user1.getLeaderboardPoints() - Math.max(50, (user1.getLeaderboardPoints() - user2.getLeaderboardPoints()) / 2));
-                leaderBoardPointWinner = Math.max(50, user1.getLeaderboardPoints() - user2.getLeaderboardPoints());
-                leaderBoardPointsLoser = Math.max(50, (user1.getLeaderboardPoints() - user2.getLeaderboardPoints()) / 2);
+                user2.setLeaderboardPoints(lbPoints2 + Math.max(50, lbPoints1 - lbPoints2));
+                user1.setLeaderboardPoints(lbPoints1 - Math.max(50, (lbPoints1 - lbPoints2) / 2));
+                leaderBoardPointsWinner = Math.max(50, lbPoints1 - lbPoints2);
+                leaderBoardPointsLoser = Math.max(50, (lbPoints1 - lbPoints2) / 2);
                 damageWinner = user2.getPlayerState().getDamage();
                 damageLoser = user1.getPlayerState().getDamage();
             }
@@ -619,16 +620,108 @@ public class GameService {
             List<UserAccount> users = game.getUsers();
 
             for (UserAccount player : game.getUsers()) {
-                messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", Arrays.asList(game, users, sepCoins, leaderBoardPointWinner, leaderBoardPointsLoser,damageWinner, damageLoser, cardsPlayedA, cardsPlayedB, sacrificedA, sacrificedB));
+                messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", Arrays.asList(game, users, sepCoins, leaderBoardPointsWinner, leaderBoardPointsLoser,damageWinner, damageLoser, cardsPlayedA, cardsPlayedB, sacrificedA, sacrificedB));
             }
 
 
-            deleteUserGameData(Arrays.asList(user1.getId(), user2.getId()));
-            gameRepository.delete(game);
+            /*deleteUserGameData(Arrays.asList(user1.getId(), user2.getId()));*/
+            /*gameRepository.delete(game);*/
+            deleteGame(gameId);
 
             //TODO: Alle Daten zurücksetzten (Deck, Cards, etc)
 
     }
+
+    /*@Transactional
+    public void deleteGame(Long gameId) {
+        // Spiel laden
+        Game game = gameRepository.findById(gameId)
+                .orElseThrow(() -> new IllegalArgumentException("Game not found with id: " + gameId));
+
+        // Alle Benutzer des Spiels holen
+        List<UserAccount> users = game.getUsers();
+
+        // Verbindung zwischen Game und UserAccount aufheben
+        game.getUsers().clear();
+        gameRepository.save(game);
+
+        // Spiel löschen
+        gameRepository.delete(game);
+
+        // Für jeden Benutzer die zugehörigen PlayerCards und PlayerStates löschen
+        for (UserAccount user : users) {
+            PlayerState playerState = user.getPlayerState();
+            if (playerState != null) {
+                // PlayerCards entfernen
+                playerState.getHandCards().clear();
+                playerState.getFieldCards().clear();
+                playerState.getDeckClone().clear();
+                playerState.getCardsPlayed().clear();
+                playerStateRepository.save(playerState);
+
+                // Deck löschen
+                if (playerState.getDeck() != null && playerState.getDeckClone() != null) {
+                    playerState.setDeck(null);
+                    playerState.setDeckClone(null);
+                }
+                playerStateRepository.save(playerState);
+
+
+                // PlayerState löschen aus UserAccouunt
+                user.setPlayerState(null);
+                userAccountRepository.save(user);
+
+                // PlayerState löschen
+                playerStateRepository.delete(playerState);
+            }
+        }
+    }
+*/
+
+    @Transactional
+    public void deleteGame(Long gameId) {
+        // Spiel laden
+        Game game = gameRepository.findById(gameId)
+                .orElseThrow(() -> new IllegalArgumentException("Game not found with id: " + gameId));
+
+        // Alle Benutzer des Spiels laden
+        List<UserAccount> users = game.getUsers();
+
+        // Verbindung zwischen Game und UserAccount aufheben
+        game.getUsers().clear();
+        gameRepository.save(game);
+
+        // Für jeden Benutzer die zugehörigen Handkarten löschen und PlayerState-Referenz auf null setzen
+        for (UserAccount user : users) {
+            PlayerState playerState = user.getPlayerState();
+            if (playerState != null) {
+                playerState.getHandCards().clear();
+                user.setPlayerState(null);
+                userAccountRepository.save(user);
+            }
+        }
+
+        // Spiel löschen
+        gameRepository.delete(game);
+
+        // Nun den Rest aufräumen: PlayerStates, PlayerCards und Deck löschen
+        for (UserAccount user : users) {
+            PlayerState playerState = user.getPlayerState();
+            if (playerState != null) {
+                // PlayerCards und Deck löschen
+                playerState.getFieldCards().clear();
+                playerState.getDeckClone().clear();
+                playerState.getCardsPlayed().clear();
+                if (playerState.getDeck() != null) {
+                    playerState.setDeck(null);
+                }
+
+                // PlayerState löschen
+                playerStateRepository.delete(playerState);
+            }
+        }
+    }
+
 
     @Transactional
     public void deleteUserGameData(List<Long> userIds) {
@@ -642,10 +735,5 @@ public class GameService {
         playerStateRepository.deletePlayerCardsByUserIds(userIds);
         playerStateRepository.deletePlayerStatesByUserIds(userIds);
     }
-
-
-
-
-
 
 }

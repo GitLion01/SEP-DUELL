@@ -30,7 +30,5 @@ public class CardInstance {
     @JsonIgnore
     private UserAccount userAccount;
 
-    @ManyToOne
-    @JoinColumn
-    private PlayerState playerState;
+
 }
