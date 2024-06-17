@@ -16,31 +16,31 @@ public interface PlayerStateRepository extends JpaRepository<PlayerState, Long> 
 
     @Modifying
     @Transactional
-    @Query(value = "DELETE FROM player_state_hand_cards WHERE player_state_id IN (SELECT id FROM player_state WHERE user_id IN (:userIds))", nativeQuery = true)
+    @Query(value = "DELETE FROM player_state_hand_cards WHERE player_state_id IN (SELECT player_state_id FROM user_account WHERE user_account.id IN (:userIds))", nativeQuery = true)
     void deleteHandCardsByUserIds(@Param("userIds") List<Long> userIds);
 
     @Modifying
     @Transactional
-    @Query(value = "DELETE FROM player_state_deck_clone WHERE player_state_id IN (SELECT id FROM player_state WHERE user_id IN (:userIds))", nativeQuery = true)
+    @Query(value = "DELETE FROM player_state_deck_clone WHERE player_state_id IN (SELECT player_state_id FROM user_account WHERE user_account.id IN (:userIds))", nativeQuery = true)
     void deleteDeckCloneByUserIds(@Param("userIds") List<Long> userIds);
 
     @Modifying
     @Transactional
-    @Query(value = "DELETE FROM player_state_field_cards WHERE player_state_id IN (SELECT id FROM player_state WHERE user_id IN (:userIds))", nativeQuery = true)
+    @Query(value = "DELETE FROM player_state_field_cards WHERE player_state_id IN (SELECT player_state_id FROM user_account WHERE user_account.id IN (:userIds))", nativeQuery = true)
     void deleteFieldCardsByUserIds(@Param("userIds") List<Long> userIds);
 
     @Modifying
     @Transactional
-    @Query(value = "DELETE FROM player_state_cards_played WHERE player_state_id IN (SELECT id FROM player_state WHERE user_id IN (:userIds))", nativeQuery = true)
+    @Query(value = "DELETE FROM player_state_cards_played WHERE player_state_id IN (SELECT player_state_id FROM user_account WHERE user_account.id IN (:userIds))", nativeQuery = true)
     void deleteCardsPlayedByUserIds(@Param("userIds") List<Long> userIds);
 
     @Modifying
     @Transactional
-    @Query(value = "DELETE FROM player_card WHERE player_state_id IN (SELECT id FROM player_state WHERE user_id IN (:userIds))", nativeQuery = true)
+    @Query(value = "DELETE FROM player_card WHERE player_state_id IN (SELECT player_state_id FROM user_account WHERE user_account.id IN (:userIds))", nativeQuery = true)
     void deletePlayerCardsByUserIds(@Param("userIds") List<Long> userIds);
 
     @Modifying
     @Transactional
-    @Query(value = "DELETE FROM player_state WHERE user_id IN (:userIds)", nativeQuery = true)
+    @Query(value = "DELETE FROM player_state WHERE player_state.id IN (SELECT player_state_id FROM user_account WHERE user_account.id IN (:userIds))", nativeQuery = true)
     void deletePlayerStatesByUserIds(@Param("userIds") List<Long> userIds);
 }
