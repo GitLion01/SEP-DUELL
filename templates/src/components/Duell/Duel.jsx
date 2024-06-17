@@ -62,26 +62,38 @@ const Duel = () => {
     }
   }, [id, users, game]);
 
-  /*
   useEffect(() => {
-    if (users[0].id === id) {
-      setPlayerState(users[0].playerState);
-      setOpponentState(users[1].playerState);
-    }
-    else {
-      setPlayerState(users[1].playerState);
-      setOpponentState(users[0].playerState);
-    }
-  }, [id]);
+    if (client && connected && id) {
+      const subscription = client.subscribe(`/user/${id}/queue/timer`, (message) => {
+        const response =JSON.parse(message.body);
+        setTimer(response);
+        if (response === 119) {
+          toast.warning("Neuer Zug beginnt");
+        }
+        if (response === 10) {
+          toast.warning("Noch 10 Sekunden übrig");
+        }
+      })
 
-   */
+      // Cleanup Subscription
+      return () => {
+        if (subscription) subscription.unsubscribe();
+      };
+    }
+  }, [id])
+
 
   useEffect(() => {
     if (client && connected && id) {
       const subscription = client.subscribe(`/user/${id}/queue/game`, (message) => {
         const response = JSON.parse(message.body);
+        console.log("Response: ", response);
 
-        if (response) {
+        // Speichern des Spiels und der Benutzer im Speicher
+        sessionStorage.setItem('game', JSON.stringify(response[0]));
+        sessionStorage.setItem('users', JSON.stringify(response[1]));
+
+        if (response.length === 2) {
           const currentUser = response[1].find(user => user.id === parseInt(id));
           const opponentUser = response[1].find(user => user.id !== parseInt(id));
 
@@ -94,27 +106,25 @@ const Duel = () => {
           setCurrentTurn(response[0].currentTurn);
           console.log("Mein feld nach Angriff: ", currentUser.playerState.fieldCards);
           console.log("Gegner feld nach Angriff: ", opponentUser.playerState.fieldCards);
-
-
-          // Speichern des Spiels und der Benutzer im Speicher
-          sessionStorage.setItem('game', JSON.stringify(response[0]));
-          sessionStorage.setItem('users', JSON.stringify(response[1]));
-
-          if (response.length > 2) {
-            const [_, __, sepCoins, leaderBoardPointsWinner, leaderBoardPointsLoser, damageWinner, damageLoser, cardsPlayedA, cardsPlayedB, sacrificedA, sacrificedB] = response;
-            setStats({
-              sepCoins,
-              leaderboardPointsA: response[1][0].playerState.winner ? leaderBoardPointsWinner : leaderBoardPointsLoser,
-              leaderboardPointsB : response[1][1].playerState.winner ? leaderBoardPointsWinner : leaderBoardPointsLoser,
-              damageA: response[1][0].playerState.winner ? damageWinner : damageLoser,
-              damageB: response[1][1].playerState.winner ? damageWinner : damageLoser,
-              cardsPlayedA,
-              cardsPlayedB,
-              sacrificedA,
-              sacrificedB
-            })
-          }
         }
+
+        if (response.length > 3) {
+          const [_, __, sepCoins, leaderBoardPointsWinner, leaderBoardPointsLoser, damageWinner, damageLoser, cardsPlayedA, cardsPlayedB, sacrificedA, sacrificedB] = response;
+          setStats({
+            sepCoins,
+            leaderboardPointsA: response[1][0].playerState.winner ? leaderBoardPointsWinner : leaderBoardPointsLoser,
+            leaderboardPointsB : response[1][1].playerState.winner ? leaderBoardPointsWinner : leaderBoardPointsLoser,
+            damageA: response[1][0].playerState.winner ? damageWinner : damageLoser,
+            damageB: response[1][1].playerState.winner ? damageWinner : damageLoser,
+            cardsPlayedA,
+            cardsPlayedB,
+            sacrificedA,
+            sacrificedB
+          })
+          console.log(stats);
+
+        }
+
       });
 
       // Cleanup Subscription
