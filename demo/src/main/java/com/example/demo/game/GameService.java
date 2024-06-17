@@ -91,13 +91,6 @@ public class GameService {
     }
 
 
-
-
-
-
-    private Long index; // damit in jeder methode der index => id aktuelle bleibt
-    private int deckIndex = 0;
-
     @Transactional
     public void selectDeck(DeckSelectionRequest request) {
         System.out.println("SERVICE ERREICHT");
@@ -225,7 +218,7 @@ public class GameService {
         handCards.add(cardInstance);
         deck.getCards().remove(deck.getCards().get(0));*/
 
-
+        playerStateRepository.save(userAccount.getPlayerState());
         gameRepository.save(game);
 
         List<UserAccount> users = game.getUsers();
@@ -236,33 +229,33 @@ public class GameService {
             System.out.println(" DANACH Player: " + player.getId());
         }
 
-
-
-
     }
 
     public void placeCard(PlaceCardRequest request){
 
         Optional<Game> optionalGame = gameRepository.findById(request.getGameId());
         Optional<UserAccount> optionalUserAccount = userAccountRepository.findById(request.getUserId());
+        Optional<PlayerCard> optionalCard = playerCardRepository.findById(request.getCardId());
 
-        if(optionalGame.isEmpty() || optionalUserAccount.isEmpty()) {
+        if(optionalGame.isEmpty() || optionalUserAccount.isEmpty() || optionalCard.isEmpty()) {
             return;
         }
 
         Game game = optionalGame.get();
         UserAccount userAccount = optionalUserAccount.get();
+        PlayerCard card = optionalCard.get();
         if(!game.getUsers().get(game.getCurrentTurn()).equals(userAccount) ||
                 userAccount.getPlayerState().getFieldCards().size() > 5
-                || userAccount.getPlayerState().getHandCards().get(request.getCardIndex()).getRarity() != Rarity.NORMAL){// prüft ob der User am zug ist
+                || card.getRarity() != Rarity.NORMAL){// prüft ob der User am zug ist
             return;
         }
 
-        userAccount.getPlayerState().getFieldCards().add(userAccount.getPlayerState().getHandCards().get(request.getCardIndex())); // Fügt Karte aus Hand dem Feld hinzu
-        PlayerCard removed = userAccount.getPlayerState().getHandCards().remove(request.getCardIndex()); // Löscht Karte aus Hand
-        userAccount.getPlayerState().getCardsPlayed().add(removed); // Fügt die Karte den gespielten Karten hinzu
 
+        userAccount.getPlayerState().getFieldCards().add(card); // Fügt Karte aus Hand dem Feld hinzu
+        userAccount.getPlayerState().getHandCards().remove(card); // Löscht Karte aus Hand
+        userAccount.getPlayerState().getCardsPlayed().add(card); // Fügt die Karte den gespielten Karten hinzu
 
+        playerStateRepository.save(userAccount.getPlayerState());
         gameRepository.save(game);
 
         List<UserAccount> users = game.getUsers();
@@ -298,6 +291,7 @@ public class GameService {
         List<PlayerCard> cards = userAccount.getPlayerState().getFieldCards();
         for(PlayerCard card : cards){
             card.setHasAttacked(false);
+            playerCardRepository.save(card);
         }
 
         gameRepository.save(game);
@@ -317,16 +311,18 @@ public class GameService {
         Optional<Game> optionalGame = gameRepository.findById(request.getGameId());
         Optional<UserAccount> optionalAttacker = userAccountRepository.findById(request.getUserIdAttacker());
         Optional<UserAccount> optionalDefender = userAccountRepository.findById(request.getUserIdDefender());
+        Optional<PlayerCard> optionalAttackerCard = playerCardRepository.findById(request.getAttackerId());
+        Optional<PlayerCard> optionalTarget = playerCardRepository.findById(request.getTargetId());
 
-        if(optionalGame.isEmpty() || optionalAttacker.isEmpty() || optionalDefender.isEmpty()) {
+        if(optionalGame.isEmpty() || optionalAttacker.isEmpty() || optionalDefender.isEmpty() || optionalAttackerCard.isEmpty() || optionalTarget.isEmpty()) {
             return;
         }
 
         Game game = optionalGame.get();
         UserAccount attacker = optionalAttacker.get();
         UserAccount defender = optionalDefender.get();
-        PlayerCard attackerCard = attacker.getPlayerState().getFieldCards().get(request.getAttackerIndex());
-        PlayerCard target = defender.getPlayerState().getFieldCards().get(request.getTargetIndex());
+        PlayerCard attackerCard = optionalAttackerCard.get();
+        PlayerCard target = optionalTarget.get();
 
         if(attackerCard.getHasAttacked()){
             return;
@@ -348,7 +344,7 @@ public class GameService {
         System.out.println("RemainingTargetDefense " + remainingTargetDefense);
         if (remainingTargetDefense < 0) {
             // C2 wird zerstört und vom Spielfeld entfernt
-            defender.getPlayerState().getFieldCards().remove(request.getTargetIndex());
+            defender.getPlayerState().getFieldCards().remove(target);
             attacker.getPlayerState().setDamage(attacker.getPlayerState().getDamage() + target.getDefensePoints() + 1);
             target.setDefensePoints(-1);
             System.out.println("Target wurde entfernt");
@@ -363,7 +359,7 @@ public class GameService {
             int remainingAttackerDefense = attackerCard.getDefensePoints() - target.getAttackPoints();
             if (remainingAttackerDefense < 0) {
                 // C1 wird zerstört und vom Spielfeld entfernt
-                attacker.getPlayerState().getFieldCards().remove(request.getAttackerIndex());
+                attacker.getPlayerState().getFieldCards().remove(attackerCard);
                 System.out.println("Attacker wurde entfernt");
             } else {
                 // C1 überlebt den Konter, setze neue Verteidigungspunkte
@@ -397,18 +393,20 @@ public class GameService {
         Optional<Game> optionalGame = gameRepository.findById(request.getGameId());
         Optional<UserAccount> optionalAttacker = userAccountRepository.findById(request.getAttackerId());
         Optional<UserAccount> optionalDefender = userAccountRepository.findById(request.getDefenderId());
+        Optional<PlayerCard> optionalPlayerCard = playerCardRepository.findById(request.getAttackerCardId());
 
-        if(optionalGame.isEmpty() || optionalAttacker.isEmpty() || optionalDefender.isEmpty()) {
+        if(optionalGame.isEmpty() || optionalAttacker.isEmpty() || optionalDefender.isEmpty() || optionalPlayerCard.isEmpty()) {
             return;
         }
 
         Game game = optionalGame.get();
         UserAccount attacker = optionalAttacker.get();
         UserAccount defender = optionalDefender.get();
+        PlayerCard attackerCard = optionalPlayerCard.get();
         if(!game.getUsers().get(game.getCurrentTurn()).equals(attacker) || !defender.getPlayerState().getFieldCards().isEmpty() || game.getFirstRound()){
             return;
         }
-        PlayerCard attackerCard = attacker.getPlayerState().getFieldCards().get(request.getAttackerCardIndex());
+
 
         if(attackerCard.getHasAttacked()){
             return;
@@ -448,32 +446,36 @@ public class GameService {
     public void swapForRare(RareSwapRequest request) {
         Optional<Game> optionalGame = gameRepository.findById(request.getGameId());
         Optional<UserAccount> optionalUser = userAccountRepository.findById(request.getUserId());
+        Optional<PlayerCard> optionalRare = playerCardRepository.findById(request.getRareId());
+        Optional<PlayerCard> optionalCard1 = playerCardRepository.findById(request.getCardIds().get(0));
+        Optional<PlayerCard> optionalCard2 = playerCardRepository.findById(request.getCardIds().get(1));
 
-        if(optionalGame.isEmpty() || optionalUser.isEmpty()) {
+
+        if(optionalGame.isEmpty() || optionalUser.isEmpty() || optionalRare.isEmpty() || optionalCard1.isEmpty() || optionalCard2.isEmpty()) {
             return;
         }
 
         Game game = optionalGame.get();
         UserAccount user = optionalUser.get();
 
-        if(!game.getUsers().get(0).equals(user) || request.getNormalCardsIndex().size() != 2) {
+        if(!game.getUsers().get(game.getCurrentTurn()).equals(user) || request.getCardIds().size() != 2) {
             return;
         }
 
         List<PlayerCard> hand = user.getPlayerState().getHandCards();
         List<PlayerCard> field = user.getPlayerState().getFieldCards();
-        PlayerCard normal1 = field.get(request.getNormalCardsIndex().get(0));
-        PlayerCard normal2 = field.get(request.getNormalCardsIndex().get(1));
-        PlayerCard rare = hand.get(request.getRareCardIndex());
+        PlayerCard card1 = optionalCard1.get();
+        PlayerCard card2 = optionalCard2.get();
+        PlayerCard rare = optionalRare.get();
 
         if(rare.getRarity() != Rarity.RARE){
             return;
         }
 
-        normal1.setSacrificed(true);
-        normal2.setSacrificed(true);
-        user.getPlayerState().getFieldCards().remove(normal1);
-        user.getPlayerState().getFieldCards().remove(normal2);
+        card1.setSacrificed(true);
+        card2.setSacrificed(true);
+        user.getPlayerState().getFieldCards().remove(card1);
+        user.getPlayerState().getFieldCards().remove(card1);
         user.getPlayerState().getFieldCards().add(rare);
         user.getPlayerState().getCardsPlayed().add(rare);
         user.getPlayerState().getHandCards().remove(rare);
@@ -494,22 +496,25 @@ public class GameService {
     public void swapForLegendary(LegendarySwapRequest request) {
         Optional<Game> optionalGame = gameRepository.findById(request.getGameId());
         Optional<UserAccount> optionalUser = userAccountRepository.findById(request.getUserId());
+        Optional<PlayerCard> optionalLeggendary = playerCardRepository.findById(request.getLegendaryId());
+        Optional<PlayerCard> optionalCard1 = playerCardRepository.findById(request.getCardIds().get(0));
+        Optional<PlayerCard> optionalCard2 = playerCardRepository.findById(request.getCardIds().get(1));
+        Optional<PlayerCard> optionalCard3 = playerCardRepository.findById(request.getCardIds().get(2));
 
-        if(optionalGame.isEmpty() || optionalUser.isEmpty()) {
+        if(optionalGame.isEmpty() || optionalUser.isEmpty() || optionalCard1.isEmpty() || optionalCard2.isEmpty() || optionalCard3.isEmpty() || optionalLeggendary.isEmpty()) {
             return;
         }
 
         Game game = optionalGame.get();
         UserAccount user = optionalUser.get();
-        if(!game.getUsers().get(0).equals(user) || request.getNormalCardsIndex().size() != 3) {
+        if(!game.getUsers().get(game.getCurrentTurn()).equals(user) || request.getCardIds().size() != 3) {
             return;
         }
-        List<PlayerCard> hand = user.getPlayerState().getHandCards();
-        List<PlayerCard> field = user.getPlayerState().getFieldCards();
-        PlayerCard card1 = field.get(request.getNormalCardsIndex().get(0));
-        PlayerCard card2 = field.get(request.getNormalCardsIndex().get(1));
-        PlayerCard card3 = field.get(request.getNormalCardsIndex().get(2));
-        PlayerCard legendary = hand.get(request.getLegendaryCardIndex());
+
+        PlayerCard card1 = optionalCard1.get();
+        PlayerCard card2 = optionalCard2.get();
+        PlayerCard card3 = optionalCard3.get();
+        PlayerCard legendary = optionalLeggendary.get();
 
         if(legendary.getRarity() != Rarity.LEGENDARY){
             return;

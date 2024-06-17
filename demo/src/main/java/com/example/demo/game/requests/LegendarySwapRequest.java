@@ -11,7 +11,7 @@ public class LegendarySwapRequest {
 
     Long gameId;
     Long userId;
-    List<Integer> normalCardsIndex;
-    int legendaryCardIndex;
+    List<Long> cardIds;
+    Long legendaryId;
 
 }
