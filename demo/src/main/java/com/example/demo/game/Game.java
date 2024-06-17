@@ -20,6 +20,7 @@ public class Game {
     private Long id;
     private Boolean ready = false;
     private Boolean firstRound = true;
+    private Integer timeLeft = 120;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinTable(
@@ -31,5 +32,13 @@ public class Game {
     private List<UserAccount> users = new ArrayList<>();
 
     private Integer currentTurn = 0;
+
+    public void resetTimer(){
+        this.timeLeft = 120;
+    }
+
+    public Integer getRemaingTime(){
+        return this.timeLeft;
+    }
 
 }
