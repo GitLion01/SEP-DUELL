@@ -8,6 +8,7 @@ import com.example.demo.user.UserAccount;
 import com.example.demo.user.UserAccountRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
@@ -25,8 +26,6 @@ public class GameService {
     private final SimpMessagingTemplate messagingTemplate;
     private final PlayerStateRepository playerStateRepository;
     private final PlayerCardRepository playerCardRepository;
-    private Timer timer = new Timer();
-    private int timeLeft = 120;
 
 
     @Autowired
@@ -47,6 +46,33 @@ public class GameService {
 
 
 
+
+    @Scheduled(fixedRate = 1000)
+    public void updateTimers(){
+        List<Game> games = gameRepository.findAll();
+        for (Game game : games) {
+            if(game.getReady() && game.getRemaingTime() <= 0){
+                handleTimerExpiration(game);
+            }
+            sendTimerUpdate(game);
+        }
+    }
+
+    private void handleTimerExpiration(Game game) {
+        UserAccount currentTurnPlayer = game.getUsers().get(game.getCurrentTurn());
+        currentTurnPlayer.getPlayerState().setLifePoints(-1);
+        UserAccount otherPlayer = game.getUsers().get(0).equals(currentTurnPlayer) ? game.getUsers().get(1) : game.getUsers().get(0);
+        currentTurnPlayer.getPlayerState().setLifePoints(-1);
+        otherPlayer.getPlayerState().setWinner(true);
+        terminateMatch(game.getId(), currentTurnPlayer.getId(), otherPlayer.getId());
+    }
+
+    private void sendTimerUpdate(Game game) {
+        int remainingTime = game.getRemaingTime();
+        for(UserAccount player : game.getUsers()) {
+            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", remainingTime);
+        }
+    }
 
 
     public void createGame(CreateGameRequest request) {
@@ -83,6 +109,7 @@ public class GameService {
         System.out.println("Nach Game");
         newGame.getUsers().add(userA);
         newGame.getUsers().add(userB);
+        newGame.resetTimer();
         System.out.println("vor speichern");
         gameRepository.save(newGame);
         System.out.println("Game gespeichert");
@@ -180,17 +207,6 @@ public class GameService {
             game.setReady(true);
         }
 
-
-        TimerTask task = new TimerTask() {
-            @Override
-            public void run() {
-                timeLeft--;
-                for(UserAccount player : game.getUsers()) {
-                    messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/timer", timeLeft);
-                }
-            }
-        };
-        timer.schedule(task, 1000); // in Millisekunden
 
         System.out.println("ALLE READY");
 
@@ -299,33 +315,11 @@ public class GameService {
             return;
         }
 
+        UserAccount currentTurn = game.getUsers().get(game.getCurrentTurn());
+        UserAccount notTurn = game.getUsers().get(0).equals(userAccount) ? game.getUsers().get(1) : userAccount;
+
         game.setCurrentTurn(game.getUsers().get(0).equals(userAccount) ? 1 : 0);
-
-        timer.cancel(); // Stoppt den Timer aus selectDeck
-        timer.purge();
-        timer = new Timer(); // neuer Timer wird gesetzt
-        TimerTask task = new TimerTask() {
-            @Override
-            public void run() {
-                /*terminateMatch(game.getId(), game.getUsers().get(0).getId(), game.getUsers().get(1).getId());*/
-                timeLeft--;
-            }
-        };
-        timer.schedule(task, 1000); // in Millisekunden
-
-        if(timeLeft == 10) {
-            for(UserAccount player : game.getUsers()) {
-                messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/timer", timeLeft);
-            }
-        }
-
-        if(timeLeft == 0){
-            terminateMatch(game.getId(), game.getUsers().get(0).getId(), game.getUsers().get(1).getId());
-            return;
-        }
-
-
-
+        game.resetTimer();
 
         if(game.getFirstRound()){
             game.setFirstRound(false);
