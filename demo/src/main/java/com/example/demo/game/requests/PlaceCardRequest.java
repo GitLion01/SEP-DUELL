@@ -9,5 +9,5 @@ public class PlaceCardRequest {
 
     private Long gameId;
     private Long userId;
-    private int cardIndex;
+    private Long cardId;
 }

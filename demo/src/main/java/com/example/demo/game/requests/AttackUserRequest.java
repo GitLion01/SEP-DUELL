@@ -10,5 +10,5 @@ public class AttackUserRequest {
     private Long gameId;
     private Long attackerId;
     private Long defenderId;
-    private int attackerCardIndex;
+    private Long attackerCardId;
 }

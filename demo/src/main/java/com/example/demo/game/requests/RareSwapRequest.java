@@ -11,6 +11,6 @@ public class RareSwapRequest {
 
     Long gameId;
     Long userId;
-    List<Integer> normalCardsIndex;
-    int rareCardIndex;
+    List<Long> cardIds;
+    Long rareId;
 }
