@@ -24,6 +24,7 @@ public class GameService {
     private final SimpMessagingTemplate messagingTemplate;
     private final PlayerStateRepository playerStateRepository;
     private final PlayerCardRepository playerCardRepository;
+    private final Timer timer = new Timer();
 
 
     @Autowired
@@ -746,5 +747,8 @@ public class GameService {
         playerStateRepository.deletePlayerCardsByUserIds(userIds);
         playerStateRepository.deletePlayerStatesByUserIds(userIds);
     }
+
+
+    timer
 
 }
