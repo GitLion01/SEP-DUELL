@@ -53,12 +53,12 @@ const LeaderboardPage = () => {
                         }
                     });
                 });
-                newClient.subscribe('/user/queue/notifications', message => {
+                newClient.subscribe(`/user/${userId}/queue/messages`, message => {
                     const notification = JSON.parse(message.body);
-                    if (notification.type === 'challenge') {
+                    if (notification.message === 'challenge') {
                         setCountdown(30); // Start des Countdowns bei 30 Sekunden
                         setIsChallengeDisabled(true); // Herausforderungsbutton deaktivieren
-                    } else if (notification.type === 'duelAccepted') {
+                    } else if (notification.message === 'duelAccepted') {
                         setActiveDuel(notification); // Aktives Duell setzen
                     }
                     setNotifications(prev => [...prev, notification]);
