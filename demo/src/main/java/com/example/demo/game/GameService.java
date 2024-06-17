@@ -26,6 +26,7 @@ public class GameService {
     private final PlayerStateRepository playerStateRepository;
     private final PlayerCardRepository playerCardRepository;
     private Timer timer = new Timer();
+    private int timeLeft = 120;
 
 
     @Autowired
@@ -183,10 +184,13 @@ public class GameService {
         TimerTask task = new TimerTask() {
             @Override
             public void run() {
-                terminateMatch(request.getGameId(), game.getUsers().get(0).getId(), game.getUsers().get(1).getId());
+                timeLeft--;
+                for(UserAccount player : game.getUsers()) {
+                    messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/timer", timeLeft);
+                }
             }
         };
-        timer.schedule(task, 120000); // in Millisekunden
+        timer.schedule(task, 1000); // in Millisekunden
 
         System.out.println("ALLE READY");
 
@@ -281,7 +285,6 @@ public class GameService {
     }
 
 
-
     public void endTurn(EndTurnRequest request) {
         Optional<Game> optionalGame = gameRepository.findById(request.getGameID());
         Optional<UserAccount> optionalUserAccount = userAccountRepository.findById(request.getUserID());
@@ -304,10 +307,24 @@ public class GameService {
         TimerTask task = new TimerTask() {
             @Override
             public void run() {
-                terminateMatch(game.getId(), game.getUsers().get(0).getId(), game.getUsers().get(1).getId());
+                /*terminateMatch(game.getId(), game.getUsers().get(0).getId(), game.getUsers().get(1).getId());*/
+                timeLeft--;
             }
         };
-        timer.schedule(task, 120000); // in Millisekunden
+        timer.schedule(task, 1000); // in Millisekunden
+
+        if(timeLeft == 10) {
+            for(UserAccount player : game.getUsers()) {
+                messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/timer", timeLeft);
+            }
+        }
+
+        if(timeLeft == 0){
+            terminateMatch(game.getId(), game.getUsers().get(0).getId(), game.getUsers().get(1).getId());
+            return;
+        }
+
+
 
 
         if(game.getFirstRound()){
