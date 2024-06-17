@@ -14,6 +14,7 @@ import java.util.*;
 
 
 
+
 @Transactional
 @Service
 public class GameService {
@@ -24,7 +25,7 @@ public class GameService {
     private final SimpMessagingTemplate messagingTemplate;
     private final PlayerStateRepository playerStateRepository;
     private final PlayerCardRepository playerCardRepository;
-    private final Timer timer = new Timer();
+    private Timer timer = new Timer();
 
 
     @Autowired
@@ -41,6 +42,9 @@ public class GameService {
         this.playerStateRepository = playerStateRepository;
         this.playerCardRepository = playerCardRepository;
     }
+
+
+
 
 
 
@@ -175,6 +179,15 @@ public class GameService {
             game.setReady(true);
         }
 
+
+        TimerTask task = new TimerTask() {
+            @Override
+            public void run() {
+                terminateMatch(request.getGameId(), game.getUsers().get(0).getId(), game.getUsers().get(1).getId());
+            }
+        };
+        timer.schedule(task, 120000); // in Millisekunden
+
         System.out.println("ALLE READY");
 
         gameRepository.save(game);
@@ -284,6 +297,18 @@ public class GameService {
         }
 
         game.setCurrentTurn(game.getUsers().get(0).equals(userAccount) ? 1 : 0);
+
+        timer.cancel(); // Stoppt den Timer aus selectDeck
+        timer.purge();
+        timer = new Timer(); // neuer Timer wird gesetzt
+        TimerTask task = new TimerTask() {
+            @Override
+            public void run() {
+                terminateMatch(game.getId(), game.getUsers().get(0).getId(), game.getUsers().get(1).getId());
+            }
+        };
+        timer.schedule(task, 120000); // in Millisekunden
+
 
         if(game.getFirstRound()){
             game.setFirstRound(false);
@@ -644,51 +669,7 @@ public class GameService {
 
     }
 
-    /*@Transactional
-    public void deleteGame(Long gameId) {
-        // Spiel laden
-        Game game = gameRepository.findById(gameId)
-                .orElseThrow(() -> new IllegalArgumentException("Game not found with id: " + gameId));
 
-        // Alle Benutzer des Spiels holen
-        List<UserAccount> users = game.getUsers();
-
-        // Verbindung zwischen Game und UserAccount aufheben
-        game.getUsers().clear();
-        gameRepository.save(game);
-
-        // Spiel löschen
-        gameRepository.delete(game);
-
-        // Für jeden Benutzer die zugehörigen PlayerCards und PlayerStates löschen
-        for (UserAccount user : users) {
-            PlayerState playerState = user.getPlayerState();
-            if (playerState != null) {
-                // PlayerCards entfernen
-                playerState.getHandCards().clear();
-                playerState.getFieldCards().clear();
-                playerState.getDeckClone().clear();
-                playerState.getCardsPlayed().clear();
-                playerStateRepository.save(playerState);
-
-                // Deck löschen
-                if (playerState.getDeck() != null && playerState.getDeckClone() != null) {
-                    playerState.setDeck(null);
-                    playerState.setDeckClone(null);
-                }
-                playerStateRepository.save(playerState);
-
-
-                // PlayerState löschen aus UserAccouunt
-                user.setPlayerState(null);
-                userAccountRepository.save(user);
-
-                // PlayerState löschen
-                playerStateRepository.delete(playerState);
-            }
-        }
-    }
-*/
 
     @Transactional
     public void deleteGame(Long gameId) {
@@ -749,6 +730,5 @@ public class GameService {
     }
 
 
-    timer
 
 }
