@@ -69,8 +69,6 @@ public class ChatService {
     }
 
     public void sendMessage(ChatMessage chatMessage,Long userId,Long chatId) {
-        System.out.println("start sendMessage in ChatService");
-        System.out.println(chatMessage.getMessage());
         try {
             for (Chat chat : chatRepository.findAll()) {
                 if (Objects.equals(chatMessage.getChat().getId(), chat.getId()))
@@ -90,26 +88,6 @@ public class ChatService {
         }
     }
 
-    /*public void sendGroupMessage(ChatMessage chatMessage) {
-        try{
-            for (Group group : groupRepository.findAll()) {
-                if(Objects.equals(chatMessage.getChat().getId(), group.getId()))
-                {
-                    group.getMessages().add(chatMessage);
-                    groupRepository.save(group);
-                    chatMessage.setId(group.getMessages().get(group.getMessages().size() - 1).getId());
-                    for(UserAccount userAccount : group.getUsers())
-                    {
-                        messagingTemplate.convertAndSendToUser(userAccount.getId().toString(),"/queue/messages", convertToChatMessageDTO(chatMessage));
-                    }
-                    break;
-                }
-            }
-        }
-        catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
-    }*/
 
     public void editMessage(ChatMessage chatMessage) {
         ChatMessage existingMessage = chatMessageRepository.findById(chatMessage.getId())
@@ -235,7 +213,7 @@ public class ChatService {
 
     }
 
-    private Object convertToChatMessageDTO2(ChatMessage chatMessage) {
+    private ChatMessageDTO convertToChatMessageDTO2(ChatMessage chatMessage) {
         ChatMessageDTO dto = new ChatMessageDTO();
         dto.setId(chatMessage.getId());
         dto.setMessage(chatMessage.getMessage());

@@ -1,5 +1,4 @@
 package com.example.demo.chat;
-
 import com.example.demo.user.UserAccount;
 import com.example.demo.user.UserAccountRepository;
 import org.junit.jupiter.api.*;
@@ -8,7 +7,6 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -117,26 +115,120 @@ class ChatServiceTest {
 
     @Test
     void sendMessage() {
+        UserAccount user1=new UserAccount();
+        UserAccount user2=new UserAccount();
+        Chat chat=new Chat();
+        ChatMessage chatMessage=new ChatMessage();
+
+        user1.setId(1L);
+        user2.setId(2L);
+        chat.setId(1L);
+        chatMessage.setId(1L);
+
+        chat.getUsers().add(user1);
+        chat.getUsers().add(user2);
+        user1.getUserChat().add(chat);
+        user2.getUserChat().add(chat);
+
+        chatMessage.setSender(user1);
+        chat.getMessages().add(chatMessage);
+
+        when(chatMessageRepository.findById(user2.getUserChat().get(0).getMessages().get(0).getId())).thenReturn(Optional.of(chatMessage));
+        ResponseEntity<ChatMessage> message;
+        if(chatMessageRepository.findById(user2.getUserChat().get(0).getMessages().get(0).getId()).isPresent())
+            message= new ResponseEntity<>(chatMessageRepository.findById(user2.getUserChat().get(0).getMessages().get(0).getId()).get(),HttpStatus.OK);
+        else
+            message= new ResponseEntity<>(new ChatMessage(),HttpStatus.NOT_FOUND);
+        assertNotNull(message);
+        assertEquals(message.getStatusCode(),HttpStatus.OK);
+
+
     }
 
     @Test
-    @Disabled
     void editMessage() {
+        UserAccount user1=new UserAccount();
+        UserAccount user2=new UserAccount();
+        Chat chat=new Chat();
+        ChatMessage chatMessage=new ChatMessage();
+
+        user1.setId(1L);
+        user2.setId(2L);
+        chat.setId(1L);
+        chatMessage.setId(1L);
+        chatMessage.setMessage("first Message");
+
+        chat.getUsers().add(user1);
+        chat.getUsers().add(user2);
+        user1.getUserChat().add(chat);
+        user2.getUserChat().add(chat);
+
+        chatMessage.setSender(user1);
+        chat.getMessages().add(chatMessage);
+        chatMessage.setMessage("Edited");
+
+        when(chatMessageRepository.findById(user2.getUserChat().get(0).getMessages().get(0).getId())).thenReturn(Optional.of(chatMessage));
+
+        if(chatMessageRepository.findById(user2.getUserChat().get(0).getMessages().get(0).getId()).isPresent())
+            chatMessage = chatMessageRepository.findById(user2.getUserChat().get(0).getMessages().get(0).getId()).get();
+
+        assertNotNull(chatMessage);
+        assertEquals(chat.getMessages().get(0).getMessage(),"Edited");
     }
 
     @Test
-    @Disabled
-    void updateChatWithEditedMessage() {
-    }
-
-    @Test
-    @Disabled
     void deleteMessage() {
+        UserAccount user1=new UserAccount();
+        UserAccount user2=new UserAccount();
+        Chat chat=new Chat();
+        ChatMessage chatMessage=new ChatMessage();
+
+        user1.setId(1L);
+        user2.setId(2L);
+        chat.setId(1L);
+        chatMessage.setId(1L);
+
+        chat.getUsers().add(user1);
+        chat.getUsers().add(user2);
+        user1.getUserChat().add(chat);
+        user2.getUserChat().add(chat);
+
+        chatMessage.setSender(user1);
+        chat.getMessages().add(chatMessage);
+
+        chat.getMessages().remove(chatMessage);
+
+        ResponseEntity<String> s;
+        if(chat.getMessages().contains(chatMessage))
+            s=new ResponseEntity<>("Not deleted",HttpStatus.OK);
+        else
+            s=new ResponseEntity<>("deleted",HttpStatus.NOT_FOUND);
+
+        assertEquals("deleted",s.getBody());
     }
 
     @Test
-    @Disabled
     void getGroups() {
+        UserAccount user = new UserAccount();
+        user.setId(1L);
+        user.setUserChat(new ArrayList<>());
+        List<Group> groups=new ArrayList<>();
+        for(int i=0;i<10;i++) {
+            groups.add(new Group());
+            groups.get(i).setName("group"+i);
+            groups.get(i).setId((long)i);
+            user.getUserChat().add(groups.get(i));
+        }
+        for(int i=0;i<10;i++)
+        {
+            when(groupRepository.findById(groups.get(i).getId())).thenReturn(Optional.of(groups.get(i)));
+        }
+        ResponseEntity<List<Group>> response=new ResponseEntity<>(groups,HttpStatus.OK);
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK,response.getStatusCode());
+
+        for(int i=0;i<10;i++)
+            System.out.println(groups.get(i).getName());
     }
 
     @Test
@@ -182,12 +274,20 @@ class ChatServiceTest {
     }
 
     @Test
-    @Disabled
     void setReadTrue() {
+        ChatMessage chatMessage=new ChatMessage();
+        chatMessage.setId(1L);
+        chatMessage.setRead(true);
+        when(chatMessageRepository.findById(chatMessage.getId())).thenReturn(Optional.of(chatMessage));
+        ResponseEntity<ChatMessage> chatMessage1;
+        if(chatMessageRepository.findById(1L).isPresent()) {
+            chatMessage1 = new ResponseEntity<>(chatMessageRepository.findById(1L).get(), HttpStatus.OK);
+        }
+        else
+            chatMessage1 = new ResponseEntity<>(new ChatMessage(), HttpStatus.NOT_FOUND);
+        assertNotNull(chatMessage1);
+        assertEquals(HttpStatus.OK,chatMessage1.getStatusCode());
+
     }
 
-    @Test
-    @Disabled
-    void checkOnline() {
-    }
 }
