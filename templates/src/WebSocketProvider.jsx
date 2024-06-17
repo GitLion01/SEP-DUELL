@@ -8,6 +8,7 @@ export const WebSocketProvider = ({ children }) => {
     const [client, setClient] = useState(null);
     const [game, setGame] = useState(null);
     const [users, setUsers] = useState([]);
+    const [connected, setConnected] = useState(false);
 
     useEffect(() => {
         const userId = parseInt(localStorage.getItem('id')); // ID des aktuellen Benutzers als Zahl
@@ -18,6 +19,7 @@ export const WebSocketProvider = ({ children }) => {
             reconnectDelay: 5000,
             onConnect: () => {
                 console.log('Connected to WebSocket server');
+                setConnected(true);
 
                 // Wiederherstellung von Spiel und Benutzern aus dem Speicher
                 const storedGame = sessionStorage.getItem('game');
@@ -70,7 +72,7 @@ export const WebSocketProvider = ({ children }) => {
     }, []);
 
     return (
-        <WebSocketContext.Provider value={{ client, game, setGame, users, setUsers }}>
+        <WebSocketContext.Provider value={{ client, game, setGame, users, setUsers, connected }}>
             {children}
         </WebSocketContext.Provider>
     );

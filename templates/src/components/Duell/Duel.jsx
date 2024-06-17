@@ -9,7 +9,7 @@ import SwapModal from "./SwapModal";
 
 const Duel = () => {
   const navigate = useNavigate();
-  const { client, game, setGame, users, setUsers } = useContext(WebSocketContext);
+  const { client, game, setGame, users, setUsers, connected } = useContext(WebSocketContext);
   const [id, setId] = useState(null);
   const gameId = localStorage.getItem('gameId');
   const [timer, setTimer] = useState(120);
@@ -74,7 +74,7 @@ const Duel = () => {
    */
 
   useEffect(() => {
-    if (client && client.connected && id) {
+    if (client && connected && id) {
       const subscription = client.subscribe(`/user/${id}/queue/game`, (message) => {
         const response = JSON.parse(message.body);
 
@@ -100,31 +100,8 @@ const Duel = () => {
         if (subscription) subscription.unsubscribe();
       };
     }
-  }, [client, id]);
+  }, [client, connected, id]);
 
-
-
-   /*
-  useEffect(() => {
-    if (timer > 0) {
-      const interval = setInterval(() => {
-        setTimer((prev) => {
-          if (prev === 11) {
-            toast.warning('10 seconds remaining!');
-          }
-          if (prev === 1) {
-            handleTimeout();
-            clearInterval(interval);
-          }
-          return prev - 1;
-        });
-      }, 1000);
-
-      return () => clearInterval(interval);
-    }
-  }, [timer, currentTurn, id]);
-
-    */
 
   const resetTimer = () => {
     setTimer(120);
@@ -152,29 +129,6 @@ const Duel = () => {
     }
   };
 
-  /*
-  const handleAttack = () => {
-    if (selectedAttacker !== null) {
-      if (selectedTarget !== null) {
-        // Angriff auf gegnerische Karte
-        if (client) {
-          client.publish({
-            destination: '/app/attackCard',
-            body: JSON.stringify({
-              gameId: gameId,
-              userIdAttacker: id,
-              userIdDefender: opponentUser.id,
-              attackerIndex: selectedAttacker,
-              targetIndex: selectedTarget
-            }),
-          });
-        }
-      }
-      resetAttackMode();
-    }
-  };
-
-   */
 
   const handleAttack = () => {
     if (opponentState.fieldCards.length === 0) {
@@ -243,6 +197,7 @@ const Duel = () => {
 
   const handleSetCard = (index) => {
     if (isSetCardMode) {
+      console.log("karte wird gesetzt");
       client.publish({
         destination: '/app/placeCard',
         body: JSON.stringify({
