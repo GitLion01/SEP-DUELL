@@ -5,6 +5,7 @@ import Card from "../card";
 import {WebSocketContext} from "../../WebSocketProvider";
 import './duel.css';
 import SwapModal from "./SwapModal";
+import StatisticsModal from "./StatisticsModal";
 
 
 const Duel = () => {
@@ -25,8 +26,10 @@ const Duel = () => {
   const [selectedTarget, setSelectedTarget] = useState(null);
   const [currentTurn, setCurrentTurn] = useState(game?.currentTurn || 0);
   const [cardDrawn, setCardDrawn] = useState(false);
+  const [hasAttacked, setHasAttacked] = useState(false);
   const [selectedCards, setSelectedCards] = useState([]);
   const [selectedHandCard, setSelectedHandCard] = useState(null);
+  const [stats, setStats] = useState(null);
 
 
 
@@ -79,19 +82,38 @@ const Duel = () => {
         const response = JSON.parse(message.body);
 
         if (response) {
-          if (response[1][0].id === parseInt(id)) {
-            setPlayerState(response[1][0].playerState);
-            setOpponentState(response[1][1].playerState);
-          } else {
-            setPlayerState(response[1][1].playerState);
-            setOpponentState(response[1][0].playerState);
+          const currentUser = response[1].find(user => user.id === parseInt(id));
+          const opponentUser = response[1].find(user => user.id !== parseInt(id));
+
+          if (currentUser) {
+            setPlayerState(currentUser.playerState);
+          }
+          if (opponentUser) {
+            setOpponentState(opponentUser.playerState);
           }
           setCurrentTurn(response[0].currentTurn);
+          console.log("Mein feld nach Angriff: ", currentUser.playerState.fieldCards);
+          console.log("Gegner feld nach Angriff: ", opponentUser.playerState.fieldCards);
+
 
           // Speichern des Spiels und der Benutzer im Speicher
           sessionStorage.setItem('game', JSON.stringify(response[0]));
           sessionStorage.setItem('users', JSON.stringify(response[1]));
 
+          if (response.length > 2) {
+            const [_, __, sepCoins, leaderBoardPointsWinner, leaderBoardPointsLoser, damageWinner, damageLoser, cardsPlayedA, cardsPlayedB, sacrificedA, sacrificedB] = response;
+            setStats({
+              sepCoins,
+              leaderboardPointsA: response[1][0].playerState.winner ? leaderBoardPointsWinner : leaderBoardPointsLoser,
+              leaderboardPointsB : response[1][1].playerState.winner ? leaderBoardPointsWinner : leaderBoardPointsLoser,
+              damageA: response[1][0].playerState.winner ? damageWinner : damageLoser,
+              damageB: response[1][1].playerState.winner ? damageWinner : damageLoser,
+              cardsPlayedA,
+              cardsPlayedB,
+              sacrificedA,
+              sacrificedB
+            })
+          }
         }
       });
 
@@ -108,6 +130,11 @@ const Duel = () => {
   };
 
   const handleEndTurn = () => {
+    if (!cardDrawn) {
+      toast.error("Ziehe zuerst eine Karte");
+      return;
+    }
+
     if (client) {
       client.publish({
         destination: '/app/endTurn',
@@ -117,6 +144,7 @@ const Duel = () => {
         setCardDrawn(false);
       }
       resetAttackMode()
+      setHasAttacked(false);
     }
   };
 
@@ -131,45 +159,51 @@ const Duel = () => {
 
 
   const handleAttack = () => {
-    if (opponentState.fieldCards.length === 0) {
-      console.log("der sollte jetzt angreifen");
 
-        console.log("angreifer wurde ausgewählt");
-        client.publish({
-          destination: '/app/attackUser',
-          body: JSON.stringify({
-            gameId: gameId,
-            attackerId: id,
-            defenderId: users.find(user => user.id !== parseInt(id)).id,
-            attackerCardIndex: selectedAttacker
-          }),
-        });
-        console.log("gegner wird angegriffen");
+      if(cardDrawn) {
+        if (opponentState.fieldCards.length === 0) {
+          console.log("der sollte jetzt angreifen");
+
+          console.log("angreifer wurde ausgewählt");
+          client.publish({
+            destination: '/app/attackUser',
+            body: JSON.stringify({
+              gameId: gameId,
+              attackerId: id,
+              defenderId: users.find(user => user.id !== parseInt(id)).id,
+              attackerCardId: selectedAttacker
+            }),
+          });
+          console.log("Mein feld vor Angriff: ", playerState.fieldCards);
+          console.log("Gegner feld vor Angriff: ", opponentState.fieldCards);
+          setHasAttacked(true);
+        }
+        else {
+          console.log(selectedAttacker, selectedTarget);
+          //if (selectedTarget && selectedAttacker) {
+          console.log("gegnerkarte wird angegriffen");
+          client.publish({
+            destination: '/app/attackCard',
+            body: JSON.stringify({
+              gameId: gameId,
+              userIdAttacker: id,
+              userIdDefender: users.find(user => user.id !== parseInt(id)).id,
+              attackerId: selectedAttacker,
+              targetId: selectedTarget
+            }),
+          });
+          setHasAttacked(true);
+          //}
+        }
+      }
 
 
-    }
-    else {
-      console.log(selectedAttacker, selectedTarget);
-      //if (selectedTarget && selectedAttacker) {
-        console.log("gegnerkarte wird angegriffen");
-        client.publish({
-          destination: '/app/attackCard',
-          body: JSON.stringify({
-            gameId: gameId,
-            userIdAttacker: id,
-            userIdDefender: users.find(user => user.id !== parseInt(id)).id,
-            attackerIndex: selectedAttacker,
-            targetIndex: selectedTarget
-          }),
-        });
-      //}
-    }
   }
 
-  const selectAttackingCard = (index) => {
+  const selectAttackingCard = (Id) => {
     //if (isAttackMode) {
-      setSelectedAttacker(index);
-      console.log("angreifende karte wird ausgewählt")
+      setSelectedAttacker(Id);
+      console.log("angreifende karte wird ausgewählt: ", id);
     //}
   };
 
@@ -187,23 +221,33 @@ const Duel = () => {
     }
   }, [selectedTarget]);
 
-  const selectTargetCard = (index) => {
+  const selectTargetCard = (Id) => {
     //if (isAttackMode) {
-      setSelectedTarget(index);
+      setSelectedTarget(Id);
       console.log("jetzt wird die karte angegriffen ", selectedTarget);
       //handleAttack(); // Führe Angriff aus, wenn Ziel ausgewählt ist
     //}
   };
 
-  const handleSetCard = (index) => {
+  const handleSetCard = (Id) => {
+    if (!cardDrawn) {
+      toast.error("Ziehen Sie zuerst eine Karte");
+      return;
+    }
+
+    if (hasAttacked) {
+      toast.error("Sie haben schon angegriffen");
+      return;
+    }
+
     if (isSetCardMode) {
-      console.log("karte wird gesetzt");
+      console.log("karte wird gesetzt: ", Id);
       client.publish({
         destination: '/app/placeCard',
         body: JSON.stringify({
           gameId: gameId,
           userId: id,
-          cardIndex: index
+          cardId: Id
         }),
       });
       setIsSetCardMode(false); // Deaktivieren des Setzkartenmodus
@@ -234,7 +278,18 @@ const Duel = () => {
   }
 
   const handleRareSwap = () => {
-    if (selectedCards.length === 2 && selectedHandCard !== null && playerState.handCards[selectedHandCard].rarity === 'RARE') {
+    if (!cardDrawn) {
+      toast.error("Ziehen Sie erst eine Karte");
+      return;
+    }
+
+    if (hasAttacked) {
+      toast.error("Sie haben schon angegriffen");
+      return;
+    }
+    console.log(selectedHandCard);
+
+    if (selectedCards.length === 2 && selectedHandCard !== null && playerState.handCards.find(playerCard => playerCard.id === selectedHandCard).rarity === 'RARE') {
       console.log("normalCardsIndex ", selectedCards);
       console.log("selectedHandCard ", selectedHandCard);
 
@@ -243,8 +298,8 @@ const Duel = () => {
         body: JSON.stringify({
           gameId: gameId,
           userId: id,
-          normalCardsIndex: selectedCards,
-          rareCardIndex: selectedHandCard
+          cardIds: selectedCards,
+          rareId: selectedHandCard
         }),
       });
       setIsRareSwapMode(false);
@@ -256,7 +311,17 @@ const Duel = () => {
   };
 
   const handleLegendarySwap = () => {
-    if (selectedCards.length === 3 && selectedHandCard !== null && playerState.handCards[selectedHandCard].rarity === 'LEGENDARY') {
+    if (!cardDrawn) {
+      toast.error("Ziehen Sie erst eine Karte");
+      return;
+    }
+
+    if (hasAttacked) {
+      toast.error("Sie haben schon angegriffen");
+      return;
+    }
+
+    if (selectedCards.length === 3 && selectedHandCard !== null && playerState.handCards.find(playerCard => playerCard.id === selectedHandCard).rarity === 'LEGENDARY') {
       console.log("normalCardsIndex ", selectedCards);
       console.log("selectedHandCard ", selectedHandCard);
       client.publish({
@@ -264,8 +329,8 @@ const Duel = () => {
         body: JSON.stringify({
           gameId: gameId,
           userId: id,
-          normalCardsIndex: selectedCards,
-          legendaryCardIndex: selectedHandCard
+          cardIds: selectedCards,
+          legendaryId: selectedHandCard
         }),
       });
       console.log("Gesendete KartenIndexListe ", selectedCards)
@@ -277,6 +342,12 @@ const Duel = () => {
       toast.error("Wählen Sie 3 Karten vom Spielfeld und eine legendäre Karte aus der Hand.");
     }
   };
+
+  const closeStatisticsModal = () => {
+    sessionStorage.removeItem('game');
+    sessionStorage.removeItem('users');
+    navigate('/startseite')
+  }
 
   return (
       <div className="duel-container">
@@ -296,24 +367,24 @@ const Duel = () => {
         </div>
         <div className="field">
           <div className="field-row opponent-field">
-            {opponentState?.fieldCards?.map((playerCard, index) => (
-                <div key={index} className="card-slot">
-                  <Card card={playerCard} onCardClick={() => selectTargetCard(index)}/>
+            {opponentState?.fieldCards?.map((playerCard) => (
+                <div key={playerCard.id} className="card-slot">
+                  <Card card={playerCard} onCardClick={() => selectTargetCard(playerCard.id)}/>
                 </div>
             ))}
           </div>
           <div className="field-row player-field">
-            {playerState?.fieldCards?.map((playerCard, index) => (
-                <div key={index} className="card-slot">
-                  <Card card={playerCard} onCardClick={() => selectAttackingCard(index)}/>
+            {playerState?.fieldCards?.map((playerCard) => (
+                <div key={playerCard.id} className="card-slot">
+                  <Card card={playerCard} onCardClick={() => selectAttackingCard(playerCard.id)}/>
                 </div>
             ))}
           </div>
         </div>
         <div className="hand player-hand">
-          {playerState?.handCards?.map((playerCard, index) => (
-              <div key={index} className="card">
-                <Card card={playerCard} onCardClick={() => handleSetCard(index)}/>
+          {playerState?.handCards?.map((playerCard) => (
+              <div key={playerCard.id} className="card">
+                <Card card={playerCard} onCardClick={() => handleSetCard(playerCard.id)}/>
               </div>
           ))}
         </div>
@@ -350,6 +421,12 @@ const Duel = () => {
             setSelectedHandCard={setSelectedHandCard}
             selectedHandCard={selectedHandCard}
             requiredFieldCards={3}
+        />
+        <StatisticsModal
+          isOpen={stats !== null}
+          onRequestClose={closeStatisticsModal}
+          stats={stats || {}}
+          users={users}
         />
         <ToastContainer/>
       </div>

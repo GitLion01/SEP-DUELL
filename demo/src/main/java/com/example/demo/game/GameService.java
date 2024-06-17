@@ -475,7 +475,7 @@ public class GameService {
         card1.setSacrificed(true);
         card2.setSacrificed(true);
         user.getPlayerState().getFieldCards().remove(card1);
-        user.getPlayerState().getFieldCards().remove(card1);
+        user.getPlayerState().getFieldCards().remove(card2);
         user.getPlayerState().getFieldCards().add(rare);
         user.getPlayerState().getCardsPlayed().add(rare);
         user.getPlayerState().getHandCards().remove(rare);
@@ -608,7 +608,7 @@ public class GameService {
                 user1.setLeaderboardPoints(lbPoints1 + Math.max(50, lbPoints2 - lbPoints1));
                 user2.setLeaderboardPoints(lbPoints2 - Math.max(50, (lbPoints2 - lbPoints1) / 2));
                 leaderBoardPointsWinner = Math.max(50, lbPoints2 - lbPoints1);
-                leaderBoardPointsLoser = Math.max(50, (lbPoints2 - lbPoints1) / 2);
+                leaderBoardPointsLoser = -1 * (Math.max(50, (lbPoints2 - lbPoints1) / 2));
                 damageWinner = user1.getPlayerState().getDamage();
                 damageLoser = user2.getPlayerState().getDamage();
             } else {
@@ -616,7 +616,7 @@ public class GameService {
                 user2.setLeaderboardPoints(lbPoints2 + Math.max(50, lbPoints1 - lbPoints2));
                 user1.setLeaderboardPoints(lbPoints1 - Math.max(50, (lbPoints1 - lbPoints2) / 2));
                 leaderBoardPointsWinner = Math.max(50, lbPoints1 - lbPoints2);
-                leaderBoardPointsLoser = Math.max(50, (lbPoints1 - lbPoints2) / 2);
+                leaderBoardPointsLoser = -1 * (Math.max(50, (lbPoints1 - lbPoints2) / 2));
                 damageWinner = user2.getPlayerState().getDamage();
                 damageLoser = user1.getPlayerState().getDamage();
             }

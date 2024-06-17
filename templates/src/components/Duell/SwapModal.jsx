@@ -4,10 +4,12 @@ import Modal from 'react-modal';
 import Card from "../card";
 
 const SwapModal = ({ isOpen, onRequestClose, onConfirm, title, selectedCards, setSelectedCards, playerCards, selectedHandCard, handCards, setSelectedHandCard, requiredFieldCards }) => {
-    const toggleSelectCard = (index) => {
+    const toggleSelectCard = (Id) => {
         setSelectedCards((prevSelected) =>
-            prevSelected.includes(index) ? prevSelected.filter(i => i !== index) : [...prevSelected, index]
+            prevSelected.includes(Id) ? prevSelected.filter(cardId => cardId !== Id) : [...prevSelected, Id]
+
         );
+        console.log(selectedCards);
     };
 
     return (
@@ -21,24 +23,23 @@ const SwapModal = ({ isOpen, onRequestClose, onConfirm, title, selectedCards, se
             <h3>{title}</h3>
             <div className="field-cards">
                 <h4>Karten auf dem Feld</h4>
-                {playerCards.map((card, index) => (
+                {playerCards.map((playerCard) => (
                     <div
-                        key={index}
-                        className={`card-slot ${selectedCards.includes(index) ? 'selected' : ''}`}
+                        key={playerCard.id}
+                        className={`card-slot ${selectedCards.includes(playerCard.id) ? 'selected' : ''}`}
                     >
-                        <Card card={card} onCardClick={() => toggleSelectCard(index)}/>
+                        <Card card={playerCard} onCardClick={() => toggleSelectCard(playerCard.id)}/>
                     </div>
                 ))}
             </div>
             <div className="hand-cards">
                 <h4>Karten auf der Hand</h4>
-                {handCards.map((card, index) => (
+                {handCards.map((playerCard) => (
                     <div
-                        key={index}
-                        className={`card ${index === selectedHandCard ? 'selected' : ''}`}
-
+                        key={playerCard.id}
+                        className={`card ${playerCard.id === selectedHandCard ? 'selected' : ''}`}
                     >
-                        <Card card={card} onCardClick={() => setSelectedHandCard(index)} />
+                        <Card card={playerCard} onCardClick={() => setSelectedHandCard(playerCard.id)}/>
                     </div>
                 ))}
             </div>
