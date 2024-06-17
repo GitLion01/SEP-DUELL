@@ -23,12 +23,12 @@ public class HerausforderungService {
 
     public void sendHerausforderung(Long senderId, Long receiverId) {
         Notification notification = new Notification(senderId,receiverId,userAccountRepository.findById(senderId).get().getUsername(),"challenge");
-        messagingTemplate.convertAndSendToUser(receiverId.toString(),"/queue/messages",notification);
+        messagingTemplate.convertAndSendToUser(receiverId.toString(),"/queue/notifications",notification);
     }
 
     public void acceptHerausforderung(Long senderId, Long receiverId) {
         Notification notification = new Notification(senderId,receiverId,userAccountRepository.findById(senderId).get().getUsername(),"duelAccepted");
-        messagingTemplate.convertAndSendToUser(receiverId.toString(),"/queue/messages",notification);
+        messagingTemplate.convertAndSendToUser(receiverId.toString(),"/queue/notifications",notification);
     }
 
     public ResponseEntity<Long> toDuell(Long senderId, Long receiverId) {
