@@ -413,7 +413,8 @@ public class GameService {
 
         int remainingLifePoints = defender.getPlayerState().getLifePoints() - attackerCard.getAttackPoints();
         if(attackerCard.getAttackPoints() > defender.getPlayerState().getLifePoints()){
-            attacker.getPlayerState().setDamage(attacker.getPlayerState().getDamage() + attackerCard.getDefensePoints()); // erhöht den Damage Counter des Angreifers
+            attacker.getPlayerState().setDamage(attacker.getPlayerState().getDamage() + defender.getPlayerState().getLifePoints() + 1); // erhöht den Damage Counter des Angreifers
+            defender.getPlayerState().setDamage(-1);
             attacker.getPlayerState().setWinner(true);
             playerStateRepository.save(attacker.getPlayerState());
         }else{
@@ -471,6 +472,7 @@ public class GameService {
         user.getPlayerState().getFieldCards().remove(normal1);
         user.getPlayerState().getFieldCards().remove(normal2);
         user.getPlayerState().getFieldCards().add(rare);
+        user.getPlayerState().getCardsPlayed().add(rare);
         user.getPlayerState().getHandCards().remove(rare);
 
 
@@ -517,6 +519,7 @@ public class GameService {
         user.getPlayerState().getFieldCards().remove(card2);
         user.getPlayerState().getFieldCards().remove(card3);
         user.getPlayerState().getFieldCards().add(legendary);
+        user.getPlayerState().getCardsPlayed().add(legendary);
         user.getPlayerState().getHandCards().remove(legendary);
 
 
