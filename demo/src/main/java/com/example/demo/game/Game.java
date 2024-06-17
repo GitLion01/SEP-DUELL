@@ -41,4 +41,10 @@ public class Game {
         return this.timeLeft;
     }
 
+    public void decrementTimer(){
+        if(this.timeLeft > 0){
+            timeLeft--;
+        }
+    }
+
 }

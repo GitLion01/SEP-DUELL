@@ -51,6 +51,8 @@ public class GameService {
     public void updateTimers(){
         List<Game> games = gameRepository.findAll();
         for (Game game : games) {
+            game.decrementTimer();
+            System.out.println("After decrementing timer " + game.getRemaingTime());
             if(game.getReady() && game.getRemaingTime() <= 0){
                 handleTimerExpiration(game);
             }
@@ -70,7 +72,7 @@ public class GameService {
     private void sendTimerUpdate(Game game) {
         int remainingTime = game.getRemaingTime();
         for(UserAccount player : game.getUsers()) {
-            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", remainingTime);
+            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/timer", remainingTime);
         }
     }
 
@@ -668,6 +670,7 @@ public class GameService {
             List<UserAccount> users = game.getUsers();
 
             for (UserAccount player : game.getUsers()) {
+                System.out.println("Spiel wurde beendet");
                 messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", Arrays.asList(game, users, sepCoins, leaderBoardPointsWinner, leaderBoardPointsLoser,damageWinner, damageLoser, cardsPlayedA, cardsPlayedB, sacrificedA, sacrificedB));
             }
 
