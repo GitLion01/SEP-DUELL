@@ -23,6 +23,13 @@ public class HerausforderungService {
 
     public void acceptHerausforderung(Long senderId, Long receiverId) {
         Notification notification = new Notification(senderId,receiverId,userAccountRepository.findById(senderId).get().getUsername(),"duelAccepted");
+        messagingTemplate.convertAndSendToUser(senderId.toString(),"/queue/notifications",notification);
+        messagingTemplate.convertAndSendToUser(receiverId.toString(),"/queue/notifications",notification);
+    }
+
+    public void rejectHerausforderung(Long senderId, Long receiverId) {
+        Notification notification = new Notification(senderId,receiverId,userAccountRepository.findById(senderId).get().getUsername(),"duelRejected");
+        messagingTemplate.convertAndSendToUser(senderId.toString(),"/queue/notifications",notification);
         messagingTemplate.convertAndSendToUser(receiverId.toString(),"/queue/notifications",notification);
     }
 }
