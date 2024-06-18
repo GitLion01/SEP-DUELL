@@ -2,16 +2,20 @@ import React, { createContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
+import { toast } from 'react-toastify';
+
 
 export const WebSocketContext = createContext();
 
 export const WebSocketProvider = ({ children }) => {
     const [client, setClient] = useState(null);
     const [chatClient, setChatClient] = useState(null); 
+    const [notifications, setNotifications] = useState([]); 
+    const navigate = useNavigate(); 
+    const userId = parseInt(localStorage.getItem('id'))
 
     useEffect(() => {
 
-        const userId = parseInt(localStorage.getItem('id')); // ID des aktuellen Benutzers als Zahl
 
 
         const newClient = new Client({
@@ -20,6 +24,16 @@ export const WebSocketProvider = ({ children }) => {
             reconnectDelay: 5000,
             onConnect: () => {
                 console.log('Connected to WebSocket server');
+                // Subscribe für Benachrichtigung 
+                newClient.subscribe(`/user/${userId}/queue/notifications`, (message) => {
+                    const notification = JSON.parse(message.body);
+                    if (notification.message === 'challenge') {
+                        setNotifications(prev => [...prev, { ...notification, countdown: 30 }]);
+                    } else if (notification.type === 'duelAccepted') {
+                        // Weitere Logik für akzeptierte Duelle
+                    }
+
+                });
 
                 // Subscribe für globale Herausforderung
                 newClient.subscribe(`/user/${userId}/queue/create`, (message) => {
@@ -82,8 +96,38 @@ export const WebSocketProvider = ({ children }) => {
         };
     }, []);
 
+
+
+    const handleAcceptChallenge = (challenger) => {
+        // Erstelle das Spiel, nachdem die Herausforderung akzeptiert wurde
+        createGame(userId, challenger);
+        setNotifications(notifications.filter(n => n.senderName !== challenger));
+    };
+
+    const createGame = (userA, userB) => {
+        if (client && client.connected) {
+            client.publish({
+                destination: '/app/createGame',
+                body: JSON.stringify({ userA, userB }),
+            });
+            toast.success("Herausforderung gesendet.");
+        } else {
+            toast.error("WebSocket-Verbindung ist nicht aktiv.");
+        }
+    };
+
+    const handleRejectChallenge = (challenger) => {
+        setNotifications(notifications.filter(n => n.senderName !== challenger));
+    };
+
+    const handleTimeoutChallenge = (challenger) => {
+        setNotifications(notifications.filter(n => n.senderName !== challenger));
+    };
+
+
+
     return (
-        <WebSocketContext.Provider value={{ client, chatClient }}>
+        <WebSocketContext.Provider value={{ client, chatClient, notifications, handleAcceptChallenge, handleRejectChallenge, handleTimeoutChallenge }}>
             {children}
         </WebSocketContext.Provider>
     );

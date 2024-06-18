@@ -20,12 +20,14 @@ import LeaderboardPage from './components/LeaderboardPage/LeaderboardPage.jsx';
 import './index.css';
 import DuelC from "./components/DuelC/DuelC";
 import {WebSocketProvider} from "./WebSocketProvider";
+import GlobalNotification from './components/LeaderboardPage/GlobalNotification.jsx';
 
 
 function App() {
   return (
       <Router>
         <WebSocketProvider>
+          <GlobalNotification/>
           <AppRoutes />
         </WebSocketProvider>
       </Router>
