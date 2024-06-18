@@ -12,6 +12,7 @@ export const WebSocketProvider = ({ children }) => {
     const [chatClient, setChatClient] = useState(null); 
     const [notifications, setNotifications] = useState([]); 
     const navigate = useNavigate(); 
+    const [activeDuel, setActiveDuel] = useState(false);
     const userId = parseInt(localStorage.getItem('id'))
 
     useEffect(() => {
@@ -24,30 +25,33 @@ export const WebSocketProvider = ({ children }) => {
             reconnectDelay: 5000,
             onConnect: () => {
                 console.log('Connected to WebSocket server');
-                // Subscribe für Benachrichtigung 
-                newClient.subscribe(`/user/${userId}/queue/notifications`, (message) => {
-                    const notification = JSON.parse(message.body);
-                    if (notification.message === 'challenge') {
-                        setNotifications(prev => [...prev, { ...notification, countdown: 30 }]);
-                    } else if (notification.type === 'duelAccepted') {
-                        // Weitere Logik für akzeptierte Duelle
-                    }
-
-                });
-
-                // Subscribe für globale Herausforderung
-                newClient.subscribe(`/user/${userId}/queue/create`, (message) => {
-                    const response = JSON.parse(message.body);
-                    console.log("Received response:", response)
-
-                    // Finde den Benutzer im Array
-                    // const userInGame = response.users.find(user => user.id === userId);
-
-                    if (response.gameId) {
-                        localStorage.setItem('gameId', response.gameId);
-                        window.dispatchEvent(new CustomEvent('gameCreated', { detail: response.gameId }));
-                    }
-                });
+                
+                // Überprüfung, ob der Client verbunden ist
+                if (newClient.connected) {
+                    // Subscribe für Benachrichtigung 
+                    newClient.subscribe(`/user/${userId}/queue/notifications`, (message) => {
+                        const notification = JSON.parse(message.body);
+                        if (notification.message === 'challenge') {
+                            setNotifications(prev => [...prev, { ...notification, countdown: 30 }]);
+                            console.log(notification);
+                        } else if (notification.message === 'duelAccepted') {
+                            setActiveDuel(true);  // Setze activeDuel auf true
+                            setNotifications(prev => [...prev, { ...notification}]);
+                            console.log(notifications)
+                        }
+                    });
+        
+                    // Subscribe für globale Herausforderung
+                    newClient.subscribe(`/user/${userId}/queue/create`, (message) => {
+                        const response = JSON.parse(message.body);
+                        console.log("Received response:", response);
+        
+                        if (response.gameId) {
+                            localStorage.setItem('gameId', response.gameId);
+                            window.dispatchEvent(new CustomEvent('gameCreated', { detail: response.gameId }));
+                        }
+                    });
+                }
             },
             onStompError: (frame) => {
                 console.error(`Broker reported error: ${frame.headers['message']}`);
@@ -60,9 +64,10 @@ export const WebSocketProvider = ({ children }) => {
                 console.error('WebSocket closed', event);
             },
         });
-
+        
         newClient.activate();
         setClient(newClient);
+        
         
         const newChatClient = new Client({
             brokerURL: 'ws://localhost:8080/chat',
@@ -98,36 +103,52 @@ export const WebSocketProvider = ({ children }) => {
 
 
 
-    const handleAcceptChallenge = (challenger) => {
-        // Erstelle das Spiel, nachdem die Herausforderung akzeptiert wurde
-        createGame(userId, challenger);
-        setNotifications(notifications.filter(n => n.senderName !== challenger));
+    const handleAcceptChallenge = (challengerId, challengerName, receiverId) => {
+     
+        console.log(challengerId, receiverId)
+        if (client && client.connected) {
+            client.publish({
+                destination: '/app/accept.herausforderung',
+                headers: {
+                    senderId: challengerId.toString(),
+                    receiverId: receiverId.toString(),
+                },
+            });
+        setNotifications(notifications.filter(n => n.senderName !== challengerName));
+        setActiveDuel(true);
+         } else {
+            toast.error("WebSocket-Verbindung ist nicht aktiv.");
+        }
     };
 
-    const createGame = (userA, userB) => {
+    const createGame = (receiverId, senderName) => {  
         if (client && client.connected) {
             client.publish({
                 destination: '/app/createGame',
-                body: JSON.stringify({ userA, userB }),
+                body: JSON.stringify({ userA: receiverId, userB: senderName }),
             });
-            toast.success("Herausforderung gesendet.");
+            toast.success("Spiel wird gestartet");
+            setActiveDuel(false); 
         } else {
             toast.error("WebSocket-Verbindung ist nicht aktiv.");
         }
     };
 
-    const handleRejectChallenge = (challenger) => {
-        setNotifications(notifications.filter(n => n.senderName !== challenger));
+    const handleRejectChallenge = (challengerId) => {
+        console.log(challengerId)
+        setNotifications(notifications.filter(n => n.senderId !== challengerId));
     };
 
-    const handleTimeoutChallenge = (challenger) => {
-        setNotifications(notifications.filter(n => n.senderName !== challenger));
+    const handleTimeoutChallenge = (challengerId) => {
+        setNotifications(notifications.filter(n => n.senderId !== challengerId));
     };
 
 
 
     return (
-        <WebSocketContext.Provider value={{ client, chatClient, notifications, handleAcceptChallenge, handleRejectChallenge, handleTimeoutChallenge }}>
+        <WebSocketContext.Provider value={{ client, chatClient, notifications, handleAcceptChallenge, handleRejectChallenge, handleTimeoutChallenge,
+            activeDuel, createGame
+         }}>
             {children}
         </WebSocketContext.Provider>
     );

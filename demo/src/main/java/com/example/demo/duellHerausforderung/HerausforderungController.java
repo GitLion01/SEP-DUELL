@@ -2,6 +2,7 @@ package com.example.demo.duellHerausforderung;
 
 
 import lombok.AllArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.web.bind.annotation.*;
@@ -22,9 +23,13 @@ public class HerausforderungController {
         herausforderungService.acceptHerausforderung(senderId,receiverId);
     }
 
+    @PostMapping("/toDuell")
+    public ResponseEntity<Long> toDuell(@RequestParam Long senderId, @RequestParam Long receiverId){
+        return herausforderungService.toDuell(senderId,receiverId);
+    }
+
     @MessageMapping("/reject.herausforderung")
     public void rejectHerausforderung(@Header Long senderId,@Header Long receiverId){
         herausforderungService.rejectHerausforderung(senderId,receiverId);
-    }
-
+        }
 }

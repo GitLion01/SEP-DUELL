@@ -28,36 +28,40 @@ const LeaderboardPage = () => {
                 console.log(userData);
             });
 
-        // Abonnieren des WebSocket-Kanals für Leaderboard-Updates
-        const leaderboardSubscription = client.subscribe('/topic/leaderboard', message => {
-            const updatedUser = JSON.parse(message.body);
-            setLeaderboard(prev => {
-                const index = prev.findIndex(user => user.id === updatedUser.id);
-                if (index !== -1) {
-                    const updatedLeaderboard = [...prev];
-                    updatedLeaderboard[index] = updatedUser;
-                    return updatedLeaderboard;
-                } else {
-                    return [...prev, updatedUser];
-                }
-            });
-        });
-
-        return () => {
-            // Deaktiviere die Abonnements bei der Bereinigung
-            if (leaderboardSubscription) {
-                leaderboardSubscription.unsubscribe();
+            if (client && client.connected) {
+                const leaderboardSubscription = client.subscribe('/topic/leaderboard', message => {
+                    const updatedUser = JSON.parse(message.body);
+                    setLeaderboard(prev => {
+                        const index = prev.findIndex(user => user.id === updatedUser.id);
+                        if (index !== -1) {
+                            const updatedLeaderboard = [...prev];
+                            updatedLeaderboard[index] = updatedUser;
+                            return updatedLeaderboard;
+                        } else {
+                            return [...prev, updatedUser];
+                        }
+                    });
+                });
+    
+                return () => {
+                    // Deaktiviere die Abonnements bei der Bereinigung
+                    if (leaderboardSubscription) {
+                        leaderboardSubscription.unsubscribe();
+                    }
+                };
             }
-        };
-    }, [userId, client]);
+        }, [userId, client]);
 
     const handleChallenge = async (userId, username) => {
         try {
             const currentUserDeckResponse = await fetch(`http://localhost:8080/decks/getUserDecks/${currentUserData.id}`);
             const currentUserDeckData = await currentUserDeckResponse.json();
-
+            console.log(currentUserDeckData)
             const opponentDeckResponse = await fetch(`http://localhost:8080/decks/getUserDecks/${userId}`);
             const opponentDeckData = await opponentDeckResponse.json();
+
+            
+
 
             if (currentUserDeckData.length === 0) {
                 toast.error('Du hast kein Deck!');
@@ -68,6 +72,8 @@ const LeaderboardPage = () => {
                 toast.error(`${username} hat kein Deck!`);
                 return;
             }
+
+
 
             if (client) {
                 client.publish({
@@ -150,7 +156,9 @@ const LeaderboardPage = () => {
                 {filteredNotifications.map((notification, index) => (
                     <Notification
                         key={index}
-                        challenger={notification.senderName}
+                        challengerId={notification.senderId}
+                        challengerName={notification.senderName}
+                        receiverId={notification.receiverId}
                         onAccept={handleAcceptChallenge}
                         onReject={handleRejectChallenge}
                         message={notification.message}
