@@ -60,7 +60,7 @@ const Duel = () => {
       console.log('playerState nach initial', playerState);
       console.log('opponent state nach intial: ', opponentState);
     }
-  }, [id, users, game]);
+  }, [id, users, game, connected]);
 
   useEffect(() => {
     if (client && connected && id) {
@@ -140,6 +140,8 @@ const Duel = () => {
   };
 
   const handleEndTurn = () => {
+
+    console.log("Karten im Deck: ", playerState.deckClone.length);
 
     if (users[currentTurn].id !== parseInt(id)) {
       toast.warning("Du bist nicht am Zug");
@@ -225,8 +227,8 @@ const Duel = () => {
 
   const selectAttackingCard = (Id) => {
     //if (isAttackMode) {
-      setSelectedAttacker(Id);
-      console.log("angreifende karte wird ausgewählt: ", id);
+    setSelectedAttacker(Id);
+    console.log("angreifende karte wird ausgewählt: ", id);
     //}
   };
 
@@ -246,9 +248,9 @@ const Duel = () => {
 
   const selectTargetCard = (Id) => {
     //if (isAttackMode) {
-      setSelectedTarget(Id);
-      console.log("jetzt wird die karte angegriffen ", selectedTarget);
-      //handleAttack(); // Führe Angriff aus, wenn Ziel ausgewählt ist
+    setSelectedTarget(Id);
+    console.log("jetzt wird die karte angegriffen ", selectedTarget);
+    //handleAttack(); // Führe Angriff aus, wenn Ziel ausgewählt ist
     //}
   };
 
@@ -299,14 +301,14 @@ const Duel = () => {
       return;
     }
 
-    if (playerState.deckClone.length === 0 && users[currentTurn].id === parseInt(id)) {
+    if (playerState.deckClone.length < 1) {
       toast.error("Deck leer");
       return;
     }
-    if (cardDrawn && users[currentTurn].id === parseInt(id)) {
+    if (cardDrawn) {
       toast.warning("Karte bereits gezogen");
+      return;
     }
-    if (!cardDrawn) {
       client.publish({
         destination: '/app/drawCard',
         body: JSON.stringify({
@@ -314,12 +316,8 @@ const Duel = () => {
           userId: id
         })
       })
+      setCardDrawn(true);
       console.log("cardDrawn", cardDrawn);
-      if(users[currentTurn].id === parseInt(id)) {
-        setCardDrawn(true);
-      }
-    }
-    else { toast.error("Karte bereits gezogen");}
   }
 
   const handleRareSwap = () => {
@@ -336,7 +334,7 @@ const Duel = () => {
     }
 
     if (hasAttacked) {
-      toast.error("Sie haben schon angegriffen");
+      toast.error("Sie dürfen nach einem Angriff keine Karte setzen");
       return;
     }
     console.log(selectedHandCard);
@@ -483,10 +481,10 @@ const Duel = () => {
             requiredFieldCards={3}
         />
         <StatisticsModal
-          isOpen={stats !== null}
-          onRequestClose={closeStatisticsModal}
-          stats={stats || {}}
-          users={users}
+            isOpen={stats !== null}
+            onRequestClose={closeStatisticsModal}
+            stats={stats || {}}
+            users={users}
         />
         <ToastContainer/>
       </div>
