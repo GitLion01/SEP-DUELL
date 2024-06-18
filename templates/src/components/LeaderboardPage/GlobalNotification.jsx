@@ -19,15 +19,14 @@ const GlobalNotification = () => {
         <div className="global-notification">
             {notifications.map((notification, index) => (
                 <Notification
-                    key={index}
-                    challengerId={notification.senderId}
-                    challengerName={notification.senderName}
-                    receiverId={notification.receiverId}
-                    onAccept={handleAcceptChallenge}
-                    onReject={handleRejectChallenge}
-                    message={notification.message}
-                    countdown={notification.countdown}
-                    onTimeout={handleTimeoutChallenge}
+                senderId={notification.senderId}
+                senderName={notification.senderName}
+                receiverId={notification.receiverId}
+                onAccept={handleAcceptChallenge}
+                onReject={handleRejectChallenge}
+                message={notification.message}
+                countdown={notification.countdown}
+                onTimeout={handleTimeoutChallenge}
                 />
             ))}
             {activeDuel && (

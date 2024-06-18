@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import './Notification.css';
 
-const Notification = ({ challengerId, challengerName, receiverId, onAccept, onReject, message, countdown, onTimeout }) => {
+const Notification = ({ senderId, senderName, receiverId, onAccept, onReject, message, countdown, onTimeout }) => {
     const [timeLeft, setTimeLeft] = useState(countdown);
 
     useEffect(() => {
@@ -11,9 +11,9 @@ const Notification = ({ challengerId, challengerName, receiverId, onAccept, onRe
             }, 1000);
             return () => clearInterval(timer);
         } else if (timeLeft === 0) {
-            onTimeout(challengerId);  // Ruft die Methode auf, wenn der Timer 0 erreicht
+            onTimeout(senderId);  // Ruft die Methode auf, wenn der Timer 0 erreicht
         }
-    }, [timeLeft, onTimeout, challengerId]);
+    }, [timeLeft, onTimeout, senderId]);
 
     if (message !== 'challenge') {
         return null;
@@ -21,10 +21,10 @@ const Notification = ({ challengerId, challengerName, receiverId, onAccept, onRe
 
     return (
         <div className="notification">
-            <p>{challengerName} hat dich zu einem Duell herausgefordert!</p>
+            <p>{senderName} hat dich zu einem Duell herausgefordert!</p>
             <p>Verbleibende Zeit: {timeLeft} Sekunden</p>
-            <button onClick={() => onAccept(challengerId, challengerName, receiverId)}>Akzeptieren</button>
-            <button onClick={() => onReject(challengerId)}>Ablehnen</button>
+            <button onClick={() => onAccept(senderId, senderName, receiverId)}>Akzeptieren</button>
+            <button onClick={() => onReject(senderId)}>Ablehnen</button>
         </div>
     );
 };

@@ -39,7 +39,10 @@ export const WebSocketProvider = ({ children }) => {
                             setNotifications(prev => [...prev, { ...notification}]);
                             console.log(notifications)
                         }
-                    });
+                        else if (notification.message==='duelRejected')
+                            toast.info('Deine Herausforderung wurde abgelehnt. Du kannst eine neue Herausforderung senden.');
+                            setNotifications(prev => prev.filter(n => n.senderId !== notification.senderId));          
+                        });
         
                     // Subscribe für globale Herausforderung
                     newClient.subscribe(`/user/${userId}/queue/create`, (message) => {
@@ -134,9 +137,20 @@ export const WebSocketProvider = ({ children }) => {
         }
     };
 
-    const handleRejectChallenge = (challengerId) => {
-        console.log(challengerId)
-        setNotifications(notifications.filter(n => n.senderId !== challengerId));
+    const handleRejectChallenge = (receiverId, senderId) => {
+        console.log(senderId);
+        if (client && client.connected) {
+            client.publish({
+                destination: '/app/reject.herausforderung',
+                headers: {
+                    senderId: senderId.toString(),
+                    receiverId: receiverId.toString(),
+                },
+            });
+            setNotifications(notifications.filter(n => n.senderId !== senderId));
+        } else {
+            toast.error("WebSocket-Verbindung ist nicht aktiv.");
+        }
     };
 
     const handleTimeoutChallenge = (challengerId) => {
