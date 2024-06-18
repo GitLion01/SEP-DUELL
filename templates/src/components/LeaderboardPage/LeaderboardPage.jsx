@@ -62,15 +62,16 @@ const LeaderboardPage = () => {
 
             const currentUserDeckHasEnoughCards = await Promise.all(
                 currentUserDeckData.map(async (deck) => {
-                    const deckCardsResponse = await fetch(`http://localhost:8080/cards/${deck.name}/${currentUserData.id}`);
+                    const deckCardsResponse = await fetch(`http://localhost:8080/decks/cards/${deck.name}/${currentUserData.id}`);
                     const deckCards = await deckCardsResponse.json();
+                    console.log(deckCards.length,deckCards);
                     return deckCards.length >= 5;
                 })
             );
 
             const opponentDeckHasEnoughCards = await Promise.all(
                 opponentDeckData.map(async (deck) => {
-                    const deckCardsResponse = await fetch(`http://localhost:8080/cards/${deck.name}/${userId}`);
+                    const deckCardsResponse = await fetch(`http://localhost:8080/decks/cards/${deck.name}/${userId}`);
                     const deckCards = await deckCardsResponse.json();
                     return deckCards.length >= 5;
                 })
