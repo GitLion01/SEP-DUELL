@@ -17,7 +17,6 @@ export const WebSocketProvider = ({ children }) => {
     const [game, setGame] = useState(null);
     const [users, setUsers] = useState([]);
     const [connected, setConnected] = useState(false);
-    const [chatClient, setChatClient] = useState(null);
 
     useEffect(() => {
 
