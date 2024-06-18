@@ -140,7 +140,14 @@ const Duel = () => {
   };
 
   const handleEndTurn = () => {
-    if (!cardDrawn) {
+
+    if (users[currentTurn].id !== parseInt(id)) {
+      toast.warning("Du bist nicht am Zug");
+      resetAttackMode();
+      return;
+    }
+
+    if (!cardDrawn && playerState.deckClone.length > 0) {
       toast.error("Ziehe zuerst eine Karte");
       return;
     }
@@ -170,42 +177,48 @@ const Duel = () => {
 
   const handleAttack = () => {
 
-      if(cardDrawn) {
-        if (opponentState.fieldCards.length === 0) {
-          console.log("der sollte jetzt angreifen");
+    if (users[currentTurn].id !== parseInt(id)) {
+      toast.warning("Du bist nicht am Zug");
+      resetAttackMode();
+      return;
+    }
 
-          console.log("angreifer wurde ausgewählt");
-          client.publish({
-            destination: '/app/attackUser',
-            body: JSON.stringify({
-              gameId: gameId,
-              attackerId: id,
-              defenderId: users.find(user => user.id !== parseInt(id)).id,
-              attackerCardId: selectedAttacker
-            }),
-          });
-          console.log("Mein feld vor Angriff: ", playerState.fieldCards);
-          console.log("Gegner feld vor Angriff: ", opponentState.fieldCards);
-          setHasAttacked(true);
-        }
-        else {
-          console.log(selectedAttacker, selectedTarget);
-          //if (selectedTarget && selectedAttacker) {
-          console.log("gegnerkarte wird angegriffen");
-          client.publish({
-            destination: '/app/attackCard',
-            body: JSON.stringify({
-              gameId: gameId,
-              userIdAttacker: id,
-              userIdDefender: users.find(user => user.id !== parseInt(id)).id,
-              attackerId: selectedAttacker,
-              targetId: selectedTarget
-            }),
-          });
-          setHasAttacked(true);
-          //}
-        }
+    if(cardDrawn || playerState.deckClone.length === 0) {
+      if (opponentState.fieldCards.length === 0) {
+        console.log("der sollte jetzt angreifen");
+
+        console.log("angreifer wurde ausgewählt");
+        client.publish({
+          destination: '/app/attackUser',
+          body: JSON.stringify({
+            gameId: gameId,
+            attackerId: id,
+            defenderId: users.find(user => user.id !== parseInt(id)).id,
+            attackerCardId: selectedAttacker
+          }),
+        });
+        console.log("Mein feld vor Angriff: ", playerState.fieldCards);
+        console.log("Gegner feld vor Angriff: ", opponentState.fieldCards);
+        setHasAttacked(true);
       }
+      else {
+        console.log(selectedAttacker, selectedTarget);
+        //if (selectedTarget && selectedAttacker) {
+        console.log("gegnerkarte wird angegriffen");
+        client.publish({
+          destination: '/app/attackCard',
+          body: JSON.stringify({
+            gameId: gameId,
+            userIdAttacker: id,
+            userIdDefender: users.find(user => user.id !== parseInt(id)).id,
+            attackerId: selectedAttacker,
+            targetId: selectedTarget
+          }),
+        });
+        setHasAttacked(true);
+        //}
+      }
+    }
 
 
   }
@@ -240,7 +253,14 @@ const Duel = () => {
   };
 
   const handleSetCard = (Id) => {
-    if (!cardDrawn) {
+
+    if (users[currentTurn].id !== parseInt(id)) {
+      toast.warning("Du bist nicht am Zug");
+      resetAttackMode();
+      return;
+    }
+
+    if (!cardDrawn && playerState.deckClone.length > 0) {
       toast.error("Ziehen Sie zuerst eine Karte");
       return;
     }
@@ -261,6 +281,7 @@ const Duel = () => {
         }),
       });
       setIsSetCardMode(false); // Deaktivieren des Setzkartenmodus
+      resetAttackMode();
     }
   };
 
@@ -271,6 +292,20 @@ const Duel = () => {
   };
 
   const handleDrawCard = () => {
+
+    if (users[currentTurn].id !== parseInt(id)) {
+      toast.warning("Du bist nicht am Zug");
+      resetAttackMode();
+      return;
+    }
+
+    if (playerState.deckClone.length === 0 && users[currentTurn].id === parseInt(id)) {
+      toast.error("Deck leer");
+      return;
+    }
+    if (cardDrawn && users[currentTurn].id === parseInt(id)) {
+      toast.warning("Karte bereits gezogen");
+    }
     if (!cardDrawn) {
       client.publish({
         destination: '/app/drawCard',
@@ -288,7 +323,14 @@ const Duel = () => {
   }
 
   const handleRareSwap = () => {
-    if (!cardDrawn) {
+
+    if (users[currentTurn].id !== parseInt(id)) {
+      toast.warning("Du bist nicht am Zug");
+      resetAttackMode();
+      return;
+    }
+
+    if (!cardDrawn && playerState.deckClone.length > 0) {
       toast.error("Ziehen Sie erst eine Karte");
       return;
     }
@@ -321,13 +363,21 @@ const Duel = () => {
   };
 
   const handleLegendarySwap = () => {
-    if (!cardDrawn) {
+    if (users[currentTurn].id !== parseInt(id)) {
+      toast.warning("Du bist nicht am Zug");
+      resetAttackMode();
+      return;
+    }
+
+    if (!cardDrawn && playerState.deckClone.length > 0) {
       toast.error("Ziehen Sie erst eine Karte");
+      resetAttackMode()
       return;
     }
 
     if (hasAttacked) {
       toast.error("Sie haben schon angegriffen");
+      resetAttackMode();
       return;
     }
 
@@ -343,8 +393,8 @@ const Duel = () => {
           legendaryId: selectedHandCard
         }),
       });
-      console.log("Gesendete KartenIndexListe ", selectedCards)
-      console.log("Gesendete LegendaryCardIndex ", selectedHandCard)
+      console.log("Gesendete KartenIdListe ", selectedCards)
+      console.log("Gesendete LegendaryCardId ", selectedHandCard)
       setIsLegendarySwapMode(false);
       setSelectedCards([]);
       setSelectedHandCard(null);
