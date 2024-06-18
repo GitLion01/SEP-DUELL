@@ -35,8 +35,7 @@ public class Deck {
     @JsonIgnore
     private UserAccount user;
 
-    @OneToOne(mappedBy = "deck")
-    private PlayerState playerState;
+
 
 
 }

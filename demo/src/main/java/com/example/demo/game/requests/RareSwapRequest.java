@@ -9,9 +9,8 @@ import java.util.List;
 @Getter
 public class RareSwapRequest {
 
-    Long gameID;
-    Long userID;
-    Long selectedDeckID;
-    List<Long> normalCardsID;
-    Long RareCardID;
+    Long gameId;
+    Long userId;
+    List<Long> cardIds;
+    Long rareId;
 }

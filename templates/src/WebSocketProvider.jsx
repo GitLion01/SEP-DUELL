@@ -7,7 +7,10 @@ export const WebSocketContext = createContext();
 
 export const WebSocketProvider = ({ children }) => {
     const [client, setClient] = useState(null);
-    const [chatClient, setChatClient] = useState(null); 
+    const [game, setGame] = useState(null);
+    const [users, setUsers] = useState([]);
+    const [connected, setConnected] = useState(false);
+    const [chatClient, setChatClient] = useState(null);
 
     useEffect(() => {
 
@@ -20,18 +23,32 @@ export const WebSocketProvider = ({ children }) => {
             reconnectDelay: 5000,
             onConnect: () => {
                 console.log('Connected to WebSocket server');
+                setConnected(true);
+
+                // Wiederherstellung von Spiel und Benutzern aus dem Speicher
+                const storedGame = sessionStorage.getItem('game');
+                const storedUsers = sessionStorage.getItem('users');
+                if (storedGame) {
+                    setGame(JSON.parse(storedGame));
+                }
+                if (storedUsers) {
+                    setUsers(JSON.parse(storedUsers));
+                }
 
                 // Subscribe für globale Herausforderung
                 newClient.subscribe(`/user/${userId}/queue/create`, (message) => {
                     const response = JSON.parse(message.body);
                     console.log("Received response:", response)
+                    setGame(response[0]);
+                    setUsers(response[1]);
 
-                    // Finde den Benutzer im Array
-                    // const userInGame = response.users.find(user => user.id === userId);
+                    // Speichern des Spiels und der Benutzer im Speicher
+                    sessionStorage.setItem('game', JSON.stringify(response[0]));
+                    sessionStorage.setItem('users', JSON.stringify(response[1]));
 
-                    if (response.gameId) {
-                        localStorage.setItem('gameId', response.gameId);
-                        window.dispatchEvent(new CustomEvent('gameCreated', { detail: response.gameId }));
+                    if (response[0].id) {
+                        localStorage.setItem('gameId', response[0].id);
+                        window.dispatchEvent(new CustomEvent('gameCreated', { detail: response[0].id }));
                     }
                 });
             },
@@ -49,7 +66,7 @@ export const WebSocketProvider = ({ children }) => {
 
         newClient.activate();
         setClient(newClient);
-        
+
         const newChatClient = new Client({
             brokerURL: 'ws://localhost:8080/chat',
             webSocketFactory: () => new SockJS('http://localhost:8080/chat'),
@@ -80,10 +97,11 @@ export const WebSocketProvider = ({ children }) => {
                 newChatClient.deactivate();
             }
         };
+
     }, []);
 
     return (
-        <WebSocketContext.Provider value={{ client, chatClient }}>
+        <WebSocketContext.Provider value={{ client,chatClient, game, setGame, users, setUsers, connected }}>
             {children}
         </WebSocketContext.Provider>
     );

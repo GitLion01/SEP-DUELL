@@ -3,6 +3,7 @@ import com.example.demo.cards.CardInstance;
 import com.example.demo.chat.Chat;
 import com.example.demo.chat.ChatMessage;
 import com.example.demo.decks.Deck;
+import com.example.demo.game.Game;
 import com.example.demo.game.PlayerState;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
@@ -78,8 +79,7 @@ public class UserAccount implements UserDetails {
     private List<CardInstance> userCardInstance=new ArrayList<>();
 
 
-
-    @OneToOne(fetch = FetchType.EAGER)
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "player_state_id")
     private PlayerState playerState;
 
@@ -115,6 +115,7 @@ public class UserAccount implements UserDetails {
         this.email = email;
         this.password = password;
         this.role = role;
+
 
     }
 

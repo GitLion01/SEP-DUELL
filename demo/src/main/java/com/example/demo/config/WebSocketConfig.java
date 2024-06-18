@@ -1,6 +1,7 @@
 package com.example.demo.config;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.socket.config.annotation.*;
 import org.springframework.web.socket.WebSocketSession;
 
@@ -8,7 +9,15 @@ import org.springframework.web.socket.WebSocketSession;
 
 @Configuration
 @EnableWebSocketMessageBroker
+@EnableScheduling
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
+
+
+    @Override
+    public void configureWebSocketTransport(WebSocketTransportRegistration registration) {
+        registration.setMessageSizeLimit(10 * 1024 * 1024); // 10MB
+        registration.setSendBufferSizeLimit(100 * 1024 * 1024); // 10MB
+    }
 
 
     @Override
@@ -26,10 +35,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         registry.addEndpoint("/chat").setAllowedOrigins("http://localhost:4000", "http://localhost:4001").withSockJS();
     }
 
-
-
-
-    @Override
+   /* @Override
     public void configureWebSocketTransport(WebSocketTransportRegistration registration) {
         registration.addDecoratorFactory(handler -> {
             if (handler instanceof MyWebSocketHandler) {
@@ -48,7 +54,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 return handler;
             }
         });
-    }
+    }*/
 
 
 
