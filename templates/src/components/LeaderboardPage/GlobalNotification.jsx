@@ -10,15 +10,20 @@ const GlobalNotification = () => {
         
         const duelAcceptedNotification = notifications.find(n => n.message === 'duelAccepted');
         console.log(duelAcceptedNotification)
+        if (duelAcceptedNotification) {
         const senderName = duelAcceptedNotification.senderName;
         const receiverId = duelAcceptedNotification.receiverId
         createGame(receiverId, senderName)
-                
+        }
+        else {
+            alert('Es ist ein Fehler aufgetreten')
+        }
     };
     return (
         <div className="global-notification">
             {notifications.map((notification, index) => (
                 <Notification
+                key={index}
                 senderId={notification.senderId}
                 senderName={notification.senderName}
                 receiverId={notification.receiverId}
@@ -31,9 +36,7 @@ const GlobalNotification = () => {
             ))}
             {activeDuel && (
                 <div className="active-duel">
-                    <a href="/duel">
-                        <button className="active-duel-button" onClick={handleGameCreation}>Aktives Duell</button>
-                    </a>
+                    <button className="active-duel-button" onClick={handleGameCreation}>Aktives Duell</button>
                 </div>
             )}
         </div>
