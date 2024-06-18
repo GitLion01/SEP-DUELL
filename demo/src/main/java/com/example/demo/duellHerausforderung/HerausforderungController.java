@@ -2,7 +2,6 @@ package com.example.demo.duellHerausforderung;
 
 
 import lombok.AllArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.web.bind.annotation.*;
