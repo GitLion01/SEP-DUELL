@@ -409,42 +409,13 @@ const Duel = () => {
 
   return (
       <div className="duel-container">
-        <div className="timer">
-          <h4>{timer} seconds</h4>
-        </div>
-        <div className="currentTurn">
-          <h4>{users[currentTurn]?.username}</h4>
-        </div>
-        <div className="player-actions">
-          <button onClick={() => handleDrawCard()}>Karte Ziehen</button>
-          <button onClick={() => setIsSetCardMode(true)}>Karte einsetzen</button>
-          <button onClick={() => handleAttack()}>Angreifen</button>
-          <button onClick={() => setIsRareSwapMode(true)}>Rare Swap</button>
-          <button onClick={() => setIsLegendarySwapMode(true)}>Legendary Swap</button>
-          <button onClick={handleEndTurn}>End Turn</button>
-        </div>
-        <div className="field">
-          <div className="field-row opponent-field">
-            {opponentState?.fieldCards?.map((playerCard) => (
-                <div key={playerCard.id} className="card-slot">
-                  <Card card={playerCard} onCardClick={() => selectTargetCard(playerCard.id)}/>
-                </div>
-            ))}
+        <div className="timer-and-turn">
+          <div className="timer">
+            <h4>{timer} seconds</h4>
           </div>
-          <div className="field-row player-field">
-            {playerState?.fieldCards?.map((playerCard) => (
-                <div key={playerCard.id} className="card-slot">
-                  <Card card={playerCard} onCardClick={() => selectAttackingCard(playerCard.id)}/>
-                </div>
-            ))}
+          <div className="current-turn">
+            <h4>{users[currentTurn]?.username}</h4>
           </div>
-        </div>
-        <div className="hand player-hand">
-          {playerState?.handCards?.map((playerCard) => (
-              <div key={playerCard.id} className="card">
-                <Card card={playerCard} onCardClick={() => handleSetCard(playerCard.id)}/>
-              </div>
-          ))}
         </div>
         <div className="life-points">
           <div className="opponent-lp">
@@ -453,6 +424,37 @@ const Duel = () => {
           <div className="player-lp">
             <h4>LP: {playerState?.lifePoints}</h4>
           </div>
+        </div>
+        <div className="field">
+          <div className="field-row opponent-field">
+            {opponentState?.fieldCards?.slice().reverse().map((playerCard) => (
+                <div key={playerCard.id} className="card-slot">
+                  <Card className="duel-card opponent-card" card={playerCard} onCardClick={() => selectTargetCard(playerCard.id)} />
+                </div>
+            ))}
+          </div>
+          <div className="field-row player-field">
+            {playerState?.fieldCards?.map((playerCard) => (
+                <div key={playerCard.id} className="card-slot">
+                  <Card className="duel-card" card={playerCard} onCardClick={() => selectAttackingCard(playerCard.id)} />
+                </div>
+            ))}
+          </div>
+        </div>
+        <div className="hand player-hand">
+          {playerState?.handCards?.map((playerCard) => (
+              <div key={playerCard.id} className="card">
+                <Card className="duel-card" card={playerCard} onCardClick={() => handleSetCard(playerCard.id)} />
+              </div>
+          ))}
+        </div>
+        <div className="player-actions">
+          <button onClick={() => handleDrawCard()}>Karte Ziehen</button>
+          <button onClick={() => setIsSetCardMode(true)}>Karte einsetzen</button>
+          <button onClick={() => handleAttack()}>Angreifen</button>
+          <button onClick={() => setIsRareSwapMode(true)}>Rare Swap</button>
+          <button onClick={() => setIsLegendarySwapMode(true)}>Legendary Swap</button>
+          <button onClick={handleEndTurn}>End Turn</button>
         </div>
         <SwapModal
             isOpen={isRareSwapMode}
@@ -486,9 +488,12 @@ const Duel = () => {
             stats={stats || {}}
             users={users}
         />
-        <ToastContainer/>
+        <ToastContainer />
       </div>
   );
+
+
+
 }
 
 export default Duel;
