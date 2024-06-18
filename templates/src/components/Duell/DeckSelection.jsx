@@ -70,6 +70,7 @@ const  DeckSelection = () => {
 
   const handleSelectDeck = (deckId) => {
     if (client && client.connected) { // Überprüfe, ob client existiert und verbunden ist
+      console.log("GESENDETE DECKID: ", deckId);
       setSelectedDeck(deckId);
       client.publish({
         destination: '/app/selectDeck',
@@ -95,9 +96,9 @@ const  DeckSelection = () => {
       <div>
         <h2>Select Your Deck</h2>
         <div className="deck-list">
-          {decks.map((deck, index) => (
+          {decks.map((deck) => (
 
-              <div key={index}
+              <div key={deck.id}
                    className="deck" onClick={() => handleSelectDeck(deck.id)}
                    >
                 {deck.name}

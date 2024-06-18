@@ -14,19 +14,15 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 
 
-
-
 @Transactional
 @Service
 public class GameService {
-
     private final GameRepository gameRepository;
     private final DeckRepository deckRepository;
     private final UserAccountRepository userAccountRepository;
     private final SimpMessagingTemplate messagingTemplate;
     private final PlayerStateRepository playerStateRepository;
     private final PlayerCardRepository playerCardRepository;
-
 
     @Autowired
     public GameService(GameRepository gameRepository,
@@ -44,22 +40,17 @@ public class GameService {
     }
 
 
-
-
-
     @Scheduled(fixedRate = 1000)
     public void updateTimers(){
         List<Game> games = gameRepository.findAll();
         for (Game game : games) {
             game.decrementTimer();
-            System.out.println("After decrementing timer " + game.getRemaingTime());
             if(game.getReady() && game.getRemaingTime() <= 0){
                 handleTimerExpiration(game);
             }
             sendTimerUpdate(game);
         }
     }
-
     private void handleTimerExpiration(Game game) {
         UserAccount currentTurnPlayer = game.getUsers().get(game.getCurrentTurn());
         currentTurnPlayer.getPlayerState().setLifePoints(-1);
@@ -68,7 +59,6 @@ public class GameService {
         otherPlayer.getPlayerState().setWinner(true);
         terminateMatch(game.getId(), currentTurnPlayer.getId(), otherPlayer.getId());
     }
-
     private void sendTimerUpdate(Game game) {
         int remainingTime = game.getRemaingTime();
         for(UserAccount player : game.getUsers()) {
@@ -76,36 +66,30 @@ public class GameService {
         }
     }
 
-
     public void createGame(CreateGameRequest request) {
         System.out.println("Creating game for users A:" + request.getUserA() + " and B:" + request.getUserB());
         UserAccount userA = userAccountRepository.findById(request.getUserA())
                 .orElseThrow(() -> new IllegalArgumentException("User A not found"));
         UserAccount userB = userAccountRepository.findByUsername(request.getUserB())
                 .orElseThrow(() -> new IllegalArgumentException("User B not found"));
-
         // Check if userA is already associated with a game
         if (gameRepository.existsByUsersContaining(userA)) {
             System.out.println("User with id: " + userA.getId() + " already in a game");
             return;
         }
-
         // Check if userB is already associated with a game
         if (gameRepository.existsByUsersContaining(userB)) {
             System.out.println("User with id: " + userA.getId() + " already in a game");
             return;
         }
-
         PlayerState playerStateA = new PlayerState();
         playerStateRepository.save(playerStateA);
         userA.setPlayerState(playerStateA);
         userAccountRepository.save(userA);
-
         PlayerState playerStateB = new PlayerState();
         playerStateRepository.save(playerStateB);
         userB.setPlayerState(playerStateB);
         userAccountRepository.save(userB);
-
         System.out.println("Vor Game");
         Game newGame = new Game();
         System.out.println("Nach Game");
@@ -115,29 +99,25 @@ public class GameService {
         System.out.println("vor speichern");
         gameRepository.save(newGame);
         System.out.println("Game gespeichert");
-
         List<UserAccount> users = newGame.getUsers();
-
 
         for(UserAccount user : newGame.getUsers()) {
             messagingTemplate.convertAndSendToUser(user.getId().toString(), "/queue/create", Arrays.asList(newGame, users));
         }
-
     }
-
 
     @Transactional
     public void selectDeck(DeckSelectionRequest request) {
         System.out.println("SERVICE ERREICHT");
+        System.out.println("Deck ID: " + request.getDeckId());
+        System.out.println("User ID: " + request.getUserId());
+        System.out.println("Game ID: " + request.getGameId());
         Optional<Game> optionalGame = gameRepository.findById(request.getGameId());
         Optional<Deck> optionalDeck = deckRepository.findByDeckIdAndUserId(request.getDeckId(), request.getUserId());
-
         if(optionalGame.isEmpty() || optionalDeck.isEmpty()) {
             return;
         }
-
         System.out.println("Game und Deck vorhanden");
-
         Game game = optionalGame.get();
         Deck deck = optionalDeck.get();
         List<Card> cards = deck.getCards();
@@ -157,18 +137,14 @@ public class GameService {
             playerCardRepository.save(playerCard);
         }
 
-
-
         System.out.println("VOR DECK SETZEN");
         UserAccount user = deck.getUser();
         user.getPlayerState().setDeck(deck);
         user.getPlayerState().setReady(true);
         //Fortan wird mit diesem Deck Klon gearbeitet
         user.getPlayerState().setDeckClone(playerCards);
-
         playerStateRepository.save(user.getPlayerState());
         System.out.println("NACH DECK SETZEN");
-
         // setzt initial 5 Karten aus dem gemischten Deck auf die Hand
         Iterator<PlayerCard> iterator = user.getPlayerState().getDeckClone().iterator();
         int count = 0;
@@ -180,7 +156,6 @@ public class GameService {
             count++; // Inkrementiert den Zähler für die Anzahl der gezogenen Karten
         }
 
-
         /*Iterator<PlayerCard> iterator = playerCards.iterator();
         int count = 0;
         while (iterator.hasNext() && count < 5) {
@@ -190,12 +165,10 @@ public class GameService {
             count++; // Inkrementiert den Zähler für die Anzahl der gezogenen Karten
         }*/
         user.getPlayerState().getDeckClone().removeAll(cardsToRemove);
-
         System.out.println("VOR SPEICHERN DES USERS");
         playerStateRepository.save(user.getPlayerState());
         userAccountRepository.save(user);
         System.out.println("NACH SPEICHERN DES USERS");
-
         // überprüft ob in beiden PlayerStates der Spieler ready auf true gesetzt ist
         boolean allPlayersReady = true;
         for (UserAccount userAccount : game.getUsers()) {
@@ -204,35 +177,32 @@ public class GameService {
                 break;
             }
         }
-
         if (allPlayersReady) {
             game.setReady(true);
         }
 
-
         System.out.println("ALLE READY");
 
-        gameRepository.save(game);
+        playerStateRepository.save(user.getPlayerState());
 
+        System.out.println("READY? " + user.getPlayerState().getReady());
+
+        gameRepository.save(game);
         List<UserAccount> users = game.getUsers();
         for(UserAccount player : game.getUsers()) {
             System.out.println("Player: " + player.getId());
             messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/selectDeck", Arrays.asList(game, users));
         }
 
-
     }
-
 
     // erste Karte im Deck wird auf die Hand gelegt
     public void drawCard(DrawCardRequest request) {
         Optional<Game> optionalGame = gameRepository.findById(request.getGameId());
         Optional<UserAccount> optionalUserAccount = userAccountRepository.findById(request.getUserId());
-
         if(optionalGame.isEmpty() || optionalUserAccount.isEmpty()) {
             return;
         }
-
         Game game = optionalGame.get();
         UserAccount userAccount = optionalUserAccount.get();
         if(!game.getUsers().get(game.getCurrentTurn()).equals(userAccount)){// prüft ob der User am zug ist
@@ -241,42 +211,35 @@ public class GameService {
         Deck deck = userAccount.getPlayerState().getDeck();
         List<PlayerCard> handCards = userAccount.getPlayerState().getHandCards();
 
-
         // ersetzt den unteren Kommentar
-        handCards.add(deck.getUser().getPlayerState().getDeckClone().remove(0));
-
+        if(deck.getUser().getPlayerState().getDeckClone().isEmpty()) {
+            return;
+        }else{
+            handCards.add(deck.getUser().getPlayerState().getDeckClone().remove(0));
+        }
 
         /*Card card = deck.getCards().get(deckIndex);
         deckIndex++;
         PlayerCard playerCard = new PlayerCard();
         playerCard.setCard(card);
-
         handCards.add(cardInstance);
         deck.getCards().remove(deck.getCards().get(0));*/
-
         playerStateRepository.save(userAccount.getPlayerState());
         gameRepository.save(game);
-
         List<UserAccount> users = game.getUsers();
-
         for(UserAccount player : game.getUsers()) {
             System.out.println(" BEVOR Player: " + player.getId());
             messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", Arrays.asList(game, users));
             System.out.println(" DANACH Player: " + player.getId());
         }
-
     }
-
     public void placeCard(PlaceCardRequest request){
-
         Optional<Game> optionalGame = gameRepository.findById(request.getGameId());
         Optional<UserAccount> optionalUserAccount = userAccountRepository.findById(request.getUserId());
         Optional<PlayerCard> optionalCard = playerCardRepository.findById(request.getCardId());
-
         if(optionalGame.isEmpty() || optionalUserAccount.isEmpty() || optionalCard.isEmpty()) {
             return;
         }
-
         Game game = optionalGame.get();
         UserAccount userAccount = optionalUserAccount.get();
         PlayerCard card = optionalCard.get();
@@ -286,98 +249,73 @@ public class GameService {
             return;
         }
 
-
         userAccount.getPlayerState().getFieldCards().add(card); // Fügt Karte aus Hand dem Feld hinzu
         userAccount.getPlayerState().getHandCards().remove(card); // Löscht Karte aus Hand
         userAccount.getPlayerState().getCardsPlayed().add(card); // Fügt die Karte den gespielten Karten hinzu
-
         playerStateRepository.save(userAccount.getPlayerState());
         gameRepository.save(game);
-
         List<UserAccount> users = game.getUsers();
-
         for(UserAccount player : game.getUsers()) {
             messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", Arrays.asList(game, users));
         }
-
     }
-
 
     public void endTurn(EndTurnRequest request) {
         Optional<Game> optionalGame = gameRepository.findById(request.getGameID());
         Optional<UserAccount> optionalUserAccount = userAccountRepository.findById(request.getUserID());
-
         if(optionalGame.isEmpty() || optionalUserAccount.isEmpty()) {
             return;
         }
-
         Game game = optionalGame.get();
         UserAccount userAccount = optionalUserAccount.get();
         if(!game.getUsers().get(game.getCurrentTurn()).equals(userAccount)){
             return;
         }
-
         UserAccount currentTurn = game.getUsers().get(game.getCurrentTurn());
         UserAccount notTurn = game.getUsers().get(0).equals(userAccount) ? game.getUsers().get(1) : userAccount;
-
         game.setCurrentTurn(game.getUsers().get(0).equals(userAccount) ? 1 : 0);
         game.resetTimer();
-
         if(game.getFirstRound()){
             game.setFirstRound(false);
         }
-
         List<PlayerCard> cards = userAccount.getPlayerState().getFieldCards();
         for(PlayerCard card : cards){
             card.setHasAttacked(false);
             playerCardRepository.save(card);
         }
-
         gameRepository.save(game);
-
         List<UserAccount> users = game.getUsers();
-
         for(UserAccount player : game.getUsers()) {
             System.out.println(" BEVOR Player: " + player.getId());
             messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", Arrays.asList(game, users));
             System.out.println(" DANACH Player: " + player.getId());
         }
-
     }
-
     public void attackCard(AttackCardRequest request) {
-
         Optional<Game> optionalGame = gameRepository.findById(request.getGameId());
         Optional<UserAccount> optionalAttacker = userAccountRepository.findById(request.getUserIdAttacker());
         Optional<UserAccount> optionalDefender = userAccountRepository.findById(request.getUserIdDefender());
         Optional<PlayerCard> optionalAttackerCard = playerCardRepository.findById(request.getAttackerId());
         Optional<PlayerCard> optionalTarget = playerCardRepository.findById(request.getTargetId());
-
         if(optionalGame.isEmpty() || optionalAttacker.isEmpty() || optionalDefender.isEmpty() || optionalAttackerCard.isEmpty() || optionalTarget.isEmpty()) {
             return;
         }
-
         Game game = optionalGame.get();
         UserAccount attacker = optionalAttacker.get();
         UserAccount defender = optionalDefender.get();
         PlayerCard attackerCard = optionalAttackerCard.get();
         PlayerCard target = optionalTarget.get();
-
         if(attackerCard.getHasAttacked()){
             return;
         }
-
         if(!game.getUsers().get(game.getCurrentTurn()).equals(attacker) ||
                 defender.getPlayerState().getFieldCards().isEmpty() ||
                 attacker.getPlayerState().getFieldCards().contains(target)){
             return;
         }
 
-
-
         // Angriffslogik
         System.out.println("Start des Angriffs");
-
         // Angriffspunkte von C1 von Verteidigungspunkten von C2 abziehen
         int remainingTargetDefense = target.getDefensePoints() - attackerCard.getAttackPoints();
         System.out.println("RemainingTargetDefense " + remainingTargetDefense);
@@ -392,7 +330,6 @@ public class GameService {
             target.setDefensePoints(remainingTargetDefense);
             attacker.getPlayerState().setDamage(attacker.getPlayerState().getDamage() + attackerCard.getAttackPoints());
         }
-
         // Wenn C2 nicht zerstört wurde, dann kontert C2
         if (remainingTargetDefense >= 0) {
             int remainingAttackerDefense = attackerCard.getDefensePoints() - target.getAttackPoints();
@@ -405,39 +342,27 @@ public class GameService {
                 attackerCard.setDefensePoints(remainingAttackerDefense);
             }
         }
-
         attackerCard.setHasAttacked(true);
-
         playerCardRepository.save(attackerCard);
         playerCardRepository.save(target);
-
         playerStateRepository.save(game.getUsers().get(0).getPlayerState());
         playerStateRepository.save(game.getUsers().get(1).getPlayerState());
 
-
-
         gameRepository.save(game);
-
         List<UserAccount> users = game.getUsers();
-
         for(UserAccount player : game.getUsers()) {
             messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", Arrays.asList(game, users));
         }
 
-
     }
-
     public void attackUser(AttackUserRequest request) {
-
         Optional<Game> optionalGame = gameRepository.findById(request.getGameId());
         Optional<UserAccount> optionalAttacker = userAccountRepository.findById(request.getAttackerId());
         Optional<UserAccount> optionalDefender = userAccountRepository.findById(request.getDefenderId());
         Optional<PlayerCard> optionalPlayerCard = playerCardRepository.findById(request.getAttackerCardId());
-
         if(optionalGame.isEmpty() || optionalAttacker.isEmpty() || optionalDefender.isEmpty() || optionalPlayerCard.isEmpty()) {
             return;
         }
-
         Game game = optionalGame.get();
         UserAccount attacker = optionalAttacker.get();
         UserAccount defender = optionalDefender.get();
@@ -446,11 +371,9 @@ public class GameService {
             return;
         }
 
-
         if(attackerCard.getHasAttacked()){
             return;
         }
-
         int remainingLifePoints = defender.getPlayerState().getLifePoints() - attackerCard.getAttackPoints();
         if(attackerCard.getAttackPoints() > defender.getPlayerState().getLifePoints()){
             attacker.getPlayerState().setDamage(attacker.getPlayerState().getDamage() + defender.getPlayerState().getLifePoints() + 1); // erhöht den Damage Counter des Angreifers
@@ -462,26 +385,19 @@ public class GameService {
             attacker.getPlayerState().setDamage(attacker.getPlayerState().getDamage() + attackerCard.getAttackPoints()); // erhöht den Damage Counter des Angreifers
         }
 
-
         attackerCard.setHasAttacked(true);
-
         playerCardRepository.save(attackerCard);
         playerStateRepository.save(game.getUsers().get(0).getPlayerState());
         playerStateRepository.save(game.getUsers().get(1).getPlayerState());
         gameRepository.save(game);
-
         List<UserAccount> users = game.getUsers();
-
         for(UserAccount player : game.getUsers()) {
             messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", Arrays.asList(game, users));
         }
-
         if(remainingLifePoints < 0){
             terminateMatch(request.getGameId(), attacker.getId(), defender.getId());
         }
-
     }
-
     public void swapForRare(RareSwapRequest request) {
         Optional<Game> optionalGame = gameRepository.findById(request.getGameId());
         Optional<UserAccount> optionalUser = userAccountRepository.findById(request.getUserId());
@@ -489,28 +405,22 @@ public class GameService {
         Optional<PlayerCard> optionalCard1 = playerCardRepository.findById(request.getCardIds().get(0));
         Optional<PlayerCard> optionalCard2 = playerCardRepository.findById(request.getCardIds().get(1));
 
-
         if(optionalGame.isEmpty() || optionalUser.isEmpty() || optionalRare.isEmpty() || optionalCard1.isEmpty() || optionalCard2.isEmpty()) {
             return;
         }
-
         Game game = optionalGame.get();
         UserAccount user = optionalUser.get();
-
         if(!game.getUsers().get(game.getCurrentTurn()).equals(user) || request.getCardIds().size() != 2) {
             return;
         }
-
         List<PlayerCard> hand = user.getPlayerState().getHandCards();
         List<PlayerCard> field = user.getPlayerState().getFieldCards();
         PlayerCard card1 = optionalCard1.get();
         PlayerCard card2 = optionalCard2.get();
         PlayerCard rare = optionalRare.get();
-
         if(rare.getRarity() != Rarity.RARE){
             return;
         }
-
         card1.setSacrificed(true);
         card2.setSacrificed(true);
         user.getPlayerState().getFieldCards().remove(card1);
@@ -519,19 +429,14 @@ public class GameService {
         user.getPlayerState().getCardsPlayed().add(rare);
         user.getPlayerState().getHandCards().remove(rare);
 
-
         playerStateRepository.save(user.getPlayerState());
         gameRepository.save(game);
-
         List<UserAccount> users = game.getUsers();
-
         for(UserAccount player : game.getUsers()) {
             messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", Arrays.asList(game, users));
         }
 
-
     }
-
     public void swapForLegendary(LegendarySwapRequest request) {
         Optional<Game> optionalGame = gameRepository.findById(request.getGameId());
         Optional<UserAccount> optionalUser = userAccountRepository.findById(request.getUserId());
@@ -539,26 +444,21 @@ public class GameService {
         Optional<PlayerCard> optionalCard1 = playerCardRepository.findById(request.getCardIds().get(0));
         Optional<PlayerCard> optionalCard2 = playerCardRepository.findById(request.getCardIds().get(1));
         Optional<PlayerCard> optionalCard3 = playerCardRepository.findById(request.getCardIds().get(2));
-
         if(optionalGame.isEmpty() || optionalUser.isEmpty() || optionalCard1.isEmpty() || optionalCard2.isEmpty() || optionalCard3.isEmpty() || optionalLeggendary.isEmpty()) {
             return;
         }
-
         Game game = optionalGame.get();
         UserAccount user = optionalUser.get();
         if(!game.getUsers().get(game.getCurrentTurn()).equals(user) || request.getCardIds().size() != 3) {
             return;
         }
-
         PlayerCard card1 = optionalCard1.get();
         PlayerCard card2 = optionalCard2.get();
         PlayerCard card3 = optionalCard3.get();
         PlayerCard legendary = optionalLeggendary.get();
-
         if(legendary.getRarity() != Rarity.LEGENDARY){
             return;
         }
-
         card1.setSacrificed(true);
         card2.setSacrificed(true);
         card3.setSacrificed(true);
@@ -569,135 +469,107 @@ public class GameService {
         user.getPlayerState().getCardsPlayed().add(legendary);
         user.getPlayerState().getHandCards().remove(legendary);
 
-
         playerStateRepository.save(user.getPlayerState());
         gameRepository.save(game);
-
         List<UserAccount> users = game.getUsers();
-
         for(UserAccount player : game.getUsers()) {
             messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", Arrays.asList(game, users));
         }
-
     }
-
 
     public void terminateMatch(Long gameId, Long userA, Long userB) {
+        Optional<Game> optionalGame = gameRepository.findById(gameId);
+        Optional<UserAccount> optionalUserA = userAccountRepository.findById(userA);
+        Optional<UserAccount> optionalUserB = userAccountRepository.findById(userB);
+        if (optionalGame.isEmpty() || optionalUserA.isEmpty() || optionalUserB.isEmpty()) {
+            return;
+        }
+        Game game = optionalGame.get();
+        UserAccount user1 = optionalUserA.get();
+        UserAccount user2 = optionalUserB.get();
 
-            Optional<Game> optionalGame = gameRepository.findById(gameId);
-            Optional<UserAccount> optionalUserA = userAccountRepository.findById(userA);
-            Optional<UserAccount> optionalUserB = userAccountRepository.findById(userB);
+        List<PlayerCard> raresA = new ArrayList<>();
+        List<PlayerCard> legendariesA = new ArrayList<>();
+        List<PlayerCard> normalsA = new ArrayList<>();
+        List<PlayerCard> raresB = new ArrayList<>();
+        List<PlayerCard> legendariesB = new ArrayList<>();
+        List<PlayerCard> normalsB = new ArrayList<>();
+        List<PlayerCard> sacrificedNormalsA = new ArrayList<>();
+        List<PlayerCard> sacrificedRaresA = new ArrayList<>();
+        List<PlayerCard> sacrificedLegendariesA = new ArrayList<>();
+        List<PlayerCard> sacrificedNormalsB = new ArrayList<>();
+        List<PlayerCard> sacrificedRaresB = new ArrayList<>();
+        List<PlayerCard> sacrificedLegendariesB = new ArrayList<>();
+        normalsA = user1.getPlayerState().getCardsPlayed().stream().filter((x) -> x.getRarity() == Rarity.NORMAL).toList();
+        raresA = user1.getPlayerState().getCardsPlayed().stream().filter((x) -> x.getRarity() == Rarity.RARE).toList();
+        legendariesA = user1.getPlayerState().getCardsPlayed().stream().filter((x) -> x.getRarity() == Rarity.LEGENDARY).toList();
+        normalsB = user2.getPlayerState().getCardsPlayed().stream().filter((x) -> x.getRarity() == Rarity.NORMAL).toList();
+        raresB = user2.getPlayerState().getCardsPlayed().stream().filter((x) -> x.getRarity() == Rarity.RARE).toList();
+        legendariesB = user2.getPlayerState().getCardsPlayed().stream().filter((x) -> x.getRarity() == Rarity.LEGENDARY).toList();
+        sacrificedNormalsA = normalsA.stream().filter((x) -> x.getSacrificed()).toList();
+        sacrificedRaresA = raresA.stream().filter((x) -> x.getSacrificed()).toList();
+        sacrificedLegendariesA = legendariesA.stream().filter((x) -> x.getSacrificed()).toList();
 
-            if (optionalGame.isEmpty() || optionalUserA.isEmpty() || optionalUserB.isEmpty()) {
-                return;
-            }
+        sacrificedNormalsB = normalsB.stream().filter((x) -> x.getSacrificed()).toList();
+        sacrificedRaresB = raresB.stream().filter((x) -> x.getSacrificed()).toList();
+        sacrificedLegendariesB = legendariesB.stream().filter((x) -> x.getSacrificed()).toList();
 
-            Game game = optionalGame.get();
-            UserAccount user1 = optionalUserA.get();
-            UserAccount user2 = optionalUserB.get();
+        Integer sepCoins = 100;
+        Integer leaderBoardPointsWinner;
+        Integer leaderBoardPointsLoser;
+        Integer damageWinner;
+        Integer damageLoser;
+        List<Integer> cardsPlayedA = Arrays.asList(normalsA.size(), raresA.size(), legendariesA.size());
+        List<Integer> cardsPlayedB = Arrays.asList(normalsB.size(), raresB.size(), legendariesB.size());
+        List<Integer> sacrificedA = Arrays.asList(sacrificedNormalsA.size(), sacrificedRaresA.size(), sacrificedLegendariesA.size());
+        List<Integer> sacrificedB = Arrays.asList(sacrificedNormalsB.size(), sacrificedRaresB.size(), sacrificedLegendariesB.size());
 
+        Integer lbPoints1 = user1.getLeaderboardPoints();
+        Integer lbPoints2 = user2.getLeaderboardPoints();
+        if (user1.getPlayerState().getWinner()) {
+            user1.setSepCoins(user1.getSepCoins() + 100);
+            user1.setLeaderboardPoints(lbPoints1 + Math.max(50, lbPoints2 - lbPoints1));
+            user2.setLeaderboardPoints(lbPoints2 - Math.max(50, (lbPoints2 - lbPoints1) / 2));
+            leaderBoardPointsWinner = Math.max(50, lbPoints2 - lbPoints1);
+            leaderBoardPointsLoser = -1 * (Math.max(50, (lbPoints2 - lbPoints1) / 2));
+            damageWinner = user1.getPlayerState().getDamage();
+            damageLoser = user2.getPlayerState().getDamage();
+        } else {
+            user2.setSepCoins(user2.getSepCoins() + 100);
+            user2.setLeaderboardPoints(lbPoints2 + Math.max(50, lbPoints1 - lbPoints2));
+            user1.setLeaderboardPoints(lbPoints1 - Math.max(50, (lbPoints1 - lbPoints2) / 2));
+            leaderBoardPointsWinner = Math.max(50, lbPoints1 - lbPoints2);
+            leaderBoardPointsLoser = -1 * (Math.max(50, (lbPoints1 - lbPoints2) / 2));
+            damageWinner = user2.getPlayerState().getDamage();
+            damageLoser = user1.getPlayerState().getDamage();
+        }
 
-            List<PlayerCard> raresA = new ArrayList<>();
-            List<PlayerCard> legendariesA = new ArrayList<>();
-            List<PlayerCard> normalsA = new ArrayList<>();
-            List<PlayerCard> raresB = new ArrayList<>();
-            List<PlayerCard> legendariesB = new ArrayList<>();
-            List<PlayerCard> normalsB = new ArrayList<>();
-            List<PlayerCard> sacrificedNormalsA = new ArrayList<>();
-            List<PlayerCard> sacrificedRaresA = new ArrayList<>();
-            List<PlayerCard> sacrificedLegendariesA = new ArrayList<>();
-            List<PlayerCard> sacrificedNormalsB = new ArrayList<>();
-            List<PlayerCard> sacrificedRaresB = new ArrayList<>();
-            List<PlayerCard> sacrificedLegendariesB = new ArrayList<>();
+        playerStateRepository.save(user1.getPlayerState());
+        playerStateRepository.save(user2.getPlayerState());
+        userAccountRepository.save(user1);
+        userAccountRepository.save(user2);
+        gameRepository.save(game);
+        List<UserAccount> users = game.getUsers();
+        for (UserAccount player : game.getUsers()) {
+            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", Arrays.asList(game, users, sepCoins, leaderBoardPointsWinner, leaderBoardPointsLoser,damageWinner, damageLoser, cardsPlayedA, cardsPlayedB, sacrificedA, sacrificedB));
+        }
 
-            normalsA = user1.getPlayerState().getCardsPlayed().stream().filter((x) -> x.getRarity() == Rarity.NORMAL).toList();
-            raresA = user1.getPlayerState().getCardsPlayed().stream().filter((x) -> x.getRarity() == Rarity.RARE).toList();
-            legendariesA = user1.getPlayerState().getCardsPlayed().stream().filter((x) -> x.getRarity() == Rarity.LEGENDARY).toList();
-
-            normalsB = user2.getPlayerState().getCardsPlayed().stream().filter((x) -> x.getRarity() == Rarity.NORMAL).toList();
-            raresB = user2.getPlayerState().getCardsPlayed().stream().filter((x) -> x.getRarity() == Rarity.RARE).toList();
-            legendariesB = user2.getPlayerState().getCardsPlayed().stream().filter((x) -> x.getRarity() == Rarity.LEGENDARY).toList();
-
-            sacrificedNormalsA = normalsA.stream().filter((x) -> x.getSacrificed()).toList();
-            sacrificedRaresA = raresA.stream().filter((x) -> x.getSacrificed()).toList();
-            sacrificedLegendariesA = legendariesA.stream().filter((x) -> x.getSacrificed()).toList();
-
-
-            sacrificedNormalsB = normalsB.stream().filter((x) -> x.getSacrificed()).toList();
-            sacrificedRaresB = raresB.stream().filter((x) -> x.getSacrificed()).toList();
-            sacrificedLegendariesB = legendariesB.stream().filter((x) -> x.getSacrificed()).toList();
-
-
-            Integer sepCoins = 100;
-            Integer leaderBoardPointsWinner;
-            Integer leaderBoardPointsLoser;
-            Integer damageWinner;
-            Integer damageLoser;
-            List<Integer> cardsPlayedA = Arrays.asList(normalsA.size(), raresA.size(), legendariesA.size());
-            List<Integer> cardsPlayedB = Arrays.asList(normalsB.size(), raresB.size(), legendariesB.size());
-            List<Integer> sacrificedA = Arrays.asList(sacrificedNormalsA.size(), sacrificedRaresA.size(), sacrificedLegendariesA.size());
-            List<Integer> sacrificedB = Arrays.asList(sacrificedNormalsB.size(), sacrificedRaresB.size(), sacrificedLegendariesB.size());
-
-
-
-            Integer lbPoints1 = user1.getLeaderboardPoints();
-            Integer lbPoints2 = user2.getLeaderboardPoints();
-            if (user1.getPlayerState().getWinner()) {
-                user1.setSepCoins(user1.getSepCoins() + 100);
-                user1.setLeaderboardPoints(lbPoints1 + Math.max(50, lbPoints2 - lbPoints1));
-                user2.setLeaderboardPoints(lbPoints2 - Math.max(50, (lbPoints2 - lbPoints1) / 2));
-                leaderBoardPointsWinner = Math.max(50, lbPoints2 - lbPoints1);
-                leaderBoardPointsLoser = -1 * (Math.max(50, (lbPoints2 - lbPoints1) / 2));
-                damageWinner = user1.getPlayerState().getDamage();
-                damageLoser = user2.getPlayerState().getDamage();
-            } else {
-                user2.setSepCoins(user2.getSepCoins() + 100);
-                user2.setLeaderboardPoints(lbPoints2 + Math.max(50, lbPoints1 - lbPoints2));
-                user1.setLeaderboardPoints(lbPoints1 - Math.max(50, (lbPoints1 - lbPoints2) / 2));
-                leaderBoardPointsWinner = Math.max(50, lbPoints1 - lbPoints2);
-                leaderBoardPointsLoser = -1 * (Math.max(50, (lbPoints1 - lbPoints2) / 2));
-                damageWinner = user2.getPlayerState().getDamage();
-                damageLoser = user1.getPlayerState().getDamage();
-            }
-
-
-            playerStateRepository.save(user1.getPlayerState());
-            playerStateRepository.save(user2.getPlayerState());
-            userAccountRepository.save(user1);
-            userAccountRepository.save(user2);
-            gameRepository.save(game);
-
-            List<UserAccount> users = game.getUsers();
-
-            for (UserAccount player : game.getUsers()) {
-                System.out.println("Spiel wurde beendet");
-                messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", Arrays.asList(game, users, sepCoins, leaderBoardPointsWinner, leaderBoardPointsLoser,damageWinner, damageLoser, cardsPlayedA, cardsPlayedB, sacrificedA, sacrificedB));
-            }
-
-
-            /*deleteUserGameData(Arrays.asList(user1.getId(), user2.getId()));*/
-            /*gameRepository.delete(game);*/
-            deleteGame(gameId);
-
-            //TODO: Alle Daten zurücksetzten (Deck, Cards, etc)
-
+        /*deleteUserGameData(Arrays.asList(user1.getId(), user2.getId()));*/
+        /*gameRepository.delete(game);*/
+        deleteUserGameData(Arrays.asList(game.getUsers().get(0).getId(), game.getUsers().get(1).getId()));
+        //TODO: Alle Daten zurücksetzten (Deck, Cards, etc)
     }
 
-
-
-    @Transactional
+    /*@Transactional
     public void deleteGame(Long gameId) {
         // Spiel laden
         Game game = gameRepository.findById(gameId)
                 .orElseThrow(() -> new IllegalArgumentException("Game not found with id: " + gameId));
-
         // Alle Benutzer des Spiels laden
         List<UserAccount> users = game.getUsers();
-
         // Verbindung zwischen Game und UserAccount aufheben
         game.getUsers().clear();
         gameRepository.save(game);
-
         // Für jeden Benutzer die zugehörigen Handkarten löschen und PlayerState-Referenz auf null setzen
         for (UserAccount user : users) {
             PlayerState playerState = user.getPlayerState();
@@ -707,10 +579,8 @@ public class GameService {
                 userAccountRepository.save(user);
             }
         }
-
         // Spiel löschen
         gameRepository.delete(game);
-
         // Nun den Rest aufräumen: PlayerStates, PlayerCards und Deck löschen
         for (UserAccount user : users) {
             PlayerState playerState = user.getPlayerState();
@@ -722,13 +592,11 @@ public class GameService {
                 if (playerState.getDeck() != null) {
                     playerState.setDeck(null);
                 }
-
                 // PlayerState löschen
                 playerStateRepository.delete(playerState);
             }
         }
-    }
-
+    }*/
 
     @Transactional
     public void deleteUserGameData(List<Long> userIds) {
@@ -743,6 +611,5 @@ public class GameService {
         playerStateRepository.deletePlayerStatesByUserIds(userIds);
     }
 
-
-
 }
+ 

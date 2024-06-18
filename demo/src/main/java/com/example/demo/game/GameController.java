@@ -37,6 +37,10 @@ public class GameController {
 
     @MessageMapping("/selectDeck")
     public void selectDeck(@Payload DeckSelectionRequest request) {
+        System.out.println("CONTROLLER ERREICHT");
+        System.out.println("Deck ID: " + request.getDeckId());
+        System.out.println("User ID: " + request.getUserId());
+        System.out.println("Game ID: " + request.getGameId());
         gameService.selectDeck(request);
     }
 
