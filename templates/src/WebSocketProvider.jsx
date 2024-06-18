@@ -1,17 +1,22 @@
 import React, { createContext, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
+import { toast } from 'react-toastify';
+
 
 export const WebSocketContext = createContext();
 
 export const WebSocketProvider = ({ children }) => {
     const [client, setClient] = useState(null);
-    const [game, setGame] = useState(null);
-    const [users, setUsers] = useState([]);
-    const [connected, setConnected] = useState(false);
+    const [chatClient, setChatClient] = useState(null); 
+    const [notifications, setNotifications] = useState([]); 
+    const navigate = useNavigate(); 
+    const userId = parseInt(localStorage.getItem('id'))
 
     useEffect(() => {
-        const userId = parseInt(localStorage.getItem('id')); // ID des aktuellen Benutzers als Zahl
+
+
 
         const newClient = new Client({
             brokerURL: 'ws://localhost:8080/game-websocket',
@@ -19,32 +24,28 @@ export const WebSocketProvider = ({ children }) => {
             reconnectDelay: 5000,
             onConnect: () => {
                 console.log('Connected to WebSocket server');
-                setConnected(true);
+                // Subscribe für Benachrichtigung 
+                newClient.subscribe(`/user/${userId}/queue/notifications`, (message) => {
+                    const notification = JSON.parse(message.body);
+                    if (notification.message === 'challenge') {
+                        setNotifications(prev => [...prev, { ...notification, countdown: 30 }]);
+                    } else if (notification.type === 'duelAccepted') {
+                        // Weitere Logik für akzeptierte Duelle
+                    }
 
-                // Wiederherstellung von Spiel und Benutzern aus dem Speicher
-                const storedGame = sessionStorage.getItem('game');
-                const storedUsers = sessionStorage.getItem('users');
-                if (storedGame) {
-                    setGame(JSON.parse(storedGame));
-                }
-                if (storedUsers) {
-                    setUsers(JSON.parse(storedUsers));
-                }
+                });
 
                 // Subscribe für globale Herausforderung
                 newClient.subscribe(`/user/${userId}/queue/create`, (message) => {
                     const response = JSON.parse(message.body);
                     console.log("Received response:", response)
-                    setGame(response[0]);
-                    setUsers(response[1]);
 
-                    // Speichern des Spiels und der Benutzer im Speicher
-                    sessionStorage.setItem('game', JSON.stringify(response[0]));
-                    sessionStorage.setItem('users', JSON.stringify(response[1]));
+                    // Finde den Benutzer im Array
+                    // const userInGame = response.users.find(user => user.id === userId);
 
-                    if (response.id) {
-                        localStorage.setItem('gameId', response.id);
-                        window.dispatchEvent(new CustomEvent('gameCreated', { detail: response.id }));
+                    if (response.gameId) {
+                        localStorage.setItem('gameId', response.gameId);
+                        window.dispatchEvent(new CustomEvent('gameCreated', { detail: response.gameId }));
                     }
                 });
             },
@@ -62,17 +63,71 @@ export const WebSocketProvider = ({ children }) => {
 
         newClient.activate();
         setClient(newClient);
+        
+        const newChatClient = new Client({
+            brokerURL: 'ws://localhost:8080/chat',
+            webSocketFactory: () => new SockJS('http://localhost:8080/chat'),
+            reconnectDelay: 5000,
+            onConnect: () => {
+                console.log('Connected to chat WebSocket server');
+            },
+            onStompError: (frame) => {
+                console.error(`Chat broker reported error: ${frame.headers['message']}`);
+                console.error(`Additional details: ${frame.body}`);
+            },
+            onWebSocketError: (event) => {
+                console.error('Chat WebSocket error', event);
+            },
+            onWebSocketClose: (event) => {
+                console.error('Chat WebSocket closed', event);
+            },
+        });
+
+        newChatClient.activate();
+        setChatClient(newChatClient);
 
         return () => {
             if (newClient) {
                 newClient.deactivate();
             }
+            if (newChatClient) {
+                newChatClient.deactivate();
+            }
         };
-
     }, []);
 
+
+
+    const handleAcceptChallenge = (challenger) => {
+        // Erstelle das Spiel, nachdem die Herausforderung akzeptiert wurde
+        createGame(userId, challenger);
+        setNotifications(notifications.filter(n => n.senderName !== challenger));
+    };
+
+    const createGame = (userA, userB) => {
+        if (client && client.connected) {
+            client.publish({
+                destination: '/app/createGame',
+                body: JSON.stringify({ userA, userB }),
+            });
+            toast.success("Herausforderung gesendet.");
+        } else {
+            toast.error("WebSocket-Verbindung ist nicht aktiv.");
+        }
+    };
+
+    const handleRejectChallenge = (challenger) => {
+        setNotifications(notifications.filter(n => n.senderName !== challenger));
+    };
+
+    const handleTimeoutChallenge = (challenger) => {
+        setNotifications(notifications.filter(n => n.senderName !== challenger));
+    };
+
+
+
     return (
-        <WebSocketContext.Provider value={{ client, game, setGame, users, setUsers, connected }}>
+        <WebSocketContext.Provider value={{ client, chatClient, notifications, handleAcceptChallenge, handleRejectChallenge, handleTimeoutChallenge }}>
             {children}
         </WebSocketContext.Provider>
     );
