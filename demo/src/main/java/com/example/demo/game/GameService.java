@@ -6,7 +6,9 @@ import com.example.demo.decks.DeckRepository;
 import com.example.demo.game.requests.*;
 import com.example.demo.user.UserAccount;
 import com.example.demo.user.UserAccountRepository;
+import jakarta.validation.constraints.Null;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -45,20 +47,29 @@ public class GameService {
         List<Game> games = gameRepository.findAll();
         for (Game game : games) {
             game.decrementTimer();
-            if(game.getReady() && game.getRemaingTime() <= 0){
+            if(game.getReady() && game.getRemaingTime() == 0){
                 handleTimerExpiration(game);
             }
             sendTimerUpdate(game);
         }
     }
+
     private void handleTimerExpiration(Game game) {
-        UserAccount currentTurnPlayer = game.getUsers().get(game.getCurrentTurn());
-        currentTurnPlayer.getPlayerState().setLifePoints(-1);
-        UserAccount otherPlayer = game.getUsers().get(0).equals(currentTurnPlayer) ? game.getUsers().get(1) : game.getUsers().get(0);
-        currentTurnPlayer.getPlayerState().setLifePoints(-1);
-        otherPlayer.getPlayerState().setWinner(true);
-        terminateMatch(game.getId(), currentTurnPlayer.getId(), otherPlayer.getId());
+        try {
+            if(game!=null) {
+                UserAccount currentTurnPlayer = game.getUsers().get(game.getCurrentTurn());
+                currentTurnPlayer.getPlayerState().setLifePoints(-1);
+                UserAccount otherPlayer = game.getUsers().get(0).equals(currentTurnPlayer) ? game.getUsers().get(1) : game.getUsers().get(0);
+                currentTurnPlayer.getPlayerState().setLifePoints(-1);
+                otherPlayer.getPlayerState().setWinner(true);
+                terminateMatch(game.getId(), currentTurnPlayer.getId(), otherPlayer.getId());
+            }
+        }
+        catch (Exception e){
+            System.out.println(e+"------------------");
+        }
     }
+
     private void sendTimerUpdate(Game game) {
         int remainingTime = game.getRemaingTime();
         for(UserAccount player : game.getUsers()) {
@@ -95,7 +106,6 @@ public class GameService {
         System.out.println("Nach Game");
         newGame.getUsers().add(userA);
         newGame.getUsers().add(userB);
-        newGame.resetTimer();
         System.out.println("vor speichern");
         gameRepository.save(newGame);
         System.out.println("Game gespeichert");
@@ -180,7 +190,7 @@ public class GameService {
         if (allPlayersReady) {
             game.setReady(true);
         }
-
+        game.resetTimer();
         System.out.println("ALLE READY");
 
         playerStateRepository.save(user.getPlayerState());
@@ -233,6 +243,7 @@ public class GameService {
             System.out.println(" DANACH Player: " + player.getId());
         }
     }
+
     public void placeCard(PlaceCardRequest request){
         Optional<Game> optionalGame = gameRepository.findById(request.getGameId());
         Optional<UserAccount> optionalUserAccount = userAccountRepository.findById(request.getUserId());
@@ -291,6 +302,7 @@ public class GameService {
             System.out.println(" DANACH Player: " + player.getId());
         }
     }
+
     public void attackCard(AttackCardRequest request) {
         Optional<Game> optionalGame = gameRepository.findById(request.getGameId());
         Optional<UserAccount> optionalAttacker = userAccountRepository.findById(request.getUserIdAttacker());
@@ -355,6 +367,7 @@ public class GameService {
         }
 
     }
+
     public void attackUser(AttackUserRequest request) {
         Optional<Game> optionalGame = gameRepository.findById(request.getGameId());
         Optional<UserAccount> optionalAttacker = userAccountRepository.findById(request.getAttackerId());
@@ -398,6 +411,7 @@ public class GameService {
             terminateMatch(request.getGameId(), attacker.getId(), defender.getId());
         }
     }
+
     public void swapForRare(RareSwapRequest request) {
         Optional<Game> optionalGame = gameRepository.findById(request.getGameId());
         Optional<UserAccount> optionalUser = userAccountRepository.findById(request.getUserId());
@@ -437,6 +451,7 @@ public class GameService {
         }
 
     }
+
     public void swapForLegendary(LegendarySwapRequest request) {
         Optional<Game> optionalGame = gameRepository.findById(request.getGameId());
         Optional<UserAccount> optionalUser = userAccountRepository.findById(request.getUserId());
@@ -556,7 +571,8 @@ public class GameService {
 
         /*deleteUserGameData(Arrays.asList(user1.getId(), user2.getId()));*/
         /*gameRepository.delete(game);*/
-        deleteUserGameData(Arrays.asList(game.getUsers().get(0).getId(), game.getUsers().get(1).getId()));
+        List<Long> userIds=Arrays.asList(game.getUsers().get(0).getId(), game.getUsers().get(1).getId());
+        deleteUserGameData(userIds, game.getId());
         //TODO: Alle Daten zurücksetzten (Deck, Cards, etc)
     }
 
@@ -598,17 +614,33 @@ public class GameService {
         }
     }*/
 
+    @Modifying
     @Transactional
-    public void deleteUserGameData(List<Long> userIds) {
-        gameRepository.deleteFromGameUsersByUserIds(userIds);
-        gameRepository.deleteGamesByUserIds(userIds);
-        playerStateRepository.deleteHandCardsByUserIds(userIds);
+    public void deleteUserGameData(List<Long> userIds,Long gameId) {
+
         userAccountRepository.updatePlayerStateToNullByUserIds(userIds);
-        playerStateRepository.deleteDeckCloneByUserIds(userIds);
-        playerStateRepository.deleteFieldCardsByUserIds(userIds);
-        playerStateRepository.deleteCardsPlayedByUserIds(userIds);
-        playerStateRepository.deletePlayerCardsByUserIds(userIds);
-        playerStateRepository.deletePlayerStatesByUserIds(userIds);
+        UserAccount userAccount=userAccountRepository.findById(userIds.get(0)).get();
+        userAccount.getPlayerState().setHandCards(null);
+        userAccount.getPlayerState().setFieldCards(null);
+        userAccount.getPlayerState().setCardsPlayed(null);
+        userAccount.getPlayerState().setDeckClone(null);
+        userAccount.getPlayerState().setDeck(null);
+        playerCardRepository.deleteByPlayerStateId(userAccount.getPlayerState().getId());
+        playerStateRepository.save(userAccount.getPlayerState());
+        playerStateRepository.delete(userAccount.getPlayerState());
+
+        userAccount=userAccountRepository.findById(userIds.get(1)).get();
+        userAccount.getPlayerState().setHandCards(null);
+        userAccount.getPlayerState().setFieldCards(null);
+        userAccount.getPlayerState().setCardsPlayed(null);
+        userAccount.getPlayerState().setDeckClone(null);
+        userAccount.getPlayerState().setDeck(null);
+        playerCardRepository.deleteByPlayerStateId(userAccount.getPlayerState().getId());
+        playerStateRepository.save(userAccount.getPlayerState());
+        playerStateRepository.delete(userAccount.getPlayerState());
+
+        gameRepository.deleteFromGameUsersByUserIds(userIds);
+        gameRepository.deleteById(gameId);
     }
 
 }

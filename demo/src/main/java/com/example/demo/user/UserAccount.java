@@ -79,7 +79,7 @@ public class UserAccount implements UserDetails {
     private List<CardInstance> userCardInstance=new ArrayList<>();
 
 
-    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToOne
     @JoinColumn(name = "player_state_id")
     private PlayerState playerState;
 
