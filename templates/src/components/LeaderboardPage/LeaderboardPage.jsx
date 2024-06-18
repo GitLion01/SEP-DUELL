@@ -1,46 +1,35 @@
-import React, { useState, useEffect } from 'react';
-import { Client } from '@stomp/stompjs';
-import SockJS from 'sockjs-client';
+import React, { useContext, useState, useEffect } from 'react';
+import { WebSocketContext } from '../../WebSocketProvider';
 import './LeaderboardPage.css';
 import BackButton from '../BackButton';
 import Notification from './Notification';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const LeaderboardPage = () => {
+    const { client, notifications, handleAcceptChallenge, handleRejectChallenge, handleTimeoutChallenge } = useContext(WebSocketContext);
     const [leaderboard, setLeaderboard] = useState([]);
-    const [client, setClient] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
-    const [notifications, setNotifications] = useState([]);
-    const [countdown, setCountdown] = useState(null);
     const [isChallengeDisabled, setIsChallengeDisabled] = useState(false);
     const [activeDuel, setActiveDuel] = useState(null);
     const [currentUserData, setCurrentUserData] = useState(null); 
+    const userId = parseInt(localStorage.getItem('id'), 10);
+    const [countdown, setCountdown ] = useState(null);
 
-    useEffect(() => { ///////!!!!!!!!!!!!!!!!!!!!!!!!!
-        // Abrufen des aktuellen Benutzers aus dem lokalen Speicher
-        const userId = parseInt(localStorage.getItem('id'), 10);
-      
-        
-
-
-        // Konsolenausgabe zur Überprüfung des abgerufenen Benutzernamens
+    useEffect(() => {
         console.log('Aktueller UserId:', userId);
-        console.log(leaderboard); 
-
 
         fetch('http://localhost:8080/leaderboard')
             .then(response => response.json())
             .then(data => { 
                 setLeaderboard(data);
-                const userData = data.find(user => user.id === userId)
+                const userData = data.find(user => user.id === userId);
                 setCurrentUserData(userData);
-            })
-        const newClient = new Client({
-            brokerURL: 'ws://localhost:8080/game-websocket',
-            webSocketFactory: () => new SockJS('http://localhost:8080/game-websocket'),
-            reconnectDelay: 5000,
-            onConnect: () => {
-                console.log('Connected to WebSocket server');
-                newClient.subscribe('/topic/leaderboard', message => {
+                console.log(userData);
+            });
+
+            if (client && client.connected) {
+                const leaderboardSubscription = client.subscribe('/topic/leaderboard', message => {
                     const updatedUser = JSON.parse(message.body);
                     setLeaderboard(prev => {
                         const index = prev.findIndex(user => user.id === updatedUser.id);
@@ -53,42 +42,90 @@ const LeaderboardPage = () => {
                         }
                     });
                 });
-                newClient.subscribe(`/user/${userId}/queue/messages`, message => {
-                    const notification = JSON.parse(message.body);
-                    if (notification.message === 'challenge') {
-                        setCountdown(30); // Start des Countdowns bei 30 Sekunden
-                        setIsChallengeDisabled(true); // Herausforderungsbutton deaktivieren
-                    } else if (notification.message === 'duelAccepted') {
-                        setActiveDuel(notification); // Aktives Duell setzen
+    
+                return () => {
+                    // Deaktiviere die Abonnements bei der Bereinigung
+                    if (leaderboardSubscription) {
+                        leaderboardSubscription.unsubscribe();
                     }
-                    setNotifications(prev => [...prev, notification]);
-                });
-            },
-            onStompError: (frame) => {
-                console.error(`Broker reported error: ${frame.headers['message']}`);
-                console.error(`Additional details: ${frame.body}`);
-            },
-            onWebSocketError: (event) => {
-                console.error('WebSocket error', event);
-            },
-            onWebSocketClose: (event) => {
-                console.error('WebSocket closed', event);
-            },
-        });
-
-        newClient.activate();
-        setClient(newClient);
-        console.log(leaderboard); 
-        return () => {
-            if (client) {
-                client.deactivate();
+                };
             }
-        };
+        }, [userId, client]);
 
-        
+    const handleChallenge = async (userId, username) => {
+        try {
+            const currentUserDeckResponse = await fetch(`http://localhost:8080/decks/getUserDecks/${currentUserData.id}`);
+            const currentUserDeckData = await currentUserDeckResponse.json();
+            console.log(currentUserDeckData)
+            const opponentDeckResponse = await fetch(`http://localhost:8080/decks/getUserDecks/${userId}`);
+            const opponentDeckData = await opponentDeckResponse.json();
 
-    }, []);
+            const currentUserDeckHasEnoughCards = await Promise.all(
+                currentUserDeckData.map(async (deck) => {
+                    const deckCardsResponse = await fetch(`http://localhost:8080/cards/${deck.name}/${currentUserData.id}`);
+                    const deckCards = await deckCardsResponse.json();
+                    return deckCards.length >= 5;
+                })
+            );
 
+            const opponentDeckHasEnoughCards = await Promise.all(
+                opponentDeckData.map(async (deck) => {
+                    const deckCardsResponse = await fetch(`http://localhost:8080/cards/${deck.name}/${userId}`);
+                    const deckCards = await deckCardsResponse.json();
+                    return deckCards.length >= 5;
+                })
+            );
+
+            if (!currentUserDeckHasEnoughCards.includes(true)) {
+                toast.error('Keines deiner Decks hat genug Karten (mindestens 5)!');
+                return;
+            }
+
+            if (!opponentDeckHasEnoughCards.includes(true)) {
+                toast.error(`${username} hat kein Deck mit genug Karten (mindestens 5)!`);
+                return;
+            }
+
+
+
+
+            if (currentUserDeckData.length === 0) {
+                toast.error('Du hast kein Deck!');
+                return;
+            }
+
+            if (opponentDeckData.length === 0) {
+                toast.error(`${username} hat kein Deck!`);
+                return;
+            }
+
+
+
+            if (client) {
+                client.publish({
+                    destination: '/app/send.herausforderung',
+                    headers: { 
+                        senderId: currentUserData.id.toString(), 
+                        receiverId: userId.toString()
+                    },
+                    body: JSON.stringify({})
+                });
+                toast.success(`Du hast ${username} zu einem Duell herausgefordert!`);
+                setIsChallengeDisabled(true); // Herausforderungsbutton deaktivieren
+                setCountdown(30); // Start des Countdowns bei 30 Sekunden
+            }
+        } catch (error) {
+            console.error('Fehler beim Abrufen der Decks:', error);
+            toast.error('Fehler beim Abrufen der Decks.');
+        }
+    };
+
+    const filteredLeaderboard = leaderboard.filter(user =>
+        user.username.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    const filteredNotifications = notifications.filter(n => n.receiverId === userId);
+    
     useEffect(() => {
         if (countdown !== null && countdown > 0) {
             const timer = setInterval(() => {
@@ -100,45 +137,10 @@ const LeaderboardPage = () => {
         }
     }, [countdown]);
 
-    //zum überprüfen ob ich dieser user bin
-    const handleChallenge = (userId, username) => {        
-        if (client) {
-            client.publish({
-                destination: '/app/challenge',  //PLATZHALTER
-                body: JSON.stringify({ challenger: currentUserData.id, challenged: userId })//!!!!!!!Platzhalter
-            });
-            alert(`Du hast ${username} zu einem Duell herausgefordert!`);
-        }
-    };
-
-    const handleAcceptChallenge = (challenger) => {
-        if (client) {
-            client.publish({
-                destination: '/app/accept-challenge',  //PLATZHALTER
-                body: JSON.stringify({ challenger: challenger, challenged: currentUserData.id })
-            });
-        }
-        alert(`Du hast die Herausforderung von ${challenger} akzeptiert!`);
-        setNotifications(notifications.filter(n => n.challenger !== challenger));
-        setCountdown(null); // Countdown stoppen
-        setIsChallengeDisabled(false); // Herausforderungsbutton wieder aktivieren
-        setActiveDuel({ challenger, challenged: currentUserData.id }); // Aktives Duell setzen
-    };
-
-    const handleRejectChallenge = (challenger) => {
-        alert(`Du hast die Herausforderung von ${challenger} abgelehnt!`);
-        setNotifications(notifications.filter(n => n.challenger !== challenger));
-        setCountdown(null); // Countdown stoppen
-        setIsChallengeDisabled(false); // Herausforderungsbutton wieder aktivieren
-    };
-
-    const filteredLeaderboard = leaderboard.filter(user =>
-        user.username.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-
     return (
         <div className="leaderboard-page">
             <BackButton />
+            <ToastContainer />
             <input
                 type="text"
                 placeholder="Nach Benutzername suchen..."
@@ -148,42 +150,46 @@ const LeaderboardPage = () => {
             />
             <table className="leaderboard-table">
                 <thead>
-                <tr>
-                    <th>Rang</th>
-                    <th>Benutzername</th>
-                    <th>Punkte</th>
-                    <th>Status</th>
-                    <th>Aktion</th>
-                </tr>
+                    <tr>
+                        <th>Rang</th>
+                        <th>Benutzername</th>
+                        <th>Punkte</th>
+                        <th>Status</th>
+                        <th>Aktion</th>
+                    </tr>
                 </thead>
                 <tbody>
-                {filteredLeaderboard.map((user, index) => (
-                    <tr key={user.id}>
-                        <td>{index + 1}</td>
-                        <td>{user.username}</td>
-                        <td>{user.leaderboardPoints}</td>
-                        <td className={`status ${user.status}`}>{user.status}</td>
-                        <td>
-                            <button
-                                className="challenge-button"
-                                onClick={() => handleChallenge(user.id, user.username)}
-                                disabled={user.status !== 'online' || isChallengeDisabled || user.id === currentUserData.id || currentUserData.decks.length===0  || user.decks.length === 0 }
-                            >
-                                Duell herausfordern
-                            </button>
-                        </td>
-                    </tr>
-                ))}
+                    {filteredLeaderboard.map((user, index) => (
+                        <tr key={user.id}>
+                            <td>{index + 1}</td>
+                            <td>{user.username}</td>
+                            <td>{user.leaderboardPoints}</td>
+                            <td className={`status ${user.status}`}>{user.status}</td>
+                            <td>
+                                <button
+                                    className="challenge-button"
+                                    onClick={() => handleChallenge(user.id, user.username)}
+                                    disabled={user.status !== 'online' || isChallengeDisabled || user.id === currentUserData.id}
+                                >
+                                    Duell herausfordern
+                                </button>
+                            </td>
+                        </tr>
+                    ))}
                 </tbody>
             </table>
             <div className="notifications">
-                {notifications.map((notification, index) => (
+                {filteredNotifications.map((notification, index) => (
                     <Notification
                         key={index}
-                        challenger={notification.challenger}
+                        senderId={notification.senderId}
+                        senderName={notification.senderName}
+                        receiverId={notification.receiverId}
                         onAccept={handleAcceptChallenge}
                         onReject={handleRejectChallenge}
-                        type={notification.type} // Hier das type-Feld übergeben
+                        message={notification.message}
+                        countdown={notification.countdown}
+                        onTimeout={handleTimeoutChallenge}
                     />
                 ))}
             </div>

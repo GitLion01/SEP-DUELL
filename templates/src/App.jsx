@@ -16,16 +16,18 @@ import ShopPage from './components/ShopPage/ShopPage.jsx';
 import ChatPage from './components/chat/ChatPage.jsx';
 import DeckSelection from './components/Duell/DeckSelection.jsx';
 import Duel from "./components/Duell/Duel.jsx";
-
+import LeaderboardPage from './components/LeaderboardPage/LeaderboardPage.jsx';
 import './index.css';
 import DuelC from "./components/DuelC/DuelC";
 import {WebSocketProvider} from "./WebSocketProvider";
+import GlobalNotification from './components/LeaderboardPage/GlobalNotification.jsx';
 
 
 function App() {
   return (
       <Router>
         <WebSocketProvider>
+          <GlobalNotification/>
           <AppRoutes />
         </WebSocketProvider>
       </Router>
@@ -61,6 +63,7 @@ function AppRoutes() {
         <Route path="/freundelist" element={<ProtectedRoute element={Freundeliste} />} />
         <Route path="/shop" element={<ProtectedRoute element={ShopPage} />} />
         <Route path="/chat" element={<ProtectedRoute element={ChatPage} />} />
+        <Route path="/leaderboard" element={<ProtectedRoute element={LeaderboardPage} />} />
         <Route path="/challenge-player" element={<ProtectedRoute element={DuelC} />} />
         <Route path="/deck-selection" element={<ProtectedRoute element={DeckSelection} />} />
         <Route path="/duel" element={<ProtectedRoute element={Duel} />} />
