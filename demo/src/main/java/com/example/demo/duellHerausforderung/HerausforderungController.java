@@ -23,8 +23,4 @@ public class HerausforderungController {
         herausforderungService.acceptHerausforderung(senderId,receiverId);
     }
 
-    @PostMapping("/toDuell")
-    public ResponseEntity<Long> toDuell(@RequestParam Long senderId, @RequestParam Long receiverId){
-        return herausforderungService.toDuell(senderId,receiverId);
-    }
 }
