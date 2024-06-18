@@ -7,8 +7,8 @@ import lombok.Getter;
 @Getter
 public class AttackUserRequest {
 
-    Long attackerID;
-    Long defenderID;
-    Long gameID;
-    Long attackerCardID;
+    private Long gameId;
+    private Long attackerId;
+    private Long defenderId;
+    private Long attackerCardId;
 }

@@ -6,7 +6,6 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.List;
 
 @Getter
 @Setter
@@ -19,6 +18,8 @@ public class CardInstance {
     // ist eine Karte zerstört, dann wieder zu NONE
     /*private CardInstanceLocation location = CardInstanceLocation.NONE;*/
 
+
+
     @ManyToOne
     @JoinColumn(name= "card_id")
     @JsonIgnore
@@ -29,7 +30,5 @@ public class CardInstance {
     @JsonIgnore
     private UserAccount userAccount;
 
-    @ManyToOne
-    @JoinColumn
-    private PlayerState playerState;
+
 }

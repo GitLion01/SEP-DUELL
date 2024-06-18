@@ -1,76 +1,171 @@
-import React, { useEffect, useState } from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import { toast, ToastContainer } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
 import Card from "../card";
+import {WebSocketContext} from "../../WebSocketProvider";
+import './duel.css';
+import SwapModal from "./SwapModal";
+import StatisticsModal from "./StatisticsModal";
 
 
-const Duel = ({client, gameId}) => {
+const Duel = () => {
+  const navigate = useNavigate();
+  const { client, game, setGame, users, setUsers, connected } = useContext(WebSocketContext);
+  const [id, setId] = useState(null);
+  const gameId = localStorage.getItem('gameId');
   const [timer, setTimer] = useState(120);
-  const [playerState, setPlayerState] = useState({ handCards: [], fieldCards: [], life: 50 });
-  const [opponentState, setOpponentState] = useState({ handCards: [], fieldCards: [], life: 50 });
+  //const currentUser = users.find(user => user.id === parseInt(id));
+  //const opponentUser = users.find(user => user.id !== parseInt(id));
+  const [playerState, setPlayerState] = useState(null);
+  const [opponentState, setOpponentState] = useState(null);
   const [isAttackMode, setIsAttackMode] = useState(false);
-  const [isSetCardMode, setIsSetCardMode] = useState(false); // Zustand für das Setzen von Karten
+  const [isSetCardMode, setIsSetCardMode] = useState(false);
+  const [isRareSwapMode, setIsRareSwapMode] = useState(false);
+  const [isLegendarySwapMode, setIsLegendarySwapMode] = useState(false);
   const [selectedAttacker, setSelectedAttacker] = useState(null);
   const [selectedTarget, setSelectedTarget] = useState(null);
-  const [currentTurn, setCurrentTurn] = useState(0); // currentTurn-Index
-  const id = localStorage.getItem('id');
+  const [currentTurn, setCurrentTurn] = useState(game?.currentTurn || 0);
+  const [cardDrawn, setCardDrawn] = useState(false);
+  const [hasAttacked, setHasAttacked] = useState(false);
+  const [selectedCards, setSelectedCards] = useState([]);
+  const [selectedHandCard, setSelectedHandCard] = useState(null);
+  const [stats, setStats] = useState(null);
+
+
 
   useEffect(() => {
-    if (client) {
-      client.subscribe(`/user/${id}/queue/game`, (message) => {
-        const action = JSON.parse(message.body);
-        if (action.game) {
-          const game = action.game;
-          if (game.users[0].id === id) {
-            setPlayerState(game.users[0].playerState);
-            setOpponentState(game.users[1].playerState);
+    if (id === null) {
+      setId(localStorage.getItem('id'));
+    }
+  }, []);
+
+
+  // Initialisieren des Spielerzustands aus dem übergebenen Zustand
+  useEffect(() => {
+    if (users && game) {
+      console.log('user: ', users);
+      const currentUser = users.find(user => user.id === parseInt(id));
+      const opponentUser = users.find(user => user.id !== parseInt(id));
+
+      if (currentUser) {
+        setPlayerState(currentUser.playerState);
+      }
+      if (opponentUser) {
+        setOpponentState(opponentUser.playerState);
+      }
+      resetAttackMode();
+      setCardDrawn(false);
+      // setCurrentTurn(game.currentTurn); // initialisieren Sie den currentTurn
+
+      console.log('playerState nach initial', playerState);
+      console.log('opponent state nach intial: ', opponentState);
+    }
+  }, [id, users, game]);
+
+  useEffect(() => {
+    if (client && connected && id) {
+      const subscription = client.subscribe(`/user/${id}/queue/timer`, (message) => {
+        const response =JSON.parse(message.body);
+        setTimer(response);
+        if (response === 119) {
+          toast.warning("Neuer Zug beginnt");
+        }
+        if (response === 10) {
+          toast.warning("Noch 10 Sekunden übrig");
+        }
+      })
+
+      // Cleanup Subscription
+      return () => {
+        if (subscription) subscription.unsubscribe();
+      };
+    }
+  }, [id])
+
+
+  useEffect(() => {
+    if (client && connected && id) {
+      const subscription = client.subscribe(`/user/${id}/queue/game`, (message) => {
+        const response = JSON.parse(message.body);
+        console.log("Response: ", response);
+
+        // Speichern des Spiels und der Benutzer im Speicher
+        sessionStorage.setItem('game', JSON.stringify(response[0]));
+        sessionStorage.setItem('users', JSON.stringify(response[1]));
+
+        if (response.length === 2) {
+          const currentUser = response[1].find(user => user.id === parseInt(id));
+          const opponentUser = response[1].find(user => user.id !== parseInt(id));
+
+          if (currentUser) {
+            setPlayerState(currentUser.playerState);
           }
-          else {
-            setPlayerState(game.users[1].playerState);
-            setOpponentState(game.users[0].playerState);
+          if (opponentUser) {
+            setOpponentState(opponentUser.playerState);
           }
-          if (game.currentTurn !== currentTurn) {
-            setCurrentTurn(game.currentTurn);
-            resetTimer(); // Setze den Timer zurück, wenn sich der currentTurn ändert
-          }        }
+          setCurrentTurn(response[0].currentTurn);
+          console.log("Mein feld nach Angriff: ", currentUser.playerState.fieldCards);
+          console.log("Gegner feld nach Angriff: ", opponentUser.playerState.fieldCards);
+        }
+
+        if (response.length > 3) {
+          const [_, __, sepCoins, leaderBoardPointsWinner, leaderBoardPointsLoser, damageWinner, damageLoser, cardsPlayedA, cardsPlayedB, sacrificedA, sacrificedB] = response;
+          setStats({
+            sepCoins,
+            leaderboardPointsA: response[1][0].playerState.winner ? leaderBoardPointsWinner : leaderBoardPointsLoser,
+            leaderboardPointsB : response[1][1].playerState.winner ? leaderBoardPointsWinner : leaderBoardPointsLoser,
+            damageA: response[1][0].playerState.winner ? damageWinner : damageLoser,
+            damageB: response[1][1].playerState.winner ? damageWinner : damageLoser,
+            cardsPlayedA,
+            cardsPlayedB,
+            sacrificedA,
+            sacrificedB
+          })
+          console.log(stats);
+
+        }
+
       });
-    }
-  }, [client]);
 
-  useEffect(() => {
-    if (timer > 0 && currentTurn === id) {
-      const interval = setInterval(() => {
-        setTimer((prev) => {
-          if (prev === 11) {
-            toast.warning('10 seconds remaining!');
-          }
-          if (prev === 1) {
-            handleTimeout();
-            clearInterval(interval);
-          }
-          return prev - 1;
-        });
-      }, 1000);
-
-      return () => clearInterval(interval);
+      // Cleanup Subscription
+      return () => {
+        if (subscription) subscription.unsubscribe();
+      };
     }
-  }, [timer, currentTurn, id]);
+  }, [client, connected, id]);
+
 
   const resetTimer = () => {
     setTimer(120);
   };
 
   const handleEndTurn = () => {
+
+    if (users[currentTurn].id !== parseInt(id)) {
+      toast.warning("Du bist nicht am Zug");
+      resetAttackMode();
+      return;
+    }
+
+    if (!cardDrawn && playerState.deckClone.length > 0) {
+      toast.error("Ziehe zuerst eine Karte");
+      return;
+    }
+
     if (client) {
       client.publish({
         destination: '/app/endTurn',
         body: JSON.stringify({ gameID: gameId, userID: id }),
       });
-      toast.success("Zug Beendet");
+      if (cardDrawn) {
+        setCardDrawn(false);
+      }
+      resetAttackMode()
+      setHasAttacked(false);
     }
   };
 
   const handleTimeout = () => {
-    toast.error('Time is up! You lost the duel.');
     if (client) {
       client.publish({
         destination: '/app/timeout',
@@ -79,62 +174,114 @@ const Duel = ({client, gameId}) => {
     }
   };
 
+
   const handleAttack = () => {
-    if (selectedAttacker !== null) {
-      if (opponentState.fieldCards.length === 0) {
-        // Direkter Angriff auf den Gegner
-        if (client) {
-          client.publish({
-            destination: '/app/attackUser',
-            body: JSON.stringify({
-              gameId,
-              userIDAttacker: id,
-              userIDDefender: opponentState.userId,
-              attackerIndex: selectedAttacker
-            }),
-          });
-        }
-      } else if (selectedTarget !== null) {
-        // Angriff auf gegnerische Karte
-        if (client) {
-          client.publish({
-            destination: '/app/attackCard',
-            body: JSON.stringify({
-              gameID: gameId,
-              attackingCardIndex: selectedAttacker,
-              targetCardIndex: selectedTarget,
-            }),
-          });
-        }
-      }
+
+    if (users[currentTurn].id !== parseInt(id)) {
+      toast.warning("Du bist nicht am Zug");
       resetAttackMode();
+      return;
     }
+
+    if(cardDrawn || playerState.deckClone.length === 0) {
+      if (opponentState.fieldCards.length === 0) {
+        console.log("der sollte jetzt angreifen");
+
+        console.log("angreifer wurde ausgewählt");
+        client.publish({
+          destination: '/app/attackUser',
+          body: JSON.stringify({
+            gameId: gameId,
+            attackerId: id,
+            defenderId: users.find(user => user.id !== parseInt(id)).id,
+            attackerCardId: selectedAttacker
+          }),
+        });
+        console.log("Mein feld vor Angriff: ", playerState.fieldCards);
+        console.log("Gegner feld vor Angriff: ", opponentState.fieldCards);
+        setHasAttacked(true);
+      }
+      else {
+        console.log(selectedAttacker, selectedTarget);
+        //if (selectedTarget && selectedAttacker) {
+        console.log("gegnerkarte wird angegriffen");
+        client.publish({
+          destination: '/app/attackCard',
+          body: JSON.stringify({
+            gameId: gameId,
+            userIdAttacker: id,
+            userIdDefender: users.find(user => user.id !== parseInt(id)).id,
+            attackerId: selectedAttacker,
+            targetId: selectedTarget
+          }),
+        });
+        setHasAttacked(true);
+        //}
+      }
+    }
+
+
+  }
+
+  const selectAttackingCard = (Id) => {
+    //if (isAttackMode) {
+      setSelectedAttacker(Id);
+      console.log("angreifende karte wird ausgewählt: ", id);
+    //}
   };
 
-  const selectAttackingCard = (index) => {
-    if (isAttackMode) {
-      setSelectedAttacker(index);
+  useEffect(() => {
+    if (selectedAttacker !== null) {
+      console.log('Selected Attacker:', selectedAttacker);
+      // Führe hier weitere Logik aus, wenn erforderlich
     }
+  }, [selectedAttacker]);
+
+  useEffect(() => {
+    if (selectedTarget !== null) {
+      console.log('Selected Target:', selectedTarget);
+      // Führe hier weitere Logik aus, wenn erforderlich
+    }
+  }, [selectedTarget]);
+
+  const selectTargetCard = (Id) => {
+    //if (isAttackMode) {
+      setSelectedTarget(Id);
+      console.log("jetzt wird die karte angegriffen ", selectedTarget);
+      //handleAttack(); // Führe Angriff aus, wenn Ziel ausgewählt ist
+    //}
   };
 
-  const selectTargetCard = (index) => {
-    if (isAttackMode) {
-      setSelectedTarget(index);
-      handleAttack(); // Führe Angriff aus, wenn Ziel ausgewählt ist
-    }
-  };
+  const handleSetCard = (Id) => {
 
-  const handleSetCard = (index) => {
+    if (users[currentTurn].id !== parseInt(id)) {
+      toast.warning("Du bist nicht am Zug");
+      resetAttackMode();
+      return;
+    }
+
+    if (!cardDrawn && playerState.deckClone.length > 0) {
+      toast.error("Ziehen Sie zuerst eine Karte");
+      return;
+    }
+
+    if (hasAttacked) {
+      toast.error("Sie haben schon angegriffen");
+      return;
+    }
+
     if (isSetCardMode) {
+      console.log("karte wird gesetzt: ", Id);
       client.publish({
-        destination: '/app/playCard',
+        destination: '/app/placeCard',
         body: JSON.stringify({
-          gameID: gameId,
-          userID: id,
-          cardIndex: index
+          gameId: gameId,
+          userId: id,
+          cardId: Id
         }),
       });
       setIsSetCardMode(false); // Deaktivieren des Setzkartenmodus
+      resetAttackMode();
     }
   };
 
@@ -144,49 +291,206 @@ const Duel = ({client, gameId}) => {
     setSelectedTarget(null);
   };
 
+  const handleDrawCard = () => {
+
+    if (users[currentTurn].id !== parseInt(id)) {
+      toast.warning("Du bist nicht am Zug");
+      resetAttackMode();
+      return;
+    }
+
+    if (playerState.deckClone.length === 0 && users[currentTurn].id === parseInt(id)) {
+      toast.error("Deck leer");
+      return;
+    }
+    if (cardDrawn && users[currentTurn].id === parseInt(id)) {
+      toast.warning("Karte bereits gezogen");
+    }
+    if (!cardDrawn) {
+      client.publish({
+        destination: '/app/drawCard',
+        body: JSON.stringify({
+          gameId: gameId,
+          userId: id
+        })
+      })
+      console.log("cardDrawn", cardDrawn);
+      if(users[currentTurn].id === parseInt(id)) {
+        setCardDrawn(true);
+      }
+    }
+    else { toast.error("Karte bereits gezogen");}
+  }
+
+  const handleRareSwap = () => {
+
+    if (users[currentTurn].id !== parseInt(id)) {
+      toast.warning("Du bist nicht am Zug");
+      resetAttackMode();
+      return;
+    }
+
+    if (!cardDrawn && playerState.deckClone.length > 0) {
+      toast.error("Ziehen Sie erst eine Karte");
+      return;
+    }
+
+    if (hasAttacked) {
+      toast.error("Sie haben schon angegriffen");
+      return;
+    }
+    console.log(selectedHandCard);
+
+    if (selectedCards.length === 2 && selectedHandCard !== null && playerState.handCards.find(playerCard => playerCard.id === selectedHandCard).rarity === 'RARE') {
+      console.log("normalCardsIndex ", selectedCards);
+      console.log("selectedHandCard ", selectedHandCard);
+
+      client.publish({
+        destination: '/app/rareSwap',
+        body: JSON.stringify({
+          gameId: gameId,
+          userId: id,
+          cardIds: selectedCards,
+          rareId: selectedHandCard
+        }),
+      });
+      setIsRareSwapMode(false);
+      setSelectedCards([]);
+      setSelectedHandCard(null);
+    } else {
+      toast.error("Wählen Sie 2 Karten vom Spielfeld und eine seltene Karte aus der Hand.");
+    }
+  };
+
+  const handleLegendarySwap = () => {
+    if (users[currentTurn].id !== parseInt(id)) {
+      toast.warning("Du bist nicht am Zug");
+      resetAttackMode();
+      return;
+    }
+
+    if (!cardDrawn && playerState.deckClone.length > 0) {
+      toast.error("Ziehen Sie erst eine Karte");
+      resetAttackMode()
+      return;
+    }
+
+    if (hasAttacked) {
+      toast.error("Sie haben schon angegriffen");
+      resetAttackMode();
+      return;
+    }
+
+    if (selectedCards.length === 3 && selectedHandCard !== null && playerState.handCards.find(playerCard => playerCard.id === selectedHandCard).rarity === 'LEGENDARY') {
+      console.log("normalCardsIndex ", selectedCards);
+      console.log("selectedHandCard ", selectedHandCard);
+      client.publish({
+        destination: '/app/legendarySwap',
+        body: JSON.stringify({
+          gameId: gameId,
+          userId: id,
+          cardIds: selectedCards,
+          legendaryId: selectedHandCard
+        }),
+      });
+      console.log("Gesendete KartenIdListe ", selectedCards)
+      console.log("Gesendete LegendaryCardId ", selectedHandCard)
+      setIsLegendarySwapMode(false);
+      setSelectedCards([]);
+      setSelectedHandCard(null);
+    } else {
+      toast.error("Wählen Sie 3 Karten vom Spielfeld und eine legendäre Karte aus der Hand.");
+    }
+  };
+
+  const closeStatisticsModal = () => {
+    sessionStorage.removeItem('game');
+    sessionStorage.removeItem('users');
+    navigate('/startseite')
+  }
+
   return (
       <div className="duel-container">
         <div className="timer">
-          <h4>Time remaining: {timer} seconds</h4>
+          <h4>{timer} seconds</h4>
         </div>
-        <div className="action-controls">
-          <button onClick={() => setIsAttackMode(true)}>Angreifen</button>
-          {isAttackMode && toast.success("Angriffsmodus aktiviert.")}
+        <div className="currentTurn">
+          <h4>{users[currentTurn]?.username}</h4>
+        </div>
+        <div className="player-actions">
+          <button onClick={() => handleDrawCard()}>Karte Ziehen</button>
+          <button onClick={() => setIsSetCardMode(true)}>Karte einsetzen</button>
+          <button onClick={() => handleAttack()}>Angreifen</button>
+          <button onClick={() => setIsRareSwapMode(true)}>Rare Swap</button>
+          <button onClick={() => setIsLegendarySwapMode(true)}>Legendary Swap</button>
           <button onClick={handleEndTurn}>End Turn</button>
         </div>
-        <div className="player-field">
-          <h3>Your Field</h3>
-          <div className="cards">
-            {playerState.fieldCards.map((card, index) => (
-                <div key={index} className="card">
-                  <Card card={card} onClick={() => selectAttackingCard(index)}/>
+        <div className="field">
+          <div className="field-row opponent-field">
+            {opponentState?.fieldCards?.map((playerCard) => (
+                <div key={playerCard.id} className="card-slot">
+                  <Card card={playerCard} onCardClick={() => selectTargetCard(playerCard.id)}/>
+                </div>
+            ))}
+          </div>
+          <div className="field-row player-field">
+            {playerState?.fieldCards?.map((playerCard) => (
+                <div key={playerCard.id} className="card-slot">
+                  <Card card={playerCard} onCardClick={() => selectAttackingCard(playerCard.id)}/>
                 </div>
             ))}
           </div>
         </div>
-        <div className="player-hand">
-          <h3>Your Hand</h3>
-          <div className="cards">
-            {playerState.handCards.map((card, index) => (
-                <div key={index} className="card">
-                  <Card card={card} onClick={() => handleSetCard(index)}/>
-                </div>
-            ))}
+        <div className="hand player-hand">
+          {playerState?.handCards?.map((playerCard) => (
+              <div key={playerCard.id} className="card">
+                <Card card={playerCard} onCardClick={() => handleSetCard(playerCard.id)}/>
+              </div>
+          ))}
+        </div>
+        <div className="life-points">
+          <div className="opponent-lp">
+            <h4>LP: {opponentState?.lifePoints}</h4>
+          </div>
+          <div className="player-lp">
+            <h4>LP: {playerState?.lifePoints}</h4>
           </div>
         </div>
-        <div className="opponent-field">
-          <h3>Opponent's Field</h3>
-          <div className="cards">
-            {opponentState.fieldCards.map((card, index) => (
-                <div key={index} className="card">
-                  <Card card={card} onClick={() => selectTargetCard(index)}/>
-                </div>
-            ))}
-          </div>
-        </div>
+        <SwapModal
+            isOpen={isRareSwapMode}
+            onRequestClose={() => setIsRareSwapMode(false)}
+            onConfirm={handleRareSwap}
+            title="Wähle 2 Karten zum Opfern und eine seltene Karte aus der Hand"
+            selectedCards={selectedCards}
+            setSelectedCards={setSelectedCards}
+            playerCards={playerState?.fieldCards || []}
+            handCards={playerState?.handCards || []}
+            setSelectedHandCard={setSelectedHandCard}
+            selectedHandCard={selectedHandCard}
+            requiredFieldCards={2}
+        />
+        <SwapModal
+            isOpen={isLegendarySwapMode}
+            onRequestClose={() => setIsLegendarySwapMode(false)}
+            onConfirm={handleLegendarySwap}
+            title="Wähle 3 Karten zum Opfern und eine legendäre Karte aus der Hand"
+            selectedCards={selectedCards}
+            setSelectedCards={setSelectedCards}
+            playerCards={playerState?.fieldCards || []}
+            handCards={playerState?.handCards || []}
+            setSelectedHandCard={setSelectedHandCard}
+            selectedHandCard={selectedHandCard}
+            requiredFieldCards={3}
+        />
+        <StatisticsModal
+          isOpen={stats !== null}
+          onRequestClose={closeStatisticsModal}
+          stats={stats || {}}
+          users={users}
+        />
         <ToastContainer/>
       </div>
   );
-};
+}
 
 export default Duel;

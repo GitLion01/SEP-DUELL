@@ -34,7 +34,7 @@ class HerausforderungServiceTest {
     @BeforeEach
     void setUp() {
         autoCloseable= MockitoAnnotations.openMocks(this); //initialize alle Mocks in this class
-        underTest = new HerausforderungService(messagingTemplate,userAccountRepository,gameRepository);
+        underTest = new HerausforderungService(messagingTemplate,userAccountRepository);
     }
 
     @AfterEach

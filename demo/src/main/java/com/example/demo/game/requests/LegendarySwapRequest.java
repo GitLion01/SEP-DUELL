@@ -9,10 +9,9 @@ import java.util.List;
 @Getter
 public class LegendarySwapRequest {
 
-    Long gameID;
-    Long userID;
-    Long selectedDeckID;
-    List<Long> normalCardsID;
-    Long legendaryCardID;
+    Long gameId;
+    Long userId;
+    List<Long> cardIds;
+    Long legendaryId;
 
 }

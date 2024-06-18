@@ -1,5 +1,9 @@
-package com.example.demo.cards;
+package com.example.demo.game;
+
+import com.example.demo.cards.CardInstance;
+import com.example.demo.cards.Rarity;
 import com.example.demo.decks.Deck;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -9,14 +13,15 @@ import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
 
+
 @Entity
 @Getter
 @Setter
 @EqualsAndHashCode
 @NoArgsConstructor
-public class Card {
+public class PlayerCard {
 
-    @Id
+    @jakarta.persistence.Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long Id;
     private String name;
@@ -28,16 +33,19 @@ public class Card {
     //CascadeType.All funktioniert auch , das umfasst :
     //CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH und CascadeType.DETACH.
 
-    @ManyToMany(mappedBy = "cards", cascade = { CascadeType.PERSIST, CascadeType.MERGE })
-    private List<Deck> decks = new ArrayList<>();
+    /*@ManyToMany(mappedBy = "cards", cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    private List<Deck> decks = new ArrayList<>();*/
 
-    @OneToMany(mappedBy = "card", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CardInstance> cardInstance=new ArrayList<>();
+    /*@OneToMany(mappedBy = "card", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CardInstance> cardInstance=new ArrayList<>();*/
 
+    @ManyToOne
+    @JsonIgnore
+    private PlayerState playerState;
+    private Boolean hasAttacked = false;
+    private Boolean sacrificed = false;
 
-
-
-    public Card(String name,
+    public PlayerCard(String name,
                 Integer attackPoints,
                 Integer defensePoints,
                 String description,
@@ -57,4 +65,5 @@ public class Card {
         this.image = image;
         this.rarity = rarity;
     }
+
 }

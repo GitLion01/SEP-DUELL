@@ -1,5 +1,7 @@
 package com.example.demo.game;
 import com.example.demo.game.requests.*;
+import com.example.demo.user.UserAccount;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -9,16 +11,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 @CrossOrigin
 @RestController
+@AllArgsConstructor
 public class GameController {
 
     private final GameService gameService;
-    private final SimpMessagingTemplate messagingTemplate;
-
-    @Autowired
-    public GameController(GameService gameService, SimpMessagingTemplate messagingTemplate) {
-        this.gameService = gameService;
-        this.messagingTemplate = messagingTemplate;
-    }
 
 
      // "/all/create" oder "/specific/create"
@@ -29,56 +25,60 @@ public class GameController {
 
     @MessageMapping("/createGame")
     public void createGame(@Payload CreateGameRequest request) {
-        GameWithUsersDTO game = gameService.createGame(request);
-        messagingTemplate.convertAndSendToUser(game.getUsers().get(0).getId().toString(),"/queue/create", game);
-        messagingTemplate.convertAndSendToUser(game.getUsers().get(1).getId().toString(),"/queue/create", game);
-
+        System.out.println("ANFRAGE IN CONTROLLER EINGETROFFEN");
+        gameService.createGame(request);
+        System.out.println("ANFRAGE BEARBEITET");
     }
 
 
     @MessageMapping("/selectDeck")
     public void selectDeck(@Payload DeckSelectionRequest request) {
-
+        System.out.println("CONTROLLER ERREICHT");
+        System.out.println("Deck ID: " + request.getDeckId());
+        System.out.println("User ID: " + request.getUserId());
+        System.out.println("Game ID: " + request.getGameId());
+        gameService.selectDeck(request);
     }
 
-    @MessageMapping("/playCard")
-    public void playCard(@Payload PlayCardRequest request) {
+    @MessageMapping("/drawCard")
+    public void drawCard(@Payload DrawCardRequest request) {
+        gameService.drawCard(request);
+    }
 
+    @MessageMapping("/placeCard")
+    public void placeCard(@Payload PlaceCardRequest request) {
+        gameService.placeCard(request);
     }
 
 
     @MessageMapping("/attackCard")
     public void attackCard(@Payload AttackCardRequest request) {
-
+        gameService.attackCard(request);
     }
 
     @MessageMapping("/attackUser")
     public void attackUser(@Payload AttackUserRequest request) {
-
+        gameService.attackUser(request);
     }
 
     @MessageMapping("/endTurn")
     public void endTurn(@Payload EndTurnRequest request) {
-
+        gameService.endTurn(request);
     }
 
     @MessageMapping("/rareSwap")
     public void swapForRare(@Payload RareSwapRequest request) {
-
+        gameService.swapForRare(request);
     }
 
-    @MessageMapping("/LegendarySwap")
+    @MessageMapping("/legendarySwap")
     public void swapForLegendary(@Payload LegendarySwapRequest request) {
-
+        gameService.swapForLegendary(request);
     }
 
-    @MessageMapping("/doNothing")
-    public void doNothing(@Payload Long userID) {
-
-    }
 
     @MessageMapping("/terminateMatch")
-    public void terminateMatch(@Payload Long gameID) {
-
+    public void terminateMatch(@Payload Long gameId, Long userA, Long userB) {
+        gameService.terminateMatch(gameId, userA, userB);
     }
 }

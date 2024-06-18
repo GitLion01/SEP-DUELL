@@ -9,14 +9,19 @@ export const WebSocketContext = createContext();
 
 export const WebSocketProvider = ({ children }) => {
     const [client, setClient] = useState(null);
-    const [chatClient, setChatClient] = useState(null); 
-    const [notifications, setNotifications] = useState([]); 
-    const navigate = useNavigate(); 
+    const [chatClient, setChatClient] = useState(null);
+    const [notifications, setNotifications] = useState([]);
+    const navigate = useNavigate();
     const [activeDuel, setActiveDuel] = useState(false);
     const userId = parseInt(localStorage.getItem('id'))
+    const [game, setGame] = useState(null);
+    const [users, setUsers] = useState([]);
+    const [connected, setConnected] = useState(false);
+    const [chatClient, setChatClient] = useState(null);
 
     useEffect(() => {
 
+        const userId = parseInt(localStorage.getItem('id')); // ID des aktuellen Benutzers als Zahl
 
 
         const newClient = new Client({
@@ -25,10 +30,10 @@ export const WebSocketProvider = ({ children }) => {
             reconnectDelay: 5000,
             onConnect: () => {
                 console.log('Connected to WebSocket server');
-                
+
                 // Überprüfung, ob der Client verbunden ist
                 if (newClient.connected) {
-                    // Subscribe für Benachrichtigung 
+                    // Subscribe für Benachrichtigung
                     newClient.subscribe(`/user/${userId}/queue/notifications`, (message) => {
                         const notification = JSON.parse(message.body);
                         if (notification.message === 'challenge') {
@@ -41,20 +46,48 @@ export const WebSocketProvider = ({ children }) => {
                         }
                         else if (notification.message==='duelRejected')
                             toast.info('Deine Herausforderung wurde abgelehnt. Du kannst eine neue Herausforderung senden.');
-                            setNotifications(prev => prev.filter(n => n.senderId !== notification.senderId));          
+                            setNotifications(prev => prev.filter(n => n.senderId !== notification.senderId));
                         });
-        
+
                     // Subscribe für globale Herausforderung
                     newClient.subscribe(`/user/${userId}/queue/create`, (message) => {
                         const response = JSON.parse(message.body);
                         console.log("Received response:", response);
-        
+
                         if (response.gameId) {
                             localStorage.setItem('gameId', response.gameId);
                             window.dispatchEvent(new CustomEvent('gameCreated', { detail: response.gameId }));
                         }
                     });
                 }
+                setConnected(true);
+
+                // Wiederherstellung von Spiel und Benutzern aus dem Speicher
+                const storedGame = sessionStorage.getItem('game');
+                const storedUsers = sessionStorage.getItem('users');
+                if (storedGame) {
+                    setGame(JSON.parse(storedGame));
+                }
+                if (storedUsers) {
+                    setUsers(JSON.parse(storedUsers));
+                }
+
+                // Subscribe für globale Herausforderung
+                newClient.subscribe(`/user/${userId}/queue/create`, (message) => {
+                    const response = JSON.parse(message.body);
+                    console.log("Received response:", response)
+                    setGame(response[0]);
+                    setUsers(response[1]);
+
+                    // Speichern des Spiels und der Benutzer im Speicher
+                    sessionStorage.setItem('game', JSON.stringify(response[0]));
+                    sessionStorage.setItem('users', JSON.stringify(response[1]));
+
+                    if (response[0].id) {
+                        localStorage.setItem('gameId', response[0].id);
+                        window.dispatchEvent(new CustomEvent('gameCreated', { detail: response[0].id }));
+                    }
+                });
             },
             onStompError: (frame) => {
                 console.error(`Broker reported error: ${frame.headers['message']}`);
@@ -67,10 +100,9 @@ export const WebSocketProvider = ({ children }) => {
                 console.error('WebSocket closed', event);
             },
         });
-        
+
         newClient.activate();
         setClient(newClient);
-        
         
         const newChatClient = new Client({
             brokerURL: 'ws://localhost:8080/chat',
@@ -107,7 +139,7 @@ export const WebSocketProvider = ({ children }) => {
 
 
     const handleAcceptChallenge = (challengerId, challengerName, receiverId) => {
-     
+
         console.log(challengerId, receiverId)
         if (client && client.connected) {
             client.publish({
@@ -124,14 +156,14 @@ export const WebSocketProvider = ({ children }) => {
         }
     };
 
-    const createGame = (receiverId, senderName) => {  
+    const createGame = (receiverId, senderName) => {
         if (client && client.connected) {
             client.publish({
                 destination: '/app/createGame',
                 body: JSON.stringify({ userA: receiverId, userB: senderName }),
             });
             toast.success("Spiel wird gestartet");
-            setActiveDuel(false); 
+            setActiveDuel(false);
         } else {
             toast.error("WebSocket-Verbindung ist nicht aktiv.");
         }
@@ -161,7 +193,7 @@ export const WebSocketProvider = ({ children }) => {
 
     return (
         <WebSocketContext.Provider value={{ client, chatClient, notifications, handleAcceptChallenge, handleRejectChallenge, handleTimeoutChallenge,
-            activeDuel, createGame
+            activeDuel, createGame, game, setGame, users, setUsers, connected
          }}>
             {children}
         </WebSocketContext.Provider>
