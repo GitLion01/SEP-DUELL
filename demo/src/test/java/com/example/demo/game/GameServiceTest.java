@@ -1,7 +1,7 @@
-package com.example.demo.duellHerausforderung;
+package com.example.demo.game;
 
-import com.example.demo.game.Game;
-import com.example.demo.game.GameRepository;
+import com.example.demo.decks.DeckRepository;
+import com.example.demo.duellHerausforderung.HerausforderungService;
 import com.example.demo.user.UserAccount;
 import com.example.demo.user.UserAccountRepository;
 import org.junit.jupiter.api.AfterEach;
@@ -18,23 +18,25 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
-class HerausforderungServiceTest {
+class GameServiceTest {
 
     @Mock
-    private SimpMessagingTemplate messagingTemplate;
+    private  GameRepository gameRepository;
     @Mock
-    private UserAccountRepository userAccountRepository;
-    @Mock
-    private GameRepository gameRepository;
+    private  DeckRepository deckRepository;
+    @Mock private  UserAccountRepository userAccountRepository;
+    @Mock private  SimpMessagingTemplate messagingTemplate;
+    @Mock private  PlayerStateRepository playerStateRepository;
+    @Mock private  PlayerCardRepository playerCardRepository;
+
 
     private AutoCloseable autoCloseable;
-    private HerausforderungService underTest;
-
+    private GameService underTest;
 
     @BeforeEach
     void setUp() {
         autoCloseable= MockitoAnnotations.openMocks(this); //initialize alle Mocks in this class
-        underTest = new HerausforderungService(messagingTemplate,userAccountRepository);
+        underTest = new GameService(gameRepository,deckRepository,userAccountRepository,messagingTemplate,playerStateRepository,playerCardRepository);
     }
 
     @AfterEach
@@ -42,9 +44,12 @@ class HerausforderungServiceTest {
         autoCloseable.close();
     }
 
+    @Test
+    void updateTimers() {
+    }
 
     @Test
-    void toDuell() {
+    void createGame() {
         Long senderId= 1L;
         Long receiverId= 2L;
         UserAccount userAccount1=new UserAccount();
@@ -68,5 +73,45 @@ class HerausforderungServiceTest {
             testGame = new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
 
         assertEquals(HttpStatus.OK,testGame.getStatusCode());
+    }
+
+    @Test
+    void selectDeck() {
+    }
+
+    @Test
+    void drawCard() {
+    }
+
+    @Test
+    void placeCard() {
+    }
+
+    @Test
+    void endTurn() {
+    }
+
+    @Test
+    void attackCard() {
+    }
+
+    @Test
+    void attackUser() {
+    }
+
+    @Test
+    void swapForRare() {
+    }
+
+    @Test
+    void swapForLegendary() {
+    }
+
+    @Test
+    void terminateMatch() {
+    }
+
+    @Test
+    void deleteUserGameData() {
     }
 }
