@@ -60,7 +60,33 @@ const LeaderboardPage = () => {
             const opponentDeckResponse = await fetch(`http://localhost:8080/decks/getUserDecks/${userId}`);
             const opponentDeckData = await opponentDeckResponse.json();
 
-            
+            const currentUserDeckHasEnoughCards = await Promise.all(
+                currentUserDeckData.map(async (deck) => {
+                    const deckCardsResponse = await fetch(`http://localhost:8080/cards/${deck.name}/${currentUserData.id}`);
+                    const deckCards = await deckCardsResponse.json();
+                    return deckCards.length >= 5;
+                })
+            );
+
+            const opponentDeckHasEnoughCards = await Promise.all(
+                opponentDeckData.map(async (deck) => {
+                    const deckCardsResponse = await fetch(`http://localhost:8080/cards/${deck.name}/${userId}`);
+                    const deckCards = await deckCardsResponse.json();
+                    return deckCards.length >= 5;
+                })
+            );
+
+            if (!currentUserDeckHasEnoughCards.includes(true)) {
+                toast.error('Keines deiner Decks hat genug Karten (mindestens 5)!');
+                return;
+            }
+
+            if (!opponentDeckHasEnoughCards.includes(true)) {
+                toast.error(`${username} hat kein Deck mit genug Karten (mindestens 5)!`);
+                return;
+            }
+
+
 
 
             if (currentUserDeckData.length === 0) {
@@ -156,8 +182,8 @@ const LeaderboardPage = () => {
                 {filteredNotifications.map((notification, index) => (
                     <Notification
                         key={index}
-                        challengerId={notification.senderId}
-                        challengerName={notification.senderName}
+                        senderId={notification.senderId}
+                        senderName={notification.senderName}
                         receiverId={notification.receiverId}
                         onAccept={handleAcceptChallenge}
                         onReject={handleRejectChallenge}
