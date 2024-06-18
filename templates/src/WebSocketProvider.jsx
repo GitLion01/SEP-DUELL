@@ -33,7 +33,7 @@ export const WebSocketProvider = ({ children }) => {
                         const notification = JSON.parse(message.body);
                         if (notification.message === 'challenge') {
                             setNotifications(prev => [...prev, { ...notification, countdown: 30 }]);
-                            console.log(notification);
+                            console.log(notifications);
                         } else if (notification.message === 'duelAccepted') {
                             setActiveDuel(true);  // Setze activeDuel auf true
                             setNotifications(prev => [...prev, { ...notification}]);
