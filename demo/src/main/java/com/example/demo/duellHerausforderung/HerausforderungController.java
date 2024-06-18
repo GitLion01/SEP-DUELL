@@ -27,4 +27,9 @@ public class HerausforderungController {
     public ResponseEntity<Long> toDuell(@RequestParam Long senderId, @RequestParam Long receiverId){
         return herausforderungService.toDuell(senderId,receiverId);
     }
+
+    @MessageMapping("/reject.herausforderung")
+    public void rejectHerausforderung(@Header Long senderId,@Header Long receiverId){
+        herausforderungService.rejectHerausforderung(senderId,receiverId);
+        }
 }
