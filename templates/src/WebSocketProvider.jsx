@@ -4,7 +4,6 @@ import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { toast } from 'react-toastify';
 
-
 export const WebSocketContext = createContext();
 
 export const WebSocketProvider = ({ children }) => {
@@ -22,7 +21,6 @@ export const WebSocketProvider = ({ children }) => {
 
         const userId = parseInt(localStorage.getItem('id')); // ID des aktuellen Benutzers als Zahl
 
-
         const newClient = new Client({
             brokerURL: 'ws://localhost:8080/game-websocket',
             webSocketFactory: () => new SockJS('http://localhost:8080/game-websocket'),
@@ -35,18 +33,20 @@ export const WebSocketProvider = ({ children }) => {
                     // Subscribe für Benachrichtigung
                     newClient.subscribe(`/user/${userId}/queue/notifications`, (message) => {
                         const notification = JSON.parse(message.body);
+                        console.log('Received notification:', notification); // Debugging
+
                         if (notification.message === 'challenge') {
                             setNotifications(prev => [...prev, { ...notification, countdown: 30 }]);
-                            console.log(notification);
                         } else if (notification.message === 'duelAccepted') {
                             setActiveDuel(true);  // Setze activeDuel auf true
-                            setNotifications(prev => [...prev, { ...notification}]);
-                            console.log(notifications)
-                        }
-                        else if (notification.message==='duelRejected')
+                            setNotifications(prev => [...prev, { ...notification }]);
+                            window.dispatchEvent(new CustomEvent('duelAccepted'));
+                        } else if (notification.message === 'duelRejected') {
                             toast.info('Deine Herausforderung wurde abgelehnt. Du kannst eine neue Herausforderung senden.');
-                            setNotifications(prev => prev.filter(n => n.senderId !== notification.senderId));
-                        });
+                            setNotifications(prev => prev.filter(n => !(n.senderId === notification.senderId && n.message === 'challenge')));
+                            window.dispatchEvent(new CustomEvent('challengeRejected')); 
+                        }
+                    });
 
                     // Subscribe für globale Herausforderung
                     newClient.subscribe(`/user/${userId}/queue/create`, (message) => {
@@ -102,7 +102,7 @@ export const WebSocketProvider = ({ children }) => {
 
         newClient.activate();
         setClient(newClient);
-        
+
         const newChatClient = new Client({
             brokerURL: 'ws://localhost:8080/chat',
             webSocketFactory: () => new SockJS('http://localhost:8080/chat'),
@@ -133,13 +133,10 @@ export const WebSocketProvider = ({ children }) => {
                 newChatClient.deactivate();
             }
         };
-    }, []);
-
-
+    }, [userId]);
 
     const handleAcceptChallenge = (challengerId, challengerName, receiverId) => {
-
-        console.log(challengerId, receiverId)
+        console.log(challengerId, receiverId);
         if (client && client.connected) {
             client.publish({
                 destination: '/app/accept.herausforderung',
@@ -148,9 +145,10 @@ export const WebSocketProvider = ({ children }) => {
                     receiverId: receiverId.toString(),
                 },
             });
-        setNotifications(notifications.filter(n => n.senderName !== challengerName));
-        setActiveDuel(true);
-         } else {
+            setNotifications(notifications.filter(n => n.senderName !== challengerName));
+            setActiveDuel(true);
+            window.dispatchEvent(new CustomEvent('duelAccepted'));
+        } else {
             toast.error("WebSocket-Verbindung ist nicht aktiv.");
         }
     };
@@ -178,7 +176,8 @@ export const WebSocketProvider = ({ children }) => {
                     receiverId: receiverId.toString(),
                 },
             });
-            setNotifications(notifications.filter(n => n.senderId !== senderId));
+            setNotifications(notifications.filter(n => !(n.senderId === senderId && n.message === 'challenge')));
+            window.dispatchEvent(new CustomEvent('challengeRejected')); 
         } else {
             toast.error("WebSocket-Verbindung ist nicht aktiv.");
         }
@@ -187,8 +186,6 @@ export const WebSocketProvider = ({ children }) => {
     const handleTimeoutChallenge = (challengerId) => {
         setNotifications(notifications.filter(n => n.senderId !== challengerId));
     };
-
-
 
     return (
         <WebSocketContext.Provider value={{ client, chatClient, notifications, handleAcceptChallenge, handleRejectChallenge, handleTimeoutChallenge,

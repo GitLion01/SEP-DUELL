@@ -51,6 +51,27 @@ const LeaderboardPage = () => {
                 };
             }
         }, [userId, client]);
+        
+        useEffect(() => {
+            const handleChallengeRejected = () => {
+                setIsChallengeDisabled(false);
+                setCountdown(null);
+            };
+    
+            const handleAcceptChallenge = () => {
+                setIsChallengeDisabled(true);
+                setCountdown(null);
+            };
+    
+            window.addEventListener('challengeRejected', handleChallengeRejected);
+            window.addEventListener('challengeAccepted', handleAcceptChallenge);
+    
+            return () => {
+                window.removeEventListener('challengeRejected', handleChallengeRejected);
+                window.removeEventListener('challengeAccepted', handleAcceptChallenge);
+            };
+        }, []);
+        
 
     const handleChallenge = async (userId, username) => {
         try {
@@ -197,13 +218,6 @@ const LeaderboardPage = () => {
             {countdown !== null && countdown > 0 && (
                 <div className="countdown">
                     <p>Countdown: {countdown} Sekunden</p>
-                </div>
-            )}
-            {activeDuel && (
-                <div className="active-duel">
-                    <a href="/duel">
-                        <button className="active-duel-button">Aktives Duell</button>
-                    </a>
                 </div>
             )}
         </div>
