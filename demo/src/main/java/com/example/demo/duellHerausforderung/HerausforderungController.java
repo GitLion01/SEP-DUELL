@@ -22,4 +22,9 @@ public class HerausforderungController {
         herausforderungService.acceptHerausforderung(senderId,receiverId);
     }
 
+    @MessageMapping("/reject.herausforderung")
+    public void rejectHerausforderung(@Header Long senderId,@Header Long receiverId){
+        herausforderungService.rejectHerausforderung(senderId,receiverId);
+    }
+
 }
