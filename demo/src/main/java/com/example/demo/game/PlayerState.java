@@ -28,21 +28,21 @@ public class PlayerState {
 
 
 
-    @OneToOne(mappedBy = "playerState" , cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(mappedBy = "playerState")
     @JsonIgnore
     @JoinColumn(name = "user_id")
     private UserAccount user;
 
-    @OneToMany
+    @OneToMany(fetch = FetchType.EAGER)
     private List<PlayerCard> cardsPlayed = new ArrayList<>();
 
-    @OneToMany
+    @OneToMany(fetch = FetchType.EAGER)
     private List<PlayerCard> handCards = new ArrayList<>();
 
-    @OneToMany
+    @OneToMany(fetch = FetchType.EAGER)
     private List<PlayerCard> fieldCards = new ArrayList<>();
 
-    @OneToMany
+    @OneToMany(fetch = FetchType.EAGER)
     private List<PlayerCard> deckClone = new ArrayList<>();
 
 
