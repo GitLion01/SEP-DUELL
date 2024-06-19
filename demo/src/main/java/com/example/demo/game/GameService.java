@@ -406,8 +406,8 @@ public class GameService {
 
         attackerCard.setHasAttacked(true);
         playerCardRepository.save(attackerCard);
-        playerStateRepository.save(game.getUsers().get(0).getPlayerState());
-        playerStateRepository.save(game.getUsers().get(1).getPlayerState());
+        playerStateRepository.save(attacker.getPlayerState());
+        playerStateRepository.save(defender.getPlayerState());
         gameRepository.save(game);
         List<UserAccount> users = game.getUsers();
         for(UserAccount player : game.getUsers()) {
