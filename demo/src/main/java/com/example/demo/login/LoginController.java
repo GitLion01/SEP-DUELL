@@ -1,6 +1,7 @@
 package com.example.demo.login;
 
 import com.example.demo.email.EmailSender;
+import com.example.demo.leaderboard.LeaderboardService;
 import com.example.demo.registration.token.ConfirmationToken;
 import com.example.demo.registration.token.ConfirmationTokenRepository;
 import com.example.demo.registration.token.ConfirmationTokenService;
@@ -28,6 +29,9 @@ public class LoginController {
     private final ConfirmationTokenService confirmationTokenService;
     private final EmailSender emailSender;
 
+    @Autowired
+    private LeaderboardService leaderboardService;
+
     // Supercode als Konstante definieren
     private static final String SUPER_CODE = "SUPER1";
     private final ConfirmationTokenRepository confirmationTokenRepository;
@@ -51,6 +55,9 @@ public class LoginController {
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
             UserAccount userAccount = (UserAccount) authentication.getPrincipal();
+
+            leaderboardService.updateUserStatus(userAccount.getId(), "online");
+
             String token = confirmationTokenService.generateToken(userAccount, TokenPurpose.LOGIN);
             String subject = "Login Verification";  // Änderung
             emailSender.send(userAccount.getEmail(), buildLoginEmail(userAccount.getFirstName(), token), subject);
@@ -87,6 +94,13 @@ public class LoginController {
                     }
                 })
                 .orElse("Invalid token");
+    }
+
+    @PostMapping("/logout/{userId}")
+    public ResponseEntity<Map<String, String>> logout(@PathVariable Long userId) {
+        leaderboardService.updateUserStatus(userId, "offline");
+        SecurityContextHolder.clearContext();
+        return ResponseEntity.ok(Map.of("status", "success", "message", "Logout successful."));
     }
 
     private String buildLoginEmail(String name, String token) {

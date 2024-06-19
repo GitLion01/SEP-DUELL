@@ -1,264 +1,35 @@
-<!--
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WebSocket Test</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <script>
+        var stompClient = null;
+
+        function connect() {
+            var socket = new WebSocket('ws://localhost:8080/game-websocket');
+            stompClient = Stomp.over(socket);
+            stompClient.connect({}, function(frame) {
+                console.log('Connected: ' + frame);
+            });
+        }
+
+        function sendMessage() {
+            var message = document.getElementById('message').value;
+            stompClient.send('/chat/sendMessage', {}, JSON.stringify({ 'message': message }));
+            console.log('Message sent: ' + message);
+        }
+    </script>
 </head>
 <body>
 <h1>WebSocket Test</h1>
-<button onclick="connect()">Verbinden</button>
-<button onclick="disconnect()">Trennen</button>
-<input type="text" id="messageInput" placeholder="Nachricht">
-<button onclick="sendMessage()">Senden</button>
-<p id="output"></p>
+<textarea id="message" rows="4" cols="50">Enter your message here...</textarea><br>
+<button onclick="sendMessage()">Send Message</button>
 
 <script>
-    var stompClient;
-
-    function connect() {
-        var socket = new SockJS('http://localhost:8080/game-websocket');
-        stompClient = Stomp.over(socket);
-
-        stompClient.connect({}, function(frame) {
-            console.log('Verbindung hergestellt: ' + frame);
-
-            stompClient.subscribe('/topic/game', function(messageOutput) {
-                showMessageOutput(JSON.parse(messageOutput.body));
-            });
-        }, function(error) {
-            console.error('Fehler beim Verbindungsaufbau: ' + error);
-        });
-    }
-
-    function disconnect() {
-        if (stompClient) {
-            stompClient.disconnect();
-            console.log('Verbindung getrennt');
-        }
-    }
-
-    function sendMessage() {
-        var message = document.getElementById('messageInput').value;
-        stompClient.send('/app/game-websocket', {}, JSON.stringify({ 'message': message }));
-    }
-
-    function showMessageOutput(message) {
-        var outputElement = document.getElementById('output');
-        outputElement.innerText = 'Nachricht: ' + message;
-    }
+    connect();
 </script>
 </body>
 </html>
--->
-
-<!--
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebSocket Client</title>
-    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.5.1/dist/sockjs.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
-</head>
-<body>
-<h1>WebSocket Client</h1>
-<div>
-    <label for="gameID">Game ID:</label>
-    <input type="number" id="gameID">
-</div>
-<div>
-    <label for="userID">User ID:</label>
-    <input type="number" id="userID">
-</div>
-<button id="createGameButton">Create Game</button>
-<button id="joinGameButton">Join Game</button>
-<pre id="messages"></pre>
-
-<script>
-    let stompClient;
-
-    function connect() {
-        const socket = new SockJS('http://localhost:8080/game-websocket');
-        stompClient = Stomp.over(socket);
-
-        stompClient.connect({}, function(frame) {
-            console.log('Connected: ' + frame);
-
-            // Subscribe to specific game topics
-            const gameID = document.getElementById('gameID').value;
-            stompClient.subscribe('/topic/game/' + gameID, function(message) {
-                console.log('Message received from server:', message.body);
-                document.getElementById('messages').textContent += '\n' + message.body;
-            });
-
-            stompClient.subscribe('/user/queue/errors', function(message) {
-                alert('Error: ' + message.body);
-            });
-        });
-    }
-
-    document.getElementById('createGameButton').addEventListener('click', function() {
-        const gameID = document.getElementById('gameID').value;
-        const userID = document.getElementById('userID').value;
-
-        if (!gameID || !userID) {
-            alert('Please enter both Game ID and User ID.');
-            return;
-        }
-
-        connect();
-
-        // Send create game request
-        stompClient.send("/app/create", {}, JSON.stringify({ gameId: parseInt(gameID), userId: parseInt(userID) }));
-    });
-
-    document.getElementById('joinGameButton').addEventListener('click', function() {
-        const gameID = document.getElementById('gameID').value;
-        const userID = document.getElementById('userID').value;
-
-        if (!gameID || !userID) {
-            alert('Please enter both Game ID and User ID.');
-            return;
-        }
-
-        connect();
-
-        // Send join game request
-        stompClient.send("/app/join", {}, JSON.stringify({ gameId: parseInt(gameID), userId: parseInt(userID) }));
-    });
-</script>
-</body>
-</html>
--->
-
-
-<!--<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebSocket Client</title>
-</head>
-<body>
-<h1>WebSocket Client</h1>
-<button onclick="connect()">Connect</button>
-<button onclick="createGame()">Create Game</button>
-<button onclick="joinGame()">Join Game</button>
-<button onclick="selectDeck()">Select Deck</button>
-<button onclick="playCard()">Play Card</button>
-<div id="messages"></div>
-
-<script src="https://cdn.jsdelivr.net/npm/sockjs-client/dist/sockjs.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/stompjs/lib/stomp.min.js"></script>
-<script>
-    let stompClient = null;
-
-    function connect() {
-        const socket = new SockJS('http://localhost:8080/game-websocket');
-        stompClient = Stomp.over(socket);
-        stompClient.connect({}, function (frame) {
-            console.log('Connected: ' + frame);
-            stompClient.subscribe('/all/gameCreated', function (message) {
-                showMessage("Game Created: " + message.body);
-            });
-            stompClient.subscribe('/specific/gameUpdate', function (message) {
-                showMessage("Game Update: " + message.body);
-            });
-            stompClient.subscribe('/specific/errors', function (message) {
-                showMessage("Error: " + message.body);
-            });
-        });
-    }
-
-    function createGame() {
-        const userId = prompt("Enter User ID:");
-        stompClient.send("/app/createGame", {}, JSON.stringify({userId: userId}));
-    }
-
-    function joinGame() {
-        const gameId = prompt("Enter Game ID:");
-        const userId = prompt("Enter User ID:");
-        console.log("Game ID:", gameId);
-        console.log("User ID:", userId);
-        stompClient.send("/app/joinGame", {}, JSON.stringify({gameId: gameId, userId: userId}));
-    }
-
-    function selectDeck() {
-        const gameId = prompt("Enter Game ID:");
-        const userId = prompt("Enter User ID:");
-        const deckName = prompt("Enter Deck Name:");
-        stompClient.send("/app/selectDeck", {}, JSON.stringify({gameID: gameId, userID: userId, deckName: deckName}));
-    }
-
-    function playCard() {
-        const gameId = prompt("Enter Game ID:");
-        const userId = prompt("Enter User ID:");
-        const cardInstanceId = prompt("Enter Card Instance ID:");
-        stompClient.send("/app/playCard", {}, JSON.stringify({gameID: gameId, userID: userId, cardInstanceID: cardInstanceId}));
-    }
-
-    function showMessage(message) {
-        const messages = document.getElementById("messages");
-        const messageElement = document.createElement("div");
-        messageElement.appendChild(document.createTextNode(message));
-        messages.appendChild(messageElement);
-    }
-</script>
-</body>
-</html>-->
-
-
-<!-- das hat das game erstellt und in DB abgespeichert-->
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebSocket Create Game Client</title>
-</head>
-<body>
-<h1>Create Game</h1>
-<form id="createGameForm">
-    <label for="userA">User A:</label>
-    <input type="text" id="userA" name="userA" required><br><br>
-
-    <label for="userB">User B:</label>
-    <input type="text" id="userB" name="userB" required><br><br>
-
-    <button type="submit">Create Game</button>
-</form>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
-<script>
-    const form = document.getElementById('createGameForm');
-
-    form.addEventListener('submit', (event) => {
-        event.preventDefault();
-
-        const formData = new FormData(form);
-        const requestData = {
-            userA: formData.get('userA'),
-            userB: formData.get('userB')
-        };
-
-        const socket = new SockJS('http://localhost:8080/game-websocket');
-        const stompClient = Stomp.over(socket);
-
-        stompClient.connect({}, (frame) => {
-            console.log('Connected to WebSocket');
-            stompClient.send('/app/createGame', {}, JSON.stringify(requestData));
-        });
-    });
-</script>
-</body>
-</html>
-
-
-
-

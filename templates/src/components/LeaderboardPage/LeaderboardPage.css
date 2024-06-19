@@ -1,0 +1,111 @@
+/* src/components/LeaderboardPage/LeaderboardPage.css */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Fantasy', sans-serif; /* Schriftart anpassen */
+    color: #ffffff; /* Allgemeine Textfarbe auf weiß setzen */
+}
+
+.leaderboard-page { /* Spezifische Klasse für die Leaderboard-Seite */
+    min-height: 100vh; /* Höhe auf mindestens 100% des Viewports setzen */
+    width: 100vw; /* Breite auf 100% des Viewports setzen */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: url('./Leaderboardbild.jpg') no-repeat center center fixed;
+    background-size: cover; /* Hintergrundbild soll gesamten Container ausfüllen */
+    color: #ffebcd; /* Cremefarbene Schriftfarbe passend zum Fantasy-Thema */
+    padding: 20px; /* Padding hinzufügen für besseren Abstand */
+}
+
+.leaderboard-page h1 {
+    color: #ffebcd; /* Cremefarbene Schriftfarbe für den Titel */
+    font-size: 3em; /* Größere Schriftgröße für den Titel */
+    margin-top: 20px;
+}
+
+.search-input {
+    width: 100%;
+    max-width: 600px; /* Maximale Breite für das Suchfeld */
+    padding: 10px;
+    margin: 20px 0;
+    box-sizing: border-box;
+    font-size: 16px;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+}
+
+.leaderboard-table {
+    width: 100%;
+    max-width: 1000px; /* Maximale Breite für die Tabelle */
+    border-collapse: collapse;
+    margin-top: 20px;
+    background-color: rgba(255, 255, 255, 0.8); /* Halbtransparenter Hintergrund für die Tabelle */
+    border-radius: 10px; /* Abgerundete Ecken für die Tabelle */
+    overflow: hidden; /* Überlauf verstecken für abgerundete Ecken */
+}
+
+.leaderboard-table th, .leaderboard-table td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    color: #333333; /* Dunklere Schriftfarbe für bessere Lesbarkeit */
+    background-color: rgba(255, 255, 255, 0.8); /* Halbtransparenter Hintergrund für die Zellen */
+}
+
+.leaderboard-table th {
+    background-color: #8b78da; /* Farbe aus dem Hintergrund des Bildes */
+    color: #ffffff; /* Weiße Schriftfarbe für die Tabellenüberschriften */
+    font-size: 1.2em;
+}
+
+.leaderboard-table tr:nth-child(even) {
+    background-color: rgba(245, 245, 245, 0.9); /* Heller Hintergrund für gerade Zeilen */
+}
+
+.leaderboard-table tr:hover {
+    background-color: rgba(173, 216, 230, 0.8); /* Hellblauer Hintergrund beim Hover */
+}
+
+.leaderboard-table td.status {
+    text-transform: capitalize;
+}
+
+.status.online {
+    color: #32cd32; /* Limonengrüne Farbe für Online-Status */
+}
+
+.status.offline {
+    color: #ff4500; /* Orangerote Farbe für Offline-Status */
+}
+
+.status.im-duell {
+    color: #ffa500; /* Orange Farbe für Im-Duell-Status */
+}
+
+.challenge-button {
+    background-color: #4CAF50; /* Grüner Hintergrund */
+    border: none; /* Kein Rand */
+    color: white; /* Weiße Schrift */
+    padding: 10px 20px; /* Innenabstand */
+    text-align: center; /* Text zentrieren */
+    text-decoration: none; /* Keine Unterstreichung */
+    display: inline-block; /* Inline-Block anzeigen */
+    font-size: 16px; /* Schriftgröße */
+    margin: 4px 2px; /* Außenabstand */
+    cursor: pointer; /* Mauszeiger als Hand */
+    border-radius: 8px; /* Abgerundete Ecken */
+    transition-duration: 0.4s; /* Übergangsdauer */
+}
+
+.challenge-button:hover {
+    background-color: white; /* Weißer Hintergrund beim Hover */
+    color: black; /* Schwarze Schrift beim Hover */
+    border: 2px solid #4CAF50; /* Grüner Rand beim Hover */
+}
+
+.challenge-button:disabled {
+    background-color: #cccccc; /* Grauer Hintergrund für deaktivierten Zustand */
+    color: #666666; /* Graue Schriftfarbe für deaktivierten Zustand */
+    cursor: not-allowed; /* Cursor als nicht erlaubt anzeigen */
+}

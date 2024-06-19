@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.file.Files;
@@ -172,6 +171,7 @@ public class CardService {
         Path path = Paths.get(filePath);
         return Files.readAllBytes(path);
     }
+
     private String loadImageAndEncodeToBase64(String filePath) throws IOException {
         Path path = Paths.get(filePath);
         byte[] imageData = Files.readAllBytes(path);

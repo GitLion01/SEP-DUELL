@@ -1,5 +1,7 @@
 package com.example.demo.user;
 import com.example.demo.cards.CardInstance;
+import com.example.demo.chat.Chat;
+import com.example.demo.chat.ChatMessage;
 import com.example.demo.decks.Deck;
 import com.example.demo.game.Game;
 import com.example.demo.game.PlayerState;
@@ -36,6 +38,14 @@ public class UserAccount implements UserDetails {
     private Integer leaderboardPoints = 0;
     private Integer sepCoins = 500;
     private byte[] image;
+
+    private String status = "offline"; // Standardstatus ist offline -> online, im Duell, offline
+    private String duelStatus = "available"; // Neuer Status für Duell: available, in_duel, challenged
+
+    @ManyToOne                              //für Duell Herausforderung von
+    @JoinColumn(name = "challenger_id")
+    private UserAccount challenger; // Der Benutzer, der diesen Benutzer herausgefordert hat
+
     @Enumerated(EnumType.STRING)
     private UserRole role;
     private Boolean locked = false;
@@ -69,11 +79,24 @@ public class UserAccount implements UserDetails {
     private List<CardInstance> userCardInstance=new ArrayList<>();
 
 
-    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToOne
     @JoinColumn(name = "player_state_id")
     private PlayerState playerState;
 
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JsonIgnore
+    @JoinColumn(name= "user_message")
+    private List<ChatMessage> userMessage=new ArrayList<>();
 
+
+    @ManyToMany(fetch = FetchType.EAGER, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @JsonIgnore
+    @JoinTable(
+            name = "userChat",
+            joinColumns = @JoinColumn(name = "userAccount_id"),
+            inverseJoinColumns = @JoinColumn(name = "chat_id")
+    )
+    private List<Chat> userChat=new ArrayList<>();
 
 
     public UserAccount(byte[] image,
@@ -168,4 +191,22 @@ public class UserAccount implements UserDetails {
         return this.enabled;
     }
 
+
+    // Neue Methoden für Duell Herausforderung
+
+    public boolean canChallenge(UserAccount other) {
+        return this != other && this.isOnline() && other.isOnline() && !this.isInDuel() && !other.isInDuel() && this.hasDeck() && other.hasDeck();
+    }
+
+    public boolean isOnline() {
+        return "online".equals(this.status);
+    }
+
+    public boolean isInDuel() {
+        return "in_duel".equals(this.duelStatus);
+    }
+
+    public boolean hasDeck() {
+        return !this.decks.isEmpty();
+    }
 }

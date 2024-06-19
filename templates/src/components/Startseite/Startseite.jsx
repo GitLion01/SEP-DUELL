@@ -1,40 +1,74 @@
-import React, { Component } from 'react';
+import React, { useState } from 'react';
 import './Startseite.css';
+import { useNavigate } from 'react-router-dom';
+import { Client } from '@stomp/stompjs';
+import SockJS from 'sockjs-client';
 
-class Startseite extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      loggedIn: true,
-    };
-  }
+const Startseite = () => {
+  const [loggedIn, setLoggedIn] = useState(true);
+  const navigate = useNavigate();
 
-  handleLogout = () => {
-    this.setState({ loggedIn: false });
+  const handleLogout = async () => {
+    const userId = localStorage.getItem('id');
+    if (userId) {
+      await fetch(`http://localhost:8080/login/logout/${userId}`, { // Benutzer-ID im Pfad
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const socket = new SockJS('http://localhost:8080/game-websocket'); // WebSocket-Verbindung erstellen
+      const stompClient = new Client({
+        webSocketFactory: () => socket,
+        reconnectDelay: 5000,
+      });
+
+      stompClient.onConnect = () => {
+        console.log('Connected: ');
+        stompClient.publish({
+          destination: '/app/status',
+          body: JSON.stringify({ userId, status: 'offline' }),
+        });
+        stompClient.deactivate();
+      };
+
+      stompClient.onStompError = (frame) => {
+        console.error(`Broker reported error: ${frame.headers['message']}`);
+        console.error(`Additional details: ${frame.body}`);
+      };
+
+      stompClient.activate();
+    }
+
+    setLoggedIn(false);
     localStorage.removeItem('id');
     localStorage.removeItem('userRole');
+    navigate('/');
   };
 
-  handleAdminClick = (event) => {
+  const handleAdminClick = (event) => {
     const userRole = localStorage.getItem('userRole');
     if (userRole !== 'ADMIN') {
-      event.preventDefault(); // Verhindert die Weiterleitung
+      event.preventDefault();
       alert('Zugriff verweigert! Nur Admins können auf das Adminsteuerfeld zugreifen.');
     }
   };
 
-  render() {
-    const { loggedIn } = this.state;
-    const info = console.log(localStorage.getItem('userRole'))
-    if (!loggedIn) {
-      console.log("Benutzer ausgeloggt, Weiterleitung zur Login-Seite");
-      // Hier können Sie eine Weiterleitung zur Login-Seite implementieren
-    }
+  if (!loggedIn) {
+    console.log("Benutzer ausgeloggt, Weiterleitung zur Login-Seite");
+  }
 
-    return (
+  return (
       <div className="AppStart">
         <header>
           <h1>STARTSEITE</h1>
+          <div className="logout-button">
+            <button onClick={handleLogout}>Abmelden</button>
+          </div>
+          <div className="leaderboard-button">
+            <button onClick={() => navigate('/leaderboard')}>Leaderboard</button>
+          </div>
         </header>
         <main>
           <div className="centered-content">
@@ -51,23 +85,18 @@ class Startseite extends Component {
               <a href="/freundelist"> <h2>MEINE FREUNDESLISTE</h2></a>
             </section>
             <section className="adminsteuerfeld">
-              <a href="/admin" onClick={this.handleAdminClick}><h2>MEIN ADMINSTEUERFELD</h2></a>
+              <a href="/admin" onClick={handleAdminClick}><h2>MEIN ADMINSTEUERFELD</h2></a>
             </section>
             <section className="shop">
               <a href="/shop"><h2>SHOP</h2></a>
             </section>
+            <section className="shop">
+              <a href="/chat"><h2>CHAT</h2></a>
+            </section>
           </div>
         </main>
-        <footer>
-          <nav>
-            <ul>
-              <li><a href="/" onClick={this.handleLogout}>Abmelden</a></li>
-            </ul>
-          </nav>
-        </footer>
       </div>
-    );
-  }
-}
+  );
+};
 
 export default Startseite;

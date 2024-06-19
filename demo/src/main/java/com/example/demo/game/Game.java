@@ -22,7 +22,7 @@ public class Game {
     private Boolean firstRound = true;
     private Integer timeLeft = 120;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "game_users",
             joinColumns = @JoinColumn(name = "game_id"),

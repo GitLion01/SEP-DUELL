@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,7 +29,6 @@ public class DeckService{
     @Autowired
     private UserAccountRepository userAccountRepository;
     private final CardInstanceRepository cardInstanceRepository;
-
 
 
     @Autowired
@@ -140,12 +140,6 @@ public class DeckService{
     }
 
 
-
-
-
-
-
-
     public String removeAllCardsInstancesFromDeck(DeckRequest request) {
         try {
             // Überprüfe, ob der Benutzer existiert
@@ -186,7 +180,6 @@ public class DeckService{
             return "Fehler beim Entfernen der Karten aus dem Deck: " + e.getMessage();
         }
     }
-
 
 
     public String removeFirstInstanceOfCardType(DeckRequest request) {
@@ -238,15 +231,6 @@ public class DeckService{
     }
 
 
-
-
-
-
-
-
-
-
-
    public String addCardsToDeck(DeckRequest request) {
        try {
            // Überprüfen, ob der Benutzer existiert
@@ -292,9 +276,6 @@ public class DeckService{
            return "Fehler beim Hinzufügen der Karten zum Deck: " + e.getMessage();
        }
    }
-
-
-
 
 
     public String replaceCardsInDeck(String deckName, Long userID, List<String> cardsToRemove, List<String> cardsToAdd) {
@@ -364,8 +345,6 @@ public class DeckService{
     }
 
 
-
-
     public List<Card> getAllCardsFromDeck(Long userId, String deckName) {
         try {
             // Überprüfe, ob der Benutzer existiert
@@ -387,10 +366,6 @@ public class DeckService{
     }
 
 
-
-
-
-
     public List<Deck> getUserDecksByUserId(Long userId) {
         try {
             if (userId != null) {
@@ -410,7 +385,6 @@ public class DeckService{
             return Collections.emptyList();
         }
     }
-
 
 
     @Transactional
