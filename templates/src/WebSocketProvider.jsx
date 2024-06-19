@@ -147,11 +147,29 @@ export const WebSocketProvider = ({ children }) => {
             });
             setNotifications(notifications.filter(n => n.senderName !== challengerName));
             setActiveDuel(true);
+            updateStatus(receiverId, 'im Duell');
+            updateStatus(challengerId, 'im Duell');
             window.dispatchEvent(new CustomEvent('duelAccepted'));
         } else {
             toast.error("WebSocket-Verbindung ist nicht aktiv.");
         }
     };
+
+
+    const updateStatus = (userId, status) => {
+        if (client && client.connected) {
+            client.publish({
+                destination: '/status/status',
+                headers: {
+                    userId: userId.toString()
+                },
+                body: status
+            });
+        } else {
+            toast.error("WebSocket-Verbindung ist nicht aktiv.");
+        }
+    };
+
 
     const createGame = (receiverId, senderName) => {
         if (client && client.connected) {
@@ -159,15 +177,9 @@ export const WebSocketProvider = ({ children }) => {
                 destination: '/app/createGame',
                 body: JSON.stringify({ userA: receiverId, userB: senderName }),
             });
-            client.publish({
-                destination: '/app/status',
-                body: JSON.stringify("ingame"),
-                headers: {
-                    userId: userId.toString(),
-                },
-            });
             toast.success("Spiel wird gestartet");
             setActiveDuel(false);
+            window.dispatchEvent(new CustomEvent('duelStarted'));
         } else {
             toast.error("WebSocket-Verbindung ist nicht aktiv.");
         }

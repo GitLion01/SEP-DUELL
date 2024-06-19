@@ -16,6 +16,23 @@ function DuelC() {
                 destination: '/app/createGame',
                 body: JSON.stringify({ userA: userID, userB: username }),
             });
+            console.log("helllo1");
+            client.publish({
+                destination: '/status/status',
+                body: JSON.stringify("im Duell"),
+                headers: {
+                    userId: userID.toString(),
+                },
+            });
+            console.log("helllo2");
+            client.publish({
+                destination: '/status/status',
+                body: JSON.stringify("im Duell"),
+                headers: {
+                    userId: username,
+                },
+            });
+            console.log("helllo3");
             toast.success("Herausforderung gesendet.");
         } else {
             toast.error("Bitte geben Sie einen gültigen Benutzernamen ein und stellen Sie sicher, dass die Verbindung aktiv ist.");

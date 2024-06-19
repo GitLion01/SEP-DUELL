@@ -27,7 +27,7 @@ const Startseite = () => {
       stompClient.onConnect = () => {
         const offline="offline";
         stompClient.publish({
-          destination: '/app/status',
+          destination: '/status/status',
           body: JSON.stringify(offline),
           headers: {
             userId: userId.toString(),

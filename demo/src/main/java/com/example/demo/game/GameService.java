@@ -4,9 +4,9 @@ import com.example.demo.cards.Rarity;
 import com.example.demo.decks.Deck;
 import com.example.demo.decks.DeckRepository;
 import com.example.demo.game.requests.*;
+import com.example.demo.leaderboard.LeaderboardService;
 import com.example.demo.user.UserAccount;
 import com.example.demo.user.UserAccountRepository;
-import jakarta.validation.constraints.Null;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -25,6 +25,7 @@ public class GameService {
     private final SimpMessagingTemplate messagingTemplate;
     private final PlayerStateRepository playerStateRepository;
     private final PlayerCardRepository playerCardRepository;
+    private final LeaderboardService leaderboardService;
 
     @Autowired
     public GameService(GameRepository gameRepository,
@@ -32,13 +33,14 @@ public class GameService {
                        UserAccountRepository userAccountRepository,
                        SimpMessagingTemplate messagingTemplate,
                        PlayerStateRepository playerStateRepository,
-                       PlayerCardRepository playerCardRepository)  {
+                       PlayerCardRepository playerCardRepository, LeaderboardService leaderboardService)  {
         this.gameRepository = gameRepository;
         this.deckRepository = deckRepository;
         this.userAccountRepository = userAccountRepository;
         this.messagingTemplate = messagingTemplate;
         this.playerStateRepository = playerStateRepository;
         this.playerCardRepository = playerCardRepository;
+        this.leaderboardService = leaderboardService;
     }
 
 
@@ -573,7 +575,6 @@ public class GameService {
         /*gameRepository.delete(game);*/
         List<Long> userIds=Arrays.asList(game.getUsers().get(0).getId(), game.getUsers().get(1).getId());
         deleteUserGameData(userIds, game.getId());
-        //TODO: Alle Daten zurücksetzten (Deck, Cards, etc)
     }
 
     /*@Transactional
@@ -641,6 +642,10 @@ public class GameService {
 
         gameRepository.deleteFromGameUsersByUserIds(userIds);
         gameRepository.deleteById(gameId);
+
+        /*
+        leaderboardService.updateUserStatus(userIds.get(0),"online");
+        leaderboardService.updateUserStatus(userIds.get(1),"online");*/
     }
 
 }

@@ -2,6 +2,8 @@
 package com.example.demo.leaderboard;
 
 import com.example.demo.user.UserAccount;
+import com.example.demo.user.UserAccountRepository;
+import com.example.demo.user.UserAccountService;
 import lombok.AllArgsConstructor;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -15,6 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 public class LeaderboardController {
     private final LeaderboardService leaderboardService;
+    private final UserAccountRepository userAccountRepository;
 
     @GetMapping("/leaderboard")
     public List<UserAccount> getLeaderboard() {
@@ -23,7 +26,21 @@ public class LeaderboardController {
 
     @MessageMapping("/status")
     public void updateUserStatus(@Header("userId") String userIdHeader, @Payload String status) {
-        Long userId =  Long.parseLong(userIdHeader);
+        boolean isID=false;
+        Long userId=0L;
+        try {
+            userId = Long.parseLong(userIdHeader);
+            isID=true;
+            System.out.println("from the try");
+        }
+        catch (NumberFormatException e) {
+            System.out.println("User Name ist gegeben");
+        }
+        if(!isID)
+        {
+            System.out.println("from the if");
+            userId=userAccountRepository.findByUsername(userIdHeader).get().getId();
+        }
         System.out.println("aufgerufen");
         leaderboardService.updateUserStatus(userId, status);
     }
