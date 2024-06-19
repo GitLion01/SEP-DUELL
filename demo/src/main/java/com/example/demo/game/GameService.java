@@ -7,6 +7,7 @@ import com.example.demo.duellHerausforderung.Notification;
 import com.example.demo.game.requests.*;
 import com.example.demo.user.UserAccount;
 import com.example.demo.user.UserAccountRepository;
+import jakarta.validation.constraints.Null;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -47,7 +48,7 @@ public class GameService {
         List<Game> games = gameRepository.findAll();
         for (Game game : games) {
             game.decrementTimer();
-            if( game.getReady() && game.getRemaingTime() <= 0){
+            if(game.getReady() && game.getRemaingTime() <= 0){
                 handleTimerExpiration(game);
             }
             sendTimerUpdate(game);
@@ -121,11 +122,16 @@ public class GameService {
 
     @Transactional
     public void selectDeck(DeckSelectionRequest request) {
+        System.out.println("SERVICE ERREICHT");
+        System.out.println("Deck ID: " + request.getDeckId());
+        System.out.println("User ID: " + request.getUserId());
+        System.out.println("Game ID: " + request.getGameId());
         Optional<Game> optionalGame = gameRepository.findById(request.getGameId());
         Optional<Deck> optionalDeck = deckRepository.findByDeckIdAndUserId(request.getDeckId(), request.getUserId());
         if(optionalGame.isEmpty() || optionalDeck.isEmpty()) {
             return;
         }
+        System.out.println("Game und Deck vorhanden");
         Game game = optionalGame.get();
         Deck deck = optionalDeck.get();
         List<Card> cards = deck.getCards();
@@ -573,6 +579,7 @@ public class GameService {
         /*gameRepository.delete(game);*/
         List<Long> userIds=Arrays.asList(game.getUsers().get(0).getId(), game.getUsers().get(1).getId());
         deleteUserGameData(userIds, game.getId());
+        //TODO: Alle Daten zurücksetzten (Deck, Cards, etc)
     }
 
     /*@Transactional
