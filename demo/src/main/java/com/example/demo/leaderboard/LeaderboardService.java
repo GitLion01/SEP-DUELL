@@ -30,7 +30,10 @@ public class LeaderboardService {
         // Check if user is in a game
         // für duell Status von
         if (gameRepository.existsByUsersContaining(user)) {
+            //Game game=gameRepository.findByUsersContaining(user).get();
             status = "im Duell";
+            //game.getUsers().get(0).setStatus(status);
+            //game.getUsers().get(1).setStatus(status);
         }                                  //für duell Status bis
 
         user.setStatus(status);
