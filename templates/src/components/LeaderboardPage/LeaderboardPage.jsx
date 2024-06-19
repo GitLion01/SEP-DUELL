@@ -12,7 +12,7 @@ const LeaderboardPage = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [isChallengeDisabled, setIsChallengeDisabled] = useState(false);
     const [activeDuel, setActiveDuel] = useState(null);
-    const [currentUserData, setCurrentUserData] = useState(null); 
+    const [currentUserData, setCurrentUserData] = useState(null);
     const userId = parseInt(localStorage.getItem('id'), 10);
     const [countdown, setCountdown ] = useState(null);
 
@@ -21,57 +21,64 @@ const LeaderboardPage = () => {
 
         fetch('http://localhost:8080/leaderboard')
             .then(response => response.json())
-            .then(data => { 
+            .then(data => {
                 setLeaderboard(data);
                 const userData = data.find(user => user.id === userId);
                 setCurrentUserData(userData);
                 console.log(userData);
             });
 
-            if (client && client.connected) {
-                const leaderboardSubscription = client.subscribe('/topic/leaderboard', message => {
-                    const updatedUser = JSON.parse(message.body);
-                    setLeaderboard(prev => {
-                        const index = prev.findIndex(user => user.id === updatedUser.id);
-                        if (index !== -1) {
-                            const updatedLeaderboard = [...prev];
-                            updatedLeaderboard[index] = updatedUser;
-                            return updatedLeaderboard;
-                        } else {
-                            return [...prev, updatedUser];
-                        }
-                    });
-                });
-    
-                return () => {
-                    // Deaktiviere die Abonnements bei der Bereinigung
-                    if (leaderboardSubscription) {
-                        leaderboardSubscription.unsubscribe();
+        if (client && client.connected) {
+            const leaderboardSubscription = client.subscribe('/status/leaderboard', message => {
+                const updatedUser = JSON.parse(message.body);
+                setLeaderboard(prev => {
+                    const index = prev.findIndex(user => user.id === updatedUser.id);
+                    if (index !== -1) {
+                        const updatedLeaderboard = [...prev];
+                        updatedLeaderboard[index] = updatedUser;
+                        return updatedLeaderboard;
+                    } else {
+                        return [...prev, updatedUser];
                     }
-                };
-            }
-        }, [userId, client]);
-        
-        useEffect(() => {
-            const handleChallengeRejected = () => {
-                setIsChallengeDisabled(false);
-                setCountdown(null);
-            };
-    
-            const handleAcceptChallenge = () => {
-                setIsChallengeDisabled(true);
-                setCountdown(null);
-            };
-    
-            window.addEventListener('challengeRejected', handleChallengeRejected);
-            window.addEventListener('challengeAccepted', handleAcceptChallenge);
-    
+                });
+            });
+
             return () => {
-                window.removeEventListener('challengeRejected', handleChallengeRejected);
-                window.removeEventListener('challengeAccepted', handleAcceptChallenge);
+                // Deaktiviere die Abonnements bei der Bereinigung
+                if (leaderboardSubscription) {
+                    leaderboardSubscription.unsubscribe();
+                }
             };
-        }, []);
-        
+        }
+    }, [userId, client]);
+
+    useEffect(() => {
+        const handleChallengeRejected = () => {
+            setIsChallengeDisabled(false);
+            setCountdown(null);
+        };
+
+        const handleAcceptChallenge = () => {
+            setIsChallengeDisabled(true);
+            setCountdown(null);
+        };
+
+
+        const handleDuelStarted = () => {
+            setActiveDuel(false);
+        };
+
+        window.addEventListener('challengeRejected', handleChallengeRejected);
+        window.addEventListener('challengeAccepted', handleAcceptChallenge);
+        window.addEventListener('duelStarted', handleDuelStarted);
+
+        return () => {
+            window.removeEventListener('challengeRejected', handleChallengeRejected);
+            window.removeEventListener('challengeAccepted', handleAcceptChallenge);
+            window.addEventListener('duelStarted', handleDuelStarted);
+        };
+    }, []);
+
 
     const handleChallenge = async (userId, username) => {
         try {
@@ -126,8 +133,8 @@ const LeaderboardPage = () => {
             if (client) {
                 client.publish({
                     destination: '/app/send.herausforderung',
-                    headers: { 
-                        senderId: currentUserData.id.toString(), 
+                    headers: {
+                        senderId: currentUserData.id.toString(),
                         receiverId: userId.toString()
                     },
                     body: JSON.stringify({})
@@ -147,7 +154,7 @@ const LeaderboardPage = () => {
     );
 
     const filteredNotifications = notifications.filter(n => n.receiverId === userId);
-    
+
     useEffect(() => {
         if (countdown !== null && countdown > 0) {
             const timer = setInterval(() => {
@@ -172,32 +179,32 @@ const LeaderboardPage = () => {
             />
             <table className="leaderboard-table">
                 <thead>
-                    <tr>
-                        <th>Rang</th>
-                        <th>Benutzername</th>
-                        <th>Punkte</th>
-                        <th>Status</th>
-                        <th>Aktion</th>
-                    </tr>
+                <tr>
+                    <th>Rang</th>
+                    <th>Benutzername</th>
+                    <th>Punkte</th>
+                    <th>Status</th>
+                    <th>Aktion</th>
+                </tr>
                 </thead>
                 <tbody>
-                    {filteredLeaderboard.map((user, index) => (
-                        <tr key={user.id}>
-                            <td>{index + 1}</td>
-                            <td>{user.username}</td>
-                            <td>{user.leaderboardPoints}</td>
-                            <td className={`status ${user.status}`}>{user.status}</td>
-                            <td>
-                                <button
-                                    className="challenge-button"
-                                    onClick={() => handleChallenge(user.id, user.username)}
-                                    disabled={user.status !== 'online' || isChallengeDisabled || user.id === currentUserData.id}
-                                >
-                                    Duell herausfordern
-                                </button>
-                            </td>
-                        </tr>
-                    ))}
+                {filteredLeaderboard.map((user, index) => (
+                    <tr key={user.id}>
+                        <td>{index + 1}</td>
+                        <td>{user.username}</td>
+                        <td>{user.leaderboardPoints}</td>
+                        <td className={`status ${user.status}`}>{user.status}</td>
+                        <td>
+                            <button
+                                className="challenge-button"
+                                onClick={() => handleChallenge(user.id, user.username)}
+                                disabled={user.status !== 'online' || isChallengeDisabled || user.id === currentUserData.id}
+                            >
+                                Duell herausfordern
+                            </button>
+                        </td>
+                    </tr>
+                ))}
                 </tbody>
             </table>
             <div className="notifications">

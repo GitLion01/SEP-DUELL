@@ -38,6 +38,6 @@ public class LeaderboardService {
 
         user.setStatus(status);
         userAccountRepository.save(user);
-        messagingTemplate.convertAndSend("/topic/leaderboard", user);   ///topic/leaderboard   //user-Objekt = alle user nicht eine einzelne userid
+        messagingTemplate.convertAndSend("/status/leaderboard", user);   ///topic/leaderboard   //user-Objekt = alle user nicht eine einzelne userid
     }
 }
