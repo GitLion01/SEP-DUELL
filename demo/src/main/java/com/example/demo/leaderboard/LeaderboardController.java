@@ -3,7 +3,9 @@ package com.example.demo.leaderboard;
 
 import com.example.demo.user.UserAccount;
 import lombok.AllArgsConstructor;
+import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,7 +22,9 @@ public class LeaderboardController {
     }
 
     @MessageMapping("/status")
-    public void updateUserStatus(Long userId, String status) {
+    public void updateUserStatus(@Header("userId") String userIdHeader, @Payload String status) {
+        Long userId =  Long.parseLong(userIdHeader);
+        System.out.println("aufgerufen");
         leaderboardService.updateUserStatus(userId, status);
     }
 }

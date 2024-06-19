@@ -25,11 +25,15 @@ const Startseite = () => {
       });
 
       stompClient.onConnect = () => {
-        console.log('Connected: ');
+        const offline="offline";
         stompClient.publish({
           destination: '/app/status',
-          body: JSON.stringify({ userId, status: 'offline' }),
+          body: JSON.stringify(offline),
+          headers: {
+            userId: userId.toString(),
+          },
         });
+        console.log('Disconnected: ');
         stompClient.deactivate();
       };
 
@@ -72,9 +76,6 @@ const Startseite = () => {
         </header>
         <main>
           <div className="centered-content">
-            <section className="spiel">
-              <a href="/spielen"><h2>SPIEL START</h2></a>
-            </section>
             <section className="meinprofile">
               <a href="/profil"><h2>MEIN PROFIL</h2></a>
             </section>
