@@ -1,0 +1,109 @@
+/* SwapModal.css */
+
+/* Overlay-Stil für das Modal, um den Hintergrund zu verdunkeln */
+.swap-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7); /* Dunkler Hintergrund */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000; /* Über anderen Elementen */
+}
+
+/* Stil für den Inhalt des Modals */
+.swap-modal-content {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    max-width: 800px; /* Maximale Breite des Modals */
+    max-height: 90vh; /* Maximale Höhe des Modals */
+    width: 100%;
+    height: 90%;
+    overflow: auto;
+    z-index: 1100; /* Über anderen Elementen */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Titelstil im Modal */
+.swap-modal-content h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 1.5em;
+    color: #333;
+}
+
+/* Stil für den Container der Karten auf dem Feld */
+.field-cards {
+    margin-bottom: 20px;
+    width: 100%;
+}
+
+.field-cards h4 {
+    margin-bottom: 10px;
+    font-size: 1.2em;
+    color: #333;
+}
+
+/* Kartencontainer im Modal */
+.field-cards .card-slot,
+.hand-cards .card {
+    width: 120px;
+    height: 180px;
+    margin: 5px;
+    cursor: pointer;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+    display: inline-block;
+}
+
+.field-cards .card-slot:hover,
+.hand-cards .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Ausgewählte Karten hervorheben */
+.card.selected,
+.card-slot.selected {
+    border: 2px solid red;
+}
+
+/* Stil für den Container der Handkarten */
+.hand-cards {
+    margin-bottom: 20px;
+    width: 100%;
+}
+
+.hand-cards h4 {
+    margin-bottom: 10px;
+    font-size: 1.2em;
+    color: #333;
+}
+
+/* Button-Stile */
+.swap-modal-content button {
+    background: #ffbb00;
+    color: #000;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.3s;
+    margin: 5px;
+}
+
+.swap-modal-content button:hover {
+    background: #ff9900;
+    transform: translateY(-3px);
+}
