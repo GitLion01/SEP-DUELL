@@ -2,14 +2,13 @@
 import React from 'react';
 import Modal from 'react-modal';
 import Card from "../card";
+import './SwapModal.css';
 
 const SwapModal = ({ isOpen, onRequestClose, onConfirm, title, selectedCards, setSelectedCards, playerCards, selectedHandCard, handCards, setSelectedHandCard, requiredFieldCards }) => {
     const toggleSelectCard = (Id) => {
         setSelectedCards((prevSelected) =>
             prevSelected.includes(Id) ? prevSelected.filter(cardId => cardId !== Id) : [...prevSelected, Id]
-
         );
-        console.log(selectedCards);
     };
 
     return (
@@ -28,7 +27,7 @@ const SwapModal = ({ isOpen, onRequestClose, onConfirm, title, selectedCards, se
                         key={playerCard.id}
                         className={`card-slot ${selectedCards.includes(playerCard.id) ? 'selected' : ''}`}
                     >
-                        <Card card={playerCard} onCardClick={() => toggleSelectCard(playerCard.id)}/>
+                        <Card card={playerCard} onCardClick={() => toggleSelectCard(playerCard.id)} />
                     </div>
                 ))}
             </div>
@@ -39,7 +38,7 @@ const SwapModal = ({ isOpen, onRequestClose, onConfirm, title, selectedCards, se
                         key={playerCard.id}
                         className={`card ${playerCard.id === selectedHandCard ? 'selected' : ''}`}
                     >
-                        <Card card={playerCard} onCardClick={() => setSelectedHandCard(playerCard.id)}/>
+                        <Card card={playerCard} onCardClick={() => setSelectedHandCard(playerCard.id)} />
                     </div>
                 ))}
             </div>
