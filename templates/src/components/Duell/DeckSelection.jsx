@@ -4,7 +4,7 @@ import axios from 'axios';
 import { WebSocketContext} from "../../WebSocketProvider";
 
 const  DeckSelection = () => {
-  const { client, setGame, users, setUsers } = useContext(WebSocketContext); // Verwende den Kontext
+  const { client, setGame, users, setUsers, connected } = useContext(WebSocketContext); // Verwende den Kontext
   const [decks, setDecks] = useState([]);
   const [selectedDeck, setSelectedDeck] = useState(null);
   const [id, setId] = useState(null);
@@ -25,7 +25,7 @@ const  DeckSelection = () => {
 
   useEffect(() => {
     const loadDecks = async () => {
-      if (id) {
+      if (id && connected) {
         try {
           const decksResponse = await axios.get(`http://localhost:8080/decks/getUserDecks/${id}`);
           console.log('Received decks:', decksResponse.data);
@@ -36,10 +36,10 @@ const  DeckSelection = () => {
       }
     };
     loadDecks();
-  }, [id]);
+  }, [id, connected]);
 
   useEffect(() => {
-    if (client && client.connected) {
+    if (client && connected) {
       const subscription = client.subscribe(`/user/${id}/queue/selectDeck`, (message) => {
         const response = JSON.parse(message.body);
         /*
@@ -64,7 +64,7 @@ const  DeckSelection = () => {
 
       return () => subscription.unsubscribe(); // Cleanup function
     }
-  }, [client, id, gameId, navigate]);
+  }, [client, id, gameId, navigate, connected]);
 
   // Überwachung der Statusänderungen von game und users
 

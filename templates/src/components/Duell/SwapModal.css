@@ -41,6 +41,7 @@
 }
 
 /* Stil für den Container der Karten auf dem Feld */
+
 .field-cards {
     margin-bottom: 20px;
     width: 100%;
@@ -55,9 +56,9 @@
 /* Kartencontainer im Modal */
 .field-cards .card-slot,
 .hand-cards .card {
-    width: 120px;
-    height: 180px;
-    margin: 5px;
+    width: 170px;
+    height: 300px;
+    margin: 0px;
     cursor: pointer;
     border-radius: 8px;
     overflow: hidden;
