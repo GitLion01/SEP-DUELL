@@ -188,9 +188,9 @@ public class GameService {
             }
         }
         if (allPlayersReady) {
+            game.resetTimer();
             game.setReady(true);
         }
-        game.resetTimer();
         System.out.println("ALLE READY");
 
         playerStateRepository.save(user.getPlayerState());
