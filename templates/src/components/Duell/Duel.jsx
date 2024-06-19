@@ -60,7 +60,7 @@ const Duel = () => {
       console.log('playerState nach initial', playerState);
       console.log('opponent state nach intial: ', opponentState);
     }
-  }, [id, users, game]);
+  }, [id, users, game, connected]);
 
   useEffect(() => {
     if (client && connected && id) {
@@ -140,6 +140,8 @@ const Duel = () => {
   };
 
   const handleEndTurn = () => {
+
+    console.log("Karten im Deck: ", playerState.deckClone.length);
 
     if (users[currentTurn].id !== parseInt(id)) {
       toast.warning("Du bist nicht am Zug");
@@ -225,8 +227,8 @@ const Duel = () => {
 
   const selectAttackingCard = (Id) => {
     //if (isAttackMode) {
-      setSelectedAttacker(Id);
-      console.log("angreifende karte wird ausgewählt: ", id);
+    setSelectedAttacker(Id);
+    console.log("angreifende karte wird ausgewählt: ", id);
     //}
   };
 
@@ -246,9 +248,9 @@ const Duel = () => {
 
   const selectTargetCard = (Id) => {
     //if (isAttackMode) {
-      setSelectedTarget(Id);
-      console.log("jetzt wird die karte angegriffen ", selectedTarget);
-      //handleAttack(); // Führe Angriff aus, wenn Ziel ausgewählt ist
+    setSelectedTarget(Id);
+    console.log("jetzt wird die karte angegriffen ", selectedTarget);
+    //handleAttack(); // Führe Angriff aus, wenn Ziel ausgewählt ist
     //}
   };
 
@@ -299,14 +301,14 @@ const Duel = () => {
       return;
     }
 
-    if (playerState.deckClone.length === 0 && users[currentTurn].id === parseInt(id)) {
+    if (playerState.deckClone.length < 1) {
       toast.error("Deck leer");
       return;
     }
-    if (cardDrawn && users[currentTurn].id === parseInt(id)) {
+    if (cardDrawn) {
       toast.warning("Karte bereits gezogen");
+      return;
     }
-    if (!cardDrawn) {
       client.publish({
         destination: '/app/drawCard',
         body: JSON.stringify({
@@ -314,12 +316,8 @@ const Duel = () => {
           userId: id
         })
       })
+      setCardDrawn(true);
       console.log("cardDrawn", cardDrawn);
-      if(users[currentTurn].id === parseInt(id)) {
-        setCardDrawn(true);
-      }
-    }
-    else { toast.error("Karte bereits gezogen");}
   }
 
   const handleRareSwap = () => {
@@ -336,7 +334,7 @@ const Duel = () => {
     }
 
     if (hasAttacked) {
-      toast.error("Sie haben schon angegriffen");
+      toast.error("Sie dürfen nach einem Angriff keine Karte setzen");
       return;
     }
     console.log(selectedHandCard);
@@ -411,42 +409,13 @@ const Duel = () => {
 
   return (
       <div className="duel-container">
-        <div className="timer">
-          <h4>{timer} seconds</h4>
-        </div>
-        <div className="currentTurn">
-          <h4>{users[currentTurn]?.username}</h4>
-        </div>
-        <div className="player-actions">
-          <button onClick={() => handleDrawCard()}>Karte Ziehen</button>
-          <button onClick={() => setIsSetCardMode(true)}>Karte einsetzen</button>
-          <button onClick={() => handleAttack()}>Angreifen</button>
-          <button onClick={() => setIsRareSwapMode(true)}>Rare Swap</button>
-          <button onClick={() => setIsLegendarySwapMode(true)}>Legendary Swap</button>
-          <button onClick={handleEndTurn}>End Turn</button>
-        </div>
-        <div className="field">
-          <div className="field-row opponent-field">
-            {opponentState?.fieldCards?.map((playerCard) => (
-                <div key={playerCard.id} className="card-slot">
-                  <Card card={playerCard} onCardClick={() => selectTargetCard(playerCard.id)}/>
-                </div>
-            ))}
+        <div className="timer-and-turn">
+          <div className="timer">
+            <h4>{timer} seconds</h4>
           </div>
-          <div className="field-row player-field">
-            {playerState?.fieldCards?.map((playerCard) => (
-                <div key={playerCard.id} className="card-slot">
-                  <Card card={playerCard} onCardClick={() => selectAttackingCard(playerCard.id)}/>
-                </div>
-            ))}
+          <div className="current-turn">
+            <h4>{users[currentTurn]?.username}</h4>
           </div>
-        </div>
-        <div className="hand player-hand">
-          {playerState?.handCards?.map((playerCard) => (
-              <div key={playerCard.id} className="card">
-                <Card card={playerCard} onCardClick={() => handleSetCard(playerCard.id)}/>
-              </div>
-          ))}
         </div>
         <div className="life-points">
           <div className="opponent-lp">
@@ -455,6 +424,37 @@ const Duel = () => {
           <div className="player-lp">
             <h4>LP: {playerState?.lifePoints}</h4>
           </div>
+        </div>
+        <div className="field">
+          <div className="field-row opponent-field">
+            {opponentState?.fieldCards?.slice().reverse().map((playerCard) => (
+                <div key={playerCard.id} className="card-slot">
+                  <Card className="duel-card opponent-card" card={playerCard} onCardClick={() => selectTargetCard(playerCard.id)} />
+                </div>
+            ))}
+          </div>
+          <div className="field-row player-field">
+            {playerState?.fieldCards?.map((playerCard) => (
+                <div key={playerCard.id} className="card-slot">
+                  <Card className="duel-card" card={playerCard} onCardClick={() => selectAttackingCard(playerCard.id)} />
+                </div>
+            ))}
+          </div>
+        </div>
+        <div className="hand player-hand">
+          {playerState?.handCards?.map((playerCard) => (
+              <div key={playerCard.id} className="card">
+                <Card className="duel-card" card={playerCard} onCardClick={() => handleSetCard(playerCard.id)} />
+              </div>
+          ))}
+        </div>
+        <div className="player-actions">
+          <button onClick={() => handleDrawCard()}>Karte Ziehen</button>
+          <button onClick={() => setIsSetCardMode(true)}>Karte einsetzen</button>
+          <button onClick={() => handleAttack()}>Angreifen</button>
+          <button onClick={() => setIsRareSwapMode(true)}>Rare Swap</button>
+          <button onClick={() => setIsLegendarySwapMode(true)}>Legendary Swap</button>
+          <button onClick={handleEndTurn}>End Turn</button>
         </div>
         <SwapModal
             isOpen={isRareSwapMode}
@@ -483,14 +483,17 @@ const Duel = () => {
             requiredFieldCards={3}
         />
         <StatisticsModal
-          isOpen={stats !== null}
-          onRequestClose={closeStatisticsModal}
-          stats={stats || {}}
-          users={users}
+            isOpen={stats !== null}
+            onRequestClose={closeStatisticsModal}
+            stats={stats || {}}
+            users={users}
         />
-        <ToastContainer/>
+        <ToastContainer />
       </div>
   );
+
+
+
 }
 
 export default Duel;
