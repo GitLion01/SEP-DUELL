@@ -47,7 +47,7 @@ public class GameService {
         List<Game> games = gameRepository.findAll();
         for (Game game : games) {
             game.decrementTimer();
-            if(game.getReady() && game.getRemaingTime() == 0){
+            if(game.getReady() && game.getRemaingTime() <= 0){
                 handleTimerExpiration(game);
             }
             sendTimerUpdate(game);
