@@ -24,7 +24,7 @@ const Notification = ({ senderId, senderName, receiverId, onAccept, onReject, me
             <p>{senderName} hat dich zu einem Duell herausgefordert!</p>
             <p>Verbleibende Zeit: {timeLeft} Sekunden</p>
             <button onClick={() => onAccept(senderId, senderName, receiverId)}>Akzeptieren</button>
-            <button onClick={() => onReject(senderId)}>Ablehnen</button>
+            <button onClick={() => onReject(receiverId, senderId)}>Ablehnen</button>
         </div>
     );
 };
