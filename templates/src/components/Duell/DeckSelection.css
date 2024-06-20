@@ -1,0 +1,57 @@
+/* DeckSelection.css */
+
+.deck-selection-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 20px;
+    color: #fff;
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(to bottom, #1e3c72, #2a5298);
+}
+
+h2 {
+    margin-bottom: 20px;
+    font-size: 2em;
+}
+
+.deck-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px; /* Abstand zwischen den Decks */
+}
+
+.deck {
+    background: #444;
+    padding: 15px 20px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.3s;
+    color: #fff;
+    font-size: 1.2em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 150px; /* Feste Breite für die Decks */
+    text-align: center;
+    word-wrap: break-word;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+}
+
+.deck:hover {
+    background: #555;
+    transform: translateY(-3px);
+}
+
+.deck.selected {
+    background: #ffbb00;
+    color: #000;
+}
+
+p {
+    margin-top: 20px;
+    font-size: 1.2em;
+}

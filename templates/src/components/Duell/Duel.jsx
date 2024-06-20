@@ -303,12 +303,16 @@ const Duel = () => {
 
     if (playerState.deckClone.length < 1) {
       toast.error("Deck leer");
+      setCardDrawn(true);
       return;
     }
+
     if (cardDrawn) {
       toast.warning("Karte bereits gezogen");
+      setCardDrawn(true);
       return;
     }
+
       client.publish({
         destination: '/app/drawCard',
         body: JSON.stringify({
