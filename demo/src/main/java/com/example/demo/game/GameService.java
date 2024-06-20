@@ -49,7 +49,7 @@ public class GameService {
         List<Game> games = gameRepository.findAll();
         for (Game game : games) {
             game.decrementTimer();
-            if(game.getReady() && game.getRemaingTime() <= 0){
+            if( game.getReady() && game.getRemaingTime() <= 0){
                 handleTimerExpiration(game);
             }
             sendTimerUpdate(game);
@@ -183,10 +183,12 @@ public class GameService {
         System.out.println("NACH SPEICHERN DES USERS");
         // überprüft ob in beiden PlayerStates der Spieler ready auf true gesetzt ist
         boolean allPlayersReady = true;
-        for (UserAccount userAccount : game.getUsers()) {
-            if (!userAccount.getPlayerState().getReady()) {
-                allPlayersReady = false;
-                break;
+        for (UserAccount userAccount : userAccountRepository.findAll()) {
+            if(game.getUsers().contains(userAccount)) {
+                if (!userAccount.getPlayerState().getReady()) {
+                    allPlayersReady = false;
+                    break;
+                }
             }
         }
         if (allPlayersReady) {
@@ -642,10 +644,6 @@ public class GameService {
 
         gameRepository.deleteFromGameUsersByUserIds(userIds);
         gameRepository.deleteById(gameId);
-
-        /*
-        leaderboardService.updateUserStatus(userIds.get(0),"online");
-        leaderboardService.updateUserStatus(userIds.get(1),"online");*/
     }
 
 }

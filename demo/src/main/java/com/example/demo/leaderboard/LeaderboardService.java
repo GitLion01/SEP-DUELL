@@ -3,6 +3,7 @@ package com.example.demo.leaderboard;
 import com.example.demo.game.GameRepository;            //für duell Status
 import com.example.demo.user.UserAccount;
 import com.example.demo.user.UserAccountRepository;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,7 @@ public class LeaderboardService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     public void updateUserStatus(Long userId, String status) {
         UserAccount user = userAccountRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
@@ -34,9 +36,12 @@ public class LeaderboardService {
             status = "im Duell";
             //game.getUsers().get(0).setStatus(status);
             //game.getUsers().get(1).setStatus(status);
-        }                                  //für duell Status bis
-
-        user.setStatus(status);
+        }
+        if(status.equals("\"onlineNachGame\"")) {
+            user.setStatus("online");
+        }
+        else
+            user.setStatus(status);
         userAccountRepository.save(user);
         messagingTemplate.convertAndSend("/status/leaderboard", user);   ///topic/leaderboard   //user-Objekt = alle user nicht eine einzelne userid
     }
