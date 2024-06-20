@@ -1,9 +1,6 @@
 package com.example.demo.game;
 import com.example.demo.game.requests.*;
-import com.example.demo.user.UserAccount;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -33,10 +30,6 @@ public class GameController {
 
     @MessageMapping("/selectDeck")
     public void selectDeck(@Payload DeckSelectionRequest request) {
-        System.out.println("CONTROLLER ERREICHT");
-        System.out.println("Deck ID: " + request.getDeckId());
-        System.out.println("User ID: " + request.getUserId());
-        System.out.println("Game ID: " + request.getGameId());
         gameService.selectDeck(request);
     }
 

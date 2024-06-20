@@ -46,6 +46,11 @@ export const WebSocketProvider = ({ children }) => {
                             setNotifications(prev => prev.filter(n => !(n.senderId === notification.senderId && n.message === 'challenge')));
                             window.dispatchEvent(new CustomEvent('challengeRejected')); 
                         }
+                        if(notification.message === 'schon aktiviert')
+                        {
+                            setActiveDuel(false);
+                            console.log(notification.message);
+                        }
                     });
 
                     // Subscribe für globale Herausforderung
