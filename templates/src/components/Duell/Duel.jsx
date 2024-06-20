@@ -402,6 +402,15 @@ const Duel = () => {
   };
 
   const closeStatisticsModal = () => {
+    console.log("bevor status gesendet");
+    client.publish({
+      destination: '/status/status',
+      body: JSON.stringify("onlineNachGame"),
+      headers:{
+        'userId': id.toString()
+      }
+    })
+    console.log("status gesendet");
     sessionStorage.removeItem('game');
     sessionStorage.removeItem('users');
     navigate('/startseite')
