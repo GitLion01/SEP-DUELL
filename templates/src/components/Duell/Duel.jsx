@@ -85,6 +85,7 @@ const Duel = () => {
   }, [id])
 
 
+
   useEffect(() => {
     if (client && connected && id) {
       const subscription = client.subscribe(`/user/${id}/queue/game`, (message) => {
@@ -314,19 +315,18 @@ const Duel = () => {
 
     if (cardDrawn) {
       toast.warning("Karte bereits gezogen");
-      setCardDrawn(true);
       return;
     }
 
-      client.publish({
-        destination: '/app/drawCard',
-        body: JSON.stringify({
-          gameId: gameId,
-          userId: id
-        })
+    client.publish({
+      destination: '/app/drawCard',
+      body: JSON.stringify({
+        gameId: gameId,
+        userId: id
       })
-      setCardDrawn(true);
-      console.log("cardDrawn", cardDrawn);
+    })
+    setCardDrawn(true);
+    console.log("cardDrawn", cardDrawn);
   }
 
   const handleRareSwap = () => {
@@ -411,7 +411,6 @@ const Duel = () => {
   };
 
   const closeStatisticsModal = () => {
-    console.log("bevor status gesendet");
     client.publish({
       destination: '/status/status',
       body: JSON.stringify("onlineNachGame"),
@@ -419,7 +418,6 @@ const Duel = () => {
         'userId': id.toString()
       }
     })
-    console.log("status gesendet");
     sessionStorage.removeItem('game');
     sessionStorage.removeItem('users');
     navigate('/startseite')

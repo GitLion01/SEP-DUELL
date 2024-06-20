@@ -12,8 +12,8 @@ const GlobalNotification = () => {
         console.log(duelAcceptedNotification)
         if (duelAcceptedNotification) {
         const senderName = duelAcceptedNotification.senderName;
-        const receiverId = duelAcceptedNotification.receiverId
-        createGame(receiverId, senderName)
+        const receiverId = duelAcceptedNotification.receiverId;
+        createGame(receiverId, senderName);
         }
         else {
             alert('Es ist ein Fehler aufgetreten')

@@ -3,8 +3,8 @@ import com.example.demo.cards.Card;
 import com.example.demo.cards.Rarity;
 import com.example.demo.decks.Deck;
 import com.example.demo.decks.DeckRepository;
+import com.example.demo.duellHerausforderung.Notification;
 import com.example.demo.game.requests.*;
-import com.example.demo.leaderboard.LeaderboardService;
 import com.example.demo.user.UserAccount;
 import com.example.demo.user.UserAccountRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +25,6 @@ public class GameService {
     private final SimpMessagingTemplate messagingTemplate;
     private final PlayerStateRepository playerStateRepository;
     private final PlayerCardRepository playerCardRepository;
-    private final LeaderboardService leaderboardService;
 
     @Autowired
     public GameService(GameRepository gameRepository,
@@ -33,14 +32,13 @@ public class GameService {
                        UserAccountRepository userAccountRepository,
                        SimpMessagingTemplate messagingTemplate,
                        PlayerStateRepository playerStateRepository,
-                       PlayerCardRepository playerCardRepository, LeaderboardService leaderboardService)  {
+                       PlayerCardRepository playerCardRepository)  {
         this.gameRepository = gameRepository;
         this.deckRepository = deckRepository;
         this.userAccountRepository = userAccountRepository;
         this.messagingTemplate = messagingTemplate;
         this.playerStateRepository = playerStateRepository;
         this.playerCardRepository = playerCardRepository;
-        this.leaderboardService = leaderboardService;
     }
 
 
@@ -115,21 +113,19 @@ public class GameService {
 
         for(UserAccount user : newGame.getUsers()) {
             messagingTemplate.convertAndSendToUser(user.getId().toString(), "/queue/create", Arrays.asList(newGame, users));
+            System.out.println("gesendet-----------------");
+            Notification notification = new Notification(user.getId(),0L,userAccountRepository.findById(user.getId()).get().getUsername(),"schon aktiviert");
+            messagingTemplate.convertAndSendToUser(user.getId().toString(),"/queue/notifications",notification);
         }
     }
 
     @Transactional
     public void selectDeck(DeckSelectionRequest request) {
-        System.out.println("SERVICE ERREICHT");
-        System.out.println("Deck ID: " + request.getDeckId());
-        System.out.println("User ID: " + request.getUserId());
-        System.out.println("Game ID: " + request.getGameId());
         Optional<Game> optionalGame = gameRepository.findById(request.getGameId());
         Optional<Deck> optionalDeck = deckRepository.findByDeckIdAndUserId(request.getDeckId(), request.getUserId());
         if(optionalGame.isEmpty() || optionalDeck.isEmpty()) {
             return;
         }
-        System.out.println("Game und Deck vorhanden");
         Game game = optionalGame.get();
         Deck deck = optionalDeck.get();
         List<Card> cards = deck.getCards();

@@ -73,7 +73,7 @@ const  DeckSelection = () => {
   // Überwachung der Statusänderungen von game und users
 
   const handleSelectDeck = (deckId) => {
-    if (client && client.connected) { // Überprüfe, ob client existiert und verbunden ist
+    if (client && client.connected && selectedDeck===null) { // Überprüfe, ob client existiert und verbunden ist
       console.log("GESENDETE DECKID: ", deckId);
       setSelectedDeck(deckId);
       client.publish({
