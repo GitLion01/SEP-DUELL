@@ -41,7 +41,6 @@
 }
 
 /* Stil für den Container der Karten auf dem Feld */
-
 .field-cards {
     margin-bottom: 20px;
     width: 100%;
@@ -91,7 +90,7 @@
     color: #333;
 }
 
-/* Button-Stile */
+/* Button-Stile für allgemeine Modalaktionen */
 .swap-modal-content button {
     background: #ffbb00;
     color: #000;
@@ -107,4 +106,20 @@
 .swap-modal-content button:hover {
     background: #ff9900;
     transform: translateY(-3px);
+}
+
+/* Button-Stile für die Buttons innerhalb der Karten */
+.swap-modal-content .btn.btn-primary.btn-sm {
+    background-color: #007bff; /* Blau */
+    color: white;
+    border: none;
+    padding: 5px 10px; /* Kleinere Buttons */
+    font-size: 12px; /* Kleinere Schriftgröße */
+    border-radius: 4px;
+    transition: background 0.3s, transform 0.3s;
+}
+
+.swap-modal-content .btn.btn-primary.btn-sm:hover {
+    background-color: #0056b3; /* Dunkleres Blau beim Hover */
+    transform: translateY(-2px);
 }

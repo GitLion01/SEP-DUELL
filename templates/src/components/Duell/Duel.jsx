@@ -24,7 +24,7 @@ const Duel = () => {
   const [isLegendarySwapMode, setIsLegendarySwapMode] = useState(false);
   const [selectedAttacker, setSelectedAttacker] = useState(null);
   const [selectedTarget, setSelectedTarget] = useState(null);
-  const [currentTurn, setCurrentTurn] = useState(game?.currentTurn || 0);
+  const [currentTurn, setCurrentTurn] = useState(game?.currentTurn);
   const [cardDrawn, setCardDrawn] = useState(false);
   const [hasAttacked, setHasAttacked] = useState(false);
   const [selectedCards, setSelectedCards] = useState([]);
@@ -46,6 +46,7 @@ const Duel = () => {
       console.log('user: ', users);
       const currentUser = users.find(user => user.id === parseInt(id));
       const opponentUser = users.find(user => user.id !== parseInt(id));
+      setCurrentTurn(game.currentTurn);
 
       if (currentUser) {
         setPlayerState(currentUser.playerState);
@@ -55,12 +56,13 @@ const Duel = () => {
       }
       resetAttackMode();
       setCardDrawn(false);
+
       // setCurrentTurn(game.currentTurn); // initialisieren Sie den currentTurn
 
       console.log('playerState nach initial', playerState);
       console.log('opponent state nach intial: ', opponentState);
     }
-  }, [id, users, game, connected]);
+  }, [id, connected]);
 
   useEffect(() => {
     if (client && connected && id) {
@@ -96,6 +98,9 @@ const Duel = () => {
         if (response.length === 2) {
           const currentUser = response[1].find(user => user.id === parseInt(id));
           const opponentUser = response[1].find(user => user.id !== parseInt(id));
+
+          setGame(response[0]);
+          setUsers(response[1]);
 
           if (currentUser) {
             setPlayerState(currentUser.playerState);
@@ -303,12 +308,16 @@ const Duel = () => {
 
     if (playerState.deckClone.length < 1) {
       toast.error("Deck leer");
+      setCardDrawn(true);
       return;
     }
+
     if (cardDrawn) {
       toast.warning("Karte bereits gezogen");
+      setCardDrawn(true);
       return;
     }
+
       client.publish({
         destination: '/app/drawCard',
         body: JSON.stringify({

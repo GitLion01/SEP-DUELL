@@ -2,6 +2,7 @@ import React, {useState, useEffect, useContext} from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { WebSocketContext} from "../../WebSocketProvider";
+import './DeckSelection.css'
 
 const  DeckSelection = () => {
   const { client, setGame, users, setUsers, connected } = useContext(WebSocketContext); // Verwende den Kontext
@@ -49,7 +50,10 @@ const  DeckSelection = () => {
 
          */
 
+        setGame(response[0]);
         setUsers(response[1]);
+        sessionStorage.setItem('game', JSON.stringify(response[0]));
+        sessionStorage.setItem('users', JSON.stringify(response[1]));
 
 
         console.log('Users in game: ', response[1]);
