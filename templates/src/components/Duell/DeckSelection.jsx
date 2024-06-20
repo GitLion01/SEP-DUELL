@@ -50,7 +50,10 @@ const  DeckSelection = () => {
 
          */
 
+        setGame(response[0]);
         setUsers(response[1]);
+        sessionStorage.setItem('game', JSON.stringify(response[0]));
+        sessionStorage.setItem('users', JSON.stringify(response[1]));
 
 
         console.log('Users in game: ', response[1]);
