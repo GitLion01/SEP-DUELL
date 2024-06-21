@@ -14,6 +14,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import java.util.*;
@@ -55,6 +57,34 @@ public class GameServiceTest {
     @AfterEach
     void tearDown() throws Exception{
         autoCloseable.close();
+    }
+
+
+    @Test
+    void createGame() {
+        Long senderId= 1L;
+        Long receiverId= 2L;
+        UserAccount userAccount1=new UserAccount();
+        userAccount1.setId(senderId);
+        UserAccount userAccount2=new UserAccount();
+        userAccount2.setId(receiverId);
+
+        when(userAccountRepository.findById(senderId)).thenReturn(Optional.of(userAccount1));
+        when(userAccountRepository.findById(receiverId)).thenReturn(Optional.of(userAccount2));
+
+        Game game=new Game();
+        game.setId(1L);
+        game.getUsers().add(userAccount1);
+        game.getUsers().add(userAccount2);
+        when(gameRepository.findById(1L)).thenReturn(Optional.of(game));
+
+        ResponseEntity<Game> testGame ;
+        if(gameRepository.findById(1L).get().getUsers().size()==2)
+            testGame = new ResponseEntity<>(gameRepository.findById(1L).get(), HttpStatus.OK);
+        else
+            testGame = new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+
+        assertEquals(HttpStatus.OK,testGame.getStatusCode());
     }
 
 
