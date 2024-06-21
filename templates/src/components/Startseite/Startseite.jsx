@@ -27,7 +27,7 @@ const Startseite = () => {
       stompClient.onConnect = () => {
         const offline="offline";
         stompClient.publish({
-          destination: '/status/status',
+          destination: '/app/status',
           body: JSON.stringify(offline),
           headers: {
             userId: userId.toString(),
@@ -70,12 +70,12 @@ const Startseite = () => {
           <div className="logout-button">
             <button onClick={handleLogout}>Abmelden</button>
           </div>
-          <div className="leaderboard-button">
-            <button onClick={() => navigate('/leaderboard')}>Leaderboard</button>
-          </div>
         </header>
-        <main>
+        <main>  
           <div className="centered-content">
+          <section className="Leaderboard">
+              <a href="/leaderboard"><h2>LEADERBOARD<br />(Spiel starten)</h2></a>
+            </section>
             <section className="meinprofile">
               <a href="/profil"><h2>MEIN PROFIL</h2></a>
             </section>
