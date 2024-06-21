@@ -1,6 +1,4 @@
 package com.example.demo.leaderboard;
-
-import com.example.demo.chat.ChatService;
 import com.example.demo.game.Game;
 import com.example.demo.game.GameRepository;
 import com.example.demo.user.UserAccount;
