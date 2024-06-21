@@ -43,7 +43,7 @@ function ChatPage() {
   };
 
   const handleCreateGroup = async (newGroup) => {
-    const response = await fetch(`http://localhost:8080/create.group?groupName=${encodeURIComponent(newGroup.name)}`, {
+    const response = await fetch(`http://localhost:8080/create.group?groupName=${encodeURIComponent(newGroup.name)}`, { //(?)
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

@@ -31,8 +31,8 @@ function ChatWindow({ chatTarget, type, chatId }) {
         const data = await response.json();
         const normalizedMessages = data.map(normalizeMessage);
         const sortedMessages = normalizedMessages
-          .filter(message => message.chat.id === chatId)
-          .sort((a, b) => a.id - b.id);
+          .filter(message => message.chat.id === chatId)    
+          .sort((a, b) => a.id - b.id);   //Die Nachrichten werden dadurch soritert. 
         setMessages(sortedMessages);
       } else {
         console.error('Failed to fetch messages:', response.statusText);
@@ -42,11 +42,11 @@ function ChatWindow({ chatTarget, type, chatId }) {
     }
   };
 
-  useEffect(() => {
+  useEffect(() => { //?
     if (chatClient && chatId) {
       const subscription = chatClient.subscribe(`/user/${userId}/queue/messages`, (message) => {
         const messageBody = message.body;
-        const messageObject = JSON.parse(messageBody);
+        const messageObject = JSON.parse(messageBody); //JSON.parse erklären
         if (messageObject.onChat === "on Chat") {
           const message = {
             id: messageObject.id,
@@ -69,7 +69,7 @@ function ChatWindow({ chatTarget, type, chatId }) {
           if (normalizedMessage && normalizedMessage.chat.id === chatId) {
             setMessages((prevMessages) => {
               const messageIndex = prevMessages.findIndex(msg => msg.id === normalizedMessage.id);
-              if (messageIndex !== -1) {
+              if (messageIndex !== -1) { 
                 console.log(messages);
                 const updatedMessages = [...prevMessages];
                 updatedMessages[messageIndex] = normalizedMessage;
