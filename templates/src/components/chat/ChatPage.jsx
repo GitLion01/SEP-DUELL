@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from 'react'; // Zustönde verwalten, 
 import FriendListForChat from './FriendListForChat';
 import ChatWindow from './ChatWindow';
 import CreateGroupForm from './CreateGroupForm';

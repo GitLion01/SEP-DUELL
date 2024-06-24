@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useRef } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react'; //Zustände verwalten, ,WebsocketClient zugreifen, 
 import { WebSocketContext } from "../../WebSocketProvider";
 import './ChatWindow.css';
 import './ChatBubble.css';
@@ -11,7 +11,7 @@ function ChatWindow({ chatTarget, type, chatId }) {
   const { chatClient } = useContext(WebSocketContext);
   const messagesEndRef = useRef(null);
 
-  const normalizeMessage = (message) => {
+  const normalizeMessage = (message) => { //formatiert Nachrichten in einer einheitlichen Struktur
     if (!message.senderId || !message.chatId) {
       return null;
     }
@@ -28,7 +28,7 @@ function ChatWindow({ chatTarget, type, chatId }) {
     try {
       const response = await fetch(`http://localhost:8080/get.messages?chatId=${chatId}&userID=${userId}`);
       if (response.ok) {
-        const data = await response.json();
+        const data = await response.json(); //konvertiert die Anwort von JSON-formatierten Text in ein JavaScript-Objekt um 
         const normalizedMessages = data.map(normalizeMessage);
         const sortedMessages = normalizedMessages
           .filter(message => message.chat.id === chatId)    
@@ -46,7 +46,7 @@ function ChatWindow({ chatTarget, type, chatId }) {
     if (chatClient && chatId) {
       const subscription = chatClient.subscribe(`/user/${userId}/queue/messages`, (message) => {
         const messageBody = message.body;
-        const messageObject = JSON.parse(messageBody); //JSON.parse erklären
+        const messageObject = JSON.parse(messageBody); //JSON-String-Nachricht in ein JavaSript-Objekt zu konvertieren
         if (messageObject.onChat === "on Chat") {
           const message = {
             id: messageObject.id,
@@ -56,7 +56,7 @@ function ChatWindow({ chatTarget, type, chatId }) {
           };
           chatClient.publish({
             destination: '/chat/onChat',
-            body: JSON.stringify(message),
+            body: JSON.stringify(message), //in einen JSON-String konvertieren
             headers: {
               'userId': userId.toString(),
               'chatId': chatId.toString()

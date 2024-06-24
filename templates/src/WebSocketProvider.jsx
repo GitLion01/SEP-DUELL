@@ -4,7 +4,7 @@ import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { toast } from 'react-toastify';
 
-export const WebSocketContext = createContext();
+export const WebSocketContext = createContext(); 
 
 export const WebSocketProvider = ({ children }) => {
     const [client, setClient] = useState(null);
@@ -29,7 +29,7 @@ export const WebSocketProvider = ({ children }) => {
                 console.log('Connected to WebSocket server');
 
                 // Überprüfung, ob der Client verbunden ist
-                if (newClient.connected) {
+                if (newClient.connected) {  
                     // Subscribe für Benachrichtigung
                     newClient.subscribe(`/user/${userId}/queue/notifications`, (message) => {
                         const notification = JSON.parse(message.body);
