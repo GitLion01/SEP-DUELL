@@ -10,7 +10,7 @@ import StatisticsModal from "./StatisticsModal";
 
 const Duel = () => {
   const navigate = useNavigate();
-  const { client, game, setGame, users, setUsers, connected } = useContext(WebSocketContext);
+  const { client, game, setGame, users, setUsers, connected } = useContext(WebSocketContext); // Daten aus dem Kontext
   const [id, setId] = useState(null);
   const gameId = localStorage.getItem('gameId');
   const [timer, setTimer] = useState(120);
@@ -32,7 +32,7 @@ const Duel = () => {
   const [stats, setStats] = useState(null);
 
 
-
+  // user ID abrufen
   useEffect(() => {
     if (id === null) {
       setId(localStorage.getItem('id'));
@@ -56,8 +56,6 @@ const Duel = () => {
       }
       resetAttackMode();
       setCardDrawn(false);
-
-      // setCurrentTurn(game.currentTurn); // initialisieren Sie den currentTurn
 
       console.log('playerState nach initial', playerState);
       console.log('opponent state nach intial: ', opponentState);
@@ -85,14 +83,14 @@ const Duel = () => {
   }, [id])
 
 
-
+  // Game Kanal
   useEffect(() => {
     if (client && connected && id) {
       const subscription = client.subscribe(`/user/${id}/queue/game`, (message) => {
         const response = JSON.parse(message.body);
         console.log("Response: ", response);
 
-        // Speichern des Spiels und der Benutzer im Speicher
+        // Speichern des Spiels und der Benutzer im Webspeicher
         sessionStorage.setItem('game', JSON.stringify(response[0]));
         sessionStorage.setItem('users', JSON.stringify(response[1]));
 
@@ -114,6 +112,7 @@ const Duel = () => {
           console.log("Gegner feld nach Angriff: ", opponentUser.playerState.fieldCards);
         }
 
+        // Empfangene Daten beim Ende des Duells verarbeiten
         if (response.length > 3) {
           const [_, __, sepCoins, leaderBoardPointsWinner, leaderBoardPointsLoser, damageWinner, damageLoser, cardsPlayedA, cardsPlayedB, sacrificedA, sacrificedB] = response;
           setStats({
@@ -141,10 +140,12 @@ const Duel = () => {
   }, [client, connected, id]);
 
 
+  //nicht verwendet
   const resetTimer = () => {
     setTimer(120);
   };
 
+  // Zug beenden
   const handleEndTurn = () => {
 
     console.log("Karten im Deck: ", playerState.deckClone.length);
@@ -181,7 +182,6 @@ const Duel = () => {
       });
     }
   };
-
 
   const handleAttack = () => {
 
@@ -224,40 +224,31 @@ const Duel = () => {
           }),
         });
         setHasAttacked(true);
-        //}
       }
     }
-
-
   }
 
   const selectAttackingCard = (Id) => {
-    //if (isAttackMode) {
     setSelectedAttacker(Id);
     console.log("angreifende karte wird ausgewählt: ", id);
-    //}
   };
 
   useEffect(() => {
     if (selectedAttacker !== null) {
       console.log('Selected Attacker:', selectedAttacker);
-      // Führe hier weitere Logik aus, wenn erforderlich
     }
   }, [selectedAttacker]);
 
   useEffect(() => {
     if (selectedTarget !== null) {
       console.log('Selected Target:', selectedTarget);
-      // Führe hier weitere Logik aus, wenn erforderlich
     }
   }, [selectedTarget]);
 
   const selectTargetCard = (Id) => {
-    //if (isAttackMode) {
     setSelectedTarget(Id);
     console.log("jetzt wird die karte angegriffen ", selectedTarget);
-    //handleAttack(); // Führe Angriff aus, wenn Ziel ausgewählt ist
-    //}
+
   };
 
   const handleSetCard = (Id) => {
@@ -293,20 +284,24 @@ const Duel = () => {
     }
   };
 
+  //Angriffsmodus und Zustände zurücksetzen
   const resetAttackMode = () => {
     setIsAttackMode(false);
     setSelectedAttacker(null);
     setSelectedTarget(null);
   };
 
+  //Karte ziehen
   const handleDrawCard = () => {
 
+    // Ist Spieler am Zug?
     if (users[currentTurn].id !== parseInt(id)) {
       toast.warning("Du bist nicht am Zug");
       resetAttackMode();
       return;
     }
 
+    // Hat Spieler Karten?
     if (playerState.deckClone.length < 1) {
       toast.error("Deck leer");
       setCardDrawn(true);
