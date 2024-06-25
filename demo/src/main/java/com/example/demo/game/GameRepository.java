@@ -14,8 +14,6 @@ import java.util.Optional;
 @Repository
 public interface GameRepository extends JpaRepository<Game, Long> {
 
-    Optional<Game> findByidAndId(Long Id, Long userID);
-
     boolean existsByUsersContaining(UserAccount user);
 
     @Modifying
@@ -23,8 +21,9 @@ public interface GameRepository extends JpaRepository<Game, Long> {
     @Query(value = "DELETE FROM game_users WHERE user_id IN (:userIds)", nativeQuery = true)
     void deleteFromGameUsersByUserIds(@Param("userIds") List<Long> userIds);
 
+    /*
     @Modifying
     @Transactional
     @Query(value = "DELETE FROM game WHERE id IN (SELECT game_id FROM game_users WHERE user_id IN (:userIds))", nativeQuery = true)
-    void deleteGamesByUserIds(@Param("userIds") List<Long> userIds);
+    void deleteGamesByUserIds(@Param("userIds") List<Long> userIds);*/
 }

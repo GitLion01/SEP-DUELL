@@ -54,12 +54,6 @@ public class ChatController {
         chatService.sendMessage(chatMessage,userId,ChatId);
     }
 
-    /*@MessageMapping("/send-group-message")
-    public void sendGroupMessage(@Payload ChatMessage chatMessage)
-    {
-        chatService.sendGroupMessage(chatMessage);
-    }*/
-
     @MessageMapping("/editMessage")
     public void editMessage(@Payload ChatMessage chatMessage)
     {
