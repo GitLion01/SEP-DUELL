@@ -21,6 +21,7 @@ public class Game {
     private Boolean ready = false;
     private Boolean firstRound = true;
     private Integer timeLeft = 120;
+    private Boolean streamed = true;
 
     @OneToMany(fetch = FetchType.EAGER)
     @JoinTable(

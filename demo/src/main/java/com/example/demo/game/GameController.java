@@ -1,10 +1,15 @@
 package com.example.demo.game;
 import com.example.demo.game.requests.*;
 import lombok.AllArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+import java.util.Optional;
 
 @CrossOrigin
 @RestController
@@ -14,10 +19,16 @@ public class GameController {
     private final GameService gameService;
 
 
-     // "/all/create" oder "/specific/create"
-     // Mapped als "/app/private": Antworten werden an alle User gesendet, die diesen Endbunkt subscribed haben
-
-
+    @GetMapping(path = "/streams")
+    //Gibt spiele zurück wo stream auf true ist und Game auf ready
+    public ResponseEntity<Optional<List<Game>>> getStreamedGames(){
+        Optional<List<Game>> optionalGames = gameService.getStreamedGames();
+        if(optionalGames.isPresent()){
+            return ResponseEntity.ok(optionalGames);
+        }else{
+            return ResponseEntity.notFound().build();
+        }
+    }
 
 
     @MessageMapping("/createGame")

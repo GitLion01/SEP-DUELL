@@ -42,8 +42,8 @@ public class GameService {
         this.playerCardRepository = playerCardRepository;
     }
 
-
-    @Scheduled(fixedRate = 1000)
+    //TODO: DIESEN KOMMENTAR NICHT LÖSCHEN!!!!!
+    /*@Scheduled(fixedRate = 1000)
     public void updateTimers(){
         List<Game> games = gameRepository.findAll();
         for (Game game : games) {
@@ -76,7 +76,7 @@ public class GameService {
         for(UserAccount player : game.getUsers()) {
             messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/timer", remainingTime);
         }
-    }
+    }*/
 
     public void createGame(CreateGameRequest request) {
         System.out.println("Creating game for users A:" + request.getUserA() + " and B:" + request.getUserB());
@@ -170,14 +170,7 @@ public class GameService {
             count++; // Inkrementiert den Zähler für die Anzahl der gezogenen Karten
         }
 
-        /*Iterator<PlayerCard> iterator = playerCards.iterator();
-        int count = 0;
-        while (iterator.hasNext() && count < 5) {
-            PlayerCard card = iterator.next(); // Hohlt die nächste Karte aus dem Deck
-            user.getPlayerState().getHandCards().add(card); // Fügt die Karte der Hand des Spielers hinzu
-            deckIndex++;
-            count++; // Inkrementiert den Zähler für die Anzahl der gezogenen Karten
-        }*/
+
         user.getPlayerState().getDeckClone().removeAll(cardsToRemove);
         System.out.println("VOR SPEICHERN DES USERS");
         playerStateRepository.save(user.getPlayerState());
@@ -234,12 +227,7 @@ public class GameService {
             handCards.add(deck.getUser().getPlayerState().getDeckClone().remove(0));
         }
 
-        /*Card card = deck.getCards().get(deckIndex);
-        deckIndex++;
-        PlayerCard playerCard = new PlayerCard();
-        playerCard.setCard(card);
-        handCards.add(cardInstance);
-        deck.getCards().remove(deck.getCards().get(0));*/
+
         playerStateRepository.save(userAccount.getPlayerState());
         gameRepository.save(game);
         List<UserAccount> users = game.getUsers();
@@ -575,50 +563,12 @@ public class GameService {
             messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", Arrays.asList(game, users, sepCoins, leaderBoardPointsWinner, leaderBoardPointsLoser,damageWinner, damageLoser, cardsPlayedA, cardsPlayedB, sacrificedA, sacrificedB));
         }
 
-        /*deleteUserGameData(Arrays.asList(user1.getId(), user2.getId()));*/
-        /*gameRepository.delete(game);*/
+
         List<Long> userIds=Arrays.asList(game.getUsers().get(0).getId(), game.getUsers().get(1).getId());
         deleteUserGameData(userIds, game.getId());
-        //TODO: Alle Daten zurücksetzten (Deck, Cards, etc)
     }
 
-    /*@Transactional
-    public void deleteGame(Long gameId) {
-        // Spiel laden
-        Game game = gameRepository.findById(gameId)
-                .orElseThrow(() -> new IllegalArgumentException("Game not found with id: " + gameId));
-        // Alle Benutzer des Spiels laden
-        List<UserAccount> users = game.getUsers();
-        // Verbindung zwischen Game und UserAccount aufheben
-        game.getUsers().clear();
-        gameRepository.save(game);
-        // Für jeden Benutzer die zugehörigen Handkarten löschen und PlayerState-Referenz auf null setzen
-        for (UserAccount user : users) {
-            PlayerState playerState = user.getPlayerState();
-            if (playerState != null) {
-                playerState.getHandCards().clear();
-                user.setPlayerState(null);
-                userAccountRepository.save(user);
-            }
-        }
-        // Spiel löschen
-        gameRepository.delete(game);
-        // Nun den Rest aufräumen: PlayerStates, PlayerCards und Deck löschen
-        for (UserAccount user : users) {
-            PlayerState playerState = user.getPlayerState();
-            if (playerState != null) {
-                // PlayerCards und Deck löschen
-                playerState.getFieldCards().clear();
-                playerState.getDeckClone().clear();
-                playerState.getCardsPlayed().clear();
-                if (playerState.getDeck() != null) {
-                    playerState.setDeck(null);
-                }
-                // PlayerState löschen
-                playerStateRepository.delete(playerState);
-            }
-        }
-    }*/
+
 
     @Modifying
     @Transactional
@@ -647,6 +597,10 @@ public class GameService {
 
         gameRepository.deleteFromGameUsersByUserIds(userIds);
         gameRepository.deleteById(gameId);
+    }
+
+    public Optional<List<Game>> getStreamedGames(){
+        return gameRepository.findAllStreams();
     }
 
 }

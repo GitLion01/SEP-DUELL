@@ -21,9 +21,8 @@ public interface GameRepository extends JpaRepository<Game, Long> {
     @Query(value = "DELETE FROM game_users WHERE user_id IN (:userIds)", nativeQuery = true)
     void deleteFromGameUsersByUserIds(@Param("userIds") List<Long> userIds);
 
-    /*
-    @Modifying
-    @Transactional
-    @Query(value = "DELETE FROM game WHERE id IN (SELECT game_id FROM game_users WHERE user_id IN (:userIds))", nativeQuery = true)
-    void deleteGamesByUserIds(@Param("userIds") List<Long> userIds);*/
+    @Query(value = "SELECT * FROM game where game.streamed = true AND game.ready = true", nativeQuery = true)
+    Optional<List<Game>> findAllStreams();
+
+
 }
