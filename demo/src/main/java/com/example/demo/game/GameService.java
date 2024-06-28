@@ -598,17 +598,18 @@ public class GameService {
         gameRepository.deleteById(gameId);
     }
 
-    /*public Optional<List<Game>> getStreamedGames(){
+    public Optional<List<Game>> getStreamedGames(){
         return gameRepository.findAllStreams();
-    }*/
+    }
 
-    public void getAllStreams(){
+    /*public void getAllStreams(){
         Optional<List<Game>> optionalGames = gameRepository.findAllStreams();
         if (optionalGames.isPresent()) {
             List<Game> games = optionalGames.get();
+            //TODO: Map benutzen wo gameIds und jeweilige usernames übergeben werden
             messagingTemplate.convertAndSend("/queue/streams", games);
         }
-    }
+    }*/
 
     public void streamGame(Long gameId){
         Optional<Game> optionalGame = gameRepository.findById(gameId);
@@ -617,22 +618,26 @@ public class GameService {
             game.setStreamed(true);
             gameRepository.save(game);
 
+            Map<Long, List<String>> newStream = new HashMap<>();
+            newStream.put(game.getId(), List.of(game.getUsers().get(0).getUsername(), game.getUsers().get(1).getUsername()));
+
             for(UserAccount player : game.getUsers()){
-                messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", game);
+                messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/streams", newStream);
             }
         }
     }
 
     public void watchStream(Long gameId, Long userId){
         Optional<Game> optionalGame = gameRepository.findById(gameId);
-        Optional<UserAccount> optionaluser = userAccountRepository.findById(userId);
-        if(optionalGame.isPresent() && optionaluser.isPresent()){
+        Optional<UserAccount> optionalUser = userAccountRepository.findById(userId);
+        if(optionalGame.isPresent() && optionalUser.isPresent()){
             Game game = optionalGame.get();
-            UserAccount user = optionaluser.get();
+            UserAccount user = optionalUser.get();
             game.getViewers().add(user);
             user.setWatching(game);
             userAccountRepository.save(user);
             gameRepository.save(game);
+            messagingTemplate.convertAndSendToUser(user.getId().toString(), "/queue/game", game);
         }
     }
 
