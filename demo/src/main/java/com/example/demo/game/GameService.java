@@ -563,7 +563,6 @@ public class GameService {
             messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", Arrays.asList(game, users, sepCoins, leaderBoardPointsWinner, leaderBoardPointsLoser,damageWinner, damageLoser, cardsPlayedA, cardsPlayedB, sacrificedA, sacrificedB));
         }
 
-
         List<Long> userIds=Arrays.asList(game.getUsers().get(0).getId(), game.getUsers().get(1).getId());
         deleteUserGameData(userIds, game.getId());
     }
@@ -599,8 +598,42 @@ public class GameService {
         gameRepository.deleteById(gameId);
     }
 
-    public Optional<List<Game>> getStreamedGames(){
+    /*public Optional<List<Game>> getStreamedGames(){
         return gameRepository.findAllStreams();
+    }*/
+
+    public void getAllStreams(){
+        Optional<List<Game>> optionalGames = gameRepository.findAllStreams();
+        if (optionalGames.isPresent()) {
+            List<Game> games = optionalGames.get();
+            messagingTemplate.convertAndSend("/queue/streams", games);
+        }
+    }
+
+    public void streamGame(Long gameId){
+        Optional<Game> optionalGame = gameRepository.findById(gameId);
+        if(optionalGame.isPresent()){
+            Game game = optionalGame.get();
+            game.setStreamed(true);
+            gameRepository.save(game);
+
+            for(UserAccount player : game.getUsers()){
+                messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", game);
+            }
+        }
+    }
+
+    public void watchStream(Long gameId, Long userId){
+        Optional<Game> optionalGame = gameRepository.findById(gameId);
+        Optional<UserAccount> optionaluser = userAccountRepository.findById(userId);
+        if(optionalGame.isPresent() && optionaluser.isPresent()){
+            Game game = optionalGame.get();
+            UserAccount user = optionaluser.get();
+            game.getViewers().add(user);
+            user.setWatching(game);
+            userAccountRepository.save(user);
+            gameRepository.save(game);
+        }
     }
 
 }

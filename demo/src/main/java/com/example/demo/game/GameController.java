@@ -19,7 +19,7 @@ public class GameController {
     private final GameService gameService;
 
 
-    @GetMapping(path = "/streams")
+    /*@GetMapping(path = "/streams")
     //Gibt spiele zurück wo stream auf true ist und Game auf ready
     public ResponseEntity<Optional<List<Game>>> getStreamedGames(){
         Optional<List<Game>> optionalGames = gameService.getStreamedGames();
@@ -28,6 +28,21 @@ public class GameController {
         }else{
             return ResponseEntity.notFound().build();
         }
+    }*/
+
+    @MessageMapping("/streams")
+    public void getAllStreams(){
+        gameService.getAllStreams();
+    }
+
+    @MessageMapping("/streamGame")
+    public void streamGame(Long gameId){
+        gameService.streamGame(gameId);
+    }
+
+    @MessageMapping("/watchStream")
+    public void watchStream(Long gameId, Long userId){
+        gameService.watchStream(gameId, userId);
     }
 
 

@@ -32,6 +32,9 @@ public class Game {
     @JsonIgnore
     private List<UserAccount> users = new ArrayList<>();
 
+    @OneToMany(fetch = FetchType.EAGER)
+    private List<UserAccount> viewers = new ArrayList<>();
+
     private Integer currentTurn = 0;
 
     public void resetTimer(){
