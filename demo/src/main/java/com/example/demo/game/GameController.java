@@ -39,7 +39,7 @@ public class GameController {
         }
     }
 
-   /* @MessageMapping("/streams")
+    /*@MessageMapping("/streams")
     public void getAllStreams(){
         gameService.getAllStreams();
     }*/

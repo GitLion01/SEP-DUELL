@@ -10,6 +10,7 @@ import com.example.demo.user.UserAccountRepository;
 import jakarta.validation.constraints.Null;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -201,6 +202,14 @@ public class GameService {
         for(UserAccount player : game.getUsers()) {
             System.out.println("Player: " + player.getId());
             messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/selectDeck", Arrays.asList(game, users));
+        }
+
+        if(game.getReady() && game.getStreamed()) {
+            Map<Long, List<String>> streamedGames = new HashMap<>();
+            for (Game stream : gameRepository.findAllStreams().get()) {
+                streamedGames.put(stream.getId(), List.of(stream.getUsers().get(0).getUsername(), stream.getUsers().get(1).getUsername()));
+            }
+            messagingTemplate.convertAndSend("/queue/streams", streamedGames);
         }
 
     }
@@ -565,6 +574,12 @@ public class GameService {
 
         List<Long> userIds=Arrays.asList(game.getUsers().get(0).getId(), game.getUsers().get(1).getId());
         deleteUserGameData(userIds, game.getId());
+
+        Map<Long, List<String>> streamedGames = new HashMap<>();
+        for(Game stream : gameRepository.findAllStreams().get()){
+            streamedGames.put(stream.getId(), List.of(stream.getUsers().get(0).getUsername(), stream.getUsers().get(1).getUsername()));
+        }
+        messagingTemplate.convertAndSend("/queue/streams", streamedGames);
     }
 
 
@@ -604,12 +619,17 @@ public class GameService {
 
     /*public void getAllStreams(){
         Optional<List<Game>> optionalGames = gameRepository.findAllStreams();
-        if (optionalGames.isPresent()) {
+        if(optionalGames.isPresent()){
             List<Game> games = optionalGames.get();
-            //TODO: Map benutzen wo gameIds und jeweilige usernames übergeben werden
-            messagingTemplate.convertAndSend("/queue/streams", games);
+            Map<Long, List<String>> streamedGames = new HashMap<>();
+
+            for(Game game : games){
+                streamedGames.put(game.getId(), List.of(game.getUsers().get(0).getUsername(), game.getUsers().get(1).getUsername()));
+            }
+            messagingTemplate.convertAndSend("/queue/streams", streamedGames);
         }
     }*/
+
 
     public void streamGame(Long gameId){
         Optional<Game> optionalGame = gameRepository.findById(gameId);
@@ -617,13 +637,6 @@ public class GameService {
             Game game = optionalGame.get();
             game.setStreamed(true);
             gameRepository.save(game);
-
-            Map<Long, List<String>> newStream = new HashMap<>();
-            newStream.put(game.getId(), List.of(game.getUsers().get(0).getUsername(), game.getUsers().get(1).getUsername()));
-
-            for(UserAccount player : game.getUsers()){
-                messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/streams", newStream);
-            }
         }
     }
 
