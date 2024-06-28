@@ -41,7 +41,7 @@ const LiveTabelle = () => {
 
     useEffect(() => {
         if (client && connected) {
-            const subscription = client.subscribe(`/user/${id}/queue/streams`, (message) => {
+            const subscription = client.subscribe(`/queue/streams`, (message) => {
                 const gamesMap = JSON.parse(message.body);
                 setLiveGames(gamesMap);
                 console.log("neue streams", gamesMap);
