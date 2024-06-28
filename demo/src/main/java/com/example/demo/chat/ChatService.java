@@ -193,7 +193,6 @@ public class ChatService {
     }
 
     public void checkOnline(ChatMessage chatMessage) {
-        System.out.println("Checking if users are online for message: " + chatMessage.getMessage());
         Chat chat = chatRepository.findById(chatMessage.getChat().getId()).get();
 
         if(!chat.getMessages().contains(chatMessage)) {
