@@ -21,6 +21,7 @@ import './index.css';
 import DuelC from "./components/DuelC/DuelC";
 import {WebSocketProvider} from "./WebSocketProvider";
 import GlobalNotification from './components/LeaderboardPage/GlobalNotification.jsx';
+import LiveTabelle from "./components/Livestream/LiveTabelle";
 
 
 function App() {
@@ -67,6 +68,7 @@ function AppRoutes() {
         <Route path="/challenge-player" element={<ProtectedRoute element={DuelC} />} />
         <Route path="/deck-selection" element={<ProtectedRoute element={DeckSelection} />} />
         <Route path="/duel" element={<ProtectedRoute element={Duel} />} />
+        <Route path="/streams" element={<ProtectedRoute element={LiveTabelle} />} />
       </Routes>
   );
 }
