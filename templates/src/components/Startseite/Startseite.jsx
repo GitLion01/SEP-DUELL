@@ -95,7 +95,7 @@ const Startseite = () => {
               <a href="/chat"><h2>CHAT</h2></a>
             </section>
             <section className="liveduelle">
-              <a href="/liveduelle"><h2>LIVE DUELLE</h2></a>
+              <a href="/streams"><h2>LIVE DUELLE</h2></a>
             </section>
           </div>
         </main>

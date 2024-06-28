@@ -25,12 +25,15 @@ const LiveTabelle = () => {
                 try {
                     const streamsResponse = await axios.get(`http://localhost:8080/initialStreams`);
                     setLiveGames(streamsResponse.data);
+                    console.log(streamsResponse);
+                    console.log(liveGames);
                 }
                 catch (error) {
                     console.log("Spiele konnten nicht geladen werden", error);
                 }
             }
         }
+        loadStreams();
 
 
     }, [id]);
@@ -41,6 +44,7 @@ const LiveTabelle = () => {
             const subscription = client.subscribe(`/user/${id}/queue/streams`, (message) => {
                 const gamesMap = JSON.parse(message.body);
                 setLiveGames(gamesMap);
+                console.log("neue streams", gamesMap);
             });
 
             return () => subscription.unsubscribe();
@@ -49,13 +53,14 @@ const LiveTabelle = () => {
 
     return (
         <div>
-            <h2>Aktuelle Spiele</h2>
+            <BackButton />
+            <h2 className={"Ueberschrift"}>Aktuelle Spiele</h2>
             <BackButton/>
             <div className="live-games-list">
                 {Object.entries(liveGames).map(([gameId, players]) => (
                     <div key={gameId} className="live-game-item">
                         <span>{players[0]} vs {players[1]}</span>
-                        <button onClick={}>Zuschauen</button>
+                        <button /*onClick={} */>Zuschauen</button>
                     </div>
                 ))}
             </div>
