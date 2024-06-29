@@ -713,9 +713,16 @@ public class GameService {
                 /*gameRepository.deleteFromGameViewersByUserIds(userId);*/
 
                 userAccountRepository.save(user);
+
+                System.out.println("User " + request.getUserId() + " has left the stream of game " + game.getId());
+            } else {
+                System.out.println("User " + request.getUserId() + " is not watching any game.");
             }
+        } else {
+            System.out.println("User " + request.getUserId() + " not found.");
         }
     }
+
 
 }
  

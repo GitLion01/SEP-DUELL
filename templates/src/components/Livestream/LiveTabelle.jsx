@@ -55,7 +55,7 @@ const LiveTabelle = () => {
 
     useEffect(() => {
         if (client && connected) {
-            const subscription = client.subscribe(`/user/${id}/queue/game`, (message) => {
+            const subscription = client.subscribe(`/user/${id}/queue/startwatch`, (message) => {
                 const response = JSON.parse(message.body);
                 console.log("Response ", response);
                 if (response) {

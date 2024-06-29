@@ -56,7 +56,9 @@ public class GameController {
 
     @MessageMapping("/leaveStream")
     public void leaveStream(@Payload LeaveStreamRequest request){
+        System.out.println("Leave Stream eingegangen");
         gameService.leaveStream(request);
+        System.out.println("leaveStream ausgeführt");
     }
 
 

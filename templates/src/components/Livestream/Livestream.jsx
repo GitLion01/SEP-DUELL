@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Card from "../card";
 import { WebSocketContext } from '../../WebSocketProvider';
 import './Livestream.css';
+import StatisticsModal from "../Duell/StatisticsModal";
 
 const Livestream = () => {
     const navigate = useNavigate();
@@ -12,6 +13,8 @@ const Livestream = () => {
     const [user1State, setUser1State] = useState(null);
     const [user2State, setUser2State] = useState(null);
     const [currentTurn, setCurrentTurn] = useState(game?.currentTurn);
+    const [stats, setStats] = useState(null);
+
 
     // User ID abrufen
     useEffect(() => {
@@ -52,7 +55,7 @@ const Livestream = () => {
 
     useEffect(() => {
         if (client && connected && id) {
-            const subscription = client.subscribe(`/user/${id}/queue/game`, (message) => {
+            const subscription = client.subscribe(`/user/${id}/queue/watch`, (message) => {
                 const response = JSON.parse(message.body);
                 console.log("Response Stream: ", response);
                 if (response.length === 2) {
@@ -70,6 +73,10 @@ const Livestream = () => {
                     }
                     setCurrentTurn(response[0].currentTurn);
                 }
+
+                if (response.length > 3) {
+
+                }
             });
 
             // Cleanup Subscription
@@ -82,7 +89,7 @@ const Livestream = () => {
     const handleLeaveButton = () => {
         if (client) {
             client.publish({
-                destination: '/leaveStream',
+                destination: '/app/leaveStream',
                 body: JSON.stringify({userId: id})
             })
         }
