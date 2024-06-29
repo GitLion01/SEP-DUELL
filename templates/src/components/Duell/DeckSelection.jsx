@@ -98,8 +98,9 @@ const  DeckSelection = () => {
     if (client) {
       client.publish({
         destination: '/app/streamGame',
-        body: JSON.stringify({gameID: gameId}),
+        body: JSON.stringify({gameId: gameId}),
       });
+      console.log("aktiviere Stream");
     }
 
   }

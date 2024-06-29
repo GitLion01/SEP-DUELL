@@ -75,7 +75,19 @@ const Livestream = () => {
                 }
 
                 if (response.length > 3) {
-
+                    const [_, __, sepCoins, leaderBoardPointsWinner, leaderBoardPointsLoser, damageWinner, damageLoser, cardsPlayedA, cardsPlayedB, sacrificedA, sacrificedB] = response;
+                    setStats({
+                        sepCoins,
+                        leaderboardPointsA: response[1][0].playerState.winner ? leaderBoardPointsWinner : leaderBoardPointsLoser,
+                        leaderboardPointsB : response[1][1].playerState.winner ? leaderBoardPointsWinner : leaderBoardPointsLoser,
+                        damageA: response[1][0].playerState.winner ? damageWinner : damageLoser,
+                        damageB: response[1][1].playerState.winner ? damageWinner : damageLoser,
+                        cardsPlayedA,
+                        cardsPlayedB,
+                        sacrificedA,
+                        sacrificedB
+                    })
+                    console.log(stats);
                 }
             });
 
@@ -94,6 +106,10 @@ const Livestream = () => {
             })
         }
         navigate('/streams');
+    }
+
+    const closeStatisticsModal = () => {
+        navigate('/startseite');
     }
 
 
@@ -138,6 +154,12 @@ const Livestream = () => {
                 </div>
             </div>
             <button onClick={() => handleLeaveButton()} className="leave-button">Verlassen</button>
+            <StatisticsModal
+                isOpen={stats !== null}
+                onRequestClose={closeStatisticsModal}
+                stats={stats || {}}
+                users={users}
+            />
         </div>
     );
 };
