@@ -659,5 +659,18 @@ public class GameService {
         }
     }
 
+    public void leaveStream(Long userId){
+        Optional<UserAccount> optionalUser = userAccountRepository.findById(userId);
+        if(optionalUser.isPresent()){
+            UserAccount user = optionalUser.get();
+            if(user.getWatching() != null){
+                Game game = user.getWatching();
+                game.getViewers().remove(user);
+                user.setWatching(null);
+                gameRepository.save(game);
+            }
+        }
+    }
+
 }
  
