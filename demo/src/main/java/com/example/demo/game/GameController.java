@@ -55,8 +55,8 @@ public class GameController {
     }
 
     @MessageMapping("/leaveStream")
-    public void leaveStream(Long userId){
-        gameService.leaveStream(userId);
+    public void leaveStream(LeaveStreamRequest request){
+        gameService.leaveStream(request);
     }
 
 

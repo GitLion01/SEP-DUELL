@@ -622,7 +622,9 @@ public class GameService {
 
         List<Long> userIds=Arrays.asList(game.getUsers().get(0).getId(), game.getUsers().get(1).getId());
         for(UserAccount viewer : game.getViewers()) {
-            leaveStream(viewer.getId());
+            LeaveStreamRequest request = new LeaveStreamRequest();
+            request.setUserId(viewer.getId());
+            leaveStream(request);
         }
         deleteUserGameData(userIds, game.getId());
 
@@ -697,16 +699,19 @@ public class GameService {
         }
     }
 
-    public void leaveStream(Long userId){
-        Optional<UserAccount> optionalUser = userAccountRepository.findById(userId);
+    @Transactional
+    @Modifying
+    public void leaveStream(LeaveStreamRequest request){
+        Optional<UserAccount> optionalUser = userAccountRepository.findById(request.getUserId());
         if(optionalUser.isPresent()){
             UserAccount user = optionalUser.get();
             if(user.getWatching() != null){
                 Game game = user.getWatching();
                 game.getViewers().remove(user);
+                user.setWatching(null);
                 gameRepository.save(game);
                 /*gameRepository.deleteFromGameViewersByUserIds(userId);*/
-                user.setWatching(null);
+
                 userAccountRepository.save(user);
             }
         }
