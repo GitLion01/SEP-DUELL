@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Card from '../Card';
+import Card from "../card";
 import { WebSocketContext } from '../../WebSocketProvider';
 import './Livestream.css';
 

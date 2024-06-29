@@ -70,7 +70,7 @@ function AppRoutes() {
         <Route path="/deck-selection" element={<ProtectedRoute element={DeckSelection} />} />
         <Route path="/duel" element={<ProtectedRoute element={Duel} />} />
         <Route path="/streams" element={<ProtectedRoute element={LiveTabelle} />} />
-        <Route path=="liveduel" element={<ProtectedRoute element={Livestream} /> } />
+        <Route path="liveduel" element={<ProtectedRoute element={Livestream} /> } />
       </Routes>
   );
 }
