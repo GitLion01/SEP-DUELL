@@ -54,6 +54,11 @@ public class GameController {
         gameService.watchStream(gameId, userId);
     }
 
+    @MessageMapping("/leaveStream")
+    public void leaveStream(Long userId){
+        gameService.leaveStream(userId);
+    }
+
 
     @MessageMapping("/createGame")
     public void createGame(@Payload CreateGameRequest request) {
