@@ -635,6 +635,7 @@ public class GameService {
     @Modifying
     @Transactional
     public void deleteUserGameData(List<Long> userIds,Long gameId) {
+        deleteViewers(gameId);
 
         userAccountRepository.updatePlayerStateToNullByUserIds(userIds);
         UserAccount userAccount=userAccountRepository.findById(userIds.get(0)).get();
@@ -643,7 +644,6 @@ public class GameService {
         userAccount.getPlayerState().setCardsPlayed(null);
         userAccount.getPlayerState().setDeckClone(null);
         userAccount.getPlayerState().setDeck(null);
-        userAccount.setWatching(null);
         playerCardRepository.deleteByPlayerStateId(userAccount.getPlayerState().getId());
         playerStateRepository.save(userAccount.getPlayerState());
         playerStateRepository.delete(userAccount.getPlayerState());
@@ -654,13 +654,29 @@ public class GameService {
         userAccount.getPlayerState().setCardsPlayed(null);
         userAccount.getPlayerState().setDeckClone(null);
         userAccount.getPlayerState().setDeck(null);
-        userAccount.setWatching(null);
         playerCardRepository.deleteByPlayerStateId(userAccount.getPlayerState().getId());
         playerStateRepository.save(userAccount.getPlayerState());
         playerStateRepository.delete(userAccount.getPlayerState());
 
         gameRepository.deleteFromGameUsersByUserIds(userIds);
         gameRepository.deleteById(gameId);
+    }
+
+    @Modifying
+    @Transactional
+    public void deleteViewers(Long gameId){
+        Game game = gameRepository.findById(gameId).get();
+
+        List<UserAccount> viewers = game.getViewers();
+        game.setViewers(null);
+        gameRepository.save(game);
+
+        for(UserAccount viewer : viewers) {
+            gameRepository.deleteFromGameViewersByUserIds(viewer.getId());
+            viewer.setWatching(null);
+            userAccountRepository.save(viewer);
+        }
+
     }
 
     public Optional<List<Game>> getStreamedGames(){
