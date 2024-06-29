@@ -50,8 +50,8 @@ public class GameController {
     }
 
     @MessageMapping("/watchStream")
-    public void watchStream(Long gameId, Long userId){
-        gameService.watchStream(gameId, userId);
+    public void watchStream(WatchStreamRequest request){
+        gameService.watchStream(request);
     }
 
     @MessageMapping("/leaveStream")

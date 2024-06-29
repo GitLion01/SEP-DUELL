@@ -643,9 +643,9 @@ public class GameService {
         }
     }
 
-    public void watchStream(Long gameId, Long userId){
-        Optional<Game> optionalGame = gameRepository.findById(gameId);
-        Optional<UserAccount> optionalUser = userAccountRepository.findById(userId);
+    public void watchStream(WatchStreamRequest request){
+        Optional<Game> optionalGame = gameRepository.findById(request.getGameId());
+        Optional<UserAccount> optionalUser = userAccountRepository.findById(request.getUserId());
         if(optionalGame.isPresent() && optionalUser.isPresent()){
             Game game = optionalGame.get();
             UserAccount user = optionalUser.get();
