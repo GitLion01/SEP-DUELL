@@ -621,8 +621,8 @@ public class GameService {
         }
 
         List<Long> userIds=Arrays.asList(game.getUsers().get(0).getId(), game.getUsers().get(1).getId());
-        for(UserAccount viewer : game.getViewers()) {
-            if(viewer != null) {
+        if(!viewers.isEmpty()) {
+            for (UserAccount viewer : viewers) {
                 LeaveStreamRequest request = new LeaveStreamRequest();
                 request.setUserId(viewer.getId());
                 leaveStream(request);
