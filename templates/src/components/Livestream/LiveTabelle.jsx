@@ -62,10 +62,17 @@ const LiveTabelle = () => {
                     setGame(response[0]);
                     setUsers(response[1]);
                     localStorage.setItem("gameId", response[0].id);
+
                     navigate('/liveduel');
                 }
 
             })
+
+            // Cleanup Subscription
+            return () => {
+                if (subscription) subscription.unsubscribe();
+            };
+
         }
     }, [id, client, connected]);
 

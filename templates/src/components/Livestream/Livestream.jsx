@@ -85,7 +85,7 @@ const Livestream = () => {
                 body: JSON.stringify({userId: id})
             })
         }
-        navigate('/livetabelle');
+        navigate('/streams');
     }
 
 
