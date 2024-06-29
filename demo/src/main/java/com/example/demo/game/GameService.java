@@ -596,6 +596,7 @@ public class GameService {
         userAccount.getPlayerState().setCardsPlayed(null);
         userAccount.getPlayerState().setDeckClone(null);
         userAccount.getPlayerState().setDeck(null);
+        userAccount.setWatching(null);
         playerCardRepository.deleteByPlayerStateId(userAccount.getPlayerState().getId());
         playerStateRepository.save(userAccount.getPlayerState());
         playerStateRepository.delete(userAccount.getPlayerState());
@@ -606,6 +607,7 @@ public class GameService {
         userAccount.getPlayerState().setCardsPlayed(null);
         userAccount.getPlayerState().setDeckClone(null);
         userAccount.getPlayerState().setDeck(null);
+        userAccount.setWatching(null);
         playerCardRepository.deleteByPlayerStateId(userAccount.getPlayerState().getId());
         playerStateRepository.save(userAccount.getPlayerState());
         playerStateRepository.delete(userAccount.getPlayerState());
