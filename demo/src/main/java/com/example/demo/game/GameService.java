@@ -651,7 +651,9 @@ public class GameService {
             user.setWatching(game);
             userAccountRepository.save(user);
             gameRepository.save(game);
-            messagingTemplate.convertAndSendToUser(user.getId().toString(), "/queue/game", game);
+
+            List<UserAccount> users = game.getUsers();
+            messagingTemplate.convertAndSendToUser(user.getId().toString(), "/queue/game", List.of(game, users));
         }
     }
 
