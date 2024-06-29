@@ -506,18 +506,19 @@ public class GameService {
         UserAccount user1 = optionalUserA.get();
         UserAccount user2 = optionalUserB.get();
 
-        List<PlayerCard> raresA = new ArrayList<>();
-        List<PlayerCard> legendariesA = new ArrayList<>();
-        List<PlayerCard> normalsA = new ArrayList<>();
-        List<PlayerCard> raresB = new ArrayList<>();
-        List<PlayerCard> legendariesB = new ArrayList<>();
-        List<PlayerCard> normalsB = new ArrayList<>();
-        List<PlayerCard> sacrificedNormalsA = new ArrayList<>();
-        List<PlayerCard> sacrificedRaresA = new ArrayList<>();
-        List<PlayerCard> sacrificedLegendariesA = new ArrayList<>();
-        List<PlayerCard> sacrificedNormalsB = new ArrayList<>();
-        List<PlayerCard> sacrificedRaresB = new ArrayList<>();
-        List<PlayerCard> sacrificedLegendariesB = new ArrayList<>();
+        List<PlayerCard> raresA ;
+        List<PlayerCard> legendariesA;
+        List<PlayerCard> normalsA;
+        List<PlayerCard> raresB;
+        List<PlayerCard> legendariesB;
+        List<PlayerCard> normalsB;
+        List<PlayerCard> sacrificedNormalsA;
+        List<PlayerCard> sacrificedRaresA;
+        List<PlayerCard> sacrificedLegendariesA;
+        List<PlayerCard> sacrificedNormalsB;
+        List<PlayerCard> sacrificedRaresB;
+        List<PlayerCard> sacrificedLegendariesB;
+
         normalsA = user1.getPlayerState().getCardsPlayed().stream().filter((x) -> x.getRarity() == Rarity.NORMAL).toList();
         raresA = user1.getPlayerState().getCardsPlayed().stream().filter((x) -> x.getRarity() == Rarity.RARE).toList();
         legendariesA = user1.getPlayerState().getCardsPlayed().stream().filter((x) -> x.getRarity() == Rarity.LEGENDARY).toList();
