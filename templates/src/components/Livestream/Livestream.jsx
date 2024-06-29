@@ -79,6 +79,12 @@ const Livestream = () => {
     }, [client, connected, id, setGame, setUsers]);
 
     const handleLeaveButton = () => {
+        if (client) {
+            client.publish({
+                destination: '/leaveStream',
+                body: JSON.stringify({userId: id})
+            })
+        }
         navigate('/livetabelle');
     }
 

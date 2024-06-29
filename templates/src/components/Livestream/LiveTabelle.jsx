@@ -69,8 +69,13 @@ const LiveTabelle = () => {
         }
     }, [id, client, connected]);
 
-    const handleWatchStream = () => {
-        //TODO ausfüllens
+    const handleWatchStream = (gameId) => {
+        if (client) {
+            client.publish({
+                destination: '/app/watchStream',
+                body: JSON.stringify({gameId: gameId, userId: id}),
+            });
+        }
     }
 
     return (
@@ -82,7 +87,7 @@ const LiveTabelle = () => {
                 {Object.entries(liveGames).map(([gameId, players]) => (
                     <div key={gameId} className="live-game-item">
                         <span>{players[0]} vs {players[1]}</span>
-                        <button /*onClick={} */>Zuschauen</button>
+                        <button onClick={handleWatchStream(gameId)}>Zuschauen</button>
                     </div>
                 ))}
             </div>
