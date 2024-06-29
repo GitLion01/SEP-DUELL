@@ -1,0 +1,140 @@
+/* Grundlayout */
+.livestream-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 100vh;
+    background: url('../../../public/img/DuellFeld.webp') no-repeat center center;
+    background-size: cover;
+    padding: 0;
+    color: #fff;
+    font-family: 'Arial', sans-serif;
+    overflow: hidden;
+}
+
+/* Timer und aktueller Spieler */
+.timer-and-turn {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    padding: 10px;
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.timer {
+    font-size: 24px;
+}
+
+.current-turn {
+    font-size: 24px;
+}
+
+/* Lebenspunkte */
+.life-points {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.opponent-info,
+.player-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.opponent-lp, .player-lp {
+    background: #222;
+    border: 2px solid #ffbb00;
+    padding: 15px;
+    border-radius: 50%;
+    width: 70px;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+}
+
+/* Spielfeld */
+.field {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 80%;
+    height: 60%;
+    margin: 50px;
+    position: relative;
+    border: none;
+    padding: 50px;
+    box-sizing: border-box;
+}
+
+/* Kartenreihen */
+.field-row {
+    height: 100px;
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin: 60px 0;
+}
+
+/* Kartenslot */
+.card-slot {
+    width: 100px;
+    height: 140px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.card-slot:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Gegnerkarten drehen */
+.opponent-card {
+    transform: rotate(180deg);
+    display: flex;
+    flex-direction: column-reverse;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
+.opponent-card .duel-card-title,
+.opponent-card .duel-card-body,
+.opponent-card .duel-card-rarity {
+    transform: rotate(180deg);
+}
+
+/* Verlassen Button */
+.leave-button {
+    background: #ff4136;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 18px;
+    cursor: pointer;
+    transition: background 0.3s;
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+}
+
+.leave-button:hover {
+    background: #ff0000;
+}

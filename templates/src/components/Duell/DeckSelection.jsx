@@ -10,6 +10,7 @@ const  DeckSelection = () => {
   const [selectedDeck, setSelectedDeck] = useState(null);
   const [id, setId] = useState(null);
   const [gameId, setGameId] = useState('');
+  const [isChecked, setIsChecked] = useState(false); // Zustand für Checkbox
   const navigate = useNavigate(); // Use navigate to redirect
 
   useEffect(() => {
@@ -89,6 +90,21 @@ const  DeckSelection = () => {
     }
   };
 
+  //TODO Checkbox für das aktivieren vom streamen
+  const handleRadioChanged = (event) => {
+
+    const newIsChecked = event.target.checked;
+    setIsChecked(newIsChecked); // Setzt den neuen Zustand der Checkbox
+    if (client) {
+      client.publish({
+        destination: '/app/streamGame',
+        body: JSON.stringify({gameID: gameId}),
+      });
+    }
+
+  }
+
+
 
   const terminateGame = () => {
     client.publish({
@@ -104,13 +120,25 @@ const  DeckSelection = () => {
 
               <div key={deck.id}
                    className="deck" onClick={() => handleSelectDeck(deck.id)}
-                   >
+              >
                 {deck.name}
               </div>
 
           ))}
         </div>
-        {selectedDeck && <p>Waiting for opponent...</p>}
+        <div className="form-check form-radio">
+          <input
+              className="form-check-input"
+              type="radio"
+              id="flexRadioCheckDefault"
+              onChange={handleRadioChanged}
+              checked={isChecked}
+          />
+          <label className="form-check-label" htmlFor="flexRadioCheckDefault">
+            Stream
+          </label>
+        </div>
+        {selectedDeck && <p className={"p1"}>Waiting for opponent...</p>}
       </div>
   );
 };
