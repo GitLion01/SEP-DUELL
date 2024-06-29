@@ -638,7 +638,6 @@ public class GameService {
     @Modifying
     @Transactional
     public void deleteUserGameData(List<Long> userIds,Long gameId) {
-        deleteViewers(gameId);
 
         userAccountRepository.updatePlayerStateToNullByUserIds(userIds);
         UserAccount userAccount=userAccountRepository.findById(userIds.get(0)).get();
@@ -665,39 +664,12 @@ public class GameService {
         gameRepository.deleteById(gameId);
     }
 
-    @Modifying
-    @Transactional
-    public void deleteViewers(Long gameId){
-        Game game = gameRepository.findById(gameId).get();
 
-        List<UserAccount> viewers = game.getViewers();
-        game.setViewers(null);
-        gameRepository.save(game);
-
-        for(UserAccount viewer : viewers) {
-            gameRepository.deleteFromGameViewersByUserIds(viewer.getId());
-            viewer.setWatching(null);
-            userAccountRepository.save(viewer);
-        }
-
-    }
 
     public Optional<List<Game>> getStreamedGames(){
         return gameRepository.findAllStreams();
     }
 
-    /*public void getAllStreams(){
-        Optional<List<Game>> optionalGames = gameRepository.findAllStreams();
-        if(optionalGames.isPresent()){
-            List<Game> games = optionalGames.get();
-            Map<Long, List<String>> streamedGames = new HashMap<>();
-
-            for(Game game : games){
-                streamedGames.put(game.getId(), List.of(game.getUsers().get(0).getUsername(), game.getUsers().get(1).getUsername()));
-            }
-            messagingTemplate.convertAndSend("/queue/streams", streamedGames);
-        }
-    }*/
 
 
     public void streamGame(Long gameId){
@@ -731,9 +703,9 @@ public class GameService {
             UserAccount user = optionalUser.get();
             if(user.getWatching() != null){
                 Game game = user.getWatching();
-                /*game.getViewers().remove(user);*/
-                /*gameRepository.save(game);*/
-                gameRepository.deleteFromGameViewersByUserIds(userId);
+                game.getViewers().remove(user);
+                gameRepository.save(game);
+                /*gameRepository.deleteFromGameViewersByUserIds(userId);*/
                 user.setWatching(null);
                 userAccountRepository.save(user);
             }

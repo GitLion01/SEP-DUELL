@@ -26,7 +26,7 @@ public interface GameRepository extends JpaRepository<Game, Long> {
 
     @Modifying
     @Transactional
-    @Query(value = "DELETE FROM game_viewers WHERE game_viewers.viewers_id IN (:userId)", nativeQuery = true)
+    @Query(value = "DELETE FROM game_viewers WHERE game_viewers.viewers_id = ?1", nativeQuery = true)
     void deleteFromGameViewersByUserIds(@Param("userId") Long userId);
 
 
