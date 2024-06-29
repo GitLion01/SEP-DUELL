@@ -9,8 +9,8 @@ const Livestream = () => {
     const { client, game, setGame, users, setUsers, connected } = useContext(WebSocketContext);
     const [id, setId] = useState(null);
     const [timer, setTimer] = useState(120);
-    const [playerState, setPlayerState] = useState(null);
-    const [opponentState, setOpponentState] = useState(null);
+    const [user1State, setUser1State] = useState(null);
+    const [user2State, setUser2State] = useState(null);
     const [currentTurn, setCurrentTurn] = useState(game?.currentTurn);
 
     // User ID abrufen
@@ -23,15 +23,15 @@ const Livestream = () => {
     // Initialisieren des Spielerzustands aus dem übergebenen Zustand
     useEffect(() => {
         if (users && game) {
-            const currentUser = users.find(user => user.id === parseInt(id));
-            const opponentUser = users.find(user => user.id !== parseInt(id));
+            const user1 = users[0];
+            const user2 = users[1]
             setCurrentTurn(game.currentTurn);
 
-            if (currentUser) {
-                setPlayerState(currentUser.playerState);
+            if (user1) {
+                setUser1State(user1.playerState);
             }
-            if (opponentUser) {
-                setOpponentState(opponentUser.playerState);
+            if (user2) {
+                setUser2State(user2.playerState);
             }
         }
     }, [id]);
@@ -54,18 +54,19 @@ const Livestream = () => {
         if (client && connected && id) {
             const subscription = client.subscribe(`/user/${id}/queue/game`, (message) => {
                 const response = JSON.parse(message.body);
+                console.log("Response Stream: ", response);
                 if (response.length === 2) {
-                    const currentUser = response[1].find(user => user.id === parseInt(id));
-                    const opponentUser = response[1].find(user => user.id !== parseInt(id));
+                    const user1 = response[1][0];
+                    const user2 = response[1][1];
 
                     setGame(response[0]);
                     setUsers(response[1]);
 
-                    if (currentUser) {
-                        setPlayerState(currentUser.playerState);
+                    if (user1) {
+                        setUser1State(user1.playerState);
                     }
-                    if (opponentUser) {
-                        setOpponentState(opponentUser.playerState);
+                    if (user2) {
+                        setUser2State(user2.playerState);
                     }
                     setCurrentTurn(response[0].currentTurn);
                 }
@@ -103,26 +104,26 @@ const Livestream = () => {
                 <div className="opponent-info">
                     <h4>{users[1]?.username}</h4>
                     <div className="opponent-lp">
-                        <h4>LP: {opponentState?.lifePoints}</h4>
+                        <h4>LP: {user2State?.lifePoints}</h4>
                     </div>
                 </div>
                 <div className="player-info">
                     <div className="player-lp">
-                        <h4>LP: {playerState?.lifePoints}</h4>
+                        <h4>LP: {user1State?.lifePoints}</h4>
                     </div>
                     <h4>{users[0]?.username}</h4>
                 </div>
             </div>
             <div className="field">
                 <div className="field-row opponent-field">
-                    {opponentState?.fieldCards?.slice().reverse().map((playerCard) => (
+                    {user2State?.fieldCards?.slice().reverse().map((playerCard) => (
                         <div key={playerCard.id} className="card-slot">
                             <Card className="duel-card opponent-card" card={playerCard} />
                         </div>
                     ))}
                 </div>
                 <div className="field-row player-field">
-                    {playerState?.fieldCards?.map((playerCard) => (
+                    {user1State?.fieldCards?.map((playerCard) => (
                         <div key={playerCard.id} className="card-slot">
                             <Card className="duel-card" card={playerCard} />
                         </div>

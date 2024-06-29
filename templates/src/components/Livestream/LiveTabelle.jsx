@@ -94,7 +94,7 @@ const LiveTabelle = () => {
                 {Object.entries(liveGames).map(([gameId, players]) => (
                     <div key={gameId} className="live-game-item">
                         <span>{players[0]} vs {players[1]}</span>
-                        <button onClick={handleWatchStream(gameId)}>Zuschauen</button>
+                        <button onClick={() => handleWatchStream(gameId)}>Zuschauen</button>
                     </div>
                 ))}
             </div>
