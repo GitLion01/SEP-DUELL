@@ -45,8 +45,8 @@ public class GameController {
     }*/
 
     @MessageMapping("/streamGame")
-    public void streamGame(@Payload Long gameId){
-        gameService.streamGame(gameId);
+    public void streamGame(@Payload StreamGameRequest request){
+        gameService.streamGame(request);
     }
 
     @MessageMapping("/watchStream")

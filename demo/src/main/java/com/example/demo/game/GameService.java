@@ -204,6 +204,8 @@ public class GameService {
             messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/selectDeck", Arrays.asList(game, users));
         }
 
+
+
         if(game.getReady() && game.getStreamed()) {
             Map<Long, List<String>> streamedGames = new HashMap<>();
             for (Game stream : gameRepository.findAllStreams().get()) {
@@ -688,8 +690,8 @@ public class GameService {
 
 
 
-    public void streamGame(Long gameId){
-        Optional<Game> optionalGame = gameRepository.findById(gameId);
+    public void streamGame(StreamGameRequest request){
+        Optional<Game> optionalGame = gameRepository.findById(request.getGameId());
         if(optionalGame.isPresent()){
             Game game = optionalGame.get();
             game.setStreamed(true);
