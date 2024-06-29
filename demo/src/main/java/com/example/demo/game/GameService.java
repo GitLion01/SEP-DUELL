@@ -621,6 +621,9 @@ public class GameService {
         }
 
         List<Long> userIds=Arrays.asList(game.getUsers().get(0).getId(), game.getUsers().get(1).getId());
+        for(UserAccount viewer : game.getViewers()) {
+            leaveStream(viewer.getId());
+        }
         deleteUserGameData(userIds, game.getId());
 
         Map<Long, List<String>> streamedGames = new HashMap<>();
@@ -718,7 +721,7 @@ public class GameService {
             gameRepository.save(game);
 
             List<UserAccount> users = game.getUsers();
-            messagingTemplate.convertAndSendToUser(user.getId().toString(), "/queue/watch", List.of(game, users));
+            messagingTemplate.convertAndSendToUser(user.getId().toString(), "/queue/startwatch", List.of(game, users));
         }
     }
 
@@ -728,8 +731,8 @@ public class GameService {
             UserAccount user = optionalUser.get();
             if(user.getWatching() != null){
                 Game game = user.getWatching();
-                game.getViewers().remove(user);
-                gameRepository.save(game);
+                /*game.getViewers().remove(user);*/
+                /*gameRepository.save(game);*/
                 gameRepository.deleteFromGameViewersByUserIds(userId);
                 user.setWatching(null);
                 userAccountRepository.save(user);
