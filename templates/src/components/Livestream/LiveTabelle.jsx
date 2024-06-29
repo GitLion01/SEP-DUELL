@@ -3,12 +3,14 @@ import axios from 'axios';
 import BackButton from '../BackButton';
 import "./LiveTabelle.css";
 import { WebSocketContext } from "../../WebSocketProvider";
+import { useNavigate } from 'react-router-dom';
 
 const LiveTabelle = () => {
 
     const [id, setId] = useState(null);
-    const { client, connected } = useContext(WebSocketContext);
+    const { client, setGame, setUsers, connected } = useContext(WebSocketContext);
     const [liveGames, setLiveGames] = useState({});
+    const navigate = useNavigate();
 
     useEffect(() => {
         const userId = localStorage.getItem('id');
@@ -50,6 +52,26 @@ const LiveTabelle = () => {
             return () => subscription.unsubscribe();
         }
     }, [id, client, connected]);
+
+    useEffect(() => {
+        if (client && connected) {
+            const subscription = client.subscribe(`/user/${id}/queue/game`, (message) => {
+                const response = JSON.parse(message.body);
+                console.log("Response ", response);
+                if (response) {
+                    setGame(response[0]);
+                    setUsers(response[1]);
+                    localStorage.setItem("gameId", response[0].id);
+                    navigate('/liveduel');
+                }
+
+            })
+        }
+    }, [id, client, connected]);
+
+    const handleWatchStream = () => {
+        //TODO ausfüllens
+    }
 
     return (
         <div>
