@@ -45,17 +45,17 @@ public class GameController {
     }*/
 
     @MessageMapping("/streamGame")
-    public void streamGame(Long gameId){
+    public void streamGame(@Payload Long gameId){
         gameService.streamGame(gameId);
     }
 
     @MessageMapping("/watchStream")
-    public void watchStream(WatchStreamRequest request){
+    public void watchStream(@Payload WatchStreamRequest request){
         gameService.watchStream(request);
     }
 
     @MessageMapping("/leaveStream")
-    public void leaveStream(LeaveStreamRequest request){
+    public void leaveStream(@Payload LeaveStreamRequest request){
         gameService.leaveStream(request);
     }
 
