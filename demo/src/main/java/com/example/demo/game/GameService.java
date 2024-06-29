@@ -609,7 +609,7 @@ public class GameService {
         userAccountRepository.save(user2);
         gameRepository.save(game);
         List<UserAccount> users = game.getUsers();
-        List<UserAccount> viewers = game.getViewers();
+        List<UserAccount> viewers = game.getViewers() == null ? new ArrayList<>() : game.getViewers();
         for (UserAccount player : game.getUsers()) {
             messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", Arrays.asList(game, users, sepCoins, leaderBoardPointsWinner, leaderBoardPointsLoser,damageWinner, damageLoser, cardsPlayedA, cardsPlayedB, sacrificedA, sacrificedB));
         }
@@ -621,13 +621,13 @@ public class GameService {
         }
 
         List<Long> userIds=Arrays.asList(game.getUsers().get(0).getId(), game.getUsers().get(1).getId());
-        if(!viewers.isEmpty()) {
+
             for (UserAccount viewer : viewers) {
                 LeaveStreamRequest request = new LeaveStreamRequest();
                 request.setUserId(viewer.getId());
                 leaveStream(request);
             }
-        }
+
         deleteUserGameData(userIds, game.getId());
 
         Map<Long, List<String>> streamedGames = new HashMap<>();
