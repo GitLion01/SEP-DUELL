@@ -620,13 +620,25 @@ public class GameService {
             }
         }
 
-        List<Long> userIds=Arrays.asList(game.getUsers().get(0).getId(), game.getUsers().get(1).getId());
+        List<Long> userIds = Arrays.asList(game.getUsers().get(0).getId(), game.getUsers().get(1).getId());
 
-            for (UserAccount viewer : viewers) {
-                LeaveStreamRequest request = new LeaveStreamRequest();
-                request.setUserId(viewer.getId());
-                leaveStream(request);
-            }
+        List<Long> deepCopyIds = new ArrayList<>();
+
+        for(UserAccount viewer : viewers) {
+            deepCopyIds.add(viewer.getId());
+        }
+
+        List<UserAccount> deepCopyViewers = new ArrayList<>();
+        for(Long userId : deepCopyIds) {
+            UserAccount viewer = userAccountRepository.findById(userId).get();
+            deepCopyViewers.add(viewer);
+        }
+
+        for (UserAccount viewer : deepCopyViewers) {
+            LeaveStreamRequest request = new LeaveStreamRequest();
+            request.setUserId(viewer.getId());
+            leaveStream(request);
+        }
 
         deleteUserGameData(userIds, game.getId());
 
