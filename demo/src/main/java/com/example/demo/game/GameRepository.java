@@ -24,5 +24,10 @@ public interface GameRepository extends JpaRepository<Game, Long> {
     @Query(value = "SELECT * FROM game where game.streamed = true AND game.ready = true", nativeQuery = true)
     Optional<List<Game>> findAllStreams();
 
+    @Modifying
+    @Transactional
+    @Query(value = "DELETE FROM game_viewers WHERE game_viewers.viewers_id IN (:userId)", nativeQuery = true)
+    void deleteFromGameViewersByUserIds(@Param("userId") Long userId);
+
 
 }

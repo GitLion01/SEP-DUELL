@@ -33,6 +33,7 @@ public class Game {
     private List<UserAccount> users = new ArrayList<>();
 
     @OneToMany(fetch = FetchType.EAGER)
+    @JsonIgnore
     private List<UserAccount> viewers = new ArrayList<>();
 
     private Integer currentTurn = 0;

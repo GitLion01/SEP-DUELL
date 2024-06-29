@@ -666,8 +666,10 @@ public class GameService {
             if(user.getWatching() != null){
                 Game game = user.getWatching();
                 game.getViewers().remove(user);
-                user.setWatching(null);
                 gameRepository.save(game);
+                gameRepository.deleteFromGameViewersByUserIds(userId);
+                user.setWatching(null);
+                userAccountRepository.save(user);
             }
         }
     }
