@@ -332,10 +332,7 @@ public class GameService {
 
             if (userAccount.getPlayerState().getFieldCards().isEmpty()) {
                 // greife gegner an
-                Iterator<PlayerCard> botFieldCards = game.getPlayerStateBot().getFieldCards().iterator();
-                while (botFieldCards.hasNext()) {
-                    PlayerCard botFieldCard = botFieldCards.next();
-
+                for (PlayerCard botFieldCard : game.getPlayerStateBot().getFieldCards()) {
                     remainingLifePoints = userAccount.getPlayerState().getLifePoints() - botFieldCard.getAttackPoints();
                     if (botFieldCard.getAttackPoints() > userAccount.getPlayerState().getLifePoints()) {
                         game.getPlayerStateBot().setDamage(game.getPlayerStateBot().getDamage() + userAccount.getPlayerState().getLifePoints() + 1); // erhöht den Damage Counter des Angreifers
@@ -356,47 +353,51 @@ public class GameService {
                 List<PlayerCard> cardsToRemoveFromOpponentField = new ArrayList<>();
                 List<PlayerCard> cardsToRemoveFromBotField = new ArrayList<>();
 
-                Iterator<PlayerCard> opponentCards = userAccount.getPlayerState().getFieldCards().iterator();
-                Iterator<PlayerCard> botFieldCards = game.getPlayerStateBot().getFieldCards().iterator();
+                List<PlayerCard> opponentCards = userAccount.getPlayerState().getFieldCards();
+                List<PlayerCard> botFieldCards = game.getPlayerStateBot().getFieldCards();
 
-                while (opponentCards.hasNext() && botFieldCards.hasNext()) {
-                    PlayerCard opponentCard = opponentCards.next();
-                    PlayerCard botFieldCard = botFieldCards.next();
-                    int remainingTargetDefense = opponentCard.getDefensePoints() - botFieldCard.getAttackPoints();
-                    System.out.println("RemainingTargetDefense " + remainingTargetDefense);
-                    if (remainingTargetDefense < 0) {
-                        // C2 wird zerstört und vom Spielfeld entfernt
-                        cardsToRemoveFromOpponentField.add(opponentCard);
-                        game.getPlayerStateBot().setDamage(game.getPlayerStateBot().getDamage() + opponentCard.getDefensePoints() + 1);
-                        opponentCard.setDefensePoints(-1);
-                        System.out.println("Target wurde entfernt");
-                    } else {
-                        // C2 überlebt den Angriff, setze neue Verteidigungspunkte
-                        opponentCard.setDefensePoints(remainingTargetDefense);
-                        game.getPlayerStateBot().setDamage(game.getPlayerStateBot().getDamage() + botFieldCard.getAttackPoints());
-                    }
-                    // Wenn C2 nicht zerstört wurde, dann kontert C2
-                    if (remainingTargetDefense >= 0) {
-                        int remainingAttackerDefense = botFieldCard.getDefensePoints() - opponentCard.getAttackPoints();
-                        if (remainingAttackerDefense < 0) {
-                            // C1 wird zerstört und vom Spielfeld entfernt
-                            cardsToRemoveFromBotField.add(botFieldCard);
-                            System.out.println("Attacker wurde entfernt");
-                        } else {
-                            // C1 überlebt den Konter, setze neue Verteidigungspunkte
-                            botFieldCard.setDefensePoints(remainingAttackerDefense);
+                for (PlayerCard botFieldCard : botFieldCards) {
+                    for(PlayerCard opponentCard : opponentCards) {
+                        if(botFieldCard.getHasAttacked()){
+                            break;
                         }
-                        userAccount.getPlayerState().getFieldCards().removeAll(cardsToRemoveFromOpponentField);
-                        game.getPlayerStateBot().getFieldCards().removeAll(cardsToRemoveFromBotField);
+                        int remainingTargetDefense = opponentCard.getDefensePoints() - botFieldCard.getAttackPoints();
+                        if (remainingTargetDefense < 0) {
+                            // C2 wird zerstört und vom Spielfeld entfernt
+                            cardsToRemoveFromOpponentField.add(opponentCard);
+                            game.getPlayerStateBot().setDamage(game.getPlayerStateBot().getDamage() + opponentCard.getDefensePoints() + 1);
+                            opponentCard.setDefensePoints(-1);
+                        } else {
+                            // C2 überlebt den Angriff, setze neue Verteidigungspunkte
+                            opponentCard.setDefensePoints(remainingTargetDefense);
+                            game.getPlayerStateBot().setDamage(game.getPlayerStateBot().getDamage() + botFieldCard.getAttackPoints());
+                        }
+                        // Wenn C2 nicht zerstört wurde, dann kontert C2
+                        if (remainingTargetDefense >= 0) {
+                            int remainingAttackerDefense = botFieldCard.getDefensePoints() - opponentCard.getAttackPoints();
+                            if (remainingAttackerDefense < 0) {
+                                // C1 wird zerstört und vom Spielfeld entfernt
+                                cardsToRemoveFromBotField.add(botFieldCard);
+                            } else {
+                                // C1 überlebt den Konter, setze neue Verteidigungspunkte
+                                botFieldCard.setDefensePoints(remainingAttackerDefense);
+                            }
+                            userAccount.getPlayerState().getFieldCards().removeAll(cardsToRemoveFromOpponentField);
+                            game.getPlayerStateBot().getFieldCards().removeAll(cardsToRemoveFromBotField);
+                        }
+                        botFieldCard.setHasAttacked(true);
+                        playerCardRepository.save(botFieldCard);
+                        playerCardRepository.save(opponentCard);
+                        playerStateRepository.save(game.getPlayerStateBot());
+                        playerStateRepository.save(userAccount.getPlayerState());
+
                     }
-                    playerCardRepository.save(botFieldCard);
-                    playerCardRepository.save(opponentCard);
-                    playerStateRepository.save(game.getPlayerStateBot());
-                    playerStateRepository.save(userAccount.getPlayerState());
+                }
+
+                for(PlayerCard botFieldCard : game.getPlayerStateBot().getFieldCards()) {
+                    botFieldCard.setHasAttacked(false);
                 }
             }
-
-
             game.setMyTurn(true);
 
         }
