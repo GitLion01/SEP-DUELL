@@ -758,13 +758,12 @@ public class GameService {
         user.setPlayerState(playerState);
         userAccountRepository.save(user);
 
-        List<Card> cardCopy = new ArrayList<>();
-        for(Card card : deck.getCards()){
-            cardCopy.add(card);
-        }
+        List<Card> cardCopy = new ArrayList<>(deck.getCards());
         Deck deckCopy = new Deck();
+        deckRepository.save(deckCopy);
         deckCopy.setCards(cardCopy);
         deckRepository.save(deckCopy);
+
 
         PlayerState playerStateBot = new PlayerState();
         playerStateBot.setDeck(deckCopy);
@@ -817,7 +816,7 @@ public class GameService {
         int count = 0;
         List<PlayerCard> cardsToRemove = new ArrayList<>();
         while (iterator.hasNext() && count < 5) {
-            PlayerCard playerCard = iterator.next(); // Hohlt die nächste Karte aus dem Deck
+            PlayerCard playerCard = iterator.next(); // Holt die nächste Karte aus dem Deck
             user.getPlayerState().getHandCards().add(playerCard); // Fügt die Karte der Hand des Spielers hinzu
             cardsToRemove.add(playerCard);
             count++; // Inkrementiert den Zähler für die Anzahl der gezogenen Karten
