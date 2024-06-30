@@ -382,8 +382,6 @@ public class GameService {
                                 // C1 überlebt den Konter, setze neue Verteidigungspunkte
                                 botFieldCard.setDefensePoints(remainingAttackerDefense);
                             }
-                            userAccount.getPlayerState().getFieldCards().removeAll(cardsToRemoveFromOpponentField);
-                            game.getPlayerStateBot().getFieldCards().removeAll(cardsToRemoveFromBotField);
                         }
                         botFieldCard.setHasAttacked(true);
                         playerCardRepository.save(botFieldCard);
@@ -397,6 +395,9 @@ public class GameService {
                 for(PlayerCard botFieldCard : game.getPlayerStateBot().getFieldCards()) {
                     botFieldCard.setHasAttacked(false);
                 }
+
+                userAccount.getPlayerState().getFieldCards().removeAll(cardsToRemoveFromOpponentField);
+                game.getPlayerStateBot().getFieldCards().removeAll(cardsToRemoveFromBotField);
             }
             game.setMyTurn(true);
 
