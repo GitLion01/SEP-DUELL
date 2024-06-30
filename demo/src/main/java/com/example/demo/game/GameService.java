@@ -846,6 +846,7 @@ public class GameService {
         }
         newGame.setReady(true);
         newGame.resetTimer();
+        gameRepository.save(newGame);
 
 
 
