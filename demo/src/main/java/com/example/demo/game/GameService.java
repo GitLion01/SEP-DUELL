@@ -317,17 +317,17 @@ public class GameService {
 
             // 1: Karte Ziehen
             game.getPlayerStateBot().getHandCards().add(game.getPlayerStateBot().getDeckClone().remove(0));
-            playerStateRepository.save(game.getPlayerStateBot());
-            gameRepository.save(game);
-            // 2: Alle Normalen Karten setzen
 
+            // 2: Alle Normalen Karten setzen
+            List<PlayerCard> cardsToRemove = new ArrayList<>();
             for (PlayerCard card : playerStateRepository.findById(game.getPlayerStateBot().getId()).get().getHandCards()) {
                 if (card.getRarity() == Rarity.NORMAL) {
                     game.getPlayerStateBot().getFieldCards().add(card);
-                    game.getPlayerStateBot().getHandCards().remove(card);
+                    cardsToRemove.add(card);
                     game.getPlayerStateBot().getCardsPlayed().add(card);
                 }
             }
+            game.getPlayerStateBot().getHandCards().removeAll(cardsToRemove);
             // 3: Mit allen Karten auf dem Feld angreifen
 
             if (userAccount.getPlayerState().getFieldCards().isEmpty()) {
