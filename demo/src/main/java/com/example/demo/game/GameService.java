@@ -764,6 +764,7 @@ public class GameService {
         }
         Deck deckCopy = new Deck();
         deckCopy.setCards(cardCopy);
+        deckRepository.save(deckCopy);
 
         PlayerState playerStateBot = new PlayerState();
         playerStateBot.setDeck(deckCopy);
