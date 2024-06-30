@@ -42,12 +42,12 @@ public class GameService {
     }
 
 
-    @Scheduled(fixedRate = 1000)
+    @Scheduled(fixedRate = 100000)
     public void updateTimers(){
         List<Game> games = gameRepository.findAll();
         for (Game game : games) {
             game.decrementTimer();
-            if( game.getReady() && game.getRemaingTime() <= 0){
+            if(game.getReady() && game.getRemaingTime() <= 0){
                 handleTimerExpiration(game);
             }
             sendTimerUpdate(game);
@@ -121,11 +121,16 @@ public class GameService {
 
     @Transactional
     public void selectDeck(DeckSelectionRequest request) {
+        System.out.println("SERVICE ERREICHT");
+        System.out.println("Deck ID: " + request.getDeckId());
+        System.out.println("User ID: " + request.getUserId());
+        System.out.println("Game ID: " + request.getGameId());
         Optional<Game> optionalGame = gameRepository.findById(request.getGameId());
         Optional<Deck> optionalDeck = deckRepository.findByDeckIdAndUserId(request.getDeckId(), request.getUserId());
         if(optionalGame.isEmpty() || optionalDeck.isEmpty()) {
             return;
         }
+        System.out.println("Game und Deck vorhanden");
         Game game = optionalGame.get();
         Deck deck = optionalDeck.get();
         List<Card> cards = deck.getCards();
@@ -400,8 +405,8 @@ public class GameService {
 
         attackerCard.setHasAttacked(true);
         playerCardRepository.save(attackerCard);
-        playerStateRepository.save(game.getUsers().get(0).getPlayerState());
-        playerStateRepository.save(game.getUsers().get(1).getPlayerState());
+        playerStateRepository.save(attacker.getPlayerState());
+        playerStateRepository.save(defender.getPlayerState());
         gameRepository.save(game);
         List<UserAccount> users = game.getUsers();
         for(UserAccount player : game.getUsers()) {
@@ -569,49 +574,9 @@ public class GameService {
             messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", Arrays.asList(game, users, sepCoins, leaderBoardPointsWinner, leaderBoardPointsLoser,damageWinner, damageLoser, cardsPlayedA, cardsPlayedB, sacrificedA, sacrificedB));
         }
 
-        /*deleteUserGameData(Arrays.asList(user1.getId(), user2.getId()));*/
-        /*gameRepository.delete(game);*/
         List<Long> userIds=Arrays.asList(game.getUsers().get(0).getId(), game.getUsers().get(1).getId());
         deleteUserGameData(userIds, game.getId());
     }
-
-    /*@Transactional
-    public void deleteGame(Long gameId) {
-        // Spiel laden
-        Game game = gameRepository.findById(gameId)
-                .orElseThrow(() -> new IllegalArgumentException("Game not found with id: " + gameId));
-        // Alle Benutzer des Spiels laden
-        List<UserAccount> users = game.getUsers();
-        // Verbindung zwischen Game und UserAccount aufheben
-        game.getUsers().clear();
-        gameRepository.save(game);
-        // Für jeden Benutzer die zugehörigen Handkarten löschen und PlayerState-Referenz auf null setzen
-        for (UserAccount user : users) {
-            PlayerState playerState = user.getPlayerState();
-            if (playerState != null) {
-                playerState.getHandCards().clear();
-                user.setPlayerState(null);
-                userAccountRepository.save(user);
-            }
-        }
-        // Spiel löschen
-        gameRepository.delete(game);
-        // Nun den Rest aufräumen: PlayerStates, PlayerCards und Deck löschen
-        for (UserAccount user : users) {
-            PlayerState playerState = user.getPlayerState();
-            if (playerState != null) {
-                // PlayerCards und Deck löschen
-                playerState.getFieldCards().clear();
-                playerState.getDeckClone().clear();
-                playerState.getCardsPlayed().clear();
-                if (playerState.getDeck() != null) {
-                    playerState.setDeck(null);
-                }
-                // PlayerState löschen
-                playerStateRepository.delete(playerState);
-            }
-        }
-    }*/
 
     @Modifying
     @Transactional

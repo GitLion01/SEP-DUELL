@@ -40,6 +40,11 @@ public class ChatController {
     }
 
 
+    @GetMapping("getClanChat")
+    public ResponseEntity<GroupDTO> getClanChat(@RequestParam Long userId){
+        return chatService.getClanChat(userId);
+    }
+
     @MessageMapping("/sendMessage")
     public void sendMessage(@Payload ChatMessage chatMessage)
     {
@@ -54,12 +59,6 @@ public class ChatController {
         chatService.sendMessage(chatMessage,userId,ChatId);
     }
 
-    /*@MessageMapping("/send-group-message")
-    public void sendGroupMessage(@Payload ChatMessage chatMessage)
-    {
-        chatService.sendGroupMessage(chatMessage);
-    }*/
-
     @MessageMapping("/editMessage")
     public void editMessage(@Payload ChatMessage chatMessage)
     {
@@ -71,5 +70,4 @@ public class ChatController {
     {
         chatService.deleteMessage(chatMessage);
     }
-
 }

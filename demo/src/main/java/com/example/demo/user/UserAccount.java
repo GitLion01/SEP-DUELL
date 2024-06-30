@@ -2,8 +2,8 @@ package com.example.demo.user;
 import com.example.demo.cards.CardInstance;
 import com.example.demo.chat.Chat;
 import com.example.demo.chat.ChatMessage;
+import com.example.demo.clan.Clan;
 import com.example.demo.decks.Deck;
-import com.example.demo.game.Game;
 import com.example.demo.game.PlayerState;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
@@ -98,6 +98,9 @@ public class UserAccount implements UserDetails {
     )
     private List<Chat> userChat=new ArrayList<>();
 
+    @ManyToOne
+    @JoinColumn(name = "user_clan")
+    private Clan clan;
 
     public UserAccount(byte[] image,
                        String firstName,

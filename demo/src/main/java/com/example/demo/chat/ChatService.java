@@ -193,7 +193,6 @@ public class ChatService {
     }
 
     public void checkOnline(ChatMessage chatMessage) {
-        System.out.println("Checking if users are online for message: " + chatMessage.getMessage());
         Chat chat = chatRepository.findById(chatMessage.getChat().getId()).get();
 
         if(!chat.getMessages().contains(chatMessage)) {
@@ -225,4 +224,10 @@ public class ChatService {
         return dto;
     }
 
+    public ResponseEntity<GroupDTO> getClanChat(Long userId) {
+        UserAccount userAccount = userAccountRepository.findById(userId).get();
+        if(userAccount.getClan()!=null)
+            return ResponseEntity.ok(convertToGroupDTO(userAccount.getClan().getGroup()));
+        return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
+    }
 }
