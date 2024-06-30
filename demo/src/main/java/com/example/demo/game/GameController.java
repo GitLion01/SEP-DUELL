@@ -1,5 +1,6 @@
 package com.example.demo.game;
 import com.example.demo.game.requests.*;
+import com.example.demo.user.UserAccount;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -8,10 +9,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @CrossOrigin
 @RestController
@@ -29,8 +27,15 @@ public class GameController {
             List<Game> games = optionalGames.get();
             Map<Long, List<String>> streamedGames = new HashMap<>();
 
+
             for(Game game : games){
-                streamedGames.put(game.getId(), List.of(game.getUsers().get(0).getUsername(), game.getUsers().get(1).getUsername()));
+                Iterator<UserAccount> gameIterator = game.getUsers().iterator();
+                List<String> usernames= new ArrayList<>();
+                while(gameIterator.hasNext()){
+                    UserAccount user = gameIterator.next();
+                    usernames.add(user.getUsername());
+                }
+                streamedGames.put(game.getId(), usernames);
             }
 
             return ResponseEntity.ok(streamedGames);
