@@ -2,7 +2,6 @@ package com.example.demo.profile;
 
 import com.example.demo.decks.Deck;
 import com.example.demo.user.UserAccount;
-import com.example.demo.user.UserAccountRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,7 +12,7 @@ public class ProfileService {
 
     private final ProfileRepository profileRepository;
 
-    public ProfileService(ProfileRepository profileRepository, UserAccountRepository userAccountRepository) {
+    public ProfileService(ProfileRepository profileRepository) {
         this.profileRepository = profileRepository;
     }
 

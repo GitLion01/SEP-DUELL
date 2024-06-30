@@ -7,7 +7,6 @@ import com.example.demo.duellHerausforderung.Notification;
 import com.example.demo.game.requests.*;
 import com.example.demo.user.UserAccount;
 import com.example.demo.user.UserAccountRepository;
-import jakarta.validation.constraints.Null;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -43,7 +42,7 @@ public class GameService {
     }
 
 
-    @Scheduled(fixedRate = 1000)
+    @Scheduled(fixedRate = 100000)
     public void updateTimers(){
         List<Game> games = gameRepository.findAll();
         for (Game game : games) {

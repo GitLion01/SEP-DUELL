@@ -34,6 +34,8 @@ public class FriendListService {
             //encode in 64 Base dann convert to Byte[]
             imageBase64 = Base64.getEncoder().encodeToString(user.getImage());
         }
+        if(user.getClan()!=null)
+            return new UserDTO(user.getUsername(), imageBase64,user.getId(),user.getFirstName(),user.getLastName(),user.getFriends(), user.getLeaderboardPoints(), user.getClan().getName());
         return new UserDTO(user.getUsername(), imageBase64,user.getId(),user.getFirstName(),user.getLastName(),user.getFriends(), user.getLeaderboardPoints());
     }
 
@@ -153,8 +155,7 @@ public class FriendListService {
         }
     }
 
-    public ResponseEntity<Void> setFriendslistPrivacy(long userId)
-    {
+    public ResponseEntity<Void> setFriendslistPrivacy(long userId) {
         Optional<UserAccount> user = friendListRepository.findById(userId);
         if(user.isPresent()) {
             UserAccount userAccount = user.get();
@@ -164,8 +165,7 @@ public class FriendListService {
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
-    public ResponseEntity<Boolean> getFriendslistPrivacy(long userId)
-    {
+    public ResponseEntity<Boolean> getFriendslistPrivacy(long userId) {
         Optional<UserAccount> user = friendListRepository.findById(userId);
         if(user.isPresent()) {
             UserAccount userAccount = user.get();

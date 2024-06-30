@@ -17,6 +17,7 @@ public class UserDTO {
     private String lastName;
     private List<UserAccount> friends;
     private Integer leaderboardPoints;
+    private String clanName;
 
     // Konstruktoren, Getter und Setter
     public UserDTO( String username,long id,String firstName,String lastName) {
@@ -26,7 +27,18 @@ public class UserDTO {
         this.lastName = lastName;
     }
 
-    public UserDTO(String username, String image, long id, String firstName, String lastName, List<UserAccount> friends,Integer leaderboardPoints) {
+    public UserDTO(String username, String image, long id, String firstName, String lastName, List<UserAccount> friends,Integer leaderboardPoints, String clanName) {
+        this.username = username;
+        this.image = image;
+        this.id = id;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.friends = friends;
+        this.leaderboardPoints = leaderboardPoints;
+        this.clanName = clanName;
+    }
+
+    public UserDTO(String username, String image, Long id, String firstName, String lastName, List<UserAccount> friends, Integer leaderboardPoints) {
         this.username = username;
         this.image = image;
         this.id = id;
@@ -35,5 +47,4 @@ public class UserDTO {
         this.friends = friends;
         this.leaderboardPoints = leaderboardPoints;
     }
-
 }

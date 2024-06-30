@@ -224,4 +224,10 @@ public class ChatService {
         return dto;
     }
 
+    public ResponseEntity<GroupDTO> getClanChat(Long userId) {
+        UserAccount userAccount = userAccountRepository.findById(userId).get();
+        if(userAccount.getClan()!=null)
+            return ResponseEntity.ok(convertToGroupDTO(userAccount.getClan().getGroup()));
+        return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
+    }
 }

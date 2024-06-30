@@ -40,6 +40,11 @@ public class ChatController {
     }
 
 
+    @GetMapping("getClanChat")
+    public ResponseEntity<GroupDTO> getClanChat(@RequestParam Long userId){
+        return chatService.getClanChat(userId);
+    }
+
     @MessageMapping("/sendMessage")
     public void sendMessage(@Payload ChatMessage chatMessage)
     {
@@ -65,5 +70,4 @@ public class ChatController {
     {
         chatService.deleteMessage(chatMessage);
     }
-
 }
