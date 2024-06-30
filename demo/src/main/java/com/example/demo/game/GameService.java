@@ -317,6 +317,7 @@ public class GameService {
 
             // 1: Karte Ziehen
             game.getPlayerStateBot().getHandCards().add(game.getPlayerStateBot().getDeckClone().remove(0));
+            gameRepository.save(game);
             // 2: Alle Normalen Karten setzen
 
             for (PlayerCard card : playerStateRepository.findById(game.getPlayerStateBot().getId()).get().getHandCards()) {
