@@ -223,6 +223,7 @@ public class GameService {
         if(optionalGame.isEmpty() || optionalUserAccount.isEmpty()) {
             return;
         }
+
         Game game = optionalGame.get();
         UserAccount userAccount = optionalUserAccount.get();
         if(!game.getUsers().get(game.getCurrentTurn()).equals(userAccount)){// prüft ob der User am zug ist
@@ -285,39 +286,129 @@ public class GameService {
     public void endTurn(EndTurnRequest request) {
         Optional<Game> optionalGame = gameRepository.findById(request.getGameID());
         Optional<UserAccount> optionalUserAccount = userAccountRepository.findById(request.getUserID());
-        if(optionalGame.isEmpty() || optionalUserAccount.isEmpty()) {
+        if (optionalGame.isEmpty() || optionalUserAccount.isEmpty()) {
             return;
         }
         Game game = optionalGame.get();
         UserAccount userAccount = optionalUserAccount.get();
-        if(!game.getUsers().get(game.getCurrentTurn()).equals(userAccount)){
-            return;
-        }
-        UserAccount currentTurn = game.getUsers().get(game.getCurrentTurn());
-        UserAccount notTurn = game.getUsers().get(0).equals(userAccount) ? game.getUsers().get(1) : userAccount;
-        game.setCurrentTurn(game.getUsers().get(0).equals(userAccount) ? 1 : 0);
-        game.resetTimer();
-        if(game.getFirstRound()){
-            game.setFirstRound(false);
-        }
-        List<PlayerCard> cards = userAccount.getPlayerState().getFieldCards();
-        for(PlayerCard card : cards){
-            card.setHasAttacked(false);
-            playerCardRepository.save(card);
+
+        int remainingLifePoints = 0;
+        if (game.getPlayerStateBot() == null) {
+            if (!game.getUsers().get(game.getCurrentTurn()).equals(userAccount)) {
+                return;
+            }
+            game.setCurrentTurn(game.getUsers().get(0).equals(userAccount) ? 1 : 0);
+            game.resetTimer();
+            if (game.getFirstRound()) {
+                game.setFirstRound(false);
+            }
+            List<PlayerCard> cards = userAccount.getPlayerState().getFieldCards();
+            for (PlayerCard card : cards) {
+                card.setHasAttacked(false);
+                playerCardRepository.save(card);
+            }
+            gameRepository.save(game);
+        } else {
+            game.setMyTurn(false);
+
+            //Aktionen des Bots
+
+            // 1: Karte Ziehen
+            game.getPlayerStateBot().getHandCards().add(game.getPlayerStateBot().getDeckClone().remove(0));
+            // 2: Alle Normalen Karten setzen
+            for (PlayerCard card : game.getPlayerStateBot().getHandCards()) {
+                if (card.getRarity() == Rarity.NORMAL) {
+                    game.getPlayerStateBot().getFieldCards().add(card);
+                    game.getPlayerStateBot().getHandCards().remove(card);
+                    game.getPlayerStateBot().getCardsPlayed().add(card);
+                }
+            }
+            // 3: Mit allen Karten auf dem Feld angreifen
+
+            if (userAccount.getPlayerState().getFieldCards().isEmpty()) {
+                // greife gegner an
+                Iterator<PlayerCard> botFieldCards = game.getPlayerStateBot().getFieldCards().iterator();
+                while (botFieldCards.hasNext()) {
+                    PlayerCard botFieldCard = botFieldCards.next();
+
+                    remainingLifePoints = userAccount.getPlayerState().getLifePoints() - botFieldCard.getAttackPoints();
+                    if (botFieldCard.getAttackPoints() > userAccount.getPlayerState().getLifePoints()) {
+                        game.getPlayerStateBot().setDamage(game.getPlayerStateBot().getDamage() + userAccount.getPlayerState().getLifePoints() + 1); // erhöht den Damage Counter des Angreifers
+                        userAccount.getPlayerState().setLifePoints(-1);
+                        game.getPlayerStateBot().setWinner(true);
+                        playerStateRepository.save(game.getPlayerStateBot());
+                    } else {
+                        userAccount.getPlayerState().setLifePoints((userAccount.getPlayerState().getLifePoints() - botFieldCard.getAttackPoints())); // zieht Angriffspunkte von Lebenspunkte ab
+                        game.getPlayerStateBot().setDamage(game.getPlayerStateBot().getDamage() + botFieldCard.getAttackPoints()); // erhöht den Damage Counter des Angreifers
+                    }
+
+                    playerCardRepository.save(botFieldCard);
+                    playerStateRepository.save(game.getPlayerStateBot());
+                    playerStateRepository.save(userAccount.getPlayerState());
+                }
+            } else {
+                //greife Karten an
+                Iterator<PlayerCard> opponentCards = userAccount.getPlayerState().getFieldCards().iterator();
+                Iterator<PlayerCard> botFieldCards = game.getPlayerStateBot().getFieldCards().iterator();
+
+                while (opponentCards.hasNext() && botFieldCards.hasNext()) {
+                    PlayerCard opponentCard = opponentCards.next();
+                    PlayerCard botFieldCard = botFieldCards.next();
+                    int remainingTargetDefense = opponentCard.getDefensePoints() - botFieldCard.getAttackPoints();
+                    System.out.println("RemainingTargetDefense " + remainingTargetDefense);
+                    if (remainingTargetDefense < 0) {
+                        // C2 wird zerstört und vom Spielfeld entfernt
+                        userAccount.getPlayerState().getFieldCards().remove(opponentCard);
+                        game.getPlayerStateBot().setDamage(game.getPlayerStateBot().getDamage() + opponentCard.getDefensePoints() + 1);
+                        opponentCard.setDefensePoints(-1);
+                        System.out.println("Target wurde entfernt");
+                    } else {
+                        // C2 überlebt den Angriff, setze neue Verteidigungspunkte
+                        opponentCard.setDefensePoints(remainingTargetDefense);
+                        game.getPlayerStateBot().setDamage(game.getPlayerStateBot().getDamage() + botFieldCard.getAttackPoints());
+                    }
+                    // Wenn C2 nicht zerstört wurde, dann kontert C2
+                    if (remainingTargetDefense >= 0) {
+                        int remainingAttackerDefense = botFieldCard.getDefensePoints() - opponentCard.getAttackPoints();
+                        if (remainingAttackerDefense < 0) {
+                            // C1 wird zerstört und vom Spielfeld entfernt
+                            botFieldCard.getPlayerState().getFieldCards().remove(botFieldCard);
+                            System.out.println("Attacker wurde entfernt");
+                        } else {
+                            // C1 überlebt den Konter, setze neue Verteidigungspunkte
+                            botFieldCard.setDefensePoints(remainingAttackerDefense);
+                        }
+                    }
+                    playerCardRepository.save(botFieldCard);
+                    playerCardRepository.save(opponentCard);
+                    playerStateRepository.save(game.getPlayerStateBot());
+                    playerStateRepository.save(userAccount.getPlayerState());
+                }
+            }
+
+
+            game.setMyTurn(true);
+
         }
         gameRepository.save(game);
+
         List<UserAccount> users = game.getUsers();
         List<UserAccount> viewers = game.getViewers();
-        for(UserAccount player : game.getUsers()) {
+        for (UserAccount player : game.getUsers()) {
             System.out.println(" BEVOR Player: " + player.getId());
             messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", Arrays.asList(game, users));
             System.out.println(" DANACH Player: " + player.getId());
         }
 
-        if(!viewers.isEmpty()) {
-            for(UserAccount viewer : viewers) {
+        if (!viewers.isEmpty()) {
+            for (UserAccount viewer : viewers) {
                 messagingTemplate.convertAndSendToUser(viewer.getId().toString(), "/queue/watch", Arrays.asList(game, users));
             }
+        }
+
+
+        if (remainingLifePoints < 0) {
+            terminateMatch(request.getGameID(), game.getPlayerStateBot().getId(), userAccount.getId());
         }
     }
 
@@ -874,6 +965,25 @@ public class GameService {
 
 
     }
+
+    public void endMyTurn(EndTurnRequest request){
+        Optional<Game> optionalGame = gameRepository.findById(request.getGameID());
+        Optional<UserAccount> optionalUser = userAccountRepository.findById(request.getUserID());
+        if(optionalGame.isEmpty() || optionalUser.isEmpty()){
+            return;
+        }
+
+        Game game = optionalGame.get();
+        UserAccount userAccount = optionalUser.get();
+        if(game.getMyTurn()){
+            game.setMyTurn(false);
+        }else{
+            return;
+        }
+        gameRepository.save(game);
+    }
+
+
 
 
 }
