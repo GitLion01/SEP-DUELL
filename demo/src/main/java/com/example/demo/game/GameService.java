@@ -353,6 +353,9 @@ public class GameService {
                 }
             } else {
                 //greife Karten an
+                List<PlayerCard> cardsToRemoveFromOpponentField = new ArrayList<>();
+                List<PlayerCard> cardsToRemoveFromBotField = new ArrayList<>();
+
                 Iterator<PlayerCard> opponentCards = userAccount.getPlayerState().getFieldCards().iterator();
                 Iterator<PlayerCard> botFieldCards = game.getPlayerStateBot().getFieldCards().iterator();
 
@@ -363,7 +366,7 @@ public class GameService {
                     System.out.println("RemainingTargetDefense " + remainingTargetDefense);
                     if (remainingTargetDefense < 0) {
                         // C2 wird zerstört und vom Spielfeld entfernt
-                        userAccount.getPlayerState().getFieldCards().remove(opponentCard);
+                        cardsToRemoveFromOpponentField.add(opponentCard);
                         game.getPlayerStateBot().setDamage(game.getPlayerStateBot().getDamage() + opponentCard.getDefensePoints() + 1);
                         opponentCard.setDefensePoints(-1);
                         System.out.println("Target wurde entfernt");
@@ -377,12 +380,14 @@ public class GameService {
                         int remainingAttackerDefense = botFieldCard.getDefensePoints() - opponentCard.getAttackPoints();
                         if (remainingAttackerDefense < 0) {
                             // C1 wird zerstört und vom Spielfeld entfernt
-                            botFieldCard.getPlayerState().getFieldCards().remove(botFieldCard);
+                            cardsToRemoveFromBotField.add(botFieldCard);
                             System.out.println("Attacker wurde entfernt");
                         } else {
                             // C1 überlebt den Konter, setze neue Verteidigungspunkte
                             botFieldCard.setDefensePoints(remainingAttackerDefense);
                         }
+                        userAccount.getPlayerState().getFieldCards().removeAll(cardsToRemoveFromOpponentField);
+                        game.getPlayerStateBot().getFieldCards().removeAll(cardsToRemoveFromBotField);
                     }
                     playerCardRepository.save(botFieldCard);
                     playerCardRepository.save(opponentCard);
