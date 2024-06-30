@@ -741,7 +741,6 @@ public class GameService {
 
     // BOT-Matches -----------------------------------------------------------------------------------------------------
 
-    @Transactional
     public void createBotGame(CreateBotRequest request){
         UserAccount user = userAccountRepository.findById(request.getUserId()).orElseThrow(() -> new IllegalArgumentException("User not found"));
         Deck deck = deckRepository.findById(request.getDeckId()).orElseThrow(() -> new IllegalArgumentException("Deck not found"));
@@ -851,16 +850,15 @@ public class GameService {
 
 
 
-
         messagingTemplate.convertAndSendToUser(user.getId().toString(), "/queue/createBotDuel", Arrays.asList(newGame, user, playerStateBot));
         Notification notification = new Notification(user.getId(),0L,userAccountRepository.findById(user.getId()).get().getUsername(),"schon aktiviert");
         messagingTemplate.convertAndSendToUser(user.getId().toString(),"/queue/notifications",notification);
 
 
         if(newGame.getReady() && newGame.getStreamed()) {
-            Map<Long,String> streamedGames = new HashMap<>();
+            Map<Long,List<String>> streamedGames = new HashMap<>();
             for (Game stream : gameRepository.findAllStreams().get()) {
-                streamedGames.put(stream.getId(), user.getUsername());
+                streamedGames.put(stream.getId(), List.of(user.getUsername(), "Bot"));
             }
             messagingTemplate.convertAndSend("/queue/streams", streamedGames);
         }
