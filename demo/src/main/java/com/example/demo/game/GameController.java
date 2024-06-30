@@ -30,7 +30,7 @@ public class GameController {
 
             for(Game game : games){
                 Iterator<UserAccount> gameIterator = game.getUsers().iterator();
-                List<String> usernames= new ArrayList<>();
+                List<String> usernames = new ArrayList<>();
                 while(gameIterator.hasNext()){
                     UserAccount user = gameIterator.next();
                     usernames.add(user.getUsername());
@@ -136,6 +136,9 @@ public class GameController {
         gameService.createBotGame(request);
     }
 
-
+    @MessageMapping("/endMyTurn")
+    public void endMyTurn(EndTurnRequest request){
+        gameService.endMyTurn(request);
+    }
 
 }
