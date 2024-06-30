@@ -318,7 +318,8 @@ public class GameService {
             // 1: Karte Ziehen
             game.getPlayerStateBot().getHandCards().add(game.getPlayerStateBot().getDeckClone().remove(0));
             // 2: Alle Normalen Karten setzen
-            for (PlayerCard card : game.getPlayerStateBot().getHandCards()) {
+
+            for (PlayerCard card : playerStateRepository.findById(game.getPlayerStateBot().getId()).get().getHandCards()) {
                 if (card.getRarity() == Rarity.NORMAL) {
                     game.getPlayerStateBot().getFieldCards().add(card);
                     game.getPlayerStateBot().getHandCards().remove(card);
