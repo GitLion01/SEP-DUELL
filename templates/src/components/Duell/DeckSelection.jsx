@@ -115,7 +115,7 @@ const  DeckSelection = () => {
 
   return (
       <div>
-        <h2>Select Your Deck</h2>
+        <h2 className={"ub1"}>Select Your Deck</h2>
         <div className="deck-list">
           {decks.map((deck) => (
 

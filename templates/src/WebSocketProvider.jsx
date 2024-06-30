@@ -16,6 +16,7 @@ export const WebSocketProvider = ({ children }) => {
     const [game, setGame] = useState(null);
     const [users, setUsers] = useState([]);
     const [connected, setConnected] = useState(false);
+    const [botPS, setBotPS] = useState(null);
 
     useEffect(() => {
 
@@ -220,7 +221,7 @@ export const WebSocketProvider = ({ children }) => {
 
     return (
         <WebSocketContext.Provider value={{ client, chatClient, notifications, handleAcceptChallenge, handleRejectChallenge, handleTimeoutChallenge,
-            activeDuel, createGame, game, setGame, users, setUsers, connected
+            activeDuel, createGame, game, setGame, users, setUsers, botPS, setBotPS, connected
          }}>
             {children}
         </WebSocketContext.Provider>

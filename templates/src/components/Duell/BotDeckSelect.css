@@ -1,4 +1,4 @@
-/* DeckSelection.css */
+/* BotDeckSelect.css */
 
 .deck-selection-container {
     display: flex;
@@ -12,7 +12,7 @@
     background: linear-gradient(to bottom, #1e3c72, #2a5298);
 }
 
-.ub1 {
+.u1 {
     margin-bottom: 20px;
     font-size: 2em;
     color: #ffffff;
@@ -52,13 +52,12 @@
     color: #000;
 }
 
-.form-check-label {
-    color: #ffffff;
-}
-
 .p1 {
     color: #ffffff;
     margin-top: 20px;
     font-size: 1.2em;
 }
 
+.form-check-label {
+    color: #ffffff;
+}

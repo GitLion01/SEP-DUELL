@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 const LiveTabelle = () => {
 
     const [id, setId] = useState(null);
-    const { client, setGame, setUsers, connected } = useContext(WebSocketContext);
+    const { client, setGame, setUsers, botPS, setBotPS, connected } = useContext(WebSocketContext);
     const [liveGames, setLiveGames] = useState({});
     const navigate = useNavigate();
 
@@ -57,14 +57,26 @@ const LiveTabelle = () => {
         if (client && connected) {
             const subscription = client.subscribe(`/user/${id}/queue/startwatch`, (message) => {
                 const response = JSON.parse(message.body);
-                console.log("Response ", response);
-                if (response) {
+                //console.log("Response ", response);
+                if (response.length === 2) {
+                    console.log("duell gg spieler");
                     setGame(response[0]);
                     setUsers(response[1]);
                     localStorage.setItem("gameId", response[0].id);
 
-                    navigate('/liveduel');
+                    //navigate('/liveduel');
                 }
+                if (response.length === 3) {
+
+                    console.log("Response: ", response)
+
+                    setGame(response[0]);
+                    setUsers(response[1]);
+                    setBotPS(response[2]);
+
+                    localStorage.setItem("gameId", response[0].id);
+                }
+                navigate('/liveduel');
 
             })
 

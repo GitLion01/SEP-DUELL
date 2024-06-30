@@ -23,6 +23,7 @@ import {WebSocketProvider} from "./WebSocketProvider";
 import GlobalNotification from './components/LeaderboardPage/GlobalNotification.jsx';
 import LiveTabelle from "./components/Livestream/LiveTabelle";
 import Livestream from "./components/Livestream/Livestream";
+import BotDeckSelect from "./components/Duell/BotDeckSelect";
 
 
 function App() {
@@ -71,6 +72,7 @@ function AppRoutes() {
         <Route path="/duel" element={<ProtectedRoute element={Duel} />} />
         <Route path="/streams" element={<ProtectedRoute element={LiveTabelle} />} />
         <Route path="liveduel" element={<ProtectedRoute element={Livestream} /> } />
+        <Route path="/botdeckselect" element={<ProtectedRoute element={BotDeckSelect} />} />
       </Routes>
   );
 }

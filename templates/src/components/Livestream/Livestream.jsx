@@ -7,7 +7,7 @@ import StatisticsModal from "../Duell/StatisticsModal";
 
 const Livestream = () => {
     const navigate = useNavigate();
-    const { client, game, setGame, users, setUsers, connected } = useContext(WebSocketContext);
+    const { client, game, setGame, users, setUsers, botPS, setBotPS, connected } = useContext(WebSocketContext);
     const [id, setId] = useState(null);
     const [timer, setTimer] = useState(120);
     const [user1State, setUser1State] = useState(null);
@@ -26,17 +26,42 @@ const Livestream = () => {
     // Initialisieren des Spielerzustands aus dem übergebenen Zustand
     useEffect(() => {
         if (users && game) {
-            const user1 = users[0];
-            const user2 = users[1]
-            setCurrentTurn(game.currentTurn);
 
-            if (user1) {
-                setUser1State(user1.playerState);
+            if (users.length === 2) {
+
+                const user1 = users[0];
+                const user2 = users[1]
+                setCurrentTurn(game.currentTurn);
+
+                if (user1) {
+                    setUser1State(user1.playerState);
+                }
+                if (user2) {
+                    setUser2State(user2.playerState);
+                }
+
+                console.log("Duell gg Spieler");
+
+
             }
-            if (user2) {
-                setUser2State(user2.playerState);
+
+            else {
+                const user1 = users[0];
+
+                if (user1) {
+                    setUser1State(user1.playerState);
+                }
+
+                setUser2State(botPS);
+
+                console.log("user1 PS: ", user1State);
+                console.log("Bot PS: ", botPS);
+                console.log("Bot PS local: ", user2State);
+
+
             }
         }
+        else { console.log("kein Spiel oder verbindung", users, game);}
     }, [id]);
 
     useEffect(() => {
@@ -73,8 +98,24 @@ const Livestream = () => {
                     }
                     setCurrentTurn(response[0].currentTurn);
                 }
+                if (response.length === 3) {
+                    const user1 = response[1];
+                    const botPlayerState = response[2];
 
-                if (response.length > 3) {
+                    setGame(response[0]);
+                    setUsers(response[1]);
+
+                    if (user1) {
+                        setUser1State(user1.playerState);
+                    }
+                    if (botPlayerState) {
+                        setUser2State(botPlayerState);
+                    }
+                    setCurrentTurn(response[0].currentTurn);
+
+                }
+
+                if (response.length > 5) {
                     const [_, __, sepCoins, leaderBoardPointsWinner, leaderBoardPointsLoser, damageWinner, damageLoser, cardsPlayedA, cardsPlayedB, sacrificedA, sacrificedB] = response;
                     setStats({
                         sepCoins,
@@ -120,12 +161,12 @@ const Livestream = () => {
                     <h4>{timer} seconds</h4>
                 </div>
                 <div className="current-turn">
-                    <h4>{users[currentTurn]?.username}</h4>
+                    <h4>{users[currentTurn]?.username || "CPU"}</h4> {/* TODO teste ob aktueller Spieler korrekt anzeigt*/}
                 </div>
             </div>
             <div className="life-points">
                 <div className="opponent-info">
-                    <h4>{users[1]?.username}</h4>
+                    <h4>{users[1]?.username || "CPU"}</h4>
                     <div className="opponent-lp">
                         <h4>LP: {user2State?.lifePoints}</h4>
                     </div>

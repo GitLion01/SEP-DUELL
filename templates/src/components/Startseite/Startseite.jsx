@@ -97,6 +97,9 @@ const Startseite = () => {
             <section className="liveduelle">
               <a href="/streams"><h2>LIVE DUELLE</h2></a>
             </section>
+            <section>
+              <a href="/botdeckselect"><h2>BOT DUELL</h2></a>
+            </section>
           </div>
         </main>
       </div>
