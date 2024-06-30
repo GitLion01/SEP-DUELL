@@ -246,9 +246,7 @@ public class GameService {
 
         if(users.size() == 2) {
             for (UserAccount player : game.getUsers()) {
-                System.out.println(" BEVOR Player: " + player.getId());
                 messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", Arrays.asList(game, users));
-                System.out.println(" DANACH Player: " + player.getId());
             }
         }else{
             messagingTemplate.convertAndSendToUser(users.get(0).getId().toString(), "/queue/game", Arrays.asList(game, users, game.getPlayerStateBot()));
@@ -278,9 +276,14 @@ public class GameService {
         gameRepository.save(game);
         List<UserAccount> users = game.getUsers();
         List<UserAccount> viewers = game.getViewers();
-        for(UserAccount player : game.getUsers()) {
-            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", Arrays.asList(game, users));
+        if(users.size() == 2) {
+            for (UserAccount player : game.getUsers()) {
+                messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", Arrays.asList(game, users));
+            }
+        }else{
+            messagingTemplate.convertAndSendToUser(users.get(0).getId().toString(), "/queue/game", Arrays.asList(game, users, game.getPlayerStateBot()));
         }
+
         if(!viewers.isEmpty()) {
             for(UserAccount viewer : viewers) {
                 messagingTemplate.convertAndSendToUser(viewer.getId().toString(), "/queue/watch", Arrays.asList(game, users));
@@ -399,10 +402,15 @@ public class GameService {
 
         List<UserAccount> users = game.getUsers();
         List<UserAccount> viewers = game.getViewers();
-        for (UserAccount player : game.getUsers()) {
-            System.out.println(" BEVOR Player: " + player.getId());
-            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", Arrays.asList(game, users));
-            System.out.println(" DANACH Player: " + player.getId());
+
+        if(users.size() == 2) {
+            for (UserAccount player : game.getUsers()) {
+                System.out.println(" BEVOR Player: " + player.getId());
+                messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", Arrays.asList(game, users));
+                System.out.println(" DANACH Player: " + player.getId());
+            }
+        }else{
+            messagingTemplate.convertAndSendToUser(users.get(0).getId().toString(), "/queue/game", Arrays.asList(game, users, game.getPlayerStateBot()));
         }
 
         if (!viewers.isEmpty()) {
@@ -477,8 +485,13 @@ public class GameService {
         gameRepository.save(game);
         List<UserAccount> users = game.getUsers();
         List<UserAccount> viewers = game.getViewers();
-        for(UserAccount player : game.getUsers()) {
-            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", Arrays.asList(game, users));
+
+        if(users.size() == 2) {
+            for (UserAccount player : game.getUsers()) {
+                messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", Arrays.asList(game, users));
+            }
+        }else{
+            messagingTemplate.convertAndSendToUser(users.get(0).getId().toString(), "/queue/game", Arrays.asList(game, users, game.getPlayerStateBot()));
         }
 
         if(!viewers.isEmpty()) {
@@ -524,11 +537,19 @@ public class GameService {
         playerStateRepository.save(attacker.getPlayerState());
         playerStateRepository.save(defender.getPlayerState());
         gameRepository.save(game);
+
         List<UserAccount> users = game.getUsers();
         List<UserAccount> viewers = game.getViewers();
-        for(UserAccount player : game.getUsers()) {
-            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", Arrays.asList(game, users));
+
+
+        if(users.size() == 2) {
+            for (UserAccount player : game.getUsers()) {
+                messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", Arrays.asList(game, users));
+            }
+        }else{
+            messagingTemplate.convertAndSendToUser(users.get(0).getId().toString(), "/queue/game", Arrays.asList(game, users, game.getPlayerStateBot()));
         }
+
         if(!viewers.isEmpty()) {
             for(UserAccount viewer : viewers) {
                 messagingTemplate.convertAndSendToUser(viewer.getId().toString(), "/queue/watch", Arrays.asList(game, users));
@@ -572,10 +593,16 @@ public class GameService {
 
         playerStateRepository.save(user.getPlayerState());
         gameRepository.save(game);
+
         List<UserAccount> users = game.getUsers();
         List<UserAccount> viewers = game.getViewers();
-        for(UserAccount player : game.getUsers()) {
-            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", Arrays.asList(game, users));
+
+        if(users.size() == 2) {
+            for (UserAccount player : game.getUsers()) {
+                messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", Arrays.asList(game, users));
+            }
+        }else{
+            messagingTemplate.convertAndSendToUser(users.get(0).getId().toString(), "/queue/game", Arrays.asList(game, users, game.getPlayerStateBot()));
         }
 
         if(!viewers.isEmpty()) {
@@ -620,10 +647,16 @@ public class GameService {
 
         playerStateRepository.save(user.getPlayerState());
         gameRepository.save(game);
+
         List<UserAccount> users = game.getUsers();
         List<UserAccount> viewers = game.getViewers();
-        for(UserAccount player : game.getUsers()) {
-            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", Arrays.asList(game, users));
+
+        if(users.size() == 2) {
+            for (UserAccount player : game.getUsers()) {
+                messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", Arrays.asList(game, users));
+            }
+        }else{
+            messagingTemplate.convertAndSendToUser(users.get(0).getId().toString(), "/queue/game", Arrays.asList(game, users, game.getPlayerStateBot()));
         }
 
         if(!viewers.isEmpty()) {
@@ -755,10 +788,16 @@ public class GameService {
         }
 
         gameRepository.save(game);
+
         List<UserAccount> users = game.getUsers();
         List<UserAccount> viewers = game.getViewers() == null ? new ArrayList<>() : game.getViewers();
-        for (UserAccount player : game.getUsers()) {
-            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", Arrays.asList(game, users, sepCoins, leaderBoardPointsWinner, leaderBoardPointsLoser,damageWinner, damageLoser, cardsPlayedA, cardsPlayedB, sacrificedA, sacrificedB));
+
+        if(users.size() == 2) {
+            for (UserAccount player : game.getUsers()) {
+                messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", Arrays.asList(game, users));
+            }
+        }else{
+            messagingTemplate.convertAndSendToUser(users.get(0).getId().toString(), "/queue/game", Arrays.asList(game, users, game.getPlayerStateBot()));
         }
 
         if(!viewers.isEmpty()) {
