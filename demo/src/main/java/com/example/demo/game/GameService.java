@@ -243,10 +243,15 @@ public class GameService {
         playerStateRepository.save(userAccount.getPlayerState());
         gameRepository.save(game);
         List<UserAccount> users = game.getUsers();
-        for(UserAccount player : game.getUsers()) {
-            System.out.println(" BEVOR Player: " + player.getId());
-            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", Arrays.asList(game, users));
-            System.out.println(" DANACH Player: " + player.getId());
+
+        if(users.size() == 2) {
+            for (UserAccount player : game.getUsers()) {
+                System.out.println(" BEVOR Player: " + player.getId());
+                messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", Arrays.asList(game, users));
+                System.out.println(" DANACH Player: " + player.getId());
+            }
+        }else{
+            messagingTemplate.convertAndSendToUser(users.get(0).getId().toString(), "/queue/game", Arrays.asList(game, users, game.getPlayerStateBot()));
         }
     }
 
