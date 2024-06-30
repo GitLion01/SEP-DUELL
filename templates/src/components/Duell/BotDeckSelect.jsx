@@ -7,7 +7,7 @@ import BackButton from '../BackButton';
 
 
 const BotDeckSelect = () => {
-    const { client, setGame, users, setUsers, connected } = useContext(WebSocketContext); // Verwende den Kontext
+    const { client, setGame, users, setUsers, setBotPS, connected } = useContext(WebSocketContext); // Verwende den Kontext
     const [decks, setDecks] = useState([]);
     const [selectedDeck, setSelectedDeck] = useState(null);
     const [id, setId] = useState(null);
@@ -46,12 +46,19 @@ const BotDeckSelect = () => {
                 const response = JSON.parse(message.body);
                 console.log("Spiel wurde erstellt: ", response);
 
-                /*
-                if (response[0].ready === true) {
-                    navigate('/duel');
-                }
+                setGame(response[0]);
+                setUsers(response[1]);
+                setBotPS(response[2]);
 
-                 */
+                // Speichern des Spiels und der Benutzer im Webspeicher TODO zu testen!!!
+                sessionStorage.setItem('game', response[0]);
+                sessionStorage.setItem('users', response[1]);
+                sessionStorage.setItem('botPS', response[2]);
+
+
+                navigate('/botduel');
+
+
             });
 
             return () => subscription.unsubscribe(); // Cleanup function

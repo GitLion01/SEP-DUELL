@@ -413,6 +413,10 @@ const Duel = () => {
         'userId': id.toString()
       }
     })
+
+    setGame(null);
+    setUsers(null);
+    localStorage.removeItem('gameId');
     sessionStorage.removeItem('game');
     sessionStorage.removeItem('users');
     navigate('/startseite')

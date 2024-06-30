@@ -24,6 +24,7 @@ import GlobalNotification from './components/LeaderboardPage/GlobalNotification.
 import LiveTabelle from "./components/Livestream/LiveTabelle";
 import Livestream from "./components/Livestream/Livestream";
 import BotDeckSelect from "./components/Duell/BotDeckSelect";
+import BotDuel from "./components/Duell/BotDuel";
 
 
 function App() {
@@ -73,6 +74,7 @@ function AppRoutes() {
         <Route path="/streams" element={<ProtectedRoute element={LiveTabelle} />} />
         <Route path="liveduel" element={<ProtectedRoute element={Livestream} /> } />
         <Route path="/botdeckselect" element={<ProtectedRoute element={BotDeckSelect} />} />
+        <Route path="/botduel" element={<ProtectedRoute element={BotDuel} /> } />
       </Routes>
   );
 }
