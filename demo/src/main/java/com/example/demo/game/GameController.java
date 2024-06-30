@@ -35,7 +35,12 @@ public class GameController {
                     UserAccount user = gameIterator.next();
                     usernames.add(user.getUsername());
                 }
-                streamedGames.put(game.getId(), usernames);
+                if(usernames.size() == 1) {
+                    usernames.add("Bot");
+                    streamedGames.put(game.getId(),usernames);
+                }else{
+                    streamedGames.put(game.getId(),usernames);
+                }
             }
 
             return ResponseEntity.ok(streamedGames);
