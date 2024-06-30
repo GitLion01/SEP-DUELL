@@ -738,5 +738,127 @@ public class GameService {
     }
 
 
+
+    // BOT-Matches -----------------------------------------------------------------------------------------------------
+
+    public void createBotGame(Long userId, Long deckId, Boolean streamed){
+        UserAccount user = userAccountRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found"));
+        Deck deck = deckRepository.findById(deckId).orElseThrow(() -> new IllegalArgumentException("Deck not found"));
+
+        if (gameRepository.existsByUsersContaining(user)) {
+            System.out.println("User with id: " + user.getId() + " already in a game");
+            return;
+        }
+
+
+
+        PlayerState playerState = new PlayerState();
+        playerState.setDeck(deck);
+        playerStateRepository.save(playerState);
+        user.setPlayerState(playerState);
+        userAccountRepository.save(user);
+
+        PlayerState playerStateBot = new PlayerState();
+        playerStateBot.setDeck(deck);
+        playerStateRepository.save(playerStateBot);
+
+        Game newGame = new Game();
+        newGame.getUsers().add(user);
+        gameRepository.save(newGame);
+
+        List<Card> cards = deck.getCards();
+        Collections.shuffle(deck.getCards()); // mischt das Deck
+        List<PlayerCard> playerCards = new ArrayList<>();
+        // Klonen der Card in PlayerCard
+        for(Card card : cards){
+            PlayerCard playerCard = new PlayerCard();
+            playerCard.setName(card.getName());
+            playerCard.setAttackPoints(card.getAttackPoints());
+            playerCard.setDefensePoints(card.getDefensePoints());
+            playerCard.setDescription(card.getDescription());
+            playerCard.setImage(card.getImage());
+            playerCard.setRarity(card.getRarity());
+            playerCard.setPlayerState(deck.getUser().getPlayerState()); // verbunden mit PlayerState des Users
+            playerCards.add(playerCard);
+            playerCardRepository.save(playerCard);
+        }
+        user.getPlayerState().setDeckClone(playerCards);
+        playerStateRepository.save(user.getPlayerState());
+        playerCards.clear();
+
+        for(Card card : cards){
+            PlayerCard playerCard = new PlayerCard();
+            playerCard.setName(card.getName());
+            playerCard.setAttackPoints(card.getAttackPoints());
+            playerCard.setDefensePoints(card.getDefensePoints());
+            playerCard.setDescription(card.getDescription());
+            playerCard.setImage(card.getImage());
+            playerCard.setRarity(card.getRarity());
+            playerCard.setPlayerState(playerStateBot); // verbunden mit PlayerState des Bots
+            playerCards.add(playerCard);
+            playerCardRepository.save(playerCard);
+        }
+        playerStateBot.setDeckClone(playerCards);
+        playerStateRepository.save(playerStateBot);
+
+        newGame.setReady(true);
+        gameRepository.save(newGame);
+
+        // setzt initial 5 Karten aus dem gemischten Deck auf die Hand
+        Iterator<PlayerCard> iterator = user.getPlayerState().getDeckClone().iterator();
+        int count = 0;
+        List<PlayerCard> cardsToRemove = new ArrayList<>();
+        while (iterator.hasNext() && count < 5) {
+            PlayerCard playerCard = iterator.next(); // Hohlt die nächste Karte aus dem Deck
+            user.getPlayerState().getHandCards().add(playerCard); // Fügt die Karte der Hand des Spielers hinzu
+            cardsToRemove.add(playerCard);
+            count++; // Inkrementiert den Zähler für die Anzahl der gezogenen Karten
+        }
+
+
+        user.getPlayerState().getDeckClone().removeAll(cardsToRemove);
+        playerStateRepository.save(user.getPlayerState());
+        userAccountRepository.save(user);
+
+
+        // setzt initial 5 Karten aus dem gemischten Deck auf die Hand des Bots
+        iterator = playerStateBot.getDeckClone().iterator();
+        count = 0;
+        cardsToRemove = new ArrayList<>();
+        while (iterator.hasNext() && count < 5) {
+            PlayerCard playerCard = iterator.next(); // Hohlt die nächste Karte aus dem Deck
+            playerStateBot.getHandCards().add(playerCard); // Fügt die Karte der Hand des Spielers hinzu
+            cardsToRemove.add(playerCard);
+            count++; // Inkrementiert den Zähler für die Anzahl der gezogenen Karten
+        }
+        playerStateBot.getDeckClone().removeAll(cardsToRemove);
+        playerStateRepository.save(playerStateBot);
+
+        if(streamed){
+            newGame.setStreamed(true);
+        }
+        newGame.setReady(true);
+        newGame.resetTimer();
+
+
+
+
+        messagingTemplate.convertAndSendToUser(user.getId().toString(), "/queue/createBotDuel", Arrays.asList(newGame, user, playerStateBot));
+        Notification notification = new Notification(user.getId(),0L,userAccountRepository.findById(user.getId()).get().getUsername(),"schon aktiviert");
+        messagingTemplate.convertAndSendToUser(user.getId().toString(),"/queue/notifications",notification);
+
+
+        if(newGame.getReady() && newGame.getStreamed()) {
+            Map<Long,String> streamedGames = new HashMap<>();
+            for (Game stream : gameRepository.findAllStreams().get()) {
+                streamedGames.put(stream.getId(), user.getUsername());
+            }
+            messagingTemplate.convertAndSend("/queue/streams", streamedGames);
+        }
+
+
+    }
+
+
 }
  

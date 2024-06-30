@@ -38,6 +38,8 @@ public class Game {
 
     private Integer currentTurn = 0;
 
+    private Boolean myTurn = true;
+
     public void resetTimer(){
         this.timeLeft = 120;
     }

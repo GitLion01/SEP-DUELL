@@ -114,4 +114,18 @@ public class GameController {
     public void terminateMatch(@Payload Long gameId, Long userA, Long userB) {
         gameService.terminateMatch(gameId, userA, userB);
     }
+
+
+
+// BOT-MATCHES ---------------------------------------------------------
+
+
+
+    @MessageMapping("/createBotGame")
+    public void createBotGame(@Payload Long userId, Long deckId, Boolean streamed) {
+        gameService.createBotGame(userId, deckId, streamed);
+    }
+
+
+
 }
