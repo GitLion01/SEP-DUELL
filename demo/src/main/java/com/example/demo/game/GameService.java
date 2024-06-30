@@ -421,7 +421,7 @@ public class GameService {
 
     public void attackBotCard(AttackBotCardRequest request) {
         Optional<Game> optionalGame = gameRepository.findById(request.getGameId());
-        Optional<UserAccount> optionalAttacker = userAccountRepository.findById(request.getUserId());
+        Optional<UserAccount> optionalAttacker = userAccountRepository.findById(request.getAttackerId());
         Optional<PlayerState> optionalBotPS = playerStateRepository.findById(request.getBotPSId());
         Optional<PlayerCard> optionalAttackerCard = playerCardRepository.findById(request.getAttackerId());
         Optional<PlayerCard> optionalTarget = playerCardRepository.findById(request.getTargetId());

@@ -9,7 +9,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class AttackBotCardRequest {
     Long gameId;
-    Long userId;
+    Long userIdAttacker;
     Long attackerId;
     Long targetId;
     Long botPSId;
