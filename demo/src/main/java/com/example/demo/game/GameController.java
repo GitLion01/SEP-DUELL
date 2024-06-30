@@ -122,8 +122,8 @@ public class GameController {
 
 
     @MessageMapping("/createBotGame")
-    public void createBotGame(@Payload Long userId, Long deckId, Boolean streamed) {
-        gameService.createBotGame(userId, deckId, streamed);
+    public void createBotGame(@Payload CreateBotRequest request) {
+        gameService.createBotGame(request);
     }
 
 

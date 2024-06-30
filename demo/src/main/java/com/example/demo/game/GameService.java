@@ -741,9 +741,9 @@ public class GameService {
 
     // BOT-Matches -----------------------------------------------------------------------------------------------------
 
-    public void createBotGame(Long userId, Long deckId, Boolean streamed){
-        UserAccount user = userAccountRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found"));
-        Deck deck = deckRepository.findById(deckId).orElseThrow(() -> new IllegalArgumentException("Deck not found"));
+    public void createBotGame(CreateBotRequest request){
+        UserAccount user = userAccountRepository.findById(request.getUserId()).orElseThrow(() -> new IllegalArgumentException("User not found"));
+        Deck deck = deckRepository.findById(request.getDeckId()).orElseThrow(() -> new IllegalArgumentException("Deck not found"));
 
         if (gameRepository.existsByUsersContaining(user)) {
             System.out.println("User with id: " + user.getId() + " already in a game");
@@ -834,7 +834,7 @@ public class GameService {
         playerStateBot.getDeckClone().removeAll(cardsToRemove);
         playerStateRepository.save(playerStateBot);
 
-        if(streamed){
+        if(request.getStreamed()){
             newGame.setStreamed(true);
         }
         newGame.setReady(true);
