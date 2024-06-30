@@ -36,6 +36,9 @@ public class Game {
     @JsonIgnore
     private List<UserAccount> viewers = new ArrayList<>();
 
+    @OneToOne(fetch = FetchType.EAGER)
+    private PlayerState playerStateBot;
+
     private Integer currentTurn = 0;
 
     private Boolean myTurn = true;

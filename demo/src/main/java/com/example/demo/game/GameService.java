@@ -656,6 +656,10 @@ public class GameService {
     @Modifying
     @Transactional
     public void deleteUserGameData(List<Long> userIds,Long gameId) {
+        Game game = gameRepository.findById(gameId).get();
+        if(game.getPlayerStateBot() != null){
+            game.setPlayerStateBot(null);
+        }
 
         userAccountRepository.updatePlayerStateToNullByUserIds(userIds);
         UserAccount userAccount=userAccountRepository.findById(userIds.get(0)).get();
@@ -711,7 +715,11 @@ public class GameService {
             gameRepository.save(game);
 
             List<UserAccount> users = game.getUsers();
-            messagingTemplate.convertAndSendToUser(user.getId().toString(), "/queue/startwatch", List.of(game, users));
+            if(users.size() == 2) {
+                messagingTemplate.convertAndSendToUser(user.getId().toString(), "/queue/startwatch", List.of(game, users));
+            }else{
+                messagingTemplate.convertAndSendToUser(user.getId().toString(), "/queue/startwatch", List.of(game, users.get(0), game.getPlayerStateBot()));
+            }
         }
     }
 
@@ -771,6 +779,7 @@ public class GameService {
 
         Game newGame = new Game();
         newGame.getUsers().add(user);
+        newGame.setPlayerStateBot(playerStateBot);
         gameRepository.save(newGame);
 
         List<Card> cards = deck.getCards();
