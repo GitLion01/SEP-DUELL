@@ -12,11 +12,11 @@ const Duel = () => {
     const navigate = useNavigate();
     const { client, game, setGame, users, setUsers, botPS, setBotPS, connected } = useContext(WebSocketContext); // Daten aus dem Kontext
     const [id, setId] = useState(null);
-    const gameId = localStorage.getItem('gameId');
+    const [gameId, setGameId]= useState(null);
     const [timer, setTimer] = useState(120);
     //const currentUser = users.find(user => user.id === parseInt(id));
     //const opponentUser = users.find(user => user.id !== parseInt(id));
-    const [playerState, setPlayerState] = useState(users.playerState || null);
+    const [playerState, setPlayerState] = useState(null);
     const [opponentState, setOpponentState] = useState(null);
     const [isAttackMode, setIsAttackMode] = useState(false);
     const [isSetCardMode, setIsSetCardMode] = useState(false);
@@ -36,6 +36,8 @@ const Duel = () => {
     useEffect(() => {
         if (id === null) {
             setId(localStorage.getItem('id'));
+            setGameId(localStorage.getItem('gameId'));
+            console.log("neu", localStorage.getItem('gameId'));
         }
     }, []);
 
@@ -87,27 +89,24 @@ const Duel = () => {
                 const response = JSON.parse(message.body);
                 console.log("Response: ", response);
 
-                // Speichern des Spiels und der Benutzer im Webspeicher
-                sessionStorage.setItem('game', JSON.stringify(response[0]));
-                sessionStorage.setItem('users', JSON.stringify(response[1]));
-                sessionStorage.setItem('botPS', JSON.stringify(response[2]));
+
 
                 if (response.length === 3) {
-                    const currentUser = response[1];
+
+                    const currentUser = response[1][0];
 
                     setGame(response[0]);
-                    setUsers(response[1]);
+                    setUsers(response[1][0]);
                     setBotPS(response[2]);
 
-                    if (currentUser) {
-                        setPlayerState(currentUser.playerState);
-                    }
-                    if (response[2])
+                    setPlayerState(currentUser.playerState);
                     setOpponentState(response[2]);
-
                     setMyTurn(response[0].myTurn);
-                    console.log("Mein feld nach Angriff: ", currentUser.playerState.fieldCards);
-                    console.log("Gegner feld nach Angriff: ", opponentState.fieldCards);
+
+                    // Speichern des Spiels und der Benutzer im Webspeicher
+                    sessionStorage.setItem('game', JSON.stringify(response[0]));
+                    sessionStorage.setItem('users', JSON.stringify(response[1]));
+                    sessionStorage.setItem('botPS', JSON.stringify(response[2]));
                 }
 
                 // Empfangene Daten beim Ende des Duells verarbeiten TODO Statistiken noch zu überprüfen!!!
@@ -127,6 +126,8 @@ const Duel = () => {
                     console.log(stats);
 
                 }
+                console.log("Karten auf Hand: ", response[1][0].playerState.handCards);
+                console.log("Lebenspunkte: ", response[1][0].playerState.lifePoints);
 
             });
 
@@ -195,11 +196,11 @@ const Duel = () => {
 
                 console.log("angreifer wurde ausgewählt");
                 client.publish({
-                    destination: '/app/attackUser',
+                    destination: '/app/attackBot',
                     body: JSON.stringify({
                         gameId: gameId,
                         attackerId: id,
-                        defenderId: users.find(user => user.id !== parseInt(id)).id,
+                        botPSId: opponentState.id,
                         attackerCardId: selectedAttacker
                     }),
                 });
@@ -212,11 +213,11 @@ const Duel = () => {
                 //if (selectedTarget && selectedAttacker) {
                 console.log("gegnerkarte wird angegriffen");
                 client.publish({
-                    destination: '/app/attackCard',
+                    destination: '/app/attackBotCard',
                     body: JSON.stringify({
                         gameId: gameId,
                         userIdAttacker: id,
-                        userIdDefender: users.find(user => user.id !== parseInt(id)).id,
+                        botPSId: opponentState.id,
                         attackerId: selectedAttacker,
                         targetId: selectedTarget
                     }),
@@ -319,6 +320,9 @@ const Duel = () => {
             })
         })
         setCardDrawn(true);
+        console.log("gameId", gameId);
+        console.log("userId", id);
+
         console.log("cardDrawn", cardDrawn);
     }
 
@@ -435,7 +439,7 @@ const Duel = () => {
                     <h4>LP: {opponentState?.lifePoints}</h4>
                 </div>
                 <div className="player-lp">
-                    <h4>LP: {playerState.lifePoints}</h4>
+                    <h4>LP: {playerState?.lifePoints}</h4>
                 </div>
             </div>
             <div className="field">
@@ -447,7 +451,7 @@ const Duel = () => {
                     ))}
                 </div>
                 <div className="field-row player-field">
-                    {playerState?.fieldCards?.map((playerCard) => (
+                    {playerState?.fieldCards.map((playerCard) => (
                         <div key={playerCard.id} className="card-slot">
                             <Card className="duel-card" card={playerCard} onCardClick={() => selectAttackingCard(playerCard.id)} />
                         </div>
@@ -455,7 +459,7 @@ const Duel = () => {
                 </div>
             </div>
             <div className="hand player-hand">
-                {playerState?.handCards?.map((playerCard) => (
+                {playerState?.handCards.map((playerCard) => (
                     <div key={playerCard.id} className="card">
                         <Card className="duel-card" card={playerCard} onCardClick={() => handleSetCard(playerCard.id)} />
                     </div>

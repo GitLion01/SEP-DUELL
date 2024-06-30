@@ -55,6 +55,8 @@ const BotDeckSelect = () => {
                 sessionStorage.setItem('users', response[1]);
                 sessionStorage.setItem('botPS', response[2]);
 
+                localStorage.setItem('gameId', response[0].id);
+
 
                 navigate('/botduel');
 
