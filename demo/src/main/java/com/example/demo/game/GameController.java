@@ -99,9 +99,19 @@ public class GameController {
         gameService.attackCard(request);
     }
 
+    @MessageMapping("/attackBotCard")
+    public void attackBotCard(@Payload AttackBotCardRequest request){
+        gameService.attackBotCard(request);
+    }
+
     @MessageMapping("/attackUser")
     public void attackUser(@Payload AttackUserRequest request) {
         gameService.attackUser(request);
+    }
+
+    @MessageMapping("/attackBot")
+    public void attackBot(@Payload AttackBotRequest request){
+        gameService.attackBot(request);
     }
 
     @MessageMapping("/endTurn")
