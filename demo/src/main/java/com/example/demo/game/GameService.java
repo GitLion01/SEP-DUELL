@@ -758,8 +758,15 @@ public class GameService {
         user.setPlayerState(playerState);
         userAccountRepository.save(user);
 
+        List<Card> cardCopy = new ArrayList<>();
+        for(Card card : deck.getCards()){
+            cardCopy.add(card);
+        }
+        Deck deckCopy = new Deck();
+        deckCopy.setCards(cardCopy);
+
         PlayerState playerStateBot = new PlayerState();
-        playerStateBot.setDeck(deck);
+        playerStateBot.setDeck(deckCopy);
         playerStateRepository.save(playerStateBot);
 
         Game newGame = new Game();
