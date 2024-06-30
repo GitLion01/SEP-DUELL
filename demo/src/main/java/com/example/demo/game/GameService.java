@@ -741,6 +741,7 @@ public class GameService {
 
     // BOT-Matches -----------------------------------------------------------------------------------------------------
 
+    @Transactional
     public void createBotGame(CreateBotRequest request){
         UserAccount user = userAccountRepository.findById(request.getUserId()).orElseThrow(() -> new IllegalArgumentException("User not found"));
         Deck deck = deckRepository.findById(request.getDeckId()).orElseThrow(() -> new IllegalArgumentException("Deck not found"));
