@@ -792,7 +792,7 @@ public class GameService {
         }
         user.getPlayerState().setDeckClone(playerCards);
         playerStateRepository.save(user.getPlayerState());
-        playerCards.clear();
+        playerCards = new ArrayList<>();
 
         for(Card card : cards){
             PlayerCard playerCard = new PlayerCard();
