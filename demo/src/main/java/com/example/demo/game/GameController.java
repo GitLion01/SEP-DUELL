@@ -93,15 +93,9 @@ public class GameController {
         gameService.placeCard(request);
     }
 
-
     @MessageMapping("/attackCard")
     public void attackCard(@Payload AttackCardRequest request) {
         gameService.attackCard(request);
-    }
-
-    @MessageMapping("/attackBotCard")
-    public void attackBotCard(@Payload AttackBotCardRequest request){
-        gameService.attackBotCard(request);
     }
 
     @MessageMapping("/attackUser")
@@ -109,10 +103,6 @@ public class GameController {
         gameService.attackUser(request);
     }
 
-    @MessageMapping("/attackBot")
-    public void attackBot(@Payload AttackBotRequest request){
-        gameService.attackBot(request);
-    }
 
     @MessageMapping("/endTurn")
     public void endTurn(@Payload EndTurnRequest request) {
@@ -149,6 +139,16 @@ public class GameController {
     @MessageMapping("/endMyTurn")
     public void endMyTurn(EndTurnRequest request){
         gameService.endMyTurn(request);
+    }
+
+    @MessageMapping("/attackBotCard")
+    public void attackBotCard(@Payload AttackBotCardRequest request){
+        gameService.attackBotCard(request);
+    }
+
+    @MessageMapping("/attackBot")
+    public void attackBot(@Payload AttackBotRequest request){
+        gameService.attackBot(request);
     }
 
 }
