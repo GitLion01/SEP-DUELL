@@ -718,7 +718,7 @@ public class GameService {
             if(users.size() == 2) {
                 messagingTemplate.convertAndSendToUser(user.getId().toString(), "/queue/startwatch", List.of(game, users));
             }else{
-                messagingTemplate.convertAndSendToUser(user.getId().toString(), "/queue/startwatch", List.of(game, users.get(0), game.getPlayerStateBot()));
+                messagingTemplate.convertAndSendToUser(user.getId().toString(), "/queue/startwatch", List.of(game, users, game.getPlayerStateBot()));
             }
         }
     }
