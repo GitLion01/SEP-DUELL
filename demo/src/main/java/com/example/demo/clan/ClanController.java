@@ -1,6 +1,7 @@
 package com.example.demo.clan;
 
 
+import com.example.demo.dto.UserDTO;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +23,16 @@ public class ClanController {
     @GetMapping("/getClans")
     public ResponseEntity<List<ClanDTO>> getAllClans(){
         return clanService.getClans();
+    }
+
+    @GetMapping("/getClanId")
+    public ResponseEntity<Long> getClanId(@RequestParam Long userId){
+        return clanService.getClanId(userId);
+    }
+
+    @GetMapping("/getClanMitglieder")
+    public ResponseEntity<List<UserDTO>> getClanMitglieder(@RequestParam Long clanId){
+        return clanService.getClanMitglieder(clanId);
     }
 
     @PostMapping("/joinClan")
