@@ -316,7 +316,9 @@ public class GameService {
             //Aktionen des Bots
 
             // 1: Karte Ziehen
-            game.getPlayerStateBot().getHandCards().add(game.getPlayerStateBot().getDeckClone().remove(0));
+            if(!game.getPlayerStateBot().getDeckClone().isEmpty()) {
+                game.getPlayerStateBot().getHandCards().add(game.getPlayerStateBot().getDeckClone().remove(0));
+            }
 
             // 2: Alle Normalen Karten setzen
             List<PlayerCard> cardsToRemove = new ArrayList<>();
@@ -400,9 +402,10 @@ public class GameService {
                 game.getPlayerStateBot().getFieldCards().removeAll(cardsToRemoveFromBotField);
             }*/
 
+
             if (userAccount.getPlayerState().getFieldCards().isEmpty()) {
                 // Greife den Gegner direkt an, da keine Karten auf dem eigenen Feld sind
-                for (PlayerCard botFieldCard : game.getPlayerStateBot().getFieldCards()) {
+                /*for (PlayerCard botFieldCard : game.getPlayerStateBot().getFieldCards()) {
                     remainingLifePoints = userAccount.getPlayerState().getLifePoints() - botFieldCard.getAttackPoints();
                     if (botFieldCard.getAttackPoints() > userAccount.getPlayerState().getLifePoints()) {
                         // Der Bot hat genug Angriffspunkte, um den Spieler zu besiegen
@@ -419,16 +422,43 @@ public class GameService {
                     playerCardRepository.save(botFieldCard);
                     playerStateRepository.save(game.getPlayerStateBot());
                     playerStateRepository.save(userAccount.getPlayerState());
+                }*/
+                List<PlayerCard> botCards = new ArrayList<>(game.getPlayerStateBot().getFieldCards());
+                Iterator<PlayerCard> iterator = botCards.iterator();
+
+                while (iterator.hasNext()) {
+                    PlayerCard botFieldCard = iterator.next();
+                    remainingLifePoints = userAccount.getPlayerState().getLifePoints() - botFieldCard.getAttackPoints();
+                    if (botFieldCard.getAttackPoints() > userAccount.getPlayerState().getLifePoints()) {
+                        // Bot hat genug Angriffspunkte, um Spieler zu besiegen
+                        game.getPlayerStateBot().setDamage(game.getPlayerStateBot().getDamage() + userAccount.getPlayerState().getLifePoints() + 1);
+                        userAccount.getPlayerState().setLifePoints(-1);
+                        game.getPlayerStateBot().setWinner(true);
+                        playerStateRepository.save(game.getPlayerStateBot());
+                        iterator.remove(); // Sicher entfernen
+                    } else {
+                        // Spieler verliert Lebenspunkte entsprechend des Angriffs des Bots
+                        userAccount.getPlayerState().setLifePoints(userAccount.getPlayerState().getLifePoints() - botFieldCard.getAttackPoints());
+                        game.getPlayerStateBot().setDamage(game.getPlayerStateBot().getDamage() + botFieldCard.getAttackPoints());
+                    }
+
+                    playerCardRepository.save(botFieldCard);
+                    playerStateRepository.save(game.getPlayerStateBot());
+                    playerStateRepository.save(userAccount.getPlayerState());
                 }
+
             } else {
                 // Greife die Karten des Gegners an, wenn Karten auf dem eigenen Feld sind
                 List<PlayerCard> opponentCards = new ArrayList<>(userAccount.getPlayerState().getFieldCards()); // Kopie der Liste erstellen
                 List<PlayerCard> botFieldCards = new ArrayList<>(game.getPlayerStateBot().getFieldCards()); // Kopie der Liste erstellen
 
                 // Iteriere durch jede Karte auf dem Feld des Bots
-                for (PlayerCard botFieldCard : botFieldCards) {
+                for (Iterator<PlayerCard> botFieldCardIterator = botFieldCards.iterator(); botFieldCardIterator.hasNext();) {
                     // Überprüfe jede Karte auf dem Feld des Gegners
-                    for (PlayerCard opponentCard : opponentCards) {
+                    PlayerCard botFieldCard = botFieldCardIterator.next();
+
+                    for (Iterator<PlayerCard> opponentCardIterator = opponentCards.iterator(); opponentCardIterator.hasNext();) {
+                        PlayerCard opponentCard = opponentCardIterator.next();
                         if (botFieldCard.getHasAttacked()) {
                             break; // Die Karte hat bereits angegriffen, überspringe sie
                         }
@@ -438,7 +468,7 @@ public class GameService {
                             // Die gegnerische Karte wird zerstört
                             game.getPlayerStateBot().setDamage(game.getPlayerStateBot().getDamage() + opponentCard.getDefensePoints() + 1); // Schaden erhöhen
                             opponentCard.setDefensePoints(-1); // Verteidigungspunkte auf -1 setzen
-                            opponentCards.remove(opponentCard); // Karte aus der Liste entfernen
+                            opponentCardIterator.remove(); // Karte aus der Liste entfernen
                         } else {
                             // Die gegnerische Karte überlebt den Angriff
                             opponentCard.setDefensePoints(remainingTargetDefense); // Neue Verteidigungspunkte setzen
@@ -451,7 +481,7 @@ public class GameService {
                             if (remainingAttackerDefense < 0) {
                                 // Die Karte des Bots wird zerstört
                                 botFieldCard.setDefensePoints(-1);
-                                botFieldCards.remove(botFieldCard); // Karte aus der Liste entfernen
+                                botFieldCardIterator.remove(); // Karte aus der Liste entfernen
                             } else {
                                 // Die Karte des Bots überlebt den Konter
                                 botFieldCard.setDefensePoints(remainingAttackerDefense); // Neue Verteidigungspunkte setzen
@@ -472,8 +502,10 @@ public class GameService {
                 }
 
                 // Entferne zerstörte Karten aus den Feldern des Gegners und des Bots
-                userAccount.getPlayerState().getFieldCards().removeAll(opponentCards); // Nur noch nicht zerstörte Karten bleiben
-                game.getPlayerStateBot().getFieldCards().removeAll(botFieldCards); // Nur noch nicht zerstörte Karten bleiben
+                userAccount.getPlayerState().getFieldCards().clear(); // Nur noch nicht zerstörte Karten bleiben
+                userAccount.getPlayerState().getFieldCards().addAll(opponentCards);
+                game.getPlayerStateBot().getFieldCards().clear();
+                game.getPlayerStateBot().getFieldCards().addAll(botFieldCards); // Nur noch nicht zerstörte Karten bleiben
             }
 
             // Speichere den Spielstatus nach dem Zug
