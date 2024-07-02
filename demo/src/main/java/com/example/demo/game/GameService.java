@@ -515,6 +515,7 @@ public class GameService {
             // Speichere den Spielstatus nach dem Zug
             gameRepository.save(game);
             game.setMyTurn(true);
+            game.setFirstRound(false);
 
         }
         gameRepository.save(game);
@@ -770,7 +771,7 @@ public class GameService {
         UserAccount attacker = optionalAttacker.get();
         PlayerState botPS = optionalBotPS.get();
         PlayerCard attackerCard = optionalPlayerCard.get();
-        if(!game.getUsers().get(game.getCurrentTurn()).equals(attacker) || !botPS.getFieldCards().isEmpty() || game.getFirstRound()){
+        if(!botPS.getFieldCards().isEmpty() || game.getFirstRound()){
             return;
         }
 
