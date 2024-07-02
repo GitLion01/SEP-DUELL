@@ -35,26 +35,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         registry.addEndpoint("/chat").setAllowedOrigins("http://localhost:4000", "http://localhost:3000", "http://localhost:4005", "http://localhost:4001", "http://localhost:63342","http://localhost:3001","http://localhost:8080").withSockJS();
     }
 
-   /* @Override
-    public void configureWebSocketTransport(WebSocketTransportRegistration registration) {
-        registration.addDecoratorFactory(handler -> {
-            if (handler instanceof MyWebSocketHandler) {
-                return new MyWebSocketHandler() { // Anonyme Klasse
-                    @Override
-                    public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-                        // Hier die gameID aus der WebSocket-Sitzung abrufen
-                        Long gameID = extractGameIDFromSession(session);
-                        // Fügen Sie die gameID der Sitzung hinzu, um später darauf zuzugreifen
-                        session.getAttributes().put("gameID", gameID);
-                        // Aufrufen der ursprünglichen Methode in MyWebSocketHandler
-                        super.afterConnectionEstablished(session);
-                    }
-                };
-            } else {
-                return handler;
-            }
-        });
-    }*/
 
 
 
@@ -64,17 +44,4 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
 
 
-/*import org.springframework.context.annotation.Configuration;
-import org.springframework.web.socket.config.annotation.EnableWebSocket;
-import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
-import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
 
-@Configuration
-@EnableWebSocket
-public class WebSocketConfig implements WebSocketConfigurer {
-
-    @Override
-    public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry.addHandler(new MyWebSocketHandler(), "/websocket").setAllowedOrigins("*");
-    }
-}*/
