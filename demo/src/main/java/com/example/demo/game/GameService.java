@@ -765,6 +765,7 @@ public class GameService {
         Optional<PlayerState> optionalBotPS = playerStateRepository.findById(request.getBotPSId());
         Optional<PlayerCard> optionalPlayerCard = playerCardRepository.findById(request.getAttackerCardId());
         if(optionalGame.isEmpty() || optionalAttacker.isEmpty() || optionalBotPS.isEmpty() || optionalPlayerCard.isEmpty()) {
+            System.out.println("Problem y");
             return;
         }
         Game game = optionalGame.get();
@@ -772,10 +773,12 @@ public class GameService {
         PlayerState botPS = optionalBotPS.get();
         PlayerCard attackerCard = optionalPlayerCard.get();
         if(!botPS.getFieldCards().isEmpty() || game.getFirstRound()){
+            System.out.println("Problem x");
             return;
         }
 
         if(attackerCard.getHasAttacked()){
+            System.out.println("Problem z");
             return;
         }
         int remainingLifePoints = botPS.getLifePoints() - attackerCard.getAttackPoints();
@@ -813,7 +816,8 @@ public class GameService {
             }
         }
         if(remainingLifePoints < 0){
-            terminateMatch(request.getGameId(), attacker.getId(), botPS.getId());
+            System.out.println("match wird terminiert");
+            terminateMatch(request.getGameId(), botPS.getId(), attacker.getId());
         }
     }
 
@@ -924,6 +928,7 @@ public class GameService {
     }
 
     public void terminateMatch(Long gameId, Long userA, Long userB) {
+        System.out.println("wird exekutiert");
         Optional<Game> optionalGame = gameRepository.findById(gameId);
         Optional<UserAccount> optionalUserA = userAccountRepository.findById(userA);
         Optional<UserAccount> optionalUserB = userAccountRepository.findById(userB);
@@ -1034,11 +1039,13 @@ public class GameService {
             Integer lbPoints1 = user1.getLeaderboardPoints();
 
             if (user1.getPlayerState().getWinner()) {
+                sepCoins = 0;
                 leaderBoardPointsWinner = 0;
                 leaderBoardPointsLoser = 0;
                 damageWinner = user1.getPlayerState().getDamage();
                 damageLoser = botPS.getDamage();
             } else {
+                sepCoins = 0;
                 leaderBoardPointsWinner = 0;
                 leaderBoardPointsLoser = 0;
                 damageWinner = botPS.getDamage();
@@ -1102,7 +1109,11 @@ public class GameService {
 
         Map<Long, List<String>> streamedGames = new HashMap<>();
         for(Game stream : gameRepository.findAllStreams().get()){
-            streamedGames.put(stream.getId(), List.of(stream.getUsers().get(0).getUsername(), stream.getUsers().get(1).getUsername()));
+            if(stream.getUsers().size() == 2) {
+                streamedGames.put(stream.getId(), List.of(stream.getUsers().get(0).getUsername(), stream.getUsers().get(1).getUsername()));
+            }else{
+                streamedGames.put(stream.getId(), List.of(stream.getUsers().get(0).getUsername(), "Bot"));
+            }
         }
         messagingTemplate.convertAndSend("/queue/streams", streamedGames);
     }
