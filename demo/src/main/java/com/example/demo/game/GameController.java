@@ -133,7 +133,9 @@ public class GameController {
 
     @MessageMapping("/createBotGame")
     public void createBotGame(@Payload CreateBotRequest request) {
+        System.out.println("AttackBotCard Controller Eingang");
         gameService.createBotGame(request);
+        System.out.println("AttackBotCard Controller Ausgang");
     }
 
     @MessageMapping("/endMyTurn")

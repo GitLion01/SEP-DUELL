@@ -520,9 +520,7 @@ public class GameService {
 
         if(users.size() == 2) {
             for (UserAccount player : game.getUsers()) {
-                System.out.println(" BEVOR Player: " + player.getId());
                 messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", Arrays.asList(game, users));
-                System.out.println(" DANACH Player: " + player.getId());
             }
         }else{
             messagingTemplate.convertAndSendToUser(users.get(0).getId().toString(), "/queue/game", Arrays.asList(game, users, game.getPlayerStateBot()));
@@ -542,7 +540,7 @@ public class GameService {
 
     public void attackBotCard(AttackBotCardRequest request) {
         Optional<Game> optionalGame = gameRepository.findById(request.getGameId());
-        Optional<UserAccount> optionalAttacker = userAccountRepository.findById(request.getAttackerId());
+        Optional<UserAccount> optionalAttacker = userAccountRepository.findById(request.getUserIdAttacker());
         Optional<PlayerState> optionalBotPS = playerStateRepository.findById(request.getBotPSId());
         Optional<PlayerCard> optionalAttackerCard = playerCardRepository.findById(request.getAttackerId());
         Optional<PlayerCard> optionalTarget = playerCardRepository.findById(request.getTargetId());
@@ -572,10 +570,12 @@ public class GameService {
             botPS.getFieldCards().remove(target);
             attacker.getPlayerState().setDamage(attacker.getPlayerState().getDamage() + target.getDefensePoints() + 1);
             target.setDefensePoints(-1);
+            System.out.println("BotCard wurde zerstört");
         } else {
             // C2 überlebt den Angriff, setze neue Verteidigungspunkte
             target.setDefensePoints(remainingTargetDefense);
             attacker.getPlayerState().setDamage(attacker.getPlayerState().getDamage() + attackerCard.getAttackPoints());
+            System.out.println("BotCard kontert");
         }
         // Wenn C2 nicht zerstört wurde, dann kontert C2
         if (remainingTargetDefense >= 0) {
@@ -583,9 +583,11 @@ public class GameService {
             if (remainingAttackerDefense < 0) {
                 // C1 wird zerstört und vom Spielfeld entfernt
                 attacker.getPlayerState().getFieldCards().remove(attackerCard);
+                System.out.println("Konter zerstört meine Karte");
             } else {
                 // C1 überlebt den Konter, setze neue Verteidigungspunkte
                 attackerCard.setDefensePoints(remainingAttackerDefense);
+                System.out.println("Konter zerstört meine Karte nicht");
             }
         }
         attackerCard.setHasAttacked(true);
@@ -1047,7 +1049,7 @@ public class GameService {
                 messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", Arrays.asList(game, users, sepCoins, leaderBoardPointsWinner, leaderBoardPointsLoser,damageWinner, damageLoser, cardsPlayedA, cardsPlayedB, sacrificedA, sacrificedB));
             }
         }else{
-            messagingTemplate.convertAndSendToUser(users.get(0).getId().toString(), "/queue/game", Arrays.asList(game, users, game.getPlayerStateBot()));
+            messagingTemplate.convertAndSendToUser(users.get(0).getId().toString(), "/queue/game", Arrays.asList(game, users, game.getPlayerStateBot(), sepCoins, leaderBoardPointsWinner, leaderBoardPointsLoser,damageWinner, damageLoser, cardsPlayedA, cardsPlayedB, sacrificedA, sacrificedB));
         }
 
         if(!viewers.isEmpty()) {

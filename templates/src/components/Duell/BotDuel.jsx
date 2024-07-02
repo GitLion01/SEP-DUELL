@@ -209,7 +209,7 @@ const Duel = () => {
                 setHasAttacked(true);
             }
             else {
-                console.log(selectedAttacker, selectedTarget);
+                console.log(id, selectedAttacker, selectedTarget);
                 //if (selectedTarget && selectedAttacker) {
                 console.log("gegnerkarte wird angegriffen");
                 client.publish({
