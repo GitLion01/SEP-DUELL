@@ -8,12 +8,9 @@ import com.example.demo.game.requests.*;
 import com.example.demo.leaderboard.LeaderboardService;
 import com.example.demo.user.UserAccount;
 import com.example.demo.user.UserAccountRepository;
-import jakarta.validation.constraints.Null;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
@@ -335,97 +332,7 @@ public class GameService {
             game.getPlayerStateBot().getHandCards().removeAll(cardsToRemove);
             // 3: Mit allen Karten auf dem Feld angreifen
 
-            /*if (userAccount.getPlayerState().getFieldCards().isEmpty()) {
-                // greife gegner an
-                for (PlayerCard botFieldCard : game.getPlayerStateBot().getFieldCards()) {
-                    remainingLifePoints = userAccount.getPlayerState().getLifePoints() - botFieldCard.getAttackPoints();
-                    if (botFieldCard.getAttackPoints() > userAccount.getPlayerState().getLifePoints()) {
-                        game.getPlayerStateBot().setDamage(game.getPlayerStateBot().getDamage() + userAccount.getPlayerState().getLifePoints() + 1); // erhöht den Damage Counter des Angreifers
-                        userAccount.getPlayerState().setLifePoints(-1);
-                        game.getPlayerStateBot().setWinner(true);
-                        playerStateRepository.save(game.getPlayerStateBot());
-                    } else {
-                        userAccount.getPlayerState().setLifePoints((userAccount.getPlayerState().getLifePoints() - botFieldCard.getAttackPoints())); // zieht Angriffspunkte von Lebenspunkte ab
-                        game.getPlayerStateBot().setDamage(game.getPlayerStateBot().getDamage() + botFieldCard.getAttackPoints()); // erhöht den Damage Counter des Angreifers
-                    }
-
-                    playerCardRepository.save(botFieldCard);
-                    playerStateRepository.save(game.getPlayerStateBot());
-                    playerStateRepository.save(userAccount.getPlayerState());
-                }
-            } else {
-                //greife Karten an
-                List<PlayerCard> cardsToRemoveFromOpponentField = new ArrayList<>();
-                List<PlayerCard> cardsToRemoveFromBotField = new ArrayList<>();
-
-                List<PlayerCard> opponentCards = userAccount.getPlayerState().getFieldCards();
-                List<PlayerCard> botFieldCards = game.getPlayerStateBot().getFieldCards();
-
-                for (PlayerCard botFieldCard : botFieldCards) {
-                    for(PlayerCard opponentCard : opponentCards) {
-                        if(botFieldCard.getHasAttacked()){
-                            break;
-                        }
-                        int remainingTargetDefense = opponentCard.getDefensePoints() - botFieldCard.getAttackPoints();
-                        if (remainingTargetDefense < 0) {
-                            // C2 wird zerstört und vom Spielfeld entfernt
-                            cardsToRemoveFromOpponentField.add(opponentCard);
-                            game.getPlayerStateBot().setDamage(game.getPlayerStateBot().getDamage() + opponentCard.getDefensePoints() + 1);
-                            opponentCard.setDefensePoints(-1);
-                        } else {
-                            // C2 überlebt den Angriff, setze neue Verteidigungspunkte
-                            opponentCard.setDefensePoints(remainingTargetDefense);
-                            game.getPlayerStateBot().setDamage(game.getPlayerStateBot().getDamage() + botFieldCard.getAttackPoints());
-                        }
-                        // Wenn C2 nicht zerstört wurde, dann kontert C2
-                        if (remainingTargetDefense >= 0) {
-                            int remainingAttackerDefense = botFieldCard.getDefensePoints() - opponentCard.getAttackPoints();
-                            if (remainingAttackerDefense < 0) {
-                                // C1 wird zerstört und vom Spielfeld entfernt
-                                cardsToRemoveFromBotField.add(botFieldCard);
-                            } else {
-                                // C1 überlebt den Konter, setze neue Verteidigungspunkte
-                                botFieldCard.setDefensePoints(remainingAttackerDefense);
-                            }
-                        }
-                        botFieldCard.setHasAttacked(true);
-                        playerCardRepository.save(botFieldCard);
-                        playerCardRepository.save(opponentCard);
-                        playerStateRepository.save(game.getPlayerStateBot());
-                        playerStateRepository.save(userAccount.getPlayerState());
-
-                    }
-                }
-
-                for(PlayerCard botFieldCard : game.getPlayerStateBot().getFieldCards()) {
-                    botFieldCard.setHasAttacked(false);
-                }
-
-                userAccount.getPlayerState().getFieldCards().removeAll(cardsToRemoveFromOpponentField);
-                game.getPlayerStateBot().getFieldCards().removeAll(cardsToRemoveFromBotField);
-            }*/
-
-
             if (userAccount.getPlayerState().getFieldCards().isEmpty()) {
-                // Greife den Gegner direkt an, da keine Karten auf dem eigenen Feld sind
-                /*for (PlayerCard botFieldCard : game.getPlayerStateBot().getFieldCards()) {
-                    remainingLifePoints = userAccount.getPlayerState().getLifePoints() - botFieldCard.getAttackPoints();
-                    if (botFieldCard.getAttackPoints() > userAccount.getPlayerState().getLifePoints()) {
-                        // Der Bot hat genug Angriffspunkte, um den Spieler zu besiegen
-                        game.getPlayerStateBot().setDamage(game.getPlayerStateBot().getDamage() + userAccount.getPlayerState().getLifePoints() + 1);
-                        userAccount.getPlayerState().setLifePoints(-1); // Spielerleben auf 0 setzen
-                        game.getPlayerStateBot().setWinner(true); // Bot als Sieger markieren
-                        playerStateRepository.save(game.getPlayerStateBot());
-                    } else {
-                        // Spieler verliert Lebenspunkte entsprechend des Angriffs des Bots
-                        userAccount.getPlayerState().setLifePoints(userAccount.getPlayerState().getLifePoints() - botFieldCard.getAttackPoints());
-                        game.getPlayerStateBot().setDamage(game.getPlayerStateBot().getDamage() + botFieldCard.getAttackPoints());
-                    }
-
-                    playerCardRepository.save(botFieldCard);
-                    playerStateRepository.save(game.getPlayerStateBot());
-                    playerStateRepository.save(userAccount.getPlayerState());
-                }*/
                 List<PlayerCard> botCards = new ArrayList<>(game.getPlayerStateBot().getFieldCards());
                 Iterator<PlayerCard> iterator = botCards.iterator();
 
@@ -1039,7 +946,6 @@ public class GameService {
             sacrificedA = Arrays.asList(sacrificedNormalsA.size(), sacrificedRaresA.size(), sacrificedLegendariesA.size());
             sacrificedB = Arrays.asList(sacrificedNormalsB.size(), sacrificedRaresB.size(), sacrificedLegendariesB.size());
 
-            Integer lbPoints1 = user1.getLeaderboardPoints();
 
             if (user1.getPlayerState().getWinner()) {
                 sepCoins = 0;
@@ -1240,9 +1146,6 @@ public class GameService {
         }
     }
 
-
-
-    // BOT-Matches -----------------------------------------------------------------------------------------------------
 
     public void createBotGame(CreateBotRequest request){
         UserAccount user = userAccountRepository.findById(request.getUserId()).orElseThrow(() -> new IllegalArgumentException("User not found"));

@@ -7,6 +7,7 @@ import com.example.demo.decks.DeckRequest;
 import com.example.demo.game.*;
 import com.example.demo.game.requests.AttackUserRequest;
 import com.example.demo.game.requests.DeckSelectionRequest;
+import com.example.demo.leaderboard.LeaderboardService;
 import com.example.demo.user.UserAccount;
 import com.example.demo.user.UserAccountRepository;
 import org.junit.jupiter.api.AfterEach;
@@ -38,6 +39,8 @@ public class GameServiceTest {
     private PlayerStateRepository playerStateRepository;
     @Mock
     private PlayerCardRepository playerCardRepository;
+    @Mock
+    private LeaderboardService leaderboardService;
 
     private AutoCloseable autoCloseable;
     private GameService gameService;
@@ -51,7 +54,8 @@ public class GameServiceTest {
                 userAccountRepository,
                 messagingTemplate,
                 playerStateRepository,
-                playerCardRepository);
+                playerCardRepository,
+                leaderboardService);
     }
 
     @AfterEach
