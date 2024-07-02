@@ -501,6 +501,10 @@ public class GameService {
                     botFieldCard.setHasAttacked(false);
                 }
 
+                for (PlayerCard userCard : userAccount.getPlayerState().getFieldCards()) {
+                    userCard.setHasAttacked(false);
+                }
+
                 // Entferne zerstörte Karten aus den Feldern des Gegners und des Bots
                 userAccount.getPlayerState().getFieldCards().clear(); // Nur noch nicht zerstörte Karten bleiben
                 userAccount.getPlayerState().getFieldCards().addAll(opponentCards);
