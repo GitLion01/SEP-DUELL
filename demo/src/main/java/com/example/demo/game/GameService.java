@@ -1060,6 +1060,7 @@ public class GameService {
                 messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", Arrays.asList(game, users, sepCoins, leaderBoardPointsWinner, leaderBoardPointsLoser,damageWinner, damageLoser, cardsPlayedA, cardsPlayedB, sacrificedA, sacrificedB));
             }
         }else{
+            System.out.println("Spiel gegen Bot beendet");
             messagingTemplate.convertAndSendToUser(users.get(0).getId().toString(), "/queue/game", Arrays.asList(game, users, game.getPlayerStateBot(), sepCoins, leaderBoardPointsWinner, leaderBoardPointsLoser,damageWinner, damageLoser, cardsPlayedA, cardsPlayedB, sacrificedA, sacrificedB));
         }
 
