@@ -21,6 +21,7 @@ import './index.css';
 import DuelC from "./components/DuelC/DuelC";
 import {WebSocketProvider} from "./WebSocketProvider";
 import GlobalNotification from './components/LeaderboardPage/GlobalNotification.jsx';
+import Clan from "./components/clan/ClanList.jsx"; 
 
 
 function App() {
@@ -67,6 +68,7 @@ function AppRoutes() {
         <Route path="/challenge-player" element={<ProtectedRoute element={DuelC} />} />
         <Route path="/deck-selection" element={<ProtectedRoute element={DeckSelection} />} />
         <Route path="/duel" element={<ProtectedRoute element={Duel} />} />
+        <Route path="/clan" element={<ProtectedRoute element={Clan} />} /> 
       </Routes>
   );
 }

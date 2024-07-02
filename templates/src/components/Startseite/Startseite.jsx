@@ -94,6 +94,9 @@ const Startseite = () => {
             <section className="shop">
               <a href="/chat"><h2>CHAT</h2></a>
             </section>
+            <section> 
+              <a href="/clan"><h2>CLANS</h2></a>
+            </section>
           </div>
         </main>
       </div>

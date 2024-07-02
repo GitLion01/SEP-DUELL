@@ -58,7 +58,7 @@ class ShopPage extends Component {
                 newCards: newCards,
                 sepCoins: newSepCoins
             };
-        }, () => {
+        }, () => { //Arrow Funktion, wird als Callback an die Funktion gegeben 
             this.updateSepCoins(this.state.sepCoins);
         });
 
