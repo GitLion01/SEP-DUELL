@@ -150,7 +150,9 @@ public class GameController {
 
     @MessageMapping("/attackBot")
     public void attackBot(@Payload AttackBotRequest request){
+        System.out.println("Vor dem Angriff");
         gameService.attackBot(request);
+        System.out.println("Nach dem Angriff");
     }
 
 }

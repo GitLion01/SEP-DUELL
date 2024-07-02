@@ -88,6 +88,7 @@ const Duel = () => {
             const subscription = client.subscribe(`/user/${id}/queue/game`, (message) => {
                 const response = JSON.parse(message.body);
                 console.log("Response: ", response);
+                console.log("ResLength: ", response.length);
 
 
 
@@ -111,7 +112,7 @@ const Duel = () => {
 
                 // Empfangene Daten beim Ende des Duells verarbeiten TODO Statistiken noch zu überprüfen!!!
                 if (response.length > 3) {
-                    const [_, __, sepCoins, leaderBoardPointsWinner, leaderBoardPointsLoser, damageWinner, damageLoser, cardsPlayedA, cardsPlayedB, sacrificedA, sacrificedB] = response;
+                    const [_, __, ___, sepCoins, leaderBoardPointsWinner, leaderBoardPointsLoser, damageWinner, damageLoser, cardsPlayedA, cardsPlayedB, sacrificedA, sacrificedB] = response;
                     setStats({
                         sepCoins,
                         leaderboardPointsA: response[1][0].playerState.winner ? leaderBoardPointsWinner : leaderBoardPointsLoser,
