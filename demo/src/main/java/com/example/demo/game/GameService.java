@@ -1,4 +1,5 @@
 package com.example.demo.game;
+import com.example.demo.turnier.TurnierService;
 import com.example.demo.cards.Card;
 import com.example.demo.cards.Rarity;
 import com.example.demo.decks.Deck;
@@ -25,6 +26,7 @@ public class GameService {
     private final SimpMessagingTemplate messagingTemplate;
     private final PlayerStateRepository playerStateRepository;
     private final PlayerCardRepository playerCardRepository;
+    private final TurnierService turnierService;
 
     @Autowired
     public GameService(GameRepository gameRepository,
@@ -32,13 +34,14 @@ public class GameService {
                        UserAccountRepository userAccountRepository,
                        SimpMessagingTemplate messagingTemplate,
                        PlayerStateRepository playerStateRepository,
-                       PlayerCardRepository playerCardRepository)  {
+                       PlayerCardRepository playerCardRepository, TurnierService turnierService)  {
         this.gameRepository = gameRepository;
         this.deckRepository = deckRepository;
         this.userAccountRepository = userAccountRepository;
         this.messagingTemplate = messagingTemplate;
         this.playerStateRepository = playerStateRepository;
         this.playerCardRepository = playerCardRepository;
+        this.turnierService = turnierService;
     }
 
 
@@ -554,6 +557,12 @@ public class GameService {
             leaderBoardPointsLoser = -1 * (Math.max(50, (lbPoints2 - lbPoints1) / 2));
             damageWinner = user1.getPlayerState().getDamage();
             damageLoser = user2.getPlayerState().getDamage();
+
+            //for turnier
+            if(user1.isInTurnier()) {
+                user1.setInTurnier(false);
+                turnierService.GewinnerSpeichern(user1);
+            }
         } else {
             user2.setSepCoins(user2.getSepCoins() + 100);
             user2.setLeaderboardPoints(lbPoints2 + Math.max(50, lbPoints1 - lbPoints2));
@@ -562,6 +571,12 @@ public class GameService {
             leaderBoardPointsLoser = -1 * (Math.max(50, (lbPoints1 - lbPoints2) / 2));
             damageWinner = user2.getPlayerState().getDamage();
             damageLoser = user1.getPlayerState().getDamage();
+
+            //for turnier
+            if(user2.isInTurnier()) {
+                user1.setInTurnier(false);
+                turnierService.GewinnerSpeichern(user2);
+            }
         }
 
         playerStateRepository.save(user1.getPlayerState());

@@ -102,6 +102,8 @@ public class UserAccount implements UserDetails {
     @JoinColumn(name = "user_clan")
     private Clan clan;
 
+    private boolean isInTurnier=false;
+
     public UserAccount(byte[] image,
                        String firstName,
                        String lastName,
