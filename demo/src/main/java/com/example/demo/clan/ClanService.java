@@ -1,6 +1,7 @@
 package com.example.demo.clan;
 
 
+import com.example.demo.dto.UserDTO;
 import com.example.demo.user.UserAccount;
 import com.example.demo.user.UserAccountRepository;
 import lombok.AllArgsConstructor;
@@ -8,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +40,27 @@ public class ClanService {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         return new ResponseEntity<>(convertToClanDTO(clanList), HttpStatus.OK);
+    }
+
+    public ResponseEntity<Long> getClanId(Long userId) {
+        UserAccount user = userAccountRepository.findById(userId).get();
+        if(user.getClan()==null)
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return ResponseEntity.ok(user.getClan().getId());
+    }
+
+    public ResponseEntity<List<UserDTO>> getClanMitglieder(Long clanId) {
+        Optional<Clan> clanCheck= clanRepository.findById(clanId);
+        return clanCheck.map(clan -> ResponseEntity.ok(convertToUserDTO(clan))).orElseGet(() -> new ResponseEntity<>(HttpStatus.NO_CONTENT));
+    }
+
+    private List<UserDTO> convertToUserDTO(Clan clan) {
+        List<UserDTO> userDTOList = new ArrayList<>();
+        for(UserAccount user : clan.getUsers())
+        {
+            userDTOList.add(new UserDTO(user.getUsername(), user.getId(), user.getFirstName(),user.getLastName()));
+        }
+        return userDTOList;
     }
 
     private List<ClanDTO> convertToClanDTO(List<Clan> clanList) {
