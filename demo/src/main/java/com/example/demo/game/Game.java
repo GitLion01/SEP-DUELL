@@ -22,6 +22,7 @@ public class Game {
     private Boolean firstRound = true;
     private Integer timeLeft = 120;
     private Boolean streamed = false;
+    private Long botDeckId;
 
     @OneToMany(fetch = FetchType.EAGER)
     @JoinTable(

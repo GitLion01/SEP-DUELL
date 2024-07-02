@@ -928,11 +928,13 @@ public class GameService {
         Optional<UserAccount> optionalUserA = userAccountRepository.findById(userA);
         Optional<UserAccount> optionalUserB = userAccountRepository.findById(userB);
         Optional<PlayerState> optionalBotPS = playerStateRepository.findById(userA);
-        if (optionalGame.isEmpty() || optionalUserA.isEmpty() || optionalUserB.isEmpty()) {
+        if (optionalGame.isEmpty() || optionalUserB.isEmpty() || optionalBotPS.isEmpty() && optionalUserA.isEmpty()) {
+            System.out.println(optionalGame.isPresent()+" "+optionalUserB.isPresent()+" "+optionalBotPS.isPresent()+" "+optionalUserA.isPresent());
             return;
         }
+
         Game game = optionalGame.get();
-        UserAccount user1 = optionalUserA.get();
+
 
 
         List<PlayerCard> raresA ;
@@ -959,7 +961,9 @@ public class GameService {
         List<Integer> sacrificedB;
 
         if(game.getPlayerStateBot() == null) {
+            System.out.println("Problem2");
             UserAccount user2 = optionalUserA.get();
+            UserAccount user1 = optionalUserA.get();
             normalsA = user1.getPlayerState().getCardsPlayed().stream().filter((x) -> x.getRarity() == Rarity.NORMAL).toList();
             raresA = user1.getPlayerState().getCardsPlayed().stream().filter((x) -> x.getRarity() == Rarity.RARE).toList();
             legendariesA = user1.getPlayerState().getCardsPlayed().stream().filter((x) -> x.getRarity() == Rarity.LEGENDARY).toList();
@@ -1004,7 +1008,9 @@ public class GameService {
             userAccountRepository.save(user1);
             userAccountRepository.save(user2);
         }else{
+            System.out.println("Problem 3");
             PlayerState botPS = optionalBotPS.get();
+            UserAccount user1 = optionalUserB.get();
             normalsA = user1.getPlayerState().getCardsPlayed().stream().filter((x) -> x.getRarity() == Rarity.NORMAL).toList();
             raresA = user1.getPlayerState().getCardsPlayed().stream().filter((x) -> x.getRarity() == Rarity.RARE).toList();
             legendariesA = user1.getPlayerState().getCardsPlayed().stream().filter((x) -> x.getRarity() == Rarity.LEGENDARY).toList();
@@ -1063,7 +1069,7 @@ public class GameService {
             }
         }
 
-        List<Long> userIds = Arrays.asList(game.getUsers().get(0).getId(), game.getUsers().get(1).getId());
+
 
         List<Long> deepCopyIds = new ArrayList<>();
 
@@ -1083,6 +1089,14 @@ public class GameService {
             leaveStream(request);
         }
 
+        List<Long> userIds = new ArrayList<>();
+        if(game.getUsers().size() == 2) {
+            for (UserAccount user : game.getUsers()) {
+                userIds.add(user.getId());
+            }
+        }else{
+            userIds.addAll(List.of(users.get(0).getId(), optionalBotPS.get().getId()));
+        }
         deleteUserGameData(userIds, game.getId());
 
         Map<Long, List<String>> streamedGames = new HashMap<>();
@@ -1101,29 +1115,54 @@ public class GameService {
         if(game.getPlayerStateBot() != null){
             game.setPlayerStateBot(null);
         }
+        if (game.getUsers().size() == 2) {
+            userAccountRepository.updatePlayerStateToNullByUserIds(userIds);
+            UserAccount userAccount = userAccountRepository.findById(userIds.get(0)).get();
+            userAccount.getPlayerState().setHandCards(null);
+            userAccount.getPlayerState().setFieldCards(null);
+            userAccount.getPlayerState().setCardsPlayed(null);
+            userAccount.getPlayerState().setDeckClone(null);
+            userAccount.getPlayerState().setDeck(null);
+            playerCardRepository.deleteByPlayerStateId(userAccount.getPlayerState().getId());
+            playerStateRepository.save(userAccount.getPlayerState());
+            playerStateRepository.delete(userAccount.getPlayerState());
 
-        userAccountRepository.updatePlayerStateToNullByUserIds(userIds);
-        UserAccount userAccount=userAccountRepository.findById(userIds.get(0)).get();
-        userAccount.getPlayerState().setHandCards(null);
-        userAccount.getPlayerState().setFieldCards(null);
-        userAccount.getPlayerState().setCardsPlayed(null);
-        userAccount.getPlayerState().setDeckClone(null);
-        userAccount.getPlayerState().setDeck(null);
-        playerCardRepository.deleteByPlayerStateId(userAccount.getPlayerState().getId());
-        playerStateRepository.save(userAccount.getPlayerState());
-        playerStateRepository.delete(userAccount.getPlayerState());
+            userAccount = userAccountRepository.findById(userIds.get(1)).get();
+            userAccount.getPlayerState().setHandCards(null);
+            userAccount.getPlayerState().setFieldCards(null);
+            userAccount.getPlayerState().setCardsPlayed(null);
+            userAccount.getPlayerState().setDeckClone(null);
+            userAccount.getPlayerState().setDeck(null);
+            playerCardRepository.deleteByPlayerStateId(userAccount.getPlayerState().getId());
+            playerStateRepository.save(userAccount.getPlayerState());
+            playerStateRepository.delete(userAccount.getPlayerState());
 
-        userAccount=userAccountRepository.findById(userIds.get(1)).get();
-        userAccount.getPlayerState().setHandCards(null);
-        userAccount.getPlayerState().setFieldCards(null);
-        userAccount.getPlayerState().setCardsPlayed(null);
-        userAccount.getPlayerState().setDeckClone(null);
-        userAccount.getPlayerState().setDeck(null);
-        playerCardRepository.deleteByPlayerStateId(userAccount.getPlayerState().getId());
-        playerStateRepository.save(userAccount.getPlayerState());
-        playerStateRepository.delete(userAccount.getPlayerState());
+            gameRepository.deleteFromGameUsersByUserIds(userIds);
+        }else{
+            userAccountRepository.updatePlayerStateToNullByUserIds(userIds);
+            UserAccount userAccount = userAccountRepository.findById(userIds.get(0)).get();
+            userAccount.getPlayerState().setHandCards(null);
+            userAccount.getPlayerState().setFieldCards(null);
+            userAccount.getPlayerState().setCardsPlayed(null);
+            userAccount.getPlayerState().setDeckClone(null);
+            userAccount.getPlayerState().setDeck(null);
+            playerCardRepository.deleteByPlayerStateId(userAccount.getPlayerState().getId());
+            playerStateRepository.save(userAccount.getPlayerState());
+            playerStateRepository.delete(userAccount.getPlayerState());
 
-        gameRepository.deleteFromGameUsersByUserIds(userIds);
+            PlayerState botPS = playerStateRepository.findById(userIds.get(1)).get();
+            botPS.setHandCards(null);
+            botPS.setFieldCards(null);
+            botPS.setCardsPlayed(null);
+            botPS.setDeckClone(null);
+            botPS.setDeck(null);
+            playerCardRepository.deleteByPlayerStateId(botPS.getId());
+            playerStateRepository.save(botPS);
+            playerStateRepository.deleteById(botPS.getId());
+            deckRepository.deleteDeckCardsByDeckId(game.getBotDeckId());
+            deckRepository.deleteById(game.getBotDeckId());
+
+        }
         gameRepository.deleteById(gameId);
     }
 
@@ -1221,6 +1260,7 @@ public class GameService {
         Game newGame = new Game();
         newGame.getUsers().add(user);
         newGame.setPlayerStateBot(playerStateBot);
+        newGame.setBotDeckId(deckCopy.getId());
         gameRepository.save(newGame);
 
         List<Card> cards = deck.getCards();
