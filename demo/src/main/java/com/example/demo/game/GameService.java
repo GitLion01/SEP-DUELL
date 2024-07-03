@@ -123,7 +123,7 @@ public class GameService {
             messagingTemplate.convertAndSendToUser(user.getId().toString(),"/queue/notifications",notification);
         }
 
-        System.out.println(" CreateGame ------------------------- currentTurn: "+ newGame.getUsers().get(newGame.getCurrentTurn()).getUsername() + "; erster Spieler: " + newGame.getUsers().get(0).getUsername() + "; zweiter Spieler: " + newGame.getUsers().get(1).getUsername());
+        System.out.println(" CreateGame ------------------------- currentTurn: "+ newGame.getCurrentTurn().getUsername() + "; erster Spieler: " + newGame.getUsers().get(0).getUsername() + "; zweiter Spieler: " + newGame.getUsers().get(1).getUsername());
     }
 
     @Transactional
@@ -192,7 +192,8 @@ public class GameService {
 
         playerStateRepository.save(user.getPlayerState());
 
-        System.out.println(" DeckSelection ------------------------- currentTurn: "+ game.getUsers().get(game.getCurrentTurn()).getUsername() + "; erster Spieler: " + game.getUsers().get(0).getUsername() + "; zweiter Spieler: " + game.getUsers().get(1).getUsername());
+        game.setCurrentTurn(game.getUsers().get(0));
+        System.out.println(" DeckSelection ------------------------- currentTurn: "+ game.getCurrentTurn().getUsername() + "; erster Spieler: " + game.getUsers().get(0).getUsername() + "; zweiter Spieler: " + game.getUsers().get(1).getUsername());
         gameRepository.save(game);
         List<Long> userIds = gameRepository.findAllUsersByGameId(game.getId());
         List<UserAccount> users = new ArrayList<>();
@@ -206,8 +207,8 @@ public class GameService {
             }
         }
 
-        System.out.println(" DeckSelection ------------------------- currentTurn: "+ game.getUsers().get(game.getCurrentTurn()).getUsername() + "; erster Spieler: " + users.get(0).getUsername() + "; zweiter Spieler: " + users.get(1).getUsername());
-        System.out.println(" DeckSelection ------------------------- currentTurn: "+ gameRepository.findById(game.getId()).get().getUsers().get(game.getCurrentTurn()).getUsername() + "; erster Spieler: " + users.get(0).getUsername() + "; zweiter Spieler: " + users.get(1).getUsername());
+        System.out.println(" DeckSelection ------------------------- currentTurn: "+game.getCurrentTurn().getUsername() + "; erster Spieler: " + users.get(0).getUsername() + "; zweiter Spieler: " + users.get(1).getUsername());
+        System.out.println(" DeckSelection ------------------------- currentTurn: "+ game.getCurrentTurn().getUsername() + "; erster Spieler: " + users.get(0).getUsername() + "; zweiter Spieler: " + users.get(1).getUsername());
 
 
         if(game.getReady() && game.getStreamed()) {
@@ -230,7 +231,7 @@ public class GameService {
 
         Game game = optionalGame.get();
         UserAccount userAccount = optionalUserAccount.get();
-        if(!game.getUsers().get(game.getCurrentTurn()).equals(userAccount)){// prüft ob der User am zug ist
+        if(!game.getCurrentTurn().equals(userAccount)){// prüft ob der User am zug ist
             return;
         }
         Deck deck = userAccount.getPlayerState().getDeck();
@@ -267,7 +268,7 @@ public class GameService {
         Game game = optionalGame.get();
         UserAccount userAccount = optionalUserAccount.get();
         PlayerCard card = optionalCard.get();
-        if(!game.getUsers().get(game.getCurrentTurn()).equals(userAccount) ||
+        if(!game.getCurrentTurn().equals(userAccount) ||
                 userAccount.getPlayerState().getFieldCards().size() > 5
                 || card.getRarity() != Rarity.NORMAL){// prüft ob der User am zug ist
             return;
@@ -306,10 +307,11 @@ public class GameService {
 
         int remainingLifePoints = 0;
         if (game.getPlayerStateBot() == null) {
-            if (!game.getUsers().get(game.getCurrentTurn()).equals(userAccount)) {
+            if (!game.getCurrentTurn().equals(userAccount)) {
                 return;
             }
-            game.setCurrentTurn(game.getUsers().get(0).equals(userAccount) ? 1 : 0);
+
+            game.setCurrentTurn(game.getUsers().get(0).equals(userAccount) ? game.getUsers().get(1) : game.getUsers().get(0));
             game.resetTimer();
             if (game.getFirstRound()) {
                 game.setFirstRound(false);
@@ -481,7 +483,7 @@ public class GameService {
         if(attackerCard.getHasAttacked()){
             return;
         }
-        if(!game.getUsers().get(game.getCurrentTurn()).equals(attacker) ||
+        if(!game.getCurrentTurn().equals(attacker) ||
                 botPS.getFieldCards().isEmpty() ||
                 attacker.getPlayerState().getFieldCards().contains(target)){
             return;
@@ -558,7 +560,7 @@ public class GameService {
         if(attackerCard.getHasAttacked()){
             return;
         }
-        if(!game.getUsers().get(game.getCurrentTurn()).equals(attacker) ||
+        if(!game.getCurrentTurn().equals(attacker) ||
                 defender.getPlayerState().getFieldCards().isEmpty() ||
                 attacker.getPlayerState().getFieldCards().contains(target)){
             return;
@@ -632,7 +634,7 @@ public class GameService {
         UserAccount attacker = optionalAttacker.get();
         UserAccount defender = optionalDefender.get();
         PlayerCard attackerCard = optionalPlayerCard.get();
-        if(!game.getUsers().get(game.getCurrentTurn()).equals(attacker) || !defender.getPlayerState().getFieldCards().isEmpty() || game.getFirstRound()){
+        if(!game.getCurrentTurn().equals(attacker) || !defender.getPlayerState().getFieldCards().isEmpty() || game.getFirstRound()){
             return;
         }
 
@@ -753,7 +755,7 @@ public class GameService {
         }
         Game game = optionalGame.get();
         UserAccount user = optionalUser.get();
-        if(!game.getUsers().get(game.getCurrentTurn()).equals(user) || request.getCardIds().size() != 2) {
+        if(!game.getCurrentTurn().equals(user) || request.getCardIds().size() != 2) {
             return;
         }
         List<PlayerCard> hand = user.getPlayerState().getHandCards();
@@ -806,7 +808,7 @@ public class GameService {
         }
         Game game = optionalGame.get();
         UserAccount user = optionalUser.get();
-        if(!game.getUsers().get(game.getCurrentTurn()).equals(user) || request.getCardIds().size() != 3) {
+        if(!game.getCurrentTurn().equals(user) || request.getCardIds().size() != 3) {
             return;
         }
         PlayerCard card1 = optionalCard1.get();
@@ -1046,6 +1048,7 @@ public class GameService {
         if(game.getPlayerStateBot() != null){
             game.setPlayerStateBot(null);
         }
+        game.setCurrentTurn(null);
         if (game.getUsers().size() == 2) {
             userAccountRepository.updatePlayerStateToNullByUserIds(userIds);
             UserAccount userAccount = userAccountRepository.findById(userIds.get(0)).get();
