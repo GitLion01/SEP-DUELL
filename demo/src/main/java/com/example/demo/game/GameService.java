@@ -194,7 +194,11 @@ public class GameService {
 
         System.out.println(" DeckSelection ------------------------- currentTurn: "+ game.getUsers().get(game.getCurrentTurn()).getUsername() + "; erster Spieler: " + game.getUsers().get(0).getUsername() + "; zweiter Spieler: " + game.getUsers().get(1).getUsername());
         gameRepository.save(game);
-        List<UserAccount> users = gameRepository.findAllUsersByGameId(game.getId());
+        List<Long> userIds = gameRepository.findAllUsersByGameId(game.getId());
+        List<UserAccount> users = new ArrayList<>();
+        for (Long userId : userIds) {
+            users.add(userAccountRepository.findById(userId).get());
+        }
 
         if(game.getReady()) {
             for (UserAccount player : game.getUsers()) {

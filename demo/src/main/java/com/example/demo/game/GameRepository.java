@@ -30,6 +30,6 @@ public interface GameRepository extends JpaRepository<Game, Long> {
     void deleteFromGameViewersByUserIds(@Param("userId") Long userId);
 
     @Query(value = "SELECT user_id FROM game_users WHERE game_id = ?1", nativeQuery = true)
-    List<UserAccount> findAllUsersByGameId(Long gameId);
+    List<Long> findAllUsersByGameId(Long gameId);
 
 }
