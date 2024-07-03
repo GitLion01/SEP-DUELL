@@ -25,8 +25,9 @@ public class Clan {
     private Long id;
     private String name;
 
-    @OneToMany(fetch = FetchType.EAGER)
+    @OneToMany
     @JoinColumn(name= "clan_id")
+    @JsonIgnore
     private List<UserAccount> users =new ArrayList<>();
 
     @OneToOne(cascade = CascadeType.ALL)
