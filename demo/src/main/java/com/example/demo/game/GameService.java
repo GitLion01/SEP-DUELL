@@ -63,14 +63,12 @@ public class GameService {
             if(game!=null) {
                 if (game.getPlayerStateBot() == null) {
                     UserAccount currentTurnPlayer = game.getCurrentTurn();
-                    currentTurnPlayer.getPlayerState().setLifePoints(-1);
                     UserAccount otherPlayer = game.getUsers().get(0).equals(currentTurnPlayer) ? game.getUsers().get(1) : game.getUsers().get(0);
                     currentTurnPlayer.getPlayerState().setLifePoints(-1);
                     otherPlayer.getPlayerState().setWinner(true);
                     terminateMatch(game.getId(), currentTurnPlayer.getId(), otherPlayer.getId());
                 }else{
                     UserAccount currentTurnPlayer = game.getCurrentTurn();
-                    currentTurnPlayer.getPlayerState().setLifePoints(-1);
                     PlayerState botPS = game.getPlayerStateBot();
                     currentTurnPlayer.getPlayerState().setLifePoints(-1);
                     botPS.setWinner(true);
@@ -201,10 +199,12 @@ public class GameService {
                 }
             }
         }
+
         if (allPlayersReady) {
             game.resetTimer();
             game.setReady(true);
         }
+
 
         playerStateRepository.save(user.getPlayerState());
 
@@ -905,7 +905,7 @@ public class GameService {
 
         if(game.getPlayerStateBot() == null) {
             System.out.println("Problem2");
-            UserAccount user2 = optionalUserA.get();
+            UserAccount user2 = optionalUserB.get();
             UserAccount user1 = optionalUserA.get();
             normalsA = user1.getPlayerState().getCardsPlayed().stream().filter((x) -> x.getRarity() == Rarity.NORMAL).toList();
             raresA = user1.getPlayerState().getCardsPlayed().stream().filter((x) -> x.getRarity() == Rarity.RARE).toList();
@@ -1244,8 +1244,6 @@ public class GameService {
         }
         playerStateBot.setDeckClone(playerCards);
         playerStateRepository.save(playerStateBot);
-
-        newGame.setReady(true);
         gameRepository.save(newGame);
 
         // setzt initial 5 Karten aus dem gemischten Deck auf die Hand
