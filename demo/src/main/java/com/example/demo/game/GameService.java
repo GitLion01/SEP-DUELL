@@ -1191,6 +1191,7 @@ public class GameService {
         newGame.getUsers().add(user);
         newGame.setPlayerStateBot(playerStateBot);
         newGame.setBotDeckId(deckCopy.getId());
+        newGame.setCurrentTurn(user);
         gameRepository.save(newGame);
 
         List<Card> cards = deck.getCards();
