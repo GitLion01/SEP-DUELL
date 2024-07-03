@@ -447,6 +447,7 @@ public class GameService {
             // Speichere den Spielstatus nach dem Zug
             gameRepository.save(game);
             game.setMyTurn(true);
+            game.resetTimer();
             game.setFirstRound(false);
 
         }
