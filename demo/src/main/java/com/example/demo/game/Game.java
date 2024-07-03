@@ -40,7 +40,8 @@ public class Game {
     @OneToOne(fetch = FetchType.EAGER)
     private PlayerState playerStateBot;
 
-    private Integer currentTurn = 0;
+    @OneToOne(fetch = FetchType.EAGER)
+    private UserAccount currentTurn;
 
     private Boolean myTurn = true;
 
