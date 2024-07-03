@@ -291,7 +291,7 @@ public class GameService {
 
         if(!viewers.isEmpty()) {
             for(UserAccount viewer : viewers) {
-                messagingTemplate.convertAndSendToUser(viewer.getId().toString(), "/queue/watch", Arrays.asList(game, users));
+                messagingTemplate.convertAndSendToUser(viewer.getId().toString(), "/queue/watch", Arrays.asList(game, users, game.getPlayerStateBot()));
             }
         }
     }
@@ -455,7 +455,7 @@ public class GameService {
 
         if (!viewers.isEmpty()) {
             for (UserAccount viewer : viewers) {
-                messagingTemplate.convertAndSendToUser(viewer.getId().toString(), "/queue/watch", Arrays.asList(game, users));
+                messagingTemplate.convertAndSendToUser(viewer.getId().toString(), "/queue/watch", Arrays.asList(game, users, game.getPlayerStateBot()));
             }
         }
 
@@ -537,7 +537,7 @@ public class GameService {
 
         if(!viewers.isEmpty()) {
             for(UserAccount viewer : viewers) {
-                messagingTemplate.convertAndSendToUser(viewer.getId().toString(), "/queue/watch", Arrays.asList(game, users));
+                messagingTemplate.convertAndSendToUser(viewer.getId().toString(), "/queue/watch", Arrays.asList(game, users, game.getPlayerStateBot()));
             }
         }
 
@@ -614,7 +614,7 @@ public class GameService {
 
         if(!viewers.isEmpty()) {
             for(UserAccount viewer : viewers) {
-                messagingTemplate.convertAndSendToUser(viewer.getId().toString(), "/queue/watch", Arrays.asList(game, users));
+                messagingTemplate.convertAndSendToUser(viewer.getId().toString(), "/queue/watch", Arrays.asList(game, users, game.getPlayerStateBot()));
             }
         }
 
@@ -672,7 +672,7 @@ public class GameService {
 
         if(!viewers.isEmpty()) {
             for(UserAccount viewer : viewers) {
-                messagingTemplate.convertAndSendToUser(viewer.getId().toString(), "/queue/watch", Arrays.asList(game, users));
+                messagingTemplate.convertAndSendToUser(viewer.getId().toString(), "/queue/watch", Arrays.asList(game, users, game.getPlayerStateBot()));
             }
         }
         if(remainingLifePoints < 0){
@@ -734,7 +734,7 @@ public class GameService {
 
         if(!viewers.isEmpty()) {
             for(UserAccount viewer : viewers) {
-                messagingTemplate.convertAndSendToUser(viewer.getId().toString(), "/queue/watch", Arrays.asList(game, users));
+                messagingTemplate.convertAndSendToUser(viewer.getId().toString(), "/queue/watch", Arrays.asList(game, users, game.getPlayerStateBot()));
             }
         }
         if(remainingLifePoints < 0){
@@ -790,7 +790,7 @@ public class GameService {
 
         if(!viewers.isEmpty()) {
             for(UserAccount viewer : viewers) {
-                messagingTemplate.convertAndSendToUser(viewer.getId().toString(), "/queue/watch", Arrays.asList(game, users));
+                messagingTemplate.convertAndSendToUser(viewer.getId().toString(), "/queue/watch", Arrays.asList(game, users, game.getPlayerStateBot()));
             }
         }
 
@@ -844,7 +844,7 @@ public class GameService {
 
         if(!viewers.isEmpty()) {
             for(UserAccount viewer : viewers) {
-                messagingTemplate.convertAndSendToUser(viewer.getId().toString(), "/queue/watch", Arrays.asList(game, users));
+                messagingTemplate.convertAndSendToUser(viewer.getId().toString(), "/queue/watch", Arrays.asList(game, users, game.getPlayerStateBot()));
             }
         }
     }
