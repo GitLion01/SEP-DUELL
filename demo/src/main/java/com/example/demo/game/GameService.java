@@ -5,14 +5,12 @@ import com.example.demo.decks.Deck;
 import com.example.demo.decks.DeckRepository;
 import com.example.demo.duellHerausforderung.Notification;
 import com.example.demo.game.requests.*;
+import com.example.demo.leaderboard.LeaderboardService;
 import com.example.demo.user.UserAccount;
 import com.example.demo.user.UserAccountRepository;
-import jakarta.validation.constraints.Null;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
@@ -27,6 +25,7 @@ public class GameService {
     private final SimpMessagingTemplate messagingTemplate;
     private final PlayerStateRepository playerStateRepository;
     private final PlayerCardRepository playerCardRepository;
+    private final LeaderboardService leaderboardService;
 
     @Autowired
     public GameService(GameRepository gameRepository,
@@ -34,13 +33,15 @@ public class GameService {
                        UserAccountRepository userAccountRepository,
                        SimpMessagingTemplate messagingTemplate,
                        PlayerStateRepository playerStateRepository,
-                       PlayerCardRepository playerCardRepository)  {
+                       PlayerCardRepository playerCardRepository,
+                       LeaderboardService leaderboardService)  {
         this.gameRepository = gameRepository;
         this.deckRepository = deckRepository;
         this.userAccountRepository = userAccountRepository;
         this.messagingTemplate = messagingTemplate;
         this.playerStateRepository = playerStateRepository;
         this.playerCardRepository = playerCardRepository;
+        this.leaderboardService = leaderboardService;
     }
 
     //TODO: DIESEN KOMMENTAR NICHT LÖSCHEN!!!!!
@@ -85,56 +86,54 @@ public class GameService {
                 .orElseThrow(() -> new IllegalArgumentException("User A not found"));
         UserAccount userB = userAccountRepository.findByUsername(request.getUserB())
                 .orElseThrow(() -> new IllegalArgumentException("User B not found"));
-        // Check if userA is already associated with a game
+
         if (gameRepository.existsByUsersContaining(userA)) {
             System.out.println("User with id: " + userA.getId() + " already in a game");
             return;
         }
-        // Check if userB is already associated with a game
+
         if (gameRepository.existsByUsersContaining(userB)) {
             System.out.println("User with id: " + userA.getId() + " already in a game");
             return;
         }
+
         PlayerState playerStateA = new PlayerState();
         playerStateRepository.save(playerStateA);
         userA.setPlayerState(playerStateA);
         userAccountRepository.save(userA);
+
         PlayerState playerStateB = new PlayerState();
         playerStateRepository.save(playerStateB);
         userB.setPlayerState(playerStateB);
         userAccountRepository.save(userB);
-        System.out.println("Vor Game");
+
         Game newGame = new Game();
-        System.out.println("Nach Game");
         newGame.getUsers().add(userA);
         newGame.getUsers().add(userB);
-        System.out.println("vor speichern");
         gameRepository.save(newGame);
-        System.out.println("Game gespeichert");
+
         List<UserAccount> users = newGame.getUsers();
 
         for(UserAccount user : newGame.getUsers()) {
             messagingTemplate.convertAndSendToUser(user.getId().toString(), "/queue/create", Arrays.asList(newGame, users));
-            System.out.println("gesendet-----------------");
             Notification notification = new Notification(user.getId(),0L,userAccountRepository.findById(user.getId()).get().getUsername(),"schon aktiviert");
             messagingTemplate.convertAndSendToUser(user.getId().toString(),"/queue/notifications",notification);
         }
+
+        System.out.println(" CreateGame ------------------------- currentTurn: "+ newGame.getUsers().get(newGame.getCurrentTurn()).getUsername() + "; erster Spieler: " + newGame.getUsers().get(0).getUsername() + "; zweiter Spieler: " + newGame.getUsers().get(1).getUsername());
     }
 
     @Transactional
     public void selectDeck(DeckSelectionRequest request) {
-        System.out.println("SERVICE ERREICHT");
-        System.out.println("Deck ID: " + request.getDeckId());
-        System.out.println("User ID: " + request.getUserId());
-        System.out.println("Game ID: " + request.getGameId());
         Optional<Game> optionalGame = gameRepository.findById(request.getGameId());
         Optional<Deck> optionalDeck = deckRepository.findByDeckIdAndUserId(request.getDeckId(), request.getUserId());
-        if(optionalGame.isEmpty() || optionalDeck.isEmpty()) {
+        Optional<UserAccount> optionalUser = userAccountRepository.findById(request.getUserId());
+        if(optionalGame.isEmpty() || optionalDeck.isEmpty() || optionalUser.isEmpty()) {
             return;
         }
-        System.out.println("Game und Deck vorhanden");
         Game game = optionalGame.get();
         Deck deck = optionalDeck.get();
+        UserAccount user = optionalUser.get();
         List<Card> cards = deck.getCards();
         Collections.shuffle(deck.getCards()); // mischt das Deck
         List<PlayerCard> playerCards = new ArrayList<>();
@@ -152,7 +151,7 @@ public class GameService {
             playerCardRepository.save(playerCard);
         }
 
-        UserAccount user = deck.getUser();
+
         user.getPlayerState().setDeck(deck);
         user.getPlayerState().setReady(true);
         //Fortan wird mit diesem Deck Klon gearbeitet
@@ -190,13 +189,14 @@ public class GameService {
 
         playerStateRepository.save(user.getPlayerState());
 
-
+        System.out.println(" DeckSelection ------------------------- currentTurn: "+ game.getUsers().get(game.getCurrentTurn()).getUsername() + "; erster Spieler: " + game.getUsers().get(0).getUsername() + "; zweiter Spieler: " + game.getUsers().get(1).getUsername());
         gameRepository.save(game);
         List<UserAccount> users = game.getUsers();
         for(UserAccount player : game.getUsers()) {
-            System.out.println("Player: " + player.getId());
             messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/selectDeck", Arrays.asList(game, users));
         }
+
+        System.out.println(" DeckSelection ------------------------- currentTurn: "+ game.getUsers().get(game.getCurrentTurn()).getUsername() + "; erster Spieler: " + users.get(0).getUsername() + "; zweiter Spieler: " + users.get(1).getUsername());
 
 
 
@@ -227,7 +227,7 @@ public class GameService {
         List<PlayerCard> handCards = userAccount.getPlayerState().getHandCards();
 
         // ersetzt den unteren Kommentar
-        if(deck.getUser().getPlayerState().getDeckClone().isEmpty()) {
+        if(userAccount.getPlayerState().getDeckClone().isEmpty()) {
             return;
         }else{
             handCards.add(deck.getUser().getPlayerState().getDeckClone().remove(0));
@@ -332,97 +332,7 @@ public class GameService {
             game.getPlayerStateBot().getHandCards().removeAll(cardsToRemove);
             // 3: Mit allen Karten auf dem Feld angreifen
 
-            /*if (userAccount.getPlayerState().getFieldCards().isEmpty()) {
-                // greife gegner an
-                for (PlayerCard botFieldCard : game.getPlayerStateBot().getFieldCards()) {
-                    remainingLifePoints = userAccount.getPlayerState().getLifePoints() - botFieldCard.getAttackPoints();
-                    if (botFieldCard.getAttackPoints() > userAccount.getPlayerState().getLifePoints()) {
-                        game.getPlayerStateBot().setDamage(game.getPlayerStateBot().getDamage() + userAccount.getPlayerState().getLifePoints() + 1); // erhöht den Damage Counter des Angreifers
-                        userAccount.getPlayerState().setLifePoints(-1);
-                        game.getPlayerStateBot().setWinner(true);
-                        playerStateRepository.save(game.getPlayerStateBot());
-                    } else {
-                        userAccount.getPlayerState().setLifePoints((userAccount.getPlayerState().getLifePoints() - botFieldCard.getAttackPoints())); // zieht Angriffspunkte von Lebenspunkte ab
-                        game.getPlayerStateBot().setDamage(game.getPlayerStateBot().getDamage() + botFieldCard.getAttackPoints()); // erhöht den Damage Counter des Angreifers
-                    }
-
-                    playerCardRepository.save(botFieldCard);
-                    playerStateRepository.save(game.getPlayerStateBot());
-                    playerStateRepository.save(userAccount.getPlayerState());
-                }
-            } else {
-                //greife Karten an
-                List<PlayerCard> cardsToRemoveFromOpponentField = new ArrayList<>();
-                List<PlayerCard> cardsToRemoveFromBotField = new ArrayList<>();
-
-                List<PlayerCard> opponentCards = userAccount.getPlayerState().getFieldCards();
-                List<PlayerCard> botFieldCards = game.getPlayerStateBot().getFieldCards();
-
-                for (PlayerCard botFieldCard : botFieldCards) {
-                    for(PlayerCard opponentCard : opponentCards) {
-                        if(botFieldCard.getHasAttacked()){
-                            break;
-                        }
-                        int remainingTargetDefense = opponentCard.getDefensePoints() - botFieldCard.getAttackPoints();
-                        if (remainingTargetDefense < 0) {
-                            // C2 wird zerstört und vom Spielfeld entfernt
-                            cardsToRemoveFromOpponentField.add(opponentCard);
-                            game.getPlayerStateBot().setDamage(game.getPlayerStateBot().getDamage() + opponentCard.getDefensePoints() + 1);
-                            opponentCard.setDefensePoints(-1);
-                        } else {
-                            // C2 überlebt den Angriff, setze neue Verteidigungspunkte
-                            opponentCard.setDefensePoints(remainingTargetDefense);
-                            game.getPlayerStateBot().setDamage(game.getPlayerStateBot().getDamage() + botFieldCard.getAttackPoints());
-                        }
-                        // Wenn C2 nicht zerstört wurde, dann kontert C2
-                        if (remainingTargetDefense >= 0) {
-                            int remainingAttackerDefense = botFieldCard.getDefensePoints() - opponentCard.getAttackPoints();
-                            if (remainingAttackerDefense < 0) {
-                                // C1 wird zerstört und vom Spielfeld entfernt
-                                cardsToRemoveFromBotField.add(botFieldCard);
-                            } else {
-                                // C1 überlebt den Konter, setze neue Verteidigungspunkte
-                                botFieldCard.setDefensePoints(remainingAttackerDefense);
-                            }
-                        }
-                        botFieldCard.setHasAttacked(true);
-                        playerCardRepository.save(botFieldCard);
-                        playerCardRepository.save(opponentCard);
-                        playerStateRepository.save(game.getPlayerStateBot());
-                        playerStateRepository.save(userAccount.getPlayerState());
-
-                    }
-                }
-
-                for(PlayerCard botFieldCard : game.getPlayerStateBot().getFieldCards()) {
-                    botFieldCard.setHasAttacked(false);
-                }
-
-                userAccount.getPlayerState().getFieldCards().removeAll(cardsToRemoveFromOpponentField);
-                game.getPlayerStateBot().getFieldCards().removeAll(cardsToRemoveFromBotField);
-            }*/
-
-
             if (userAccount.getPlayerState().getFieldCards().isEmpty()) {
-                // Greife den Gegner direkt an, da keine Karten auf dem eigenen Feld sind
-                /*for (PlayerCard botFieldCard : game.getPlayerStateBot().getFieldCards()) {
-                    remainingLifePoints = userAccount.getPlayerState().getLifePoints() - botFieldCard.getAttackPoints();
-                    if (botFieldCard.getAttackPoints() > userAccount.getPlayerState().getLifePoints()) {
-                        // Der Bot hat genug Angriffspunkte, um den Spieler zu besiegen
-                        game.getPlayerStateBot().setDamage(game.getPlayerStateBot().getDamage() + userAccount.getPlayerState().getLifePoints() + 1);
-                        userAccount.getPlayerState().setLifePoints(-1); // Spielerleben auf 0 setzen
-                        game.getPlayerStateBot().setWinner(true); // Bot als Sieger markieren
-                        playerStateRepository.save(game.getPlayerStateBot());
-                    } else {
-                        // Spieler verliert Lebenspunkte entsprechend des Angriffs des Bots
-                        userAccount.getPlayerState().setLifePoints(userAccount.getPlayerState().getLifePoints() - botFieldCard.getAttackPoints());
-                        game.getPlayerStateBot().setDamage(game.getPlayerStateBot().getDamage() + botFieldCard.getAttackPoints());
-                    }
-
-                    playerCardRepository.save(botFieldCard);
-                    playerStateRepository.save(game.getPlayerStateBot());
-                    playerStateRepository.save(userAccount.getPlayerState());
-                }*/
                 List<PlayerCard> botCards = new ArrayList<>(game.getPlayerStateBot().getFieldCards());
                 Iterator<PlayerCard> iterator = botCards.iterator();
 
@@ -1036,7 +946,6 @@ public class GameService {
             sacrificedA = Arrays.asList(sacrificedNormalsA.size(), sacrificedRaresA.size(), sacrificedLegendariesA.size());
             sacrificedB = Arrays.asList(sacrificedNormalsB.size(), sacrificedRaresB.size(), sacrificedLegendariesB.size());
 
-            Integer lbPoints1 = user1.getLeaderboardPoints();
 
             if (user1.getPlayerState().getWinner()) {
                 sepCoins = 0;
@@ -1238,9 +1147,6 @@ public class GameService {
     }
 
 
-
-    // BOT-Matches -----------------------------------------------------------------------------------------------------
-
     public void createBotGame(CreateBotRequest request){
         UserAccount user = userAccountRepository.findById(request.getUserId()).orElseThrow(() -> new IllegalArgumentException("User not found"));
         Deck deck = deckRepository.findById(request.getDeckId()).orElseThrow(() -> new IllegalArgumentException("Deck not found"));
@@ -1250,8 +1156,7 @@ public class GameService {
             return;
         }
 
-
-
+        leaderboardService.updateUserStatus(user.getId(), "im Duell");
         PlayerState playerState = new PlayerState();
         playerState.setDeck(deck);
         playerStateRepository.save(playerState);
@@ -1360,33 +1265,12 @@ public class GameService {
         if(newGame.getReady() && newGame.getStreamed()) {
             Map<Long,List<String>> streamedGames = new HashMap<>();
             for (Game stream : gameRepository.findAllStreams().get()) {
-                streamedGames.put(stream.getId(), List.of(user.getUsername(), "Bot"));
+                streamedGames.put(stream.getId(), List.of(stream.getUsers().get(0).getUsername(), "Bot"));
             }
             messagingTemplate.convertAndSend("/queue/streams", streamedGames);
         }
 
-
     }
-
-    public void endMyTurn(EndTurnRequest request){
-        Optional<Game> optionalGame = gameRepository.findById(request.getGameID());
-        Optional<UserAccount> optionalUser = userAccountRepository.findById(request.getUserID());
-        if(optionalGame.isEmpty() || optionalUser.isEmpty()){
-            return;
-        }
-
-        Game game = optionalGame.get();
-        UserAccount userAccount = optionalUser.get();
-        if(game.getMyTurn()){
-            game.setMyTurn(false);
-        }else{
-            return;
-        }
-        gameRepository.save(game);
-    }
-
-
-
 
 }
  

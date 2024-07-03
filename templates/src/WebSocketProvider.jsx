@@ -181,6 +181,7 @@ export const WebSocketProvider = ({ children }) => {
 
 
     const createGame = (receiverId, senderName) => {
+        console.log("ReceiverID: " , receiverId, "Sendername: ", senderName);
         if (client && client.connected) {
             client.publish({
                 destination: '/app/createGame',

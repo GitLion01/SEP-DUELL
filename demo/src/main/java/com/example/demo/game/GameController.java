@@ -138,11 +138,6 @@ public class GameController {
         System.out.println("AttackBotCard Controller Ausgang");
     }
 
-    @MessageMapping("/endMyTurn")
-    public void endMyTurn(EndTurnRequest request){
-        gameService.endMyTurn(request);
-    }
-
     @MessageMapping("/attackBotCard")
     public void attackBotCard(@Payload AttackBotCardRequest request){
         gameService.attackBotCard(request);
