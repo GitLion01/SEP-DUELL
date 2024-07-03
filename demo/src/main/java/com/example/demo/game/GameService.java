@@ -11,6 +11,7 @@ import com.example.demo.user.UserAccountRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
@@ -45,7 +46,7 @@ public class GameService {
     }
 
     //TODO: DIESEN KOMMENTAR NICHT LÖSCHEN!!!!!
-    /*@Scheduled(fixedRate = 1000)
+    @Scheduled(fixedRate = 1000)
     public void updateTimers(){
         List<Game> games = gameRepository.findAll();
         for (Game game : games) {
@@ -60,12 +61,21 @@ public class GameService {
     private void handleTimerExpiration(Game game) {
         try {
             if(game!=null) {
-                UserAccount currentTurnPlayer = game.getUsers().get(game.getCurrentTurn());
-                currentTurnPlayer.getPlayerState().setLifePoints(-1);
-                UserAccount otherPlayer = game.getUsers().get(0).equals(currentTurnPlayer) ? game.getUsers().get(1) : game.getUsers().get(0);
-                currentTurnPlayer.getPlayerState().setLifePoints(-1);
-                otherPlayer.getPlayerState().setWinner(true);
-                terminateMatch(game.getId(), currentTurnPlayer.getId(), otherPlayer.getId());
+                if (game.getPlayerStateBot() == null) {
+                    UserAccount currentTurnPlayer = game.getCurrentTurn();
+                    currentTurnPlayer.getPlayerState().setLifePoints(-1);
+                    UserAccount otherPlayer = game.getUsers().get(0).equals(currentTurnPlayer) ? game.getUsers().get(1) : game.getUsers().get(0);
+                    currentTurnPlayer.getPlayerState().setLifePoints(-1);
+                    otherPlayer.getPlayerState().setWinner(true);
+                    terminateMatch(game.getId(), currentTurnPlayer.getId(), otherPlayer.getId());
+                }else{
+                    UserAccount currentTurnPlayer = game.getCurrentTurn();
+                    currentTurnPlayer.getPlayerState().setLifePoints(-1);
+                    PlayerState botPS = game.getPlayerStateBot();
+                    currentTurnPlayer.getPlayerState().setLifePoints(-1);
+                    botPS.setWinner(true);
+                    terminateMatch(game.getId(), botPS.getId(), currentTurnPlayer.getId());
+                }
             }
         }
         catch (Exception e){
@@ -78,7 +88,7 @@ public class GameService {
         for(UserAccount player : game.getUsers()) {
             messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/timer", remainingTime);
         }
-    }*/
+    }
 
     public void createGame(CreateGameRequest request) {
         System.out.println("Creating game for users A:" + request.getUserA() + " and B:" + request.getUserB());
@@ -994,7 +1004,7 @@ public class GameService {
 
         if(!viewers.isEmpty()) {
             for(UserAccount viewer : viewers) {
-                messagingTemplate.convertAndSendToUser(viewer.getId().toString(), "/queue/watch", Arrays.asList(game, users, sepCoins, leaderBoardPointsWinner, leaderBoardPointsLoser,damageWinner, damageLoser, cardsPlayedA, cardsPlayedB, sacrificedA, sacrificedB));
+                messagingTemplate.convertAndSendToUser(viewer.getId().toString(), "/queue/watch", Arrays.asList(game, users, game.getPlayerStateBot(), sepCoins, leaderBoardPointsWinner, leaderBoardPointsLoser,damageWinner, damageLoser, cardsPlayedA, cardsPlayedB, sacrificedA, sacrificedB));
             }
         }
 
