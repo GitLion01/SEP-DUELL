@@ -88,6 +88,11 @@ public class GameService {
         for(UserAccount player : game.getUsers()) {
             messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/timer", remainingTime);
         }
+        if(!game.getViewers().isEmpty()){
+            for(UserAccount viewer : game.getViewers()) {
+                messagingTemplate.convertAndSendToUser(viewer.getId().toString(), "/queue/timer", remainingTime);
+            }
+        }
     }
 
     public void createGame(CreateGameRequest request) {
