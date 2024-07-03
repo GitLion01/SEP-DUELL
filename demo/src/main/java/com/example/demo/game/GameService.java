@@ -110,6 +110,7 @@ public class GameService {
         Game newGame = new Game();
         newGame.getUsers().add(userA);
         newGame.getUsers().add(userB);
+        newGame.setCurrentTurn(userA);
         gameRepository.save(newGame);
 
         List<UserAccount> users = newGame.getUsers();
@@ -192,7 +193,6 @@ public class GameService {
 
         playerStateRepository.save(user.getPlayerState());
 
-        game.setCurrentTurn(game.getUsers().get(0));
         System.out.println(" DeckSelection ------------------------- currentTurn: "+ game.getCurrentTurn().getUsername() + "; erster Spieler: " + game.getUsers().get(0).getUsername() + "; zweiter Spieler: " + game.getUsers().get(1).getUsername());
         gameRepository.save(game);
         List<Long> userIds = gameRepository.findAllUsersByGameId(game.getId());
