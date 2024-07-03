@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import './FriendListForChat.css';
 
-function FriendListForChat({ onSelect, onCreateGroupClick, fetchGroups, groups }) {
+function FriendListForChat({ onSelect, onCreateGroupClick, groups, clanChat }) {
   const [friends, setFriends] = useState([]);
   const userId = localStorage.getItem('id');
 
@@ -48,6 +48,16 @@ function FriendListForChat({ onSelect, onCreateGroupClick, fetchGroups, groups }
         </ul>
         <button onClick={onCreateGroupClick}>Gruppe erstellen</button>
       </div>
+      <div className="friend-list-section">
+        <h2>Clan-Chat</h2>
+        <ul>
+          {clanChat.map(group => (
+            <li key={group.id} onClick={() => onSelect(group, 'group')}>
+              {group.name}
+            </li>
+          ))}
+        </ul>
+        </div>
     </div>
   );
 }

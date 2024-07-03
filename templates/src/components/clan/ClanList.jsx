@@ -4,16 +4,15 @@ import Modal from 'react-modal';
 import ClanModal from './ClanModal';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import './ClanList.css'; // Stelle sicher, dass das CSS importiert wird
+import './ClanList.css'; 
 
 function Clan() {
-    const [users, setUsers] = useState([]);
     const [clans, setClans] = useState([]);
     const userId = localStorage.getItem('id');
     const [newClanName, setNewClanName] = useState('');
     const [showModal, setShowModal] = useState(false);
     const [selectedClan, setSelectedClan] = useState(null);
-    const userClanId = null; 
+    const [userClanId, setUserClanId] = useState(null);  
 
     const fetchClans = async () => {
         try {
@@ -28,8 +27,23 @@ function Clan() {
         }
     };
 
+    const fetchClanId = async () => {
+        try { 
+            const response = await fetch(`http://localhost:8080/getClanId?userId=${userId}`); 
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            const data = await response.json();
+            setUserClanId(data); 
+        }
+        catch (error) {
+            console.error('There was a problem with the fetch operation:', error);
+        }
+    }
+
     useEffect(() => {
         fetchClans();
+        fetchClanId(); 
     }, []);
 
     const createClan = async () => {
@@ -77,13 +91,16 @@ function Clan() {
                 method: 'POST',
             });
 
+            const result = await response.text(); // Behandle die Antwort als Text
             if (response.ok) {
-                const updatedUser = await response.json();
-                toast.success('Erfolgreich dem Clan beigetreten');
-            } else if (response.status === 409) {
-                    toast.error('Du bist bereits Mitglied dieses Clans');
+                if (result.includes("You have joined a clan")) {
+                    setUserClanId(clanId);
+                    toast.success("Du bist dem Clan erfolgreich beigetreten");
+                } else if(response.status === 409) {
+                    toast.error('Du bist bereits Mitglied dieses Clans'); 
+                }
             } else {
-                toast.error('Fehler beim Beitreten des Clans');
+                toast.error(result);
             }
         } catch (error) {
             console.error('There was a problem with the fetch operation:', error);
@@ -101,6 +118,7 @@ function Clan() {
             });
 
             if (response.ok) {
+                setUserClanId(null);
                 toast.success('Erfolgreich den Clan verlassen');
                 fetchClans(); // Aktualisiere die Liste der Clans
             } else {
@@ -136,12 +154,15 @@ function Clan() {
                 placeholder="Neuen Clan erstellen"
                 value={newClanName}
                 onChange={(e) => setNewClanName(e.target.value)}
-                style={{ backgroundColor: '#333', color: 'white' }} // Eingabefeld anpassen
             />
-            <button onClick={handleCreateClan} style={{ backgroundColor: '#555', color: 'white' }}>Clan erstellen</button>
+            <button onClick={handleCreateClan}>Clan erstellen</button>
             <div className="clan-list">
                 {clans.map((clan) => (
-                    <div key={clan.id} className="clan-item" onClick={() => handleSelectClan(clan)}>
+                    <div
+                        key={clan.id}
+                        className={`clan-item ${userClanId === clan.id ? 'highlighted-clan' : ''}`}
+                        onClick={() => handleSelectClan(clan)}
+                    >
                         <span>{clan.name}</span>
                     </div>
                 ))}
@@ -159,7 +180,6 @@ function Clan() {
                         onClose={handleCloseModal}
                         userId={userId}
                         userClanId={userClanId}
-                        setCurrentUser={setUsers}
                         joinClan={joinClan}
                         leaveClan={leaveClan}
                     />

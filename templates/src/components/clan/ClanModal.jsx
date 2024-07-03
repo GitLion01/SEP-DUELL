@@ -1,18 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import './ClanModal.css'; // Optional: CSS für Styling
+import './ClanModal.css'; // Optional: CSS for styling
 import { ToastContainer, toast } from 'react-toastify';
 
-
-const ClanModal = ({ clan, onClose, userId, userClanId, setCurrentUser, joinClan, leaveClan}) => {
+const ClanModal = ({ clan, onClose, userId, userClanId, joinClan, leaveClan }) => {
     const [clanMembers, setClanMembers] = useState([]);
+    
     const fetchClanMembers = async () => {
-        // Beispielhafte Clan-Mitglieder
-        const members = [
-            { id: 1, username: 'Player 1' },
-            { id: 2, username: 'Player 2' },
-            { id: 3, username: 'Player 3' },
-        ];
-        setClanMembers(members);
+        try {
+            const response = await fetch(`http://localhost:8080/getClanMitglieder?clanId=${clan.id}`);
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            const data = await response.json();
+            setClanMembers(data);
+        } catch (error) {
+            console.error('There was a problem with the fetch operation:', error);
+            toast.error('Es gab einen Fehler beim Aufruf der Mitglieder');
+        }
     };
 
     useEffect(() => {
@@ -20,17 +24,15 @@ const ClanModal = ({ clan, onClose, userId, userClanId, setCurrentUser, joinClan
     }, [clan.id]);
 
     const handleJoinClan = async () => {
-        await joinClan(clan.id, userId); 
+        await joinClan(clan.id, userId);
         fetchClanMembers();
-        toast.success('Du bist erfolgreich beigetreten');
-        };
+    };
 
     const handleLeaveClan = async () => {
-        await leaveClan(userId)
-        fetchClanMembers(); 
-        toast.success('Du hast den Clan erfolgreich verlassen')
-        onClose(); 
-    }
+        await leaveClan(userId);
+        fetchClanMembers();
+        onClose();
+    };
 
     return (
         <div className="clan-modal-content">
@@ -43,12 +45,16 @@ const ClanModal = ({ clan, onClose, userId, userClanId, setCurrentUser, joinClan
                     </div>
                 ))}
             </div>
-            <button onClick={handleJoinClan} disabled={currentUser.clanId === clan.id}>
-                Beitreten
-            </button>
-            <button onClick={handleLeaveClan} disabled={currentUser.clanId !== clan.id}>
-                Clan verlassen
-            </button>
+            {userClanId !== clan.id && userClanId === null && (
+                <button onClick={handleJoinClan}>
+                    Beitreten
+                </button>
+            )}
+            {userClanId === clan.id && (
+                <button onClick={handleLeaveClan}>
+                    Clan verlassen
+                </button>
+            )}
         </div>
     );
 };
