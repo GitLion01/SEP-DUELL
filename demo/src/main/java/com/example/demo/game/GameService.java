@@ -201,12 +201,12 @@ public class GameService {
         }
 
         if(game.getReady()) {
-            for (UserAccount player : game.getUsers()) {
+            for (UserAccount player : users) {
                 messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/selectDeck", Arrays.asList(game, users));
             }
         }
 
-        System.out.println(" DeckSelection ------------------------- currentTurn: "+ game.getUsers().get(game.getCurrentTurn()).getUsername() + "; erster Spieler: " + users.get(0).getUsername() + "; zweiter Spieler: " + users.get(1).getUsername());
+        System.out.println(" DeckSelection ------------------------- currentTurn: "+ users.get(game.getCurrentTurn()).getUsername() + "; erster Spieler: " + users.get(0).getUsername() + "; zweiter Spieler: " + users.get(1).getUsername());
 
 
 
