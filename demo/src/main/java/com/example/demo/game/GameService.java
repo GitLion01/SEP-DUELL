@@ -206,8 +206,8 @@ public class GameService {
             }
         }
 
-        System.out.println(" DeckSelection ------------------------- currentTurn: "+ users.get(game.getCurrentTurn()).getUsername() + "; erster Spieler: " + users.get(0).getUsername() + "; zweiter Spieler: " + users.get(1).getUsername());
-
+        System.out.println(" DeckSelection ------------------------- currentTurn: "+ game.getUsers().get(game.getCurrentTurn()).getUsername() + "; erster Spieler: " + users.get(0).getUsername() + "; zweiter Spieler: " + users.get(1).getUsername());
+        System.out.println(" DeckSelection ------------------------- currentTurn: "+ gameRepository.findById(game.getId()).get().getUsers().get(game.getCurrentTurn()).getUsername() + "; erster Spieler: " + users.get(0).getUsername() + "; zweiter Spieler: " + users.get(1).getUsername());
 
 
         if(game.getReady() && game.getStreamed()) {
