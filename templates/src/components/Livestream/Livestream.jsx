@@ -83,7 +83,7 @@ const Livestream = () => {
             const subscription = client.subscribe(`/user/${id}/queue/watch`, (message) => {
                 const response = JSON.parse(message.body);
                 console.log("Response Stream: ", response);
-                if (response.length === 2) {
+                if (response[1].length === 2) {
                     const user1 = response[1][0];
                     const user2 = response[1][1];
 
@@ -106,7 +106,7 @@ const Livestream = () => {
                     setUsers(response[1]);
 
                     if (user1) {
-                        setUser1State(user1.playerState);
+                        setUser1State(user1[0].playerState);
                     }
                     if (botPlayerState) {
                         setUser2State(botPlayerState);
@@ -116,19 +116,20 @@ const Livestream = () => {
                 }
 
                 if (response.length > 5) {
-                    const [_, __, sepCoins, leaderBoardPointsWinner, leaderBoardPointsLoser, damageWinner, damageLoser, cardsPlayedA, cardsPlayedB, sacrificedA, sacrificedB] = response;
+                    const [_, __, ___, sepCoins, leaderBoardPointsWinner, leaderBoardPointsLoser, damageWinner, damageLoser, cardsPlayedA, cardsPlayedB, sacrificedA, sacrificedB] = response;
                     setStats({
                         sepCoins,
                         leaderboardPointsA: response[1][0].playerState.winner ? leaderBoardPointsWinner : leaderBoardPointsLoser,
-                        leaderboardPointsB : response[1][1].playerState.winner ? leaderBoardPointsWinner : leaderBoardPointsLoser,
+                        leaderboardPointsB : response[1][0].playerState.winner ? leaderBoardPointsLoser : leaderBoardPointsWinner,
                         damageA: response[1][0].playerState.winner ? damageWinner : damageLoser,
-                        damageB: response[1][1].playerState.winner ? damageWinner : damageLoser,
+                        damageB: response[1][0].playerState.winner ? damageLoser : damageWinner,
                         cardsPlayedA,
                         cardsPlayedB,
                         sacrificedA,
                         sacrificedB
                     })
-                    console.log(stats);
+                    console.log("Stats: ", stats);
+                    console.log("StatsResponse: ", response);
                 }
             });
 
@@ -161,7 +162,7 @@ const Livestream = () => {
                     <h4>{timer} seconds</h4>
                 </div>
                 <div className="current-turn">
-                    <h4>{users[currentTurn]?.username || "CPU"}</h4> {/* TODO teste ob aktueller Spieler korrekt anzeigt*/}
+                    <h4>{currentTurn.username || "CPU"}</h4> {/* TODO teste ob aktueller Spieler korrekt anzeigt*/}
                 </div>
             </div>
             <div className="life-points">

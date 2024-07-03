@@ -63,14 +63,12 @@ public class GameService {
             if(game!=null) {
                 if (game.getPlayerStateBot() == null) {
                     UserAccount currentTurnPlayer = game.getCurrentTurn();
-                    currentTurnPlayer.getPlayerState().setLifePoints(-1);
                     UserAccount otherPlayer = game.getUsers().get(0).equals(currentTurnPlayer) ? game.getUsers().get(1) : game.getUsers().get(0);
                     currentTurnPlayer.getPlayerState().setLifePoints(-1);
                     otherPlayer.getPlayerState().setWinner(true);
                     terminateMatch(game.getId(), currentTurnPlayer.getId(), otherPlayer.getId());
                 }else{
                     UserAccount currentTurnPlayer = game.getCurrentTurn();
-                    currentTurnPlayer.getPlayerState().setLifePoints(-1);
                     PlayerState botPS = game.getPlayerStateBot();
                     currentTurnPlayer.getPlayerState().setLifePoints(-1);
                     botPS.setWinner(true);
@@ -128,7 +126,14 @@ public class GameService {
         newGame.setCurrentTurn(userA);
         gameRepository.save(newGame);
 
-        List<UserAccount> users = newGame.getUsers();
+        List<Long> userIds = gameRepository.findAllUsersByGameId(newGame.getId());
+        List<UserAccount> users = new ArrayList<>();
+        for (Long userId : userIds) {
+            users.add(userAccountRepository.findById(userId).get());
+        }
+        System.out.println(" DeckSelection ------------------------- currentTurn: " + newGame.getCurrentTurn().getUsername() + "; erster Spieler: " + users.get(0).getUsername() + "; zweiter Spieler: " + users.get(1).getUsername());
+
+
 
 
         for(UserAccount user : newGame.getUsers()) {
@@ -905,7 +910,7 @@ public class GameService {
 
         if(game.getPlayerStateBot() == null) {
             System.out.println("Problem2");
-            UserAccount user2 = optionalUserA.get();
+            UserAccount user2 = optionalUserB.get();
             UserAccount user1 = optionalUserA.get();
             normalsA = user1.getPlayerState().getCardsPlayed().stream().filter((x) -> x.getRarity() == Rarity.NORMAL).toList();
             raresA = user1.getPlayerState().getCardsPlayed().stream().filter((x) -> x.getRarity() == Rarity.RARE).toList();
