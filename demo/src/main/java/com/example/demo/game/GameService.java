@@ -114,9 +114,12 @@ public class GameService {
 
         List<UserAccount> users = newGame.getUsers();
 
+
         for(UserAccount user : newGame.getUsers()) {
             messagingTemplate.convertAndSendToUser(user.getId().toString(), "/queue/create", Arrays.asList(newGame, users));
-            Notification notification = new Notification(user.getId(),0L,userAccountRepository.findById(user.getId()).get().getUsername(),"schon aktiviert");
+            /*Notification notification = new Notification(user.getId(),0L,userAccountRepository.findById(user.getId()).get().getUsername(),"schon aktiviert");
+            messagingTemplate.convertAndSendToUser(user.getId().toString(),"/queue/notifications",notification);*/
+            Notification notification = new Notification(newGame.getUsers().get(0).getId(), newGame.getUsers().get(1).getId(), newGame.getUsers().get(0).getUsername(), "schon aktiviert");
             messagingTemplate.convertAndSendToUser(user.getId().toString(),"/queue/notifications",notification);
         }
 
