@@ -1,6 +1,9 @@
 package com.example.demo.clan;
 
 
+import com.example.demo.chat.ChatRepository;
+import com.example.demo.chat.Group;
+import com.example.demo.chat.GroupRepository;
 import com.example.demo.dto.UserDTO;
 import com.example.demo.user.UserAccount;
 import com.example.demo.user.UserAccountRepository;
@@ -21,6 +24,8 @@ import java.util.Optional;
 public class ClanService {
     private final ClanRepository clanRepository;
     private final UserAccountRepository userAccountRepository;
+    private final ChatRepository chatRepository;
+    private final GroupRepository groupRepository;
 
     public ResponseEntity<Object> createClan(String clanName) {
         Optional<Clan> clanCheck = clanRepository.findByName(clanName);
@@ -30,6 +35,7 @@ public class ClanService {
         Clan clan = new Clan();
         clan.setName(clanName);
         clan.getGroup().setName(clanName);
+        groupRepository.save(clan.getGroup());
         clanRepository.save(clan);
         return ResponseEntity.ok(clan.getId());
     }
@@ -78,6 +84,17 @@ public class ClanService {
         Clan clan = clanRepository.findById(clanId).get();
         clan.getUsers().add(user);
         clan.getGroup().getUsers().add(user);
+        Group group = groupRepository.findById(clan.getGroup().getId()).get();
+        group.getUsers().add(user);
+        for(UserAccount userx : group.getUsers())
+            System.out.println(userx.getId()+"  ---hier");
+
+        groupRepository.save(group);
+
+        Group groupcheck = groupRepository.findById(clan.getGroup().getId()).get();
+        for(UserAccount userx : groupcheck.getUsers())
+            System.out.println(userx.getId()+"  ---hier2");
+
         clanRepository.save(clan);
         user.setClan(clan);
         userAccountRepository.save(user);
