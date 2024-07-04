@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -74,10 +75,13 @@ public class TurnierService {
     }
 
     public boolean turnierIsReady(Long turnierId){
-        Turnier turnier = turnierRepository.findById(turnierId).get();
-        Clan clan = clanRepository.findById(turnier.getClan().getId()).get();
+        Optional<Turnier> turnierCheck = turnierRepository.findById(turnierId);
+        if(turnierCheck.isPresent()) {
+            Turnier turnier = turnierCheck.get();
 
-        if(turnier.getAkzeptierteUsers().size() == clan.getUsers().size()){
+            Clan clan = clanRepository.findById(turnier.getClan().getId()).get();
+
+            if(turnier.getAkzeptierteUsers().size() == clan.getUsers().size()){
                 System.out.println("Turnier is ready");
                 Runde runde = new Runde();
                 runde.setRundeName("Runde 1");
@@ -93,8 +97,11 @@ public class TurnierService {
                     messagingTemplate.convertAndSendToUser(userInClan.getId().toString(), "/queue/notifications", notification);
                 }
                 return true;
+            }
+            return false;
         }
-        return false;
+        else
+            return false;
     }
 
     public ResponseEntity<List<Match>> getTurnierMatches(Long clanId) {
