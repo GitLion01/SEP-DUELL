@@ -34,7 +34,6 @@ public class TurnierService {
         if(clan.getUsers().size()<2)
             return;
         if(clan.getTurnier() == null) {
-            System.out.println("drin");
             Turnier turnier = new Turnier();
             clan.setTurnier(turnier);
             turnier.setClan(clan);
@@ -197,4 +196,14 @@ public class TurnierService {
         turnierRepository.delete(turnier);
     }
 
+    public boolean checkAccepted(Long turnierId, Long userId) {
+        Turnier turnier = turnierRepository.findById(turnierId).get();
+        UserAccount userAccount = userAccountRepository.findById(userId).get();
+        return turnier.getAkzeptierteUsers().contains(userAccount);
+    }
+
+    public Long getTurnierId(Long clanId) {
+        Clan clan = clanRepository.findById(clanId).get();
+        return clan.getTurnier().getId();
+    }
 }
