@@ -197,4 +197,9 @@ public class TurnierService {
         turnierRepository.delete(turnier);
     }
 
+    public boolean checkAccepted(Long turnierId, Long userId) {
+        Turnier turnier = turnierRepository.findById(turnierId).get();
+        UserAccount userAccount = userAccountRepository.findById(userId).get();
+        return turnier.getAkzeptierteUsers().contains(userAccount);
+    }
 }

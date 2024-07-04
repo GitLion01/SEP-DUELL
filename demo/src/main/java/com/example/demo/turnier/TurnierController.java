@@ -50,4 +50,9 @@ public class TurnierController {
     public void gewinnerSpeichern(@RequestParam Long userId) {
         turnierService.GewinnerSpeichernMitId(userId);
     }
+
+    @GetMapping("/checkAccepted")
+    public boolean checkAccepted(@RequestParam Long turnierId,@RequestParam Long userId) {
+        return turnierService.checkAccepted(turnierId,userId);
+    }
 }
