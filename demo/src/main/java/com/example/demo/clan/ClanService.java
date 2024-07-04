@@ -12,7 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +23,6 @@ import java.util.Optional;
 public class ClanService {
     private final ClanRepository clanRepository;
     private final UserAccountRepository userAccountRepository;
-    private final ChatRepository chatRepository;
     private final GroupRepository groupRepository;
 
     public ResponseEntity<Object> createClan(String clanName) {
@@ -84,16 +82,10 @@ public class ClanService {
         Clan clan = clanRepository.findById(clanId).get();
         clan.getUsers().add(user);
         clan.getGroup().getUsers().add(user);
+
         Group group = groupRepository.findById(clan.getGroup().getId()).get();
         group.getUsers().add(user);
-        for(UserAccount userx : group.getUsers())
-            System.out.println(userx.getId()+"  ---hier");
-
         groupRepository.save(group);
-
-        Group groupcheck = groupRepository.findById(clan.getGroup().getId()).get();
-        for(UserAccount userx : groupcheck.getUsers())
-            System.out.println(userx.getId()+"  ---hier2");
 
         clanRepository.save(clan);
         user.setClan(clan);
