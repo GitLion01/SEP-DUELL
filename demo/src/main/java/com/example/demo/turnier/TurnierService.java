@@ -30,9 +30,10 @@ public class TurnierService {
 
     public void turnierStart(Long clanId) {
         Clan clan = clanRepository.findById(clanId).get();
-        if(clan.getUsers().size()<2)
-            return;
+        //if(clan.getUsers().size()<2)
+           // return;
         if(clan.getTurnier() == null) {
+            System.out.println("drin");
             Turnier turnier = new Turnier();
             clan.setTurnier(turnier);
             turnier.setClan(clan);
@@ -57,6 +58,19 @@ public class TurnierService {
         }
         turnier.getAkzeptierteUsers().add(user);
         turnierIsReady(turnier.getId());
+    }
+
+    public void turnierAblehnen(Long userId) {
+        UserAccount user = userAccountRepository.findById(userId).get();
+        Turnier turnier = user.getClan().getTurnier();
+        user.getClan().setTurnier(null);
+        clanRepository.save(user.getClan());
+        turnierRepository.delete(turnier);
+
+        for(UserAccount userx : user.getClan().getUsers()) {
+            Notification notification = new Notification("turnierDeleted");
+            messagingTemplate.convertAndSendToUser(userx.getId().toString(),"/queue/notifications", notification);
+        }
     }
 
     public boolean turnierIsReady(Long turnierId){

@@ -49,7 +49,8 @@ public class ProfileController {
                     profile.getRole(),
                     profile.getLocked(),
                     profile.getEnabled(),
-                    decks
+                    decks,
+                    profile.getClan().getName()
             );
             return ResponseEntity.ok(profileResponse);
         } else {
