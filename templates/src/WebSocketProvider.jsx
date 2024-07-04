@@ -46,10 +46,13 @@ export const WebSocketProvider = ({ children }) => {
                             setNotifications(prev => prev.filter(n => !(n.senderId === notification.senderId && n.message === 'challenge')));
                             window.dispatchEvent(new CustomEvent('challengeRejected')); 
                         }
-                        if(notification.message === 'schon aktiviert')
+                         else if(notification.message === 'schon aktiviert')
                         {
                             setActiveDuel(false);
                             console.log(notification.message);
+                        }
+                        else if(notification.message === 'turnier'){ 
+                            setNotifications(prev => [...prev, { ...notification}]);
                         }
                     });
 
@@ -218,9 +221,47 @@ export const WebSocketProvider = ({ children }) => {
         setNotifications(notifications.filter(n => n.senderId !== challengerId));
     };
 
+    const startTournament = (clanId) => {
+        if (client && client.connected) {
+            client.publish({
+                destination: '/app/turnierStart',
+                body: JSON.stringify(clanId),
+            });
+            toast.success("Turnier gestartet");
+        } else {
+            toast.error("WebSocket-Verbindung ist nicht aktiv.");
+        }
+    };
+
+    const acceptTournament = (userId) => {
+        if (client && client.connected) {
+            client.publish({
+                destination: '/app/turnierAkzeptieren',
+                body:JSON.stringfy(userId), 
+            })
+            toast.success("Turnier akzeptiert") 
+        }
+        else { 
+            toast.error("WebSocket-Verbindung ist nicht aktiv.")
+        }
+    }
+
+    const rejectTournament = (userId) => {
+        if (client && client.connected) {
+            client.publish({
+                destination: '/app/turnierAblehnen',
+                body: JSON.stringify(userId),
+                }); 
+                toast.success("Turnier abgelehnt");
+                }
+                else { 
+                    toast.error("WebSocket-Verbindung ist nicht aktiv.")
+                }
+    }
+
     return (
         <WebSocketContext.Provider value={{ client, chatClient, notifications, handleAcceptChallenge, handleRejectChallenge, handleTimeoutChallenge,
-            activeDuel, createGame, game, setGame, users, setUsers, connected
+            activeDuel, createGame, game, setGame, users, setUsers, connected, startTournament, acceptTournament, rejectTournament
          }}>
             {children}
         </WebSocketContext.Provider>

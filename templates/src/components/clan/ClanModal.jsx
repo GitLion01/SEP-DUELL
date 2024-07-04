@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import './ClanModal.css'; // Optional: CSS for styling
 import { ToastContainer, toast } from 'react-toastify';
+import { WebSocketContext } from '../../WebSocketProvider';
 
 const ClanModal = ({ clan, onClose, userId, userClanId, joinClan, leaveClan }) => {
     const [clanMembers, setClanMembers] = useState([]);
+    const { startTournament } = useContext(WebSocketContext);
     
     const fetchClanMembers = async () => {
         try {
@@ -33,6 +35,10 @@ const ClanModal = ({ clan, onClose, userId, userClanId, joinClan, leaveClan }) =
         fetchClanMembers();
         onClose();
     };
+    
+    const handleTournamentStart = () => {
+        startTournament(clan.id);
+    };
 
     return (
         <div className="clan-modal-content">
@@ -51,9 +57,14 @@ const ClanModal = ({ clan, onClose, userId, userClanId, joinClan, leaveClan }) =
                 </button>
             )}
             {userClanId === clan.id && (
-                <button onClick={handleLeaveClan}>
-                    Clan verlassen
-                </button>
+                <>
+                    <button onClick={handleTournamentStart}>
+                        Turnier starten
+                    </button>
+                    <button onClick={handleLeaveClan}>
+                        Clan verlassen
+                    </button>
+                </>
             )}
         </div>
     );
