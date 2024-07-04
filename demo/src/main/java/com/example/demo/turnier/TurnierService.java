@@ -98,10 +98,8 @@ public class TurnierService {
                 }
                 return true;
             }
-            return false;
         }
-        else
-            return false;
+        return false;
     }
 
     public ResponseEntity<List<Match>> getTurnierMatches(Long clanId) {
