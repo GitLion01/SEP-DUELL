@@ -55,4 +55,9 @@ public class TurnierController {
     public boolean checkAccepted(@RequestParam Long turnierId,@RequestParam Long userId) {
         return turnierService.checkAccepted(turnierId,userId);
     }
+
+    @GetMapping("/getTurnierId")
+    public Long getTurnierId(@RequestParam Long clanId) {
+        return turnierService.getTurnierId(clanId);
+    }
 }
