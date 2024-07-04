@@ -100,7 +100,10 @@ public class UserAccount implements UserDetails {
 
     @ManyToOne
     @JoinColumn(name = "user_clan")
+    @JsonIgnore
     private Clan clan;
+
+    private boolean isInTurnier=false;
 
     public UserAccount(byte[] image,
                        String firstName,

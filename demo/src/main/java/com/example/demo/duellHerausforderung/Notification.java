@@ -14,4 +14,8 @@ public class Notification {
     private Long receiverId;
     private String senderName;
     private String message;
+
+    public Notification(String message) {
+        this.message = message;
+    }
 }

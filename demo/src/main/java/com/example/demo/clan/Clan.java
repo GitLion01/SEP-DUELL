@@ -1,7 +1,9 @@
 package com.example.demo.clan;
 
+import com.example.demo.turnier.Turnier;
 import com.example.demo.chat.Group;
 import com.example.demo.user.UserAccount;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -23,10 +25,15 @@ public class Clan {
     private Long id;
     private String name;
 
-    @OneToMany(fetch = FetchType.EAGER)
+    @OneToMany
     @JoinColumn(name= "clan_id")
+    @JsonIgnore
     private List<UserAccount> users =new ArrayList<>();
 
     @OneToOne(cascade = CascadeType.ALL)
     private Group group = new Group(name);
+
+    @OneToOne
+    @JsonIgnore
+    private Turnier turnier;
 }
