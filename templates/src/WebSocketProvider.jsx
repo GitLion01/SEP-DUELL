@@ -52,7 +52,16 @@ export const WebSocketProvider = ({ children }) => {
                             console.log(notification.message);
                         }
                         else if(notification.message === 'turnier'){ 
+                            console.log(notification); 
                             setNotifications(prev => [...prev, { ...notification}]);
+                        }
+                        else if (notification.message === 'turnierDeleted') {
+                            toast.info('Das Turnier wurde abgebrochen.');
+                            setNotifications(prev => prev.filter(n => n.message !== 'turnier'));
+                        }
+                        else if (notification.message === 'turnierReady') {
+                            toast.info('Das Turnier ist beginnt jetzt');
+                            navigate('/turnier');  // Weiterleiten zur Turnier-Seite
                         }
                     });
 
@@ -237,7 +246,7 @@ export const WebSocketProvider = ({ children }) => {
         if (client && client.connected) {
             client.publish({
                 destination: '/app/turnierAkzeptieren',
-                body:JSON.stringfy(userId), 
+                body:JSON.stringify(userId), 
             })
             toast.success("Turnier akzeptiert") 
         }

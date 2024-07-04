@@ -97,6 +97,9 @@ const Startseite = () => {
             <section> 
               <a href="/clan"><h2>CLANS</h2></a>
             </section>
+            <section> 
+              <a href="/turnier"><h2>CLANS</h2></a>
+            </section>
           </div>
         </main>
       </div>

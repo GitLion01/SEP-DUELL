@@ -22,6 +22,8 @@ import DuelC from "./components/DuelC/DuelC";
 import {WebSocketProvider} from "./WebSocketProvider";
 import GlobalNotification from './components/LeaderboardPage/GlobalNotification.jsx';
 import Clan from "./components/clan/ClanList.jsx"; 
+import TournamentPage from './components/Turnier/TournamentPage.jsx';
+import GlobalTournamentNotification from './components/Turnier/GlobalTournamentNotification.jsx';
 
 
 function App() {
@@ -29,6 +31,7 @@ function App() {
       <Router>
         <WebSocketProvider>
           <GlobalNotification/>
+          <GlobalTournamentNotification/>
           <AppRoutes />
         </WebSocketProvider>
       </Router>
@@ -69,6 +72,7 @@ function AppRoutes() {
         <Route path="/deck-selection" element={<ProtectedRoute element={DeckSelection} />} />
         <Route path="/duel" element={<ProtectedRoute element={Duel} />} />
         <Route path="/clan" element={<ProtectedRoute element={Clan} />} /> 
+        <Route path="/turnier" element={<ProtectedRoute element={TournamentPage}/>} />
       </Routes>
   );
 }

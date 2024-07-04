@@ -4,7 +4,7 @@ import TournamentNotification from './TournamentNotification';
 import '../LeaderboardPage/GlobalNotification.css';
 
 const GlobalTournamentNotification = () => {
-    const { notifications, handleAcceptTournament, handleRejectTournament } = useContext(WebSocketContext);
+    const { notifications, acceptTournament, rejectTournament } = useContext(WebSocketContext);
     const userId = localStorage.getItem('id')
 
     return (
@@ -14,8 +14,8 @@ const GlobalTournamentNotification = () => {
                 .map((notification, index) => (
                     <TournamentNotification
                         key={index}
-                        onAccept={() => handleAcceptTournament(userId)}
-                        onReject={() => handleRejectTournament(userId)}
+                        onAccept={() => acceptTournament(userId)}
+                        onReject={() => rejectTournament(userId)}
                     />
                 ))}
         </div>
