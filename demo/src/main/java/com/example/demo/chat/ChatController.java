@@ -40,7 +40,7 @@ public class ChatController {
     }
 
 
-    @GetMapping("getClanChat")
+    @GetMapping("/getClanChat")
     public ResponseEntity<GroupDTO> getClanChat(@RequestParam Long userId){
         return chatService.getClanChat(userId);
     }
