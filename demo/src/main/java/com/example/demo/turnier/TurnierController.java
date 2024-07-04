@@ -26,6 +26,11 @@ public class TurnierController {
         turnierService.turnierAkzeptieren(userId);
     }
 
+    @MessageMapping("/turnierAblehnen")
+    public void turnierAblehnen(@Payload Long userId) {
+        turnierService.turnierAblehnen(userId);
+    }
+
     @GetMapping("/getTurnier")
     public ResponseEntity<List<Match>> getTurnierMatches(@RequestParam Long clanId) {
         return turnierService.getTurnierMatches(clanId);

@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -33,6 +34,7 @@ public class TurnierService {
         if(clan.getUsers().size()<2)
             return;
         if(clan.getTurnier() == null) {
+            System.out.println("drin");
             Turnier turnier = new Turnier();
             clan.setTurnier(turnier);
             turnier.setClan(clan);
@@ -59,11 +61,27 @@ public class TurnierService {
         turnierIsReady(turnier.getId());
     }
 
-    public boolean turnierIsReady(Long turnierId){
-        Turnier turnier = turnierRepository.findById(turnierId).get();
-        Clan clan = clanRepository.findById(turnier.getClan().getId()).get();
+    public void turnierAblehnen(Long userId) {
+        UserAccount user = userAccountRepository.findById(userId).get();
+        Turnier turnier = user.getClan().getTurnier();
+        user.getClan().setTurnier(null);
+        clanRepository.save(user.getClan());
+        turnierRepository.delete(turnier);
 
-        if(turnier.getAkzeptierteUsers().size() == clan.getUsers().size()){
+        for(UserAccount userx : user.getClan().getUsers()) {
+            Notification notification = new Notification("turnierDeleted");
+            messagingTemplate.convertAndSendToUser(userx.getId().toString(),"/queue/notifications", notification);
+        }
+    }
+
+    public boolean turnierIsReady(Long turnierId){
+        Optional<Turnier> turnierCheck = turnierRepository.findById(turnierId);
+        if(turnierCheck.isPresent()) {
+            Turnier turnier = turnierCheck.get();
+
+            Clan clan = clanRepository.findById(turnier.getClan().getId()).get();
+
+            if(turnier.getAkzeptierteUsers().size() == clan.getUsers().size()){
                 System.out.println("Turnier is ready");
                 Runde runde = new Runde();
                 runde.setRundeName("Runde 1");
@@ -79,6 +97,7 @@ public class TurnierService {
                     messagingTemplate.convertAndSendToUser(userInClan.getId().toString(), "/queue/notifications", notification);
                 }
                 return true;
+            }
         }
         return false;
     }
