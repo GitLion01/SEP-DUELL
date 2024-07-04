@@ -30,8 +30,8 @@ public class TurnierService {
 
     public void turnierStart(Long clanId) {
         Clan clan = clanRepository.findById(clanId).get();
-        //if(clan.getUsers().size()<2)
-           // return;
+        if(clan.getUsers().size()<2)
+            return;
         if(clan.getTurnier() == null) {
             System.out.println("drin");
             Turnier turnier = new Turnier();
