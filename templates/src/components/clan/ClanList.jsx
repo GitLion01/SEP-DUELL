@@ -65,14 +65,7 @@ function Clan() {
 
             if (response.ok) {
                 toast.success('Clan erfolgreich erstellt');
-                setNewClanName('');
-                await fetchClans();  // Aktualisiere die Liste der Clans nach erfolgreicher Erstellung
-
-                // Suche den erstellten Clan in der aktualisierten Liste
-                const createdClan = clans.find(clan => clan.name.toLowerCase() === newClanName.toLowerCase());
-                if (createdClan) {
-                    await joinClan(createdClan.id, userId); // Automatisches Beitreten zum erstellten Clan
-                }
+                await fetchClans(); 
             } else if (response.status === 409) { // Konflikt-Statuscode
                 const errorMessage = await response.text();
                 toast.error(errorMessage);

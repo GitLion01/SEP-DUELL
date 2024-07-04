@@ -20,7 +20,7 @@ function Profile() {
   const [role, setRole] =useState('');
   const [error, setError] = useState(null);
   const [userdata, setUserdata] = useState('');
-  
+  const [clanName, setClanName] = useState(''); 
   // Funktion, um ein Bild von einer URL zu laden und als File zurückzugeben
   const urlToFile = async (url, filename, mimeType) => {
     const response = await fetch(url);
@@ -63,6 +63,7 @@ function Profile() {
         setVorname(userData.firstName);
         setNachname(userData.lastName);
         setEmail(userData.email);
+        setClanName(userData.clanName); 
         const date = new Date(userData.dateOfBirth);
         const formattedDate = `${date.getDate().toString().padStart(2, '0')}.${(date.getMonth() + 1).toString().padStart(2, '0')}.${date.getFullYear()}`;
         setDateOfBirth(formattedDate);
@@ -156,6 +157,7 @@ function Profile() {
           <p><strong>Vorname:</strong> {vorname}</p>
           <p><strong>Nachname:</strong> {nachname}</p>
           <p><strong>Email:</strong> {email}</p>
+          <p><strong>Clan-Name:</strong> {clanName}</p>
           {/*<p><strong>Passwort:</strong> {password} </p>*/}
           <p><strong>Geburtsdatum:</strong> {geburtsdatum}</p>
           {role !== 'ADMIN' && <p><strong>SEP Coins:</strong> {sepCoins}</p>}

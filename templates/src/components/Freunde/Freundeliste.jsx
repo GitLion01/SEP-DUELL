@@ -51,7 +51,7 @@ function App() {
             try {
                 const [friendsResponse, usersResponse] = await Promise.all([fetchFriends(), fetchUsers()]);
                 setFriends(friendsResponse); // Setzt die Freundesliste
-
+                console.log(friends)
                 // Filtert die Nutzerliste, um Nutzer auszuschließen, die bereits Freunde sind oder der aktuelle Nutzer selbst sind
                 const filteredUsers = usersResponse.filter(
                     user => user.id.toString() !== userId.toString() &&
@@ -233,6 +233,7 @@ function App() {
                             <p><strong>Vorname:</strong> {selectedFriend.firstName}</p>
                             <p><strong>Nachname:</strong> {selectedFriend.lastName}</p>
                             <p><strong>Leaderboard-Punkte:</strong> {selectedFriend.leaderboardPoints}</p>
+                            <p><strong>Clan-Name:</strong> {selectedFriend.clanName}</p>
                         </div>
                         <div className="friends-of-friend">
                             <h4>Freunde von {selectedFriend.username}</h4>

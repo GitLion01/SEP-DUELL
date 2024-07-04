@@ -10,7 +10,7 @@ function ChatPage() {
   const [creatingGroup, setCreatingGroup] = useState(false);
   const [chatId, setChatId] = useState(null);
   const [groups, setGroups] = useState([]); // Zustand für Gruppen
-  const [clanChat, setClanChat] = useState ([]); 
+  const [clanChat, setClanChat] = useState (null); 
   const userId = localStorage.getItem('id');
 
   const fetchGroups = useCallback(async () => {
@@ -21,21 +21,21 @@ function ChatPage() {
   }, [userId]);
 
   const fetchClanChat = useCallback (async () => {
-    const url = `http://localhost:8080/get.groups?userId=${userId}`
+    const url = `http://localhost:8080/getClanChat?userId=${userId}`
     const response = await fetch (url); 
     if (!response.ok) throw new Error('Konnte keine Clan Chat laden')
       return await response.json(); 
   }, [userId]); 
 
   useEffect(() => {
-   /* const loadGroups = async () => {
+   const loadGroups = async () => {
       try {
         const groups = await fetchGroups();
         setGroups(groups); // Gruppen in den Zustand schreiben
       } catch (error) {
         console.log(error.message);
       }
-    }; */
+    }; 
 
     const loadClanChat = async () => {
       try {
@@ -47,7 +47,7 @@ function ChatPage() {
       }
     };
 
-   // loadGroups();
+    loadGroups();
     loadClanChat();
     console.log(clanChat); 
   }, [fetchGroups, fetchClanChat]);
@@ -110,7 +110,7 @@ function ChatPage() {
           onSelect={handleSelect}
           onCreateGroupClick={handleCreateGroupClick}
           groups={groups}
-          clanChat= {clanChat} // Übergabe der Gruppen als Prop
+          clanChat= {clanChat} 
         />
         {creatingGroup ? (
           <CreateGroupForm onCreateGroup={handleCreateGroup} fetchGroups={fetchGroups} />

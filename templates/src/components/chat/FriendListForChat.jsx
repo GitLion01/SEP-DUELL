@@ -51,13 +51,13 @@ function FriendListForChat({ onSelect, onCreateGroupClick, groups, clanChat }) {
       <div className="friend-list-section">
         <h2>Clan-Chat</h2>
         <ul>
-          {clanChat.map(group => (
-            <li key={group.id} onClick={() => onSelect(group, 'group')}>
-              {group.name}
+          {clanChat && (
+            <li key={clanChat.id} onClick={() => onSelect(clanChat, 'group')}>
+              {clanChat.name}
             </li>
-          ))}
+          )}
         </ul>
-        </div>
+      </div>
     </div>
   );
 }
