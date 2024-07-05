@@ -2,6 +2,8 @@ package com.example.demo.profile;
 
 
 import com.example.demo.decks.Deck;
+import com.example.demo.game.GameService;
+import com.example.demo.game.Statistic;
 import com.example.demo.user.UserAccount;
 import com.example.demo.user.UserAccountResponse;
 import lombok.AllArgsConstructor;
@@ -20,6 +22,7 @@ import java.util.Optional;
 public class ProfileController {
 
     private final ProfileService profileService;
+    private final GameService gameService;
 
     @GetMapping(path ="/{id}")
     public ResponseEntity<?> getProfile(@PathVariable Long id) {// Verwendung der Wildcard, da entweder UserAccountResponse oder ResponseEntity.notFound().build() zurückgegeben wird
@@ -62,5 +65,10 @@ public class ProfileController {
         String result = profileService.updateSEPCoins(sepCoins,id);
         HttpStatus status = result.startsWith("fail") ? HttpStatus.BAD_REQUEST : HttpStatus.OK;
         return new ResponseEntity<>(result, status);
+    }
+
+    @GetMapping(path = "/history/{id}")
+    public List<Statistic> getHistory(@PathVariable Long id) {
+        return profileService.getHistory(id);
     }
 }

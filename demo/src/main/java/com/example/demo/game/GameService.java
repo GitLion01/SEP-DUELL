@@ -27,6 +27,7 @@ public class GameService {
     private final PlayerStateRepository playerStateRepository;
     private final PlayerCardRepository playerCardRepository;
     private final LeaderboardService leaderboardService;
+    private final StatisticRepository statisticRepository;
 
     @Autowired
     public GameService(GameRepository gameRepository,
@@ -35,7 +36,8 @@ public class GameService {
                        SimpMessagingTemplate messagingTemplate,
                        PlayerStateRepository playerStateRepository,
                        PlayerCardRepository playerCardRepository,
-                       LeaderboardService leaderboardService)  {
+                       LeaderboardService leaderboardService,
+                       StatisticRepository statisticRepository)  {
         this.gameRepository = gameRepository;
         this.deckRepository = deckRepository;
         this.userAccountRepository = userAccountRepository;
@@ -43,6 +45,7 @@ public class GameService {
         this.playerStateRepository = playerStateRepository;
         this.playerCardRepository = playerCardRepository;
         this.leaderboardService = leaderboardService;
+        this.statisticRepository = statisticRepository;
     }
 
     //TODO: DIESEN KOMMENTAR NICHT LÖSCHEN!!!!!
@@ -935,6 +938,8 @@ public class GameService {
 
             Integer lbPoints1 = user1.getLeaderboardPoints();
             Integer lbPoints2 = user2.getLeaderboardPoints();
+
+
             if (user1.getPlayerState().getWinner()) {
                 user1.setSepCoins(user1.getSepCoins() + 100);
                 user1.setLeaderboardPoints(lbPoints1 + Math.max(50, lbPoints2 - lbPoints1));
@@ -957,6 +962,17 @@ public class GameService {
             playerStateRepository.save(user2.getPlayerState());
             userAccountRepository.save(user1);
             userAccountRepository.save(user2);
+
+
+            Statistic statistic = new Statistic();
+            statistic.setUser1(user1.getUsername());
+            statistic.setUser2(user2.getUsername());
+            statistic.setLPWinner(leaderBoardPointsWinner);
+            statistic.setLPLoser(leaderBoardPointsLoser);
+            statistic.setWinner(user1.getPlayerState().getWinner() ? user1.getUsername() : user2.getUsername());
+            statisticRepository.save(statistic);
+
+
         }else{
             System.out.println("Problem 3");
             PlayerState botPS = optionalBotPS.get();
@@ -999,6 +1015,14 @@ public class GameService {
             playerStateRepository.save(user1.getPlayerState());
             playerStateRepository.save(botPS);
             userAccountRepository.save(user1);
+
+            Statistic statistic = new Statistic();
+            statistic.setUser1(user1.getUsername());
+            statistic.setUser2("Bot");
+            statistic.setLPWinner(leaderBoardPointsWinner);
+            statistic.setLPLoser(leaderBoardPointsLoser);
+            statistic.setWinner(user1.getPlayerState().getWinner() ? user1.getUsername() : "Bot");
+            statisticRepository.save(statistic);
         }
 
         gameRepository.save(game);
@@ -1049,6 +1073,7 @@ public class GameService {
         }else{
             userIds.addAll(List.of(users.get(0).getId(), optionalBotPS.get().getId()));
         }
+
         deleteUserGameData(userIds, game.getId());
 
         Map<Long, List<String>> streamedGames = new HashMap<>();
