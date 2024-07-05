@@ -44,6 +44,7 @@ const  DeckSelection = () => {
     if (client && connected) {
       const subscription = client.subscribe(`/user/${id}/queue/selectDeck`, (message) => {
         const response = JSON.parse(message.body);
+        console.log("users after deckSelect: ", response[1]);
         /*
           const user1 = users[0].deck = response[0];
           const user2 = users[1].deck = response[1];

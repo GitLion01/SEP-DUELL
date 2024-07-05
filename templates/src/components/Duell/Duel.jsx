@@ -91,8 +91,11 @@ const Duel = () => {
         console.log("Response: ", response);
 
         // Speichern des Spiels und der Benutzer im Webspeicher
+        /*
         sessionStorage.setItem('game', JSON.stringify(response[0]));
         sessionStorage.setItem('users', JSON.stringify(response[1]));
+
+         */
 
         if (response.length === 2) {
           const currentUser = response[1].find(user => user.id === parseInt(id));
@@ -108,6 +111,7 @@ const Duel = () => {
             setOpponentState(opponentUser.playerState);
           }
           setCurrentTurn(response[0].currentTurn);
+
           console.log("Mein feld nach Angriff: ", currentUser.playerState.fieldCards);
           console.log("Gegner feld nach Angriff: ", opponentUser.playerState.fieldCards);
         }
@@ -150,7 +154,7 @@ const Duel = () => {
 
     console.log("Karten im Deck: ", playerState.deckClone.length);
 
-    if (users[currentTurn].id !== parseInt(id)) {
+    if (currentTurn.id !== parseInt(id)) {
       toast.warning("Du bist nicht am Zug");
       resetAttackMode();
       return;
@@ -185,7 +189,7 @@ const Duel = () => {
 
   const handleAttack = () => {
 
-    if (users[currentTurn].id !== parseInt(id)) {
+    if (currentTurn.id !== parseInt(id)) {
       toast.warning("Du bist nicht am Zug");
       resetAttackMode();
       return;
@@ -253,7 +257,7 @@ const Duel = () => {
 
   const handleSetCard = (Id) => {
 
-    if (users[currentTurn].id !== parseInt(id)) {
+    if (currentTurn.id !== parseInt(id)) {
       toast.warning("Du bist nicht am Zug");
       resetAttackMode();
       return;
@@ -295,7 +299,7 @@ const Duel = () => {
   const handleDrawCard = () => {
 
     // Ist Spieler am Zug?
-    if (users[currentTurn].id !== parseInt(id)) {
+    if (currentTurn.id !== parseInt(id)) {
       toast.warning("Du bist nicht am Zug");
       resetAttackMode();
       return;
@@ -326,7 +330,7 @@ const Duel = () => {
 
   const handleRareSwap = () => {
 
-    if (users[currentTurn].id !== parseInt(id)) {
+    if (currentTurn.id !== parseInt(id)) {
       toast.warning("Du bist nicht am Zug");
       resetAttackMode();
       return;
@@ -365,7 +369,7 @@ const Duel = () => {
   };
 
   const handleLegendarySwap = () => {
-    if (users[currentTurn].id !== parseInt(id)) {
+    if (currentTurn.id !== parseInt(id)) {
       toast.warning("Du bist nicht am Zug");
       resetAttackMode();
       return;
@@ -429,7 +433,7 @@ const Duel = () => {
             <h4>{timer} seconds</h4>
           </div>
           <div className="current-turn">
-            <h4>{users[currentTurn]?.username}</h4>
+            <h4>{currentTurn?.username}</h4>
           </div>
         </div>
         <div className="life-points">

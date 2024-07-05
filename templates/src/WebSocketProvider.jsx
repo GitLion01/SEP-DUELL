@@ -55,6 +55,7 @@ export const WebSocketProvider = ({ children }) => {
                     });
 
                     // Subscribe für globale Herausforderung
+                    /*
                     newClient.subscribe(`/user/${userId}/queue/create`, (message) => {
                         const response = JSON.parse(message.body);
                         console.log("Received response:", response);
@@ -64,6 +65,8 @@ export const WebSocketProvider = ({ children }) => {
                             window.dispatchEvent(new CustomEvent('gameCreated', { detail: response.gameId }));
                         }
                     });
+
+                     */
                 }
                 setConnected(true);
 
