@@ -25,6 +25,7 @@ import LiveTabelle from "./components/Livestream/LiveTabelle";
 import Livestream from "./components/Livestream/Livestream";
 import BotDeckSelect from "./components/Duell/BotDeckSelect";
 import BotDuel from "./components/Duell/BotDuel";
+import DuellHistorie from "./components/Profilansicht/DuellHistorie";
 
 
 function App() {
@@ -75,6 +76,7 @@ function AppRoutes() {
         <Route path="liveduel" element={<ProtectedRoute element={Livestream} /> } />
         <Route path="/botdeckselect" element={<ProtectedRoute element={BotDeckSelect} />} />
         <Route path="/botduel" element={<ProtectedRoute element={BotDuel} /> } />
+        <Route path="/duellhistorie" element={<ProtectedRoute element={DuellHistorie} /> } />
       </Routes>
   );
 }
