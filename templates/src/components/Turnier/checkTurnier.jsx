@@ -1,12 +1,27 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 
-const useCheckTurnier = () => {
+const useCheckTurnier = (clanId) => {
     const [isTurnierReady, setIsTurnierReady] = useState(false);
+    const [turnierId, setTurnierId] = useState(null);
+
+    useEffect(() => {
+        const fetchTurnierId = async () => {
+            if (clanId) {
+                try {
+                    const response = await fetch(`http://localhost:8080/getTurnierId?clanId=${clanId}`);
+                    const id = await response.json();
+                    setTurnierId(id);
+                } catch (error) {
+                    console.error('Error fetching turnierId:', error);
+                }
+            }
+        };
+
+        fetchTurnierId();
+    }, [clanId]);
 
     useEffect(() => {
         const checkTurnier = async () => {
-            const turnierId = localStorage.getItem('turnierId'); // Assuming the turnierId is stored in localStorage
             if (turnierId) {
                 try {
                     const response = await fetch(`http://localhost:8080/checkTurnier?turnierId=${turnierId}`);
@@ -19,7 +34,7 @@ const useCheckTurnier = () => {
         };
 
         checkTurnier();
-    }, []);
+    }, [turnierId]);
 
     return isTurnierReady;
 };

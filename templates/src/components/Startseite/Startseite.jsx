@@ -1,31 +1,44 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './Startseite.css';
 import { useNavigate } from 'react-router-dom';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
+import { toast, ToastContainer } from 'react-toastify';
+import useCheckTurnier from '../Turnier/checkTurnier';
 
 const Startseite = () => {
   const [loggedIn, setLoggedIn] = useState(true);
   const navigate = useNavigate();
+  const userId = localStorage.getItem('id');
+  const clanId = localStorage.getItem('clanId');
+
+  const isTurnierReady = useCheckTurnier(clanId);
+
+  useEffect(() => {
+    if (isTurnierReady && !localStorage.getItem('hasBeenRedirectedToTurnier')) {
+      toast.success('Das Turnier ist bereit, Sie werden zur Turnierseite weitergeleitet.');
+      localStorage.setItem('hasBeenRedirectedToTurnier', 'true');
+      navigate('/turnier');
+    }
+  }, [isTurnierReady, navigate]);
 
   const handleLogout = async () => {
-    const userId = localStorage.getItem('id');
     if (userId) {
-      await fetch(`http://localhost:8080/login/logout/${userId}`, { // Benutzer-ID im Pfad
+      await fetch(`http://localhost:8080/login/logout/${userId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
       });
 
-      const socket = new SockJS('http://localhost:8080/game-websocket'); // WebSocket-Verbindung erstellen
+      const socket = new SockJS('http://localhost:8080/game-websocket');
       const stompClient = new Client({
         webSocketFactory: () => socket,
         reconnectDelay: 5000,
       });
 
       stompClient.onConnect = () => {
-        const offline="offline";
+        const offline = "offline";
         stompClient.publish({
           destination: '/app/status',
           body: JSON.stringify(offline),
@@ -48,6 +61,8 @@ const Startseite = () => {
     setLoggedIn(false);
     localStorage.removeItem('id');
     localStorage.removeItem('userRole');
+    localStorage.removeItem('clanId');
+    localStorage.removeItem('hasBeenRedirectedToTurnier');
     navigate('/');
   };
 
@@ -55,7 +70,14 @@ const Startseite = () => {
     const userRole = localStorage.getItem('userRole');
     if (userRole !== 'ADMIN') {
       event.preventDefault();
-      alert('Zugriff verweigert! Nur Admins können auf das Adminsteuerfeld zugreifen.');
+      toast.error('Zugriff verweigert! Nur Admins können auf das Adminsteuerfeld zugreifen.');
+    }
+  };
+
+  const handleTurnierClick = (event) => {
+    if (!isTurnierReady) {
+      event.preventDefault();
+      toast.error('Das Turnier ist noch nicht bereit.');
     }
   };
 
@@ -64,45 +86,46 @@ const Startseite = () => {
   }
 
   return (
-      <div className="AppStart">
-        <header>
-          <h1>STARTSEITE</h1>
-          <div className="logout-button">
-            <button onClick={handleLogout}>Abmelden</button>
-          </div>
-        </header>
-        <main>  
-          <div className="centered-content">
+    <div className="AppStart">
+      <ToastContainer />
+      <header>
+        <h1>STARTSEITE</h1>
+        <div className="logout-button">
+          <button onClick={handleLogout}>Abmelden</button>
+        </div>
+      </header>
+      <main>
+        <div className="centered-content">
           <section className="Leaderboard">
-              <a href="/leaderboard"><h2>LEADERBOARD<br />(Spiel starten)</h2></a>
-            </section>
-            <section className="meinprofile">
-              <a href="/profil"><h2>MEIN PROFIL</h2></a>
-            </section>
-            <section className="meindeck">
-              <a href="/decks"><h2>MEIN DECK</h2></a>
-            </section>
-            <section className="freundesliste">
-              <a href="/freundelist"> <h2>MEINE FREUNDESLISTE</h2></a>
-            </section>
-            <section className="adminsteuerfeld">
-              <a href="/admin" onClick={handleAdminClick}><h2>MEIN ADMINSTEUERFELD</h2></a>
-            </section>
-            <section className="shop">
-              <a href="/shop"><h2>SHOP</h2></a>
-            </section>
-            <section className="shop">
-              <a href="/chat"><h2>CHAT</h2></a>
-            </section>
-            <section> 
-              <a href="/clan"><h2>CLANS</h2></a>
-            </section>
-            <section> 
-              <a href="/turnier"><h2>CLANS</h2></a>
-            </section>
-          </div>
-        </main>
-      </div>
+            <a href="/leaderboard"><h2>LEADERBOARD<br />(Spiel starten)</h2></a>
+          </section>
+          <section className="meinprofile">
+            <a href="/profil"><h2>MEIN PROFIL</h2></a>
+          </section>
+          <section className="meindeck">
+            <a href="/decks"><h2>MEIN DECK</h2></a>
+          </section>
+          <section className="freundesliste">
+            <a href="/freundelist"> <h2>MEINE FREUNDESLISTE</h2></a>
+          </section>
+          <section className="adminsteuerfeld">
+            <a href="/admin" onClick={handleAdminClick}><h2>MEIN ADMINSTEUERFELD</h2></a>
+          </section>
+          <section className="shop">
+            <a href="/shop"><h2>SHOP</h2></a>
+          </section>
+          <section className="shop">
+            <a href="/chat"><h2>CHAT</h2></a>
+          </section>
+          <section>
+            <a href="/clan"><h2>CLANS</h2></a>
+          </section>
+          <section>
+            <a href="/turnier" onClick={handleTurnierClick}><h2>TURNIER</h2></a>
+          </section>
+        </div>
+      </main>
+    </div>
   );
 };
 

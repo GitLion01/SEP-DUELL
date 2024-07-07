@@ -12,14 +12,13 @@ export const WebSocketProvider = ({ children }) => {
     const [notifications, setNotifications] = useState([]);
     const navigate = useNavigate();
     const [activeDuel, setActiveDuel] = useState(false);
-    const userId = parseInt(localStorage.getItem('id'))
+    const userId = parseInt(localStorage.getItem('id'));
     const [game, setGame] = useState(null);
     const [users, setUsers] = useState([]);
     const [connected, setConnected] = useState(false);
 
     useEffect(() => {
-
-        const userId = parseInt(localStorage.getItem('id')); // ID des aktuellen Benutzers als Zahl
+        const userId = parseInt(localStorage.getItem('id'));
 
         const newClient = new Client({
             brokerURL: 'ws://localhost:8080/game-websocket',
@@ -28,44 +27,39 @@ export const WebSocketProvider = ({ children }) => {
             onConnect: () => {
                 console.log('Connected to WebSocket server');
 
-                // Überprüfung, ob der Client verbunden ist
                 if (newClient.connected) {  
-                    // Subscribe für Benachrichtigung
                     newClient.subscribe(`/user/${userId}/queue/notifications`, (message) => {
                         const notification = JSON.parse(message.body);
-                        console.log('Received notification:', notification); // Debugging
+                        console.log('Received notification:', notification);
 
                         if (notification.message === 'challenge') {
                             setNotifications(prev => [...prev, { ...notification, countdown: 30 }]);
                         } else if (notification.message === 'duelAccepted') {
-                            setActiveDuel(true);  // Setze activeDuel auf true
+                            setActiveDuel(true);
                             setNotifications(prev => [...prev, { ...notification }]);
                             window.dispatchEvent(new CustomEvent('duelAccepted'));
                         } else if (notification.message === 'duelRejected') {
                             toast.info('Deine Herausforderung wurde abgelehnt. Du kannst eine neue Herausforderung senden.');
                             setNotifications(prev => prev.filter(n => !(n.senderId === notification.senderId && n.message === 'challenge')));
                             window.dispatchEvent(new CustomEvent('challengeRejected')); 
-                        }
-                         else if(notification.message === 'schon aktiviert')
-                        {
+                        } else if(notification.message === 'schon aktiviert') {
                             setActiveDuel(false);
                             console.log(notification.message);
-                        }
-                        else if(notification.message === 'turnier'){ 
-                            console.log(notification); 
-                            setNotifications(prev => [...prev, { ...notification}]);
-                        }
-                        else if (notification.message === 'turnierDeleted') {
+                        } else if(notification.message === 'turnier') {
+                            console.log(notification);
+                            setNotifications(prev => [...prev, { ...notification }]);
+                        } else if (notification.message === 'turnierDeleted') {
                             toast.info('Das Turnier wurde abgebrochen.');
                             setNotifications(prev => prev.filter(n => n.message !== 'turnier'));
-                        }
-                        else if (notification.message === 'turnierReady') {
-                            toast.info('Das Turnier ist beginnt jetzt');
-                            navigate('/turnier');  // Weiterleiten zur Turnier-Seite
+                        } else if (notification.message === 'turnierReady') {
+                            toast.info('Das Turnier beginnt jetzt');
+                            if (!localStorage.getItem('hasBeenRedirectedToTurnier')) {
+                                localStorage.setItem('hasBeenRedirectedToTurnier', 'true');
+                                navigate('/turnier');
+                            }
                         }
                     });
 
-                    // Subscribe für globale Herausforderung
                     newClient.subscribe(`/user/${userId}/queue/create`, (message) => {
                         const response = JSON.parse(message.body);
                         console.log("Received response:", response);
@@ -78,7 +72,6 @@ export const WebSocketProvider = ({ children }) => {
                 }
                 setConnected(true);
 
-                // Wiederherstellung von Spiel und Benutzern aus dem Speicher
                 const storedGame = sessionStorage.getItem('game');
                 const storedUsers = sessionStorage.getItem('users');
                 if (storedGame) {
@@ -88,14 +81,12 @@ export const WebSocketProvider = ({ children }) => {
                     setUsers(JSON.parse(storedUsers));
                 }
 
-                // Subscribe für globale Herausforderung
                 newClient.subscribe(`/user/${userId}/queue/create`, (message) => {
                     const response = JSON.parse(message.body);
-                    console.log("Received response:", response)
+                    console.log("Received response:", response);
                     setGame(response[0]);
                     setUsers(response[1]);
 
-                    // Speichern des Spiels und der Benutzer im Speicher
                     sessionStorage.setItem('game', JSON.stringify(response[0]));
                     sessionStorage.setItem('users', JSON.stringify(response[1]));
 
@@ -172,7 +163,6 @@ export const WebSocketProvider = ({ children }) => {
         }
     };
 
-
     const updateStatus = (userId, status) => {
         if (client && client.connected) {
             client.publish({
@@ -186,7 +176,6 @@ export const WebSocketProvider = ({ children }) => {
             toast.error("WebSocket-Verbindung ist nicht aktiv.");
         }
     };
-
 
     const createGame = (receiverId, senderName) => {
         if (client && client.connected) {
@@ -247,30 +236,34 @@ export const WebSocketProvider = ({ children }) => {
             client.publish({
                 destination: '/app/turnierAkzeptieren',
                 body:JSON.stringify(userId), 
-            })
-            toast.success("Turnier akzeptiert") 
+            });
+            toast.success("Turnier akzeptiert");
+            setNotifications(prev => prev.filter(n => n.message !== 'turnier'));
+        } else { 
+            toast.error("WebSocket-Verbindung ist nicht aktiv.");
         }
-        else { 
-            toast.error("WebSocket-Verbindung ist nicht aktiv.")
-        }
-    }
+    };
 
     const rejectTournament = (userId) => {
         if (client && client.connected) {
             client.publish({
                 destination: '/app/turnierAblehnen',
                 body: JSON.stringify(userId),
-                }); 
-                toast.success("Turnier abgelehnt");
-                }
-                else { 
-                    toast.error("WebSocket-Verbindung ist nicht aktiv.")
-                }
-    }
+            }); 
+            toast.success("Turnier abgelehnt");
+            setNotifications(prev => prev.filter(n => n.message !== 'turnier'));
+        } else { 
+            toast.error("WebSocket-Verbindung ist nicht aktiv.");
+        }
+    };
+
+    const removeNotification = (notificationId) => {
+        setNotifications(prev => prev.filter(n => n.id !== notificationId));
+    };
 
     return (
         <WebSocketContext.Provider value={{ client, chatClient, notifications, handleAcceptChallenge, handleRejectChallenge, handleTimeoutChallenge,
-            activeDuel, createGame, game, setGame, users, setUsers, connected, startTournament, acceptTournament, rejectTournament
+            activeDuel, createGame, game, setGame, users, setUsers, connected, startTournament, acceptTournament, rejectTournament, removeNotification
          }}>
             {children}
         </WebSocketContext.Provider>
