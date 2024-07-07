@@ -121,6 +121,9 @@ public class TurnierService {
 
     public void GewinnerSpeichern(UserAccount user){
         Clan clan = clanRepository.findById(user.getClan().getId()).get();
+        if(clan.getTurnier().getRunde().get(clan.getTurnier().getRunde().size()-1).getGewinners().contains(user))
+            return;
+
         clan.getTurnier().getRunde().get(clan.getTurnier().getRunde().size()-1).getGewinners().add(user);
 
         //check if the list is complete -> make new Runde
