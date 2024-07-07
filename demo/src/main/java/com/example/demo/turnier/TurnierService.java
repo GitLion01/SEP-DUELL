@@ -121,6 +121,9 @@ public class TurnierService {
 
     public void GewinnerSpeichern(UserAccount user){
         Clan clan = clanRepository.findById(user.getClan().getId()).get();
+        if(clan.getTurnier().getRunde().get(clan.getTurnier().getRunde().size()-1).getGewinners().contains(user))
+            return;
+
         clan.getTurnier().getRunde().get(clan.getTurnier().getRunde().size()-1).getGewinners().add(user);
 
         //check if the list is complete -> make new Runde
@@ -135,6 +138,11 @@ public class TurnierService {
             }
 
             NeueRunde(user,clan.getTurnier().getRunde().get(clan.getTurnier().getRunde().size()-1).getGewinners());
+
+            for(UserAccount users : clan.getUsers()) {
+                Notification notification = new Notification("neueRunde");
+                messagingTemplate.convertAndSendToUser(users.getId().toString(),"/queue/notifications", notification);
+            }
         }
     }
 
@@ -205,5 +213,15 @@ public class TurnierService {
     public Long getTurnierId(Long clanId) {
         Clan clan = clanRepository.findById(clanId).get();
         return clan.getTurnier().getId();
+    }
+
+    public List<Long> getGewinner(Long clanId) {
+        Clan clan = clanRepository.findById(clanId).get();
+        List<UserAccount> userAccounts= clan.getTurnier().getRunde().get(clan.getTurnier().getRunde().size()-1).getGewinners();
+        List<Long> gewinnerIds = new ArrayList<>();
+        for(UserAccount userAccount : userAccounts){
+            gewinnerIds.add(userAccount.getId());
+        }
+        return gewinnerIds;
     }
 }

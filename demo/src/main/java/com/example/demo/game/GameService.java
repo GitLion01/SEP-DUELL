@@ -45,7 +45,7 @@ public class GameService {
     }
 
 
-    @Scheduled(fixedRate = 100000)
+    @Scheduled(fixedRate = 1000)
     public void updateTimers(){
         List<Game> games = gameRepository.findAll();
         for (Game game : games) {
