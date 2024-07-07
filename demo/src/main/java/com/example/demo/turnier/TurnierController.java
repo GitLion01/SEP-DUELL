@@ -46,8 +46,8 @@ public class TurnierController {
         turnierService.SetUserInTurnier(userId);
     }
 
-    @PostMapping("/gewinnerSpeichern")
-    public void gewinnerSpeichern(@RequestParam Long userId) {
+    @MessageMapping("/gewinnerSpeichern")
+    public void gewinnerSpeichern(@Payload Long userId) {
         turnierService.GewinnerSpeichernMitId(userId);
     }
 
@@ -59,5 +59,10 @@ public class TurnierController {
     @GetMapping("/getTurnierId")
     public Long getTurnierId(@RequestParam Long clanId) {
         return turnierService.getTurnierId(clanId);
+    }
+
+    @GetMapping("/getGewinner")
+    public List<Long> getGewinner(@RequestParam Long clanId) {
+        return turnierService.getGewinner(clanId);
     }
 }
