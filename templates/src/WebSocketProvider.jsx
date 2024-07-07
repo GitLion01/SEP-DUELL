@@ -57,6 +57,10 @@ export const WebSocketProvider = ({ children }) => {
                                 localStorage.setItem('hasBeenRedirectedToTurnier', 'true');
                                 navigate('/turnier');
                             }
+                            else if (notification.message === 'neueRunde') {
+                                toast.info('Es wurde eine neue Runde gestartet');
+                                window.dispatchEvent(new CustomEvent('neueRunde'));
+                            }
                         }
                     });
 
@@ -244,6 +248,17 @@ export const WebSocketProvider = ({ children }) => {
         }
     };
 
+    const sendWinner = (userId) => {
+        if (client && client.connected) {
+            client.publish({
+                destination: '/app/gewinnerSpeichern',
+                body: JSON.stringify(userId),
+            });
+        } else {
+            toast.error("WebSocket-Verbindung ist nicht aktiv.");
+        }
+    };
+
     const rejectTournament = (userId) => {
         if (client && client.connected) {
             client.publish({
@@ -263,9 +278,11 @@ export const WebSocketProvider = ({ children }) => {
 
     return (
         <WebSocketContext.Provider value={{ client, chatClient, notifications, handleAcceptChallenge, handleRejectChallenge, handleTimeoutChallenge,
-            activeDuel, createGame, game, setGame, users, setUsers, connected, startTournament, acceptTournament, rejectTournament, removeNotification
+            activeDuel, createGame, game, setGame, users, setUsers, connected, startTournament, acceptTournament, rejectTournament, removeNotification, sendWinner
          }}>
             {children}
         </WebSocketContext.Provider>
     );
 };
+
+export default WebSocketProvider;

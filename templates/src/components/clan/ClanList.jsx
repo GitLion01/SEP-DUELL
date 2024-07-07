@@ -5,6 +5,7 @@ import ClanModal from './ClanModal';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './ClanList.css'; 
+import GlobalTournamentNotification from '../Turnier/GlobalTournamentNotification'
 
 function Clan() {
     const [clans, setClans] = useState([]);
@@ -13,6 +14,7 @@ function Clan() {
     const [showModal, setShowModal] = useState(false);
     const [selectedClan, setSelectedClan] = useState(null);
     const [userClanId, setUserClanId] = useState(null);  
+    const [showNotification, setShowNotification] = useState (null); 
 
     const fetchClans = async () => {
         try {
@@ -42,6 +44,32 @@ function Clan() {
         }
     }
 
+    const checkTurnierStatus = async (clanId) => {
+        try {
+            const response = await fetch(`http://localhost:8080/checkTurnier?turnierId=${clanId}`);
+            const isTurnierReady = await response.json; 
+            if (!isTurnierReady) {
+                checkAcceptedstatus(clanId); 
+            }
+        }
+        catch (error) {
+            console.error('Fehler beim checken des Turnier Status', error);
+        }
+    }; 
+
+    const checkAcceptedstatus = async (clanId) => {
+        try {
+            const response = await fetch(`http://localhost:8080/checkAccepted?turnierId=${clanId}&userId=${userId}`);
+            const isAccepted = await response.json;
+            if (!isAccepted) {
+                setShowNotification(true); 
+            }
+        }
+        catch  (error) {
+            console.error('Fehler beim checken des Accepted Status', error);
+        }
+    }
+ 
     useEffect(() => {
         fetchClans();
         fetchClanId(); 
