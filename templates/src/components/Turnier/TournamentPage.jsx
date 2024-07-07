@@ -8,9 +8,9 @@ const TournamentPage = () => {
     const [userMatches, setUserMatches] = useState([]);
     const [otherMatches, setOtherMatches] = useState([]);
     const [clanId, setClanId] = useState(null);
+    const [winners, setWinners] = useState([]);
     const userId = parseInt(localStorage.getItem('id'));
     const { createGame, sendWinner } = useContext(WebSocketContext);
-    const [winners, setWinners] = useState ([])
 
     useEffect(() => {
         fetchClanId();
@@ -19,11 +19,10 @@ const TournamentPage = () => {
     useEffect(() => {
         if (clanId) {
             fetchTurnierMatches();
-            fetchWinners(); 
+            fetchWinners();
         }
     }, [clanId]);
 
-    
     useEffect(() => {
         const handleNeueRunde = () => {
             fetchTurnierMatches();
@@ -57,34 +56,32 @@ const TournamentPage = () => {
                 const data = await response.json();
                 console.log('Winners:', data);
                 setWinners(data);
-                } else {
-                    throw new Error('Network response was not ok');
-                    }
-        }
-        catch (error) {
+            } else {
+                throw new Error('Network response was not ok');
+            }
+        } catch (error) {
             console.error('Error fetching winners:', error);
+            toast.error('Fehler beim Abrufen der Gewinnerdaten');
         }
-
-}
+    };
 
     const sortMatches = (matches) => {
-        const userMatchesArray = []; 
-        const otherMatchesArray = []; 
+        const userMatchesArray = [];
+        const otherMatchesArray = [];
 
         matches.forEach((match) => {
             if (match.player2 === null) {
-                sendWinner(match.player1)
-            }
-           else  if (match.player1 === userId || match.player2 === userId) {
+                sendWinner(match.player1);
+            } else if (match.player1 === userId || match.player2 === userId) {
                 userMatchesArray.push(match);
             } else {
                 otherMatchesArray.push(match);
             }
         });
 
-        setUserMatches(userMatchesArray); 
+        setUserMatches(userMatchesArray);
         setOtherMatches(otherMatchesArray);
-    }
+    };
 
     const fetchClanId = async () => {
         try {
@@ -133,19 +130,19 @@ const TournamentPage = () => {
     return (
         <div className="container">
             <BackButton />
-            <h1>Turnier Seite</h1>
+            <h1 className="tournament-title">Turnier Seite</h1>
             {userMatches.length === 0 && otherMatches.length === 0 ? (
-                <p>Keine Matches vorhanden.</p>
+                <p className="no-matches">Keine Matches vorhanden.</p>
             ) : (
-                <div>
-                    <h2>Meine Matches</h2>
-                    <ul>
+                <div className="matches-container">
+                    <h2 className="section-title">Meine Matches</h2>
+                    <ul className="matches-list">
                         {userMatches.map((match, index) => (
                             <li key={index} className="match">
-                                <span>{match.userName1}</span>
-                                <span> vs </span>
-                                <span>{match.userName2 || "Freilos"}</span> {/* Anzeigen "Freilos" wenn kein Gegner vorhanden */}
-                                {match.player2 !== null && canStartGame(match.player1, match.player2)(
+                                <span className="player-name">{match.userName1}</span>
+                                <span className="vs"> vs </span>
+                                <span className="player-name">{match.userName2 || "Freilos"}</span> {/* Anzeigen "Freilos" wenn kein Gegner vorhanden */}
+                                {match.player2 !== null && canStartGame(match.player1, match.player2) && (
                                     <button
                                         className="start-game-button"
                                         onClick={() => handleGameCreation(
@@ -159,13 +156,13 @@ const TournamentPage = () => {
                             </li>
                         ))}
                     </ul>
-                    <h2>Andere Matches</h2>
-                    <ul>
+                    <h2 className="section-title">Andere Matches</h2>
+                    <ul className="matches-list">
                         {otherMatches.map((match, index) => (
                             <li key={index} className="match">
-                                <span>{match.userName1}</span>
-                                <span> vs </span>
-                                <span>{match.userName2 || "Freilos"}</span>
+                                <span className="player-name">{match.userName1}</span>
+                                <span className="vs"> vs </span>
+                                <span className="player-name">{match.userName2 || "Freilos"}</span>
                             </li>
                         ))}
                     </ul>
