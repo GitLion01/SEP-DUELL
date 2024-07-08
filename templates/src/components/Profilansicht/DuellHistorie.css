@@ -1,0 +1,43 @@
+/* DuellHistorie.css */
+
+.duellhistorie-container {
+    padding: 20px;
+    max-height: 80vh; /* Maximale Höhe festlegen */
+    overflow-y: auto; /* Vertikales Scrollen ermöglichen */
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start; /* Sicherstellen, dass der Inhalt oben beginnt */
+    color: #fff; /* Textfarbe der Überschrift */
+}
+
+.duellhistorie-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    background-color: #fff; /* Hintergrundfarbe der Tabelle ändern */
+}
+
+.duellhistorie-table th, .duellhistorie-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.duellhistorie-table th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+    color: #000; /* Textfarbe der Überschriften ändern */
+}
+
+.duell-summary {
+    background-color: #f9f9f9;
+    color: #000; /* Textfarbe der Zellen ändern */
+}
+
+.duell-summary:hover {
+    background-color: #f1f1f1;
+}
+
+h2 {
+    color: #fff; /* Textfarbe der Überschrift ändern */
+}

@@ -20,7 +20,7 @@ const StatisticsModal = ({ isOpen, onRequestClose, stats, users}) => {
             overlayClassName="statistics-overlay"
         >
             <h2>Ergebnisse und Statistiken</h2>
-            <p>SEP-Coins des Siegers: +{stats?.sepCoins}</p>
+            <p>SEP-Coins des Siegers: +{stats?.sepCoins || "0"}</p>
             <div className="stats-container">
                 <div className="stats-box">
                     <h3>{users[0]?.username}</h3>
@@ -30,8 +30,8 @@ const StatisticsModal = ({ isOpen, onRequestClose, stats, users}) => {
                     <p>Geopferte Karten: {formatCardCounts(stats?.sacrificedA)}</p>
                 </div>
                 <div className="stats-box">
-                    <h3>{users[1]?.username}</h3>
-                    <p>Leaderboard-Punkte: {stats?.leaderboardPointsB}</p>
+                    <h3>{users[1]?.username || "CPU" }</h3>
+                    <p>Leaderboard-Punkte: {stats?.leaderboardPointsB || "N/A"}</p>
                     <p>Schaden: {stats?.damageB}</p>
                     <p>Gespielte Karten: {formatCardCounts(stats?.cardsPlayedB)}</p>
                     <p>Geopferte Karten: {formatCardCounts(stats?.sacrificedB)}</p>

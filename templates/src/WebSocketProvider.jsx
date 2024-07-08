@@ -4,7 +4,7 @@ import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { toast } from 'react-toastify';
 
-export const WebSocketContext = createContext(); 
+export const WebSocketContext = createContext();
 
 export const WebSocketProvider = ({ children }) => {
     const [client, setClient] = useState(null);
@@ -16,6 +16,7 @@ export const WebSocketProvider = ({ children }) => {
     const [game, setGame] = useState(null);
     const [users, setUsers] = useState([]);
     const [connected, setConnected] = useState(false);
+    const [botPS, setBotPS] = useState(null);
 
     useEffect(() => {
         const userId = parseInt(localStorage.getItem('id'));
@@ -27,7 +28,7 @@ export const WebSocketProvider = ({ children }) => {
             onConnect: () => {
                 console.log('Connected to WebSocket server');
 
-                if (newClient.connected) {  
+                if (newClient.connected) {
                     newClient.subscribe(`/user/${userId}/queue/notifications`, (message) => {
                         const notification = JSON.parse(message.body);
                         console.log('Received notification:', notification);
@@ -64,6 +65,7 @@ export const WebSocketProvider = ({ children }) => {
                         }
                     });
 
+                    // Subscribe für globale Herausforderung
                     newClient.subscribe(`/user/${userId}/queue/create`, (message) => {
                         const response = JSON.parse(message.body);
                         console.log("Received response:", response);
@@ -76,6 +78,7 @@ export const WebSocketProvider = ({ children }) => {
                 }
                 setConnected(true);
 
+                // Wiederherstellung von Spiel und Benutzern aus dem Speicher
                 const storedGame = sessionStorage.getItem('game');
                 const storedUsers = sessionStorage.getItem('users');
                 if (storedGame) {
@@ -85,12 +88,14 @@ export const WebSocketProvider = ({ children }) => {
                     setUsers(JSON.parse(storedUsers));
                 }
 
+                // Subscribe für globale Herausforderung
                 newClient.subscribe(`/user/${userId}/queue/create`, (message) => {
                     const response = JSON.parse(message.body);
                     console.log("Received response:", response);
                     setGame(response[0]);
                     setUsers(response[1]);
 
+                    // Speichern des Spiels und der Benutzer im Speicher
                     sessionStorage.setItem('game', JSON.stringify(response[0]));
                     sessionStorage.setItem('users', JSON.stringify(response[1]));
 
@@ -167,6 +172,7 @@ export const WebSocketProvider = ({ children }) => {
         }
     };
 
+
     const updateStatus = (userId, status) => {
         if (client && client.connected) {
             client.publish({
@@ -181,7 +187,9 @@ export const WebSocketProvider = ({ children }) => {
         }
     };
 
+
     const createGame = (receiverId, senderName) => {
+        console.log("ReceiverID: " , receiverId, "Sendername: ", senderName);
         if (client && client.connected) {
             client.publish({
                 destination: '/app/createGame',
@@ -239,11 +247,11 @@ export const WebSocketProvider = ({ children }) => {
         if (client && client.connected) {
             client.publish({
                 destination: '/app/turnierAkzeptieren',
-                body:JSON.stringify(userId), 
+                body:JSON.stringify(userId),
             });
             toast.success("Turnier akzeptiert");
             setNotifications(prev => prev.filter(n => n.message !== 'turnier'));
-        } else { 
+        } else {
             toast.error("WebSocket-Verbindung ist nicht aktiv.");
         }
     };
@@ -264,10 +272,10 @@ export const WebSocketProvider = ({ children }) => {
             client.publish({
                 destination: '/app/turnierAblehnen',
                 body: JSON.stringify(userId),
-            }); 
+            });
             toast.success("Turnier abgelehnt");
             setNotifications(prev => prev.filter(n => n.message !== 'turnier'));
-        } else { 
+        } else {
             toast.error("WebSocket-Verbindung ist nicht aktiv.");
         }
     };
@@ -278,7 +286,7 @@ export const WebSocketProvider = ({ children }) => {
 
     return (
         <WebSocketContext.Provider value={{ client, chatClient, notifications, handleAcceptChallenge, handleRejectChallenge, handleTimeoutChallenge,
-            activeDuel, createGame, game, setGame, users, setUsers, connected, startTournament, acceptTournament, rejectTournament, removeNotification, sendWinner
+            activeDuel, createGame, game, setGame, users, setUsers, connected, startTournament, acceptTournament, rejectTournament, removeNotification, sendWinner, botPS, setBotPS,
          }}>
             {children}
         </WebSocketContext.Provider>

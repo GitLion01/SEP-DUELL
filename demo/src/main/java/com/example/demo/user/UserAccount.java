@@ -42,6 +42,9 @@ public class UserAccount implements UserDetails {
     private String status = "offline"; // Standardstatus ist offline -> online, im Duell, offline
     private String duelStatus = "available"; // Neuer Status für Duell: available, in_duel, challenged
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    private Game watching;
+
     @ManyToOne                              //für Duell Herausforderung von
     @JoinColumn(name = "challenger_id")
     private UserAccount challenger; // Der Benutzer, der diesen Benutzer herausgefordert hat

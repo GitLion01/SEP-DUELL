@@ -31,7 +31,7 @@ const Startseite = () => {
       });
 
       stompClient.onConnect = () => {
-        const offline = "offline";
+        const offline="offline";
         stompClient.publish({
           destination: '/app/status',
           body: JSON.stringify(offline),
@@ -79,46 +79,52 @@ const Startseite = () => {
   }
 
   return (
-    <div className="AppStart">
-      <ToastContainer />
-      <header>
-        <h1>STARTSEITE</h1>
-        <div className="logout-button">
-          <button onClick={handleLogout}>Abmelden</button>
-        </div>
-      </header>
-      <main>
-        <div className="centered-content">
-          <section className="Leaderboard">
-            <a href="/leaderboard"><h2>LEADERBOARD<br />(Spiel starten)</h2></a>
-          </section>
-          <section className="meinprofile">
-            <a href="/profil"><h2>MEIN PROFIL</h2></a>
-          </section>
-          <section className="meindeck">
-            <a href="/decks"><h2>MEIN DECK</h2></a>
-          </section>
-          <section className="freundesliste">
-            <a href="/freundelist"> <h2>MEINE FREUNDESLISTE</h2></a>
-          </section>
-          <section className="adminsteuerfeld">
-            <a href="/admin" onClick={handleAdminClick}><h2>MEIN ADMINSTEUERFELD</h2></a>
-          </section>
-          <section className="shop">
-            <a href="/shop"><h2>SHOP</h2></a>
-          </section>
-          <section className="shop">
-            <a href="/chat"><h2>CHAT</h2></a>
-          </section>
-          <section>
-            <a href="/clan"><h2>CLANS</h2></a>
-          </section>
-          <section>
-            <a href="/turnier" onClick={handleTurnierClick}><h2>TURNIER</h2></a>
-          </section>
-        </div>
-      </main>
-    </div>
+      <div className="AppStart">
+          <ToastContainer />
+        <header>
+          <h1>STARTSEITE</h1>
+          <div className="logout-button">
+            <button onClick={handleLogout}>Abmelden</button>
+          </div>
+          <div className="leaderboard-button">
+            <button onClick={() => navigate('/leaderboard')}>Leaderboard</button>
+          </div>
+        </header>
+        <main>
+          <div className="centered-content">
+            <section className="meinprofile">
+              <a href="/profil"><h2>MEIN PROFIL</h2></a>
+            </section>
+            <section className="meindeck">
+              <a href="/decks"><h2>MEIN DECK</h2></a>
+            </section>
+            <section className="freundesliste">
+              <a href="/freundelist"> <h2>MEINE FREUNDESLISTE</h2></a>
+            </section>
+            <section className="adminsteuerfeld">
+              <a href="/admin" onClick={handleAdminClick}><h2>MEIN ADMINSTEUERFELD</h2></a>
+            </section>
+            <section className="shop">
+              <a href="/shop"><h2>SHOP</h2></a>
+            </section>
+            <section className="shop">
+              <a href="/chat"><h2>CHAT</h2></a>
+            </section>
+              <section>
+                  <a href="/clan"><h2>CLANS</h2></a>
+              </section>
+              <section>
+                  <a href="/turnier" onClick={handleTurnierClick}><h2>TURNIER</h2></a>
+              </section>
+              <section className="liveduelle">
+                  <a href="/streams"><h2>LIVE DUELLE</h2></a>
+              </section>
+              <section>
+                  <a href="/botdeckselect"><h2>BOT DUELL</h2></a>
+              </section>
+          </div>
+        </main>
+      </div>
   );
 };
 

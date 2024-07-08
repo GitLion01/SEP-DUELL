@@ -21,6 +21,8 @@ public class Game {
     private Boolean ready = false;
     private Boolean firstRound = true;
     private Integer timeLeft = 120;
+    private Boolean streamed = false;
+    private Long botDeckId;
 
     @OneToMany(fetch = FetchType.EAGER)
     @JoinTable(
@@ -31,7 +33,17 @@ public class Game {
     @JsonIgnore
     private List<UserAccount> users = new ArrayList<>();
 
-    private Integer currentTurn = 0;
+    @OneToMany(fetch = FetchType.EAGER)
+    @JsonIgnore
+    private List<UserAccount> viewers = new ArrayList<>();
+
+    @OneToOne(fetch = FetchType.EAGER)
+    private PlayerState playerStateBot;
+
+    @OneToOne(fetch = FetchType.EAGER)
+    private UserAccount currentTurn;
+
+    private Boolean myTurn = true;
 
     public void resetTimer(){
         this.timeLeft = 120;
