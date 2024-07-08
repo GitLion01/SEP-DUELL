@@ -561,6 +561,7 @@ public class GameService {
             //for turnier
             if(user1.isInTurnier()) {
                 user1.setInTurnier(false);
+                user2.setInTurnier(false);
                 turnierService.GewinnerSpeichern(user1);
             }
         } else {
@@ -575,6 +576,7 @@ public class GameService {
             //for turnier
             if(user2.isInTurnier()) {
                 user1.setInTurnier(false);
+                user2.setInTurnier(false);
                 turnierService.GewinnerSpeichern(user2);
             }
         }
