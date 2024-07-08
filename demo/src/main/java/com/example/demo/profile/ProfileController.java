@@ -26,7 +26,9 @@ public class ProfileController {
         Optional<UserAccount> profileOptional = profileService.getProfile(id);
         if (profileOptional.isPresent()) {
             UserAccount profile = profileOptional.get();
-
+            String clanName="";
+            if(profile.getClan()!=null)
+                clanName = profile.getClan().getName();
             // Konvertiert das Bild in einen Base64-String
             byte[] image = profile.getImage();
             String imageBase64 = null;
@@ -50,7 +52,7 @@ public class ProfileController {
                     profile.getLocked(),
                     profile.getEnabled(),
                     decks,
-                    profile.getClan().getName()
+                    clanName
             );
             return ResponseEntity.ok(profileResponse);
         } else {

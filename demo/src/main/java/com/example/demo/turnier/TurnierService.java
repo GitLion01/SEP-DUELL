@@ -81,15 +81,17 @@ public class TurnierService {
             Clan clan = clanRepository.findById(turnier.getClan().getId()).get();
 
             if(turnier.getAkzeptierteUsers().size() == clan.getUsers().size()){
-                System.out.println("Turnier is ready");
-                Runde runde = new Runde();
-                runde.setRundeName("Runde 1");
+                if(turnier.getRunde().isEmpty()){
+                    System.out.println("Turnier is ready");
+                    Runde runde = new Runde();
+                    runde.setRundeName("Runde 1");
 
-                verteilung(turnier, runde, turnier.getAkzeptierteUsers());
+                    verteilung(turnier, runde, turnier.getAkzeptierteUsers());
 
-                turnier.getRunde().add(runde);
-                rundeRepository.save(runde);
-                turnierRepository.save(turnier);
+                    turnier.getRunde().add(runde);
+                    rundeRepository.save(runde);
+                    turnierRepository.save(turnier);
+                }
 
                 for (UserAccount userInClan : clan.getUsers()) {
                     Notification notification = new Notification("turnierReady");
@@ -105,6 +107,7 @@ public class TurnierService {
         Clan clan = clanRepository.findById(clanId).get();
         if(clan.getTurnier()!=null) {
             Turnier turnier = clan.getTurnier();
+            System.out.println("Runde hier "+turnier.getRunde().get(turnier.getRunde().size()-1).getRundeName());
             return ResponseEntity.ok(turnier.getRunde().get(turnier.getRunde().size()-1).getMatch());
         }
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(new ArrayList<>());
