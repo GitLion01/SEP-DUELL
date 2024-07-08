@@ -1,11 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import BackButton from '../BackButton';
-import Modal from 'react-modal'; 
+import Modal from 'react-modal';
 import ClanModal from './ClanModal';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import './ClanList.css'; 
-import GlobalTournamentNotification from '../Turnier/GlobalTournamentNotification'
+import './ClanList.css';
+import TournamentNotification from '../Turnier/TournamentNotification';
+
 
 function Clan() {
     const [clans, setClans] = useState([]);
@@ -13,8 +14,20 @@ function Clan() {
     const [newClanName, setNewClanName] = useState('');
     const [showModal, setShowModal] = useState(false);
     const [selectedClan, setSelectedClan] = useState(null);
-    const [userClanId, setUserClanId] = useState(null);  
-    const [showNotification, setShowNotification] = useState (null); 
+    const [userClanId, setUserClanId] = useState(null);
+    const [showNotification, setShowNotification] = useState(false);
+    const [turnierId, setTurnierId] = useState(null);
+
+    useEffect(() => {
+        fetchClans();
+        fetchClanId();
+    }, []);
+
+    useEffect(() => {
+        if (userClanId) {
+            fetchTurnierId(userClanId);
+        }
+    }, [userClanId]);
 
     const fetchClans = async () => {
         try {
@@ -30,50 +43,60 @@ function Clan() {
     };
 
     const fetchClanId = async () => {
-        try { 
-            const response = await fetch(`http://localhost:8080/getClanId?userId=${userId}`); 
+        try {
+            const response = await fetch(`http://localhost:8080/getClanId?userId=${userId}`);
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
             const data = await response.json();
-            setUserClanId(data); 
-            localStorage.setItem('clanId', data); 
-        }
-        catch (error) {
+            setUserClanId(data);
+            localStorage.setItem('clanId', data);
+        } catch (error) {
             console.error('There was a problem with the fetch operation:', error);
         }
-    }
+    };
 
-    const checkTurnierStatus = async (clanId) => {
+    const fetchTurnierId = async (clanId) => {
         try {
-            const response = await fetch(`http://localhost:8080/checkTurnier?turnierId=${clanId}`);
-            const isTurnierReady = await response.json; 
+            const response = await fetch(`http://localhost:8080/getTurnierId?clanId=${clanId}`);
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            const turnierId = await response.json();
+            setTurnierId(turnierId);
+            checkTurnierStatus(turnierId);
+        } catch (error) {
+            console.error('Fehler beim Abrufen der Turnier-ID:', error);
+        }
+    };
+
+    const checkTurnierStatus = async (turnierId) => {
+        try {
+            const response = await fetch(`http://localhost:8080/checkTurnier?turnierId=${turnierId}`);
+            const isTurnierReady = await response.json();
             if (!isTurnierReady) {
-                checkAcceptedstatus(clanId); 
+                checkAcceptedStatus(turnierId);
             }
+        } catch (error) {
+            console.error('Fehler beim Checken des Turnierstatus:', error);
         }
-        catch (error) {
-            console.error('Fehler beim checken des Turnier Status', error);
-        }
-    }; 
+    };
 
-    const checkAcceptedstatus = async (clanId) => {
+    const checkAcceptedStatus = async (turnierId) => {
         try {
-            const response = await fetch(`http://localhost:8080/checkAccepted?turnierId=${clanId}&userId=${userId}`);
-            const isAccepted = await response.json;
+            console.log('Check turnier');
+            const response = await fetch(`http://localhost:8080/checkAccepted?turnierId=${turnierId}&userId=${userId}`);
+            const isAccepted = await response.json();
+            console.log(isAccepted);
             if (!isAccepted) {
-                setShowNotification(true); 
+                setShowNotification(true);
+                console.log('Check turnier erfolgreich');
+                console.log(showNotification);
             }
+        } catch (error) {
+            console.error('Fehler beim Checken des Accepted-Status:', error);
         }
-        catch  (error) {
-            console.error('Fehler beim checken des Accepted Status', error);
-        }
-    }
- 
-    useEffect(() => {
-        fetchClans();
-        fetchClanId(); 
-    }, []);
+    };
 
     const createClan = async () => {
         if (newClanName.trim() === '') {
@@ -94,7 +117,7 @@ function Clan() {
 
             if (response.ok) {
                 toast.success('Clan erfolgreich erstellt');
-                await fetchClans(); 
+                await fetchClans();
             } else if (response.status === 409) { // Konflikt-Statuscode
                 const errorMessage = await response.text();
                 toast.error(errorMessage);
@@ -118,8 +141,8 @@ function Clan() {
                 if (result.includes("You have joined a clan")) {
                     setUserClanId(clanId);
                     toast.success("Du bist dem Clan erfolgreich beigetreten");
-                } else if(response.status === 409) {
-                    toast.error('Du bist bereits Mitglied dieses Clans'); 
+                } else if (response.status === 409) {
+                    toast.error('Du bist bereits Mitglied dieses Clans');
                 }
             } else {
                 toast.error(result);
@@ -168,9 +191,9 @@ function Clan() {
 
     return (
         <div className="clan-list-container">
-            <ToastContainer />
-            <BackButton />
-            <h1>Clans</h1>
+            <ToastContainer/>
+            <BackButton/>
+            <h1>Clans</h1>         
             <input
                 type="text"
                 placeholder="Neuen Clan erstellen"
@@ -189,6 +212,9 @@ function Clan() {
                     </div>
                 ))}
             </div>
+            {showNotification && (
+                <TournamentNotification/>
+            )}
             <Modal
                 isOpen={showModal}
                 onRequestClose={handleCloseModal}

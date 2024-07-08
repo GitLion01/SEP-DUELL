@@ -7,8 +7,8 @@ import { toast } from 'react-toastify';
 const GlobalTournamentNotification = () => {
     const { notifications, acceptTournament, rejectTournament, removeNotification } = useContext(WebSocketContext);
     const userId = localStorage.getItem('id');
-    const userName = localStorage.getItem('username');
 
+    
     const handleAccept = async (notificationId) => {
         try {
             const userDeckResponse = await fetch(`http://localhost:8080/decks/getUserDecks/${userId}`);

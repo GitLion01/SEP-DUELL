@@ -16,6 +16,7 @@ body {
     font-size: 2.5em;
     margin-bottom: 20px;
     color: #ffcc00; /* Goldene Farbe für den Titel */
+    text-align: center;
 }
 
 .no-matches {
@@ -25,12 +26,15 @@ body {
 
 .matches-container {
     width: 100%;
+    max-width: 800px;
+    margin: 0 auto; /* Horizontale Zentrierung */
 }
 
 .section-title {
     font-size: 2em;
     margin: 20px 0;
     color: #ffcc00; /* Goldene Farbe für die Abschnittstitel */
+    text-align: center;
 }
 
 .matches-list {
@@ -72,5 +76,3 @@ body {
 .start-game-button:hover {
     background-color: #218838;
 }
-
-

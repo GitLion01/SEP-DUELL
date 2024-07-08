@@ -14,13 +14,6 @@ const Startseite = () => {
 
   const isTurnierReady = useCheckTurnier(clanId);
 
-  useEffect(() => {
-    if (isTurnierReady && !localStorage.getItem('hasBeenRedirectedToTurnier')) {
-      toast.success('Das Turnier ist bereit, Sie werden zur Turnierseite weitergeleitet.');
-      localStorage.setItem('hasBeenRedirectedToTurnier', 'true');
-      navigate('/turnier');
-    }
-  }, [isTurnierReady, navigate]);
 
   const handleLogout = async () => {
     if (userId) {

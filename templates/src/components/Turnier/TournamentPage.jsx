@@ -51,7 +51,7 @@ const TournamentPage = () => {
 
     const fetchWinners = async () => {
         try {
-            const response = await fetch(`http://localhost:8080/getWinner?clanId=${clanId}`);
+            const response = await fetch(`http://localhost:8080/getGewinner?clanId=${clanId}`);
             if (response.ok) {
                 const data = await response.json();
                 console.log('Winners:', data);
