@@ -14,6 +14,7 @@ import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import com.example.demo.turnier.Bet;
 
 import java.util.*;
 
@@ -78,6 +79,10 @@ public class UserAccount implements UserDetails {
     @OneToMany(mappedBy = "userAccount", fetch = FetchType.EAGER)
     private List<CardInstance> userCardInstance=new ArrayList<>();
 
+    //Turnierwetten
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JsonIgnore
+    private List<Bet> bets = new ArrayList<>();
 
     @OneToOne
     @JoinColumn(name = "player_state_id")
