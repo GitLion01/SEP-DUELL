@@ -43,14 +43,11 @@ public class LeaderboardController {
             System.out.println("from the if");
             userId=userAccountRepository.findByUsername(userIdHeader).get().getId();
         }
-        System.out.println("aufgerufen+++++++++++ "+userId);
         leaderboardService.updateUserStatus(userId, status);
     }
 
     @GetMapping("/getId/{senderName}")
     public Long getId(@PathVariable("senderName") String senderName) {
-        System.out.println("senderName is " + senderName);
-        System.out.println("SenderId is " + userAccountRepository.findByUsername(senderName).get().getId());
         return userAccountRepository.findByUsername(senderName).get().getId();
     }
 }
