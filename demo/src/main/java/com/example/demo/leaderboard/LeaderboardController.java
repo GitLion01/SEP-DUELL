@@ -9,6 +9,8 @@ import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -41,7 +43,14 @@ public class LeaderboardController {
             System.out.println("from the if");
             userId=userAccountRepository.findByUsername(userIdHeader).get().getId();
         }
-        System.out.println("aufgerufen");
+        System.out.println("aufgerufen+++++++++++ "+userId);
         leaderboardService.updateUserStatus(userId, status);
+    }
+
+    @GetMapping("/getId/{senderName}")
+    public Long getId(@PathVariable("senderName") String senderName) {
+        System.out.println("senderName is " + senderName);
+        System.out.println("SenderId is " + userAccountRepository.findByUsername(senderName).get().getId());
+        return userAccountRepository.findByUsername(senderName).get().getId();
     }
 }

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { toast } from 'react-toastify';
+import axios from 'axios';
 
 export const WebSocketContext = createContext();
 
@@ -187,17 +188,25 @@ export const WebSocketProvider = ({ children }) => {
         }
     };
 
+    const getUserId =  (senderName) => {
+        const response =  axios.get(`http://localhost:8080/getId/${senderName}`);
+        console.log("Antwort ID", response);
+        return response;
+    };
 
-    const createGame = (receiverId, senderName) => {
-        console.log("ReceiverID: " , receiverId, "Sendername: ", senderName);
+
+    const createGame =  (receiverId, senderName) => {
+        const senderID =  getUserId(senderName)
+        console.log("hhhhhhhhhhhh",senderID);
+        console.log("ReceiverID: ", receiverId, "Sendername: ", senderName);
         if (client && client.connected) {
             client.publish({
                 destination: '/app/createGame',
-                body: JSON.stringify({ userA: receiverId, userB: senderName }),
+                body: JSON.stringify({userA: receiverId, userB: senderName}),
             });
             client.publish({
-                destination: '/app/status',
-                body: JSON.stringify("ingame"),
+                destination: '/status/status',
+                body: JSON.stringify("im Duell"),
                 headers: {
                     userId: userId.toString(),
                 },

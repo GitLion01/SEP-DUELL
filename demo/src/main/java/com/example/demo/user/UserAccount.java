@@ -4,6 +4,7 @@ import com.example.demo.chat.Chat;
 import com.example.demo.chat.ChatMessage;
 import com.example.demo.clan.Clan;
 import com.example.demo.decks.Deck;
+import com.example.demo.game.Game;
 import com.example.demo.game.PlayerState;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;

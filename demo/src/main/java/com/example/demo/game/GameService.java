@@ -6,8 +6,10 @@ import com.example.demo.decks.DeckRepository;
 import com.example.demo.duellHerausforderung.Notification;
 import com.example.demo.game.requests.*;
 import com.example.demo.leaderboard.LeaderboardService;
+import com.example.demo.turnier.TurnierService;
 import com.example.demo.user.UserAccount;
 import com.example.demo.user.UserAccountRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -19,6 +21,7 @@ import java.util.*;
 
 @Transactional
 @Service
+@AllArgsConstructor
 public class GameService {
     private final GameRepository gameRepository;
     private final DeckRepository deckRepository;
@@ -28,25 +31,8 @@ public class GameService {
     private final PlayerCardRepository playerCardRepository;
     private final LeaderboardService leaderboardService;
     private final StatisticRepository statisticRepository;
+    private final TurnierService turnierService;
 
-    @Autowired
-    public GameService(GameRepository gameRepository,
-                       DeckRepository deckRepository,
-                       UserAccountRepository userAccountRepository,
-                       SimpMessagingTemplate messagingTemplate,
-                       PlayerStateRepository playerStateRepository,
-                       PlayerCardRepository playerCardRepository,
-                       LeaderboardService leaderboardService,
-                       StatisticRepository statisticRepository)  {
-        this.gameRepository = gameRepository;
-        this.deckRepository = deckRepository;
-        this.userAccountRepository = userAccountRepository;
-        this.messagingTemplate = messagingTemplate;
-        this.playerStateRepository = playerStateRepository;
-        this.playerCardRepository = playerCardRepository;
-        this.leaderboardService = leaderboardService;
-        this.statisticRepository = statisticRepository;
-    }
 
     //TODO: DIESEN KOMMENTAR NICHT LÖSCHEN!!!!!
     @Scheduled(fixedRate = 1000)
@@ -132,6 +118,7 @@ public class GameService {
         List<Long> userIds = gameRepository.findAllUsersByGameId(newGame.getId());
         List<UserAccount> users = new ArrayList<>();
         for (Long userId : userIds) {
+            leaderboardService.updateUserStatus(userId,"im Duell");
             users.add(userAccountRepository.findById(userId).get());
         }
         System.out.println(" DeckSelection ------------------------- currentTurn: " + newGame.getCurrentTurn().getUsername() + "; erster Spieler: " + users.get(0).getUsername() + "; zweiter Spieler: " + users.get(1).getUsername());
@@ -948,6 +935,12 @@ public class GameService {
                 leaderBoardPointsLoser = -1 * (Math.max(50, (lbPoints2 - lbPoints1) / 2));
                 damageWinner = user1.getPlayerState().getDamage();
                 damageLoser = user2.getPlayerState().getDamage();
+                //for turnier
+                if(user1.isInTurnier()) {
+                    user1.setInTurnier(false);
+                    user2.setInTurnier(false);
+                    turnierService.GewinnerSpeichern(user1);
+                }
             } else {
                 user2.setSepCoins(user2.getSepCoins() + 100);
                 user2.setLeaderboardPoints(lbPoints2 + Math.max(50, lbPoints1 - lbPoints2));
@@ -956,6 +949,11 @@ public class GameService {
                 leaderBoardPointsLoser = -1 * (Math.max(50, (lbPoints1 - lbPoints2) / 2));
                 damageWinner = user2.getPlayerState().getDamage();
                 damageLoser = user1.getPlayerState().getDamage();
+                if(user2.isInTurnier()) {
+                    user1.setInTurnier(false);
+                    user2.setInTurnier(false);
+                    turnierService.GewinnerSpeichern(user2);
+                }
             }
 
             playerStateRepository.save(user1.getPlayerState());
