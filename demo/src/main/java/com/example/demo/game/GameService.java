@@ -1104,7 +1104,7 @@ public class GameService {
             terminateMatch(request.getGameId(), loser.getId(), winner.getId());
         }else{
             PlayerState botPS = optionalBotPS.get();
-            UserAccount loser = optionalUserAccount.get();
+            UserAccount loser = game.getUsers().get(0);
             botPS.setWinner(true);
             playerStateRepository.save(botPS);
             terminateMatch(request.getGameId(), botPS.getId(), loser.getId());
