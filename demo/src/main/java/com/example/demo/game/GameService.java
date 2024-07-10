@@ -1089,10 +1089,10 @@ public class GameService {
 
 
 
-    public void surrender(Long userId, Long gameId){
-        Optional<Game> optionalGame = gameRepository.findById(gameId);
-        Optional<UserAccount> optionalUserAccount = userAccountRepository.findById(userId);
-        Optional<PlayerState> optionalBotPS = playerStateRepository.findById(userId);
+    public void surrender(SurrenderRequest request){
+        Optional<Game> optionalGame = gameRepository.findById(request.getGameId());
+        Optional<UserAccount> optionalUserAccount = userAccountRepository.findById(request.getUserId());
+        Optional<PlayerState> optionalBotPS = playerStateRepository.findById(request.getUserId());
         if(optionalGame.isEmpty() && optionalUserAccount.isEmpty()){
             return;
         }
@@ -1103,13 +1103,13 @@ public class GameService {
             UserAccount winner = game.getUsers().get(0).equals(loser) ? game.getUsers().get(1) : game.getUsers().get(0);
             winner.getPlayerState().setWinner(true);
             playerStateRepository.save(winner.getPlayerState());
-            terminateMatch(gameId, loser.getId(), winner.getId());
+            terminateMatch(request.getGameId(), loser.getId(), winner.getId());
         }else{
             PlayerState botPS = optionalBotPS.get();
             UserAccount loser = optionalUserAccount.get();
             botPS.setWinner(true);
             playerStateRepository.save(botPS);
-            terminateMatch(gameId, botPS.getId(), loser.getId());
+            terminateMatch(request.getGameId(), botPS.getId(), loser.getId());
         }
     }
 
