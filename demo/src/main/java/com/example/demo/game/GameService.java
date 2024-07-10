@@ -35,7 +35,6 @@ public class GameService {
 
 
     //TODO: DIESEN KOMMENTAR NICHT LÖSCHEN!!!!!
-    /*
     @Scheduled(fixedRate = 1000)
     public void updateTimers(){
         List<Game> games = gameRepository.findAll();
@@ -50,8 +49,6 @@ public class GameService {
             System.out.println("irgendwas3");
         }
     }
-
-     */
 
     private void handleTimerExpiration(Game game) {
         try {
@@ -200,7 +197,7 @@ public class GameService {
         boolean allPlayersReady = true;
         for (UserAccount userAccount : userAccountRepository.findAll()) {
             if(game.getUsers().contains(userAccount)) {
-                if (!userAccount.getPlayerState().getReady()) {
+                if (!playerStateRepository.findById(userAccount.getPlayerState().getId()).get().getReady()) {
                     allPlayersReady = false;
                     break;
                 }
@@ -214,6 +211,7 @@ public class GameService {
 
 
         playerStateRepository.save(user.getPlayerState());
+        userAccountRepository.save(user);
 
         System.out.println(" DeckSelection ------------------------- currentTurn: "+ game.getCurrentTurn().getUsername() + "; erster Spieler: " + game.getUsers().get(0).getUsername() + "; zweiter Spieler: " + game.getUsers().get(1).getUsername());
         gameRepository.save(game);

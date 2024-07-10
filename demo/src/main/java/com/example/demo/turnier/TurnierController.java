@@ -75,7 +75,7 @@ public class TurnierController {
     }
 
     @GetMapping("/getTurnierId")
-    public Long getTurnierId(@RequestParam Long clanId) {
+    public ResponseEntity<Long> getTurnierId(@RequestParam Long clanId) {
         return turnierService.getTurnierId(clanId);
     }
 

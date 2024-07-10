@@ -217,9 +217,11 @@ public class TurnierService {
         return turnier.getAkzeptierteUsers().contains(userAccount);
     }
 
-    public Long getTurnierId(Long clanId) {
+    public ResponseEntity<Long> getTurnierId(Long clanId) {
         Clan clan = clanRepository.findById(clanId).get();
-        return clan.getTurnier().getId();
+        if(clan.getTurnier()!=null)
+            return ResponseEntity.ok(clan.getTurnier().getId());
+        return ResponseEntity.notFound().build();
     }
 
     public List<Long> getGewinner(Long clanId) {
