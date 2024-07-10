@@ -32,7 +32,7 @@ public class TurnierController {
     public void turnierAblehnen(@Payload Long userId) {
         turnierService.turnierAblehnen(userId);
     }
-*/
+
 
     @PostMapping("/turnierStart")
     public void turnierStart(@RequestBody ClanIdRequest request) {
