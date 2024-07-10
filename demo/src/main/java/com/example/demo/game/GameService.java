@@ -1087,6 +1087,32 @@ public class GameService {
 
 
 
+    public void surrender(Long userId, Long gameId){
+        Optional<Game> optionalGame = gameRepository.findById(gameId);
+        Optional<UserAccount> optionalUserAccount = userAccountRepository.findById(userId);
+        Optional<PlayerState> optionalBotPS = playerStateRepository.findById(userId);
+        if(optionalGame.isEmpty() && optionalUserAccount.isEmpty()){
+            return;
+        }
+
+        Game game = optionalGame.get();
+        if(game.getPlayerStateBot() == null){
+            UserAccount loser = optionalUserAccount.get();
+            UserAccount winner = game.getUsers().get(0).equals(loser) ? game.getUsers().get(1) : game.getUsers().get(0);
+            winner.getPlayerState().setWinner(true);
+            playerStateRepository.save(winner.getPlayerState());
+            terminateMatch(gameId, loser.getId(), winner.getId());
+        }else{
+            PlayerState botPS = optionalBotPS.get();
+            UserAccount loser = optionalUserAccount.get();
+            botPS.setWinner(true);
+            playerStateRepository.save(botPS);
+            terminateMatch(gameId, botPS.getId(), loser.getId());
+        }
+    }
+
+
+
     @Modifying
     @Transactional
     public void deleteUserGameData(List<Long> userIds,Long gameId) {
