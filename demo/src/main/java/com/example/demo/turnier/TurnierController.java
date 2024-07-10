@@ -1,6 +1,8 @@
 package com.example.demo.turnier;
 
 
+import com.example.demo.clan.ClanIdRequest;
+import com.example.demo.clan.UserIdRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -30,6 +32,22 @@ public class TurnierController {
     public void turnierAblehnen(@Payload Long userId) {
         turnierService.turnierAblehnen(userId);
     }
+*/
+
+    @PostMapping("/turnierStart")
+    public void turnierStart(@RequestBody ClanIdRequest request) {
+        turnierService.turnierStart(request.getClanId());
+    }
+
+    @PostMapping("/turnierAkzeptieren")
+    public void turnierAkzeptieren(@RequestBody UserIdRequest request) {
+        turnierService.turnierAkzeptieren(request.getUserId());
+    }
+
+    @PostMapping("/turnierAblehnen")
+    public void turnierAblehnen(@RequestBody UserIdRequest request) {
+        turnierService.turnierAblehnen(request.getUserId());
+    }
 
     @GetMapping("/getTurnier")
     public ResponseEntity<List<Match>> getTurnierMatches(@RequestParam Long clanId) {
@@ -46,8 +64,8 @@ public class TurnierController {
         turnierService.SetUserInTurnier(userId);
     }
 
-    @MessageMapping("/gewinnerSpeichern")
-    public void gewinnerSpeichern(@Payload Long userId) {
+    @PostMapping("/gewinnerSpeichern")
+    public void gewinnerSpeichern(@RequestParam Long userId) {
         turnierService.GewinnerSpeichernMitId(userId);
     }
 
@@ -59,6 +77,17 @@ public class TurnierController {
     @GetMapping("/getTurnierId")
     public Long getTurnierId(@RequestParam Long clanId) {
         return turnierService.getTurnierId(clanId);
+    }
+
+
+
+
+
+// Turnierwette
+
+    @PostMapping("/placeBet")
+    public ResponseEntity<String> placeBet(@RequestBody BetRequest request) {
+        return turnierService.placeBet(request.getBettorId(), request.getBetOnId());
     }
 
     @GetMapping("/getGewinner")

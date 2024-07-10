@@ -29,6 +29,8 @@ public class TurnierService {
     private final RundeRepository rundeRepository;
     private final MatchRepository matchRepository;
 
+    private final BetRepository betRepository;
+
     public void turnierStart(Long clanId) {
         Clan clan = clanRepository.findById(clanId).get();
         if(clan.getUsers().size()<2)
@@ -136,6 +138,8 @@ public class TurnierService {
             if(clan.getTurnier().getRunde().get(clan.getTurnier().getRunde().size()-1).getGewinners().size()==1){
                 user.setSepCoins(user.getSepCoins()+700);
                 userAccountRepository.save(user);
+                distributeWinnings(user);  // Gewinne verteilen <-- Aufruf der Methode distributeWinnings für Turnierwette Özgür
+                deleteBetsForClan(clan); // Wetten löschen
                 deleteTurniereData(clan.getTurnier());
                 return;
             }
@@ -227,4 +231,79 @@ public class TurnierService {
         }
         return gewinnerIds;
     }
+
+
+
+
+
+    //Turnierwetten ab hier
+
+
+
+    public ResponseEntity<String> placeBet(Long bettorId, Long betOnId) {
+        Optional<UserAccount> bettorOpt = userAccountRepository.findById(bettorId);
+        Optional<UserAccount> betOnOpt = userAccountRepository.findById(betOnId);
+
+        if (bettorOpt.isPresent() && betOnOpt.isPresent()) {
+            UserAccount bettor = bettorOpt.get();
+            UserAccount betOn = betOnOpt.get();
+
+            if (bettor.getSepCoins() < 50) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Insufficient SEP-Coins to place the bet.");
+            }
+
+            for (Bet bet : bettor.getBets()) {
+                if (bet.getBetOn().equals(betOn)) {
+                    return ResponseEntity.status(HttpStatus.CONFLICT).body("Bet already placed on this user.");
+                }
+            }
+
+            bettor.setSepCoins(bettor.getSepCoins() - 50);
+            Bet bet = new Bet(bettor, betOn);
+            bettor.getBets().add(bet);
+            betRepository.save(bet);
+            userAccountRepository.save(bettor);
+
+            return ResponseEntity.ok("Bet placed successfully.");
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
+    }
+
+
+
+    public void distributeWinnings(UserAccount winner) {
+        List<Bet> bets = betRepository.findByBetOn(winner);
+
+        for (Bet bet : bets) {
+            UserAccount bettor = bet.getBettor();
+            bettor.setSepCoins(bettor.getSepCoins() + 300); //Lootbox plus Einsatz 250 + 50 SEP Coins
+            //Logik für Lootbox
+            bet.setWinner(true);
+            bet.setCompleted(true); // Markiere Wette als abgeschlossen
+            userAccountRepository.save(bettor);
+            betRepository.save(bet); // Speichere die aktualisierte Wette
+        }
+    }
+
+        private void deleteBetsForClan(Clan clan){
+            for (UserAccount user : clan.getUsers()) {
+                for (Bet bet : user.getBets()) {
+                    betRepository.delete(bet);
+                }
+                user.getBets().clear();
+                userAccountRepository.save(user);
+            }
+        }
+
+
+
+
+
+
+
+
+
+
+
+
 }
