@@ -6,6 +6,8 @@ import {WebSocketContext} from "../../WebSocketProvider";
 import './duel.css';
 import SwapModal from "./SwapModal";
 import StatisticsModal from "./StatisticsModal";
+import axios from "axios";
+import ConfirmModal from "./ConfirmModal";
 
 
 const Duel = () => {
@@ -28,6 +30,8 @@ const Duel = () => {
   const [selectedCards, setSelectedCards] = useState([]);
   const [selectedHandCard, setSelectedHandCard] = useState(null);
   const [stats, setStats] = useState(null);
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+
 
 
   // user ID abrufen
@@ -78,7 +82,7 @@ const Duel = () => {
         if (subscription) subscription.unsubscribe();
       };
     }
-  }, [client, connected, id]);
+  }, [client, connected, id])
 
 
   // Game Kanal
@@ -228,7 +232,7 @@ const Duel = () => {
         });
         setHasAttacked(true);
       }
-    };
+    }
   };
 
   const selectAttackingCard = (Id) => {
@@ -425,6 +429,26 @@ const Duel = () => {
     navigate('/startseite')
   };
 
+  const handleOpenConfirmModal = () => {
+    setIsConfirmModalOpen(true);
+  };
+
+  const handleCloseConfirmModal = () => {
+    setIsConfirmModalOpen(false);
+  };
+
+  const handleConfirmSurrender = () => {
+    client.publish({
+      destination: '/app/surrender',
+      body: JSON.stringify({
+            userId: id,
+            gameId: gameId
+          }
+      )
+    })
+    setIsConfirmModalOpen(false);
+  };
+
   return (
       <div className="duel-container">
         <div className="timer-and-turn">
@@ -473,6 +497,7 @@ const Duel = () => {
           <button onClick={() => setIsRareSwapMode(true)}>Rare Swap</button>
           <button onClick={() => setIsLegendarySwapMode(true)}>Legendary Swap</button>
           <button onClick={handleEndTurn}>End Turn</button>
+          <button onClick={handleOpenConfirmModal}> Aufgeben</button>
         </div>
         <SwapModal
             isOpen={isRareSwapMode}
@@ -505,6 +530,12 @@ const Duel = () => {
             onRequestClose={closeStatisticsModal}
             stats={stats || {}}
             users={users}
+        />
+        <ConfirmModal
+            show={isConfirmModalOpen}
+            onConfirm={handleConfirmSurrender}
+            onCancel={handleCloseConfirmModal}
+            message="Möchten Sie wirklich aufgeben?"
         />
         <ToastContainer />
       </div>

@@ -125,6 +125,11 @@ public class GameController {
         gameService.terminateMatch(gameId, userA, userB);
     }
 
+    @MessageMapping("/surrender")
+    public void surrender(@Payload SurrenderRequest request){
+        gameService.surrender(request);
+    }
+
 
 
 // BOT-MATCHES ---------------------------------------------------------
