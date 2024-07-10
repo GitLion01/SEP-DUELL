@@ -1091,7 +1091,7 @@ public class GameService {
         Optional<Game> optionalGame = gameRepository.findById(request.getGameId());
         Optional<UserAccount> optionalUserAccount = userAccountRepository.findById(request.getUserId());
         Optional<PlayerState> optionalBotPS = playerStateRepository.findById(request.getUserId());
-        if(optionalGame.isEmpty() && optionalUserAccount.isEmpty()){
+        if(optionalGame.isEmpty() || optionalUserAccount.isEmpty() && optionalBotPS.isEmpty()){
             return;
         }
 
