@@ -49,11 +49,6 @@ public class GameController {
         }
     }
 
-    /*@MessageMapping("/streams")
-    public void getAllStreams(){
-        gameService.getAllStreams();
-    }*/
-
     @MessageMapping("/streamGame")
     public void streamGame(@Payload StreamGameRequest request){
         gameService.streamGame(request);
@@ -126,15 +121,9 @@ public class GameController {
     }
 
     @MessageMapping("/surrender")
-    public void surrender(@Payload Long userId, Long gameId){
-        gameService.surrender(userId, gameId);
+    public void surrender(@Payload SurrenderRequest request){
+        gameService.surrender(request);
     }
-
-
-
-// BOT-MATCHES ---------------------------------------------------------
-
-
 
     @MessageMapping("/createBotGame")
     public void createBotGame(@Payload CreateBotRequest request) {
