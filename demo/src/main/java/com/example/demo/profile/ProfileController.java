@@ -22,7 +22,6 @@ import java.util.Optional;
 public class ProfileController {
 
     private final ProfileService profileService;
-    private final GameService gameService;
 
     @GetMapping(path ="/{id}")
     public ResponseEntity<?> getProfile(@PathVariable Long id) {// Verwendung der Wildcard, da entweder UserAccountResponse oder ResponseEntity.notFound().build() zurückgegeben wird
