@@ -14,8 +14,6 @@ const Duel = () => {
   const [id, setId] = useState(null);
   const gameId = localStorage.getItem('gameId');
   const [timer, setTimer] = useState(120);
-  //const currentUser = users.find(user => user.id === parseInt(id));
-  //const opponentUser = users.find(user => user.id !== parseInt(id));
   const [playerState, setPlayerState] = useState(null);
   const [opponentState, setOpponentState] = useState(null);
   const [isAttackMode, setIsAttackMode] = useState(false);
@@ -80,7 +78,7 @@ const Duel = () => {
         if (subscription) subscription.unsubscribe();
       };
     }
-  }, [id])
+  }, [client, connected, id]);
 
 
   // Game Kanal
@@ -172,6 +170,7 @@ const Duel = () => {
       });
       if (cardDrawn) {
         setCardDrawn(false);
+        console.log("cardDrawn: from end Turn ", cardDrawn);
       }
       resetAttackMode()
       setHasAttacked(false);
@@ -229,8 +228,8 @@ const Duel = () => {
         });
         setHasAttacked(true);
       }
-    }
-  }
+    };
+  };
 
   const selectAttackingCard = (Id) => {
     setSelectedAttacker(Id);
@@ -326,7 +325,7 @@ const Duel = () => {
     })
     setCardDrawn(true);
     console.log("cardDrawn", cardDrawn);
-  }
+  };
 
   const handleRareSwap = () => {
 
@@ -424,7 +423,7 @@ const Duel = () => {
     sessionStorage.removeItem('game');
     sessionStorage.removeItem('users');
     navigate('/startseite')
-  }
+  };
 
   return (
       <div className="duel-container">

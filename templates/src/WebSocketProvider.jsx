@@ -53,16 +53,9 @@ export const WebSocketProvider = ({ children }) => {
                         } else if (notification.message === 'turnierDeleted') {
                             toast.info('Das Turnier wurde abgebrochen.');
                             setNotifications(prev => prev.filter(n => n.message !== 'turnier'));
-                        } else if (notification.message === 'turnierReady') {
-                            toast.info('Das Turnier beginnt jetzt');
-                            if (!localStorage.getItem('hasBeenRedirectedToTurnier')) {
-                                localStorage.setItem('hasBeenRedirectedToTurnier', 'true');
-                                navigate('/turnier');
-                            }
-                            else if (notification.message === 'neueRunde') {
+                        } else if (notification.message === 'neueRunde') {
                                 toast.info('Es wurde eine neue Runde gestartet');
                                 window.dispatchEvent(new CustomEvent('neueRunde'));
-                            }
                         }
                     });
 
