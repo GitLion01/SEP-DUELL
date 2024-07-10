@@ -35,28 +35,36 @@ public class GameService {
 
 
     //TODO: DIESEN KOMMENTAR NICHT LÖSCHEN!!!!!
+    /*
     @Scheduled(fixedRate = 1000)
     public void updateTimers(){
         List<Game> games = gameRepository.findAll();
         for (Game game : games) {
             game.decrementTimer();
+            System.out.println("irgendwas");
             if(game.getReady() && game.getRemaingTime() <= 0){
                 handleTimerExpiration(game);
+                System.out.println("irgendwas2");
             }
             sendTimerUpdate(game);
+            System.out.println("irgendwas3");
         }
     }
+
+     */
 
     private void handleTimerExpiration(Game game) {
         try {
             if(game!=null) {
                 if (game.getPlayerStateBot() == null) {
+                    System.out.println("irgendwas4");
                     UserAccount currentTurnPlayer = game.getCurrentTurn();
                     UserAccount otherPlayer = game.getUsers().get(0).equals(currentTurnPlayer) ? game.getUsers().get(1) : game.getUsers().get(0);
                     currentTurnPlayer.getPlayerState().setLifePoints(-1);
                     otherPlayer.getPlayerState().setWinner(true);
                     terminateMatch(game.getId(), currentTurnPlayer.getId(), otherPlayer.getId());
                 }else{
+                    System.out.println("irgendwas5");
                     UserAccount currentTurnPlayer = game.getCurrentTurn();
                     PlayerState botPS = game.getPlayerStateBot();
                     currentTurnPlayer.getPlayerState().setLifePoints(-1);
@@ -74,10 +82,12 @@ public class GameService {
         int remainingTime = game.getRemaingTime();
         for(UserAccount player : game.getUsers()) {
             messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/timer", remainingTime);
+            System.out.println("irgendwas6");
         }
         if(!game.getViewers().isEmpty()){
             for(UserAccount viewer : game.getViewers()) {
                 messagingTemplate.convertAndSendToUser(viewer.getId().toString(), "/queue/timer", remainingTime);
+                System.out.println("irgendwas7");
             }
         }
     }
@@ -1088,10 +1098,12 @@ public class GameService {
 
 
     public void surrender(SurrenderRequest request){
+        System.out.println("Aufgeben wird ausgeführt");
         Optional<Game> optionalGame = gameRepository.findById(request.getGameId());
         Optional<UserAccount> optionalUserAccount = userAccountRepository.findById(request.getUserId());
         Optional<PlayerState> optionalBotPS = playerStateRepository.findById(request.getUserId());
         if(optionalGame.isEmpty() || optionalUserAccount.isEmpty() && optionalBotPS.isEmpty()){
+            System.out.println("Aufgeben1");
             return;
         }
 
@@ -1102,12 +1114,14 @@ public class GameService {
             winner.getPlayerState().setWinner(true);
             playerStateRepository.save(winner.getPlayerState());
             terminateMatch(request.getGameId(), loser.getId(), winner.getId());
+            System.out.println("Aufgeben2");
         }else{
             PlayerState botPS = optionalBotPS.get();
             UserAccount loser = game.getUsers().get(0);
             botPS.setWinner(true);
             playerStateRepository.save(botPS);
             terminateMatch(request.getGameId(), botPS.getId(), loser.getId());
+            System.out.println("Aufgeben3");
         }
     }
 
