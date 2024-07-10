@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import Axios from 'axios';
 import './Profile.css';
 import testbild from './testbild.jpg';
@@ -8,6 +8,7 @@ import BackButton from '../BackButton';
 // Profil-Seite
 
 function Profile() {
+  const navigate = useNavigate();
   const id = localStorage.getItem('id');
   const [profilePicture, setProfilePicture] = useState('');
   const [username, setUsername] = useState('');
@@ -142,30 +143,32 @@ function Profile() {
     <BackButton/>
       <div className="Profile">
         <h1 className="titel"> Mein Profil</h1>
-        <div className="daten">
-          
-          {/* Profilbild anzeigen und Ändern */}
-          <input type="file" accept="image/*" onChange={handleFileChange} style={{display: 'none'}} />
-          <img className="profilbild"
+          <div className="daten">
 
-          // Profilbild umwandeln von base64 in Bildformat
-          src={`data:image/jpeg;base64,${profilePicture}`}
-          alt={'Profilbild'} onClick={() => document.querySelector('input[type="file"]').click()}
-          />
+              {/* Profilbild anzeigen und Ändern */}
+              <input type="file" accept="image/*" onChange={handleFileChange} style={{display: 'none'}}/>
+              <img className="profilbild"
 
-          <p><strong>Username:</strong> {username}</p>
-          <p><strong>Vorname:</strong> {vorname}</p>
-          <p><strong>Nachname:</strong> {nachname}</p>
-          <p><strong>Email:</strong> {email}</p>
-          <p><strong>Clan-Name:</strong> {clanName}</p>
-          {/*<p><strong>Passwort:</strong> {password} </p>*/}
-          <p><strong>Geburtsdatum:</strong> {geburtsdatum}</p>
-          {role !== 'ADMIN' && <p><strong>SEP Coins:</strong> {sepCoins}</p>}
-          {role !== 'ADMIN' && <p><strong>Leaderboard Punkte:</strong> {leaderbordpunkte}</p>}
-          {error && <p className="error">{error}</p>} {/* Fehlermeldung anzeigen falls error != null */}
-        </div>
+                  // Profilbild umwandeln von base64 in Bildformat
+                   src={`data:image/jpeg;base64,${profilePicture}`}
+                   alt={'Profilbild'} onClick={() => document.querySelector('input[type="file"]').click()}
+              />
+
+              <p><strong>Username:</strong> {username}</p>
+              <p><strong>Vorname:</strong> {vorname}</p>
+              <p><strong>Nachname:</strong> {nachname}</p>
+              <p><strong>Email:</strong> {email}</p>
+              <p><strong>Clan-Name:</strong> {clanName}</p>
+              {/*<p><strong>Passwort:</strong> {password} </p>*/}
+              <p><strong>Geburtsdatum:</strong> {geburtsdatum}</p>
+              {role !== 'ADMIN' && <p><strong>SEP Coins:</strong> {sepCoins}</p>}
+              {role !== 'ADMIN' && <p><strong>Leaderboard Punkte:</strong> {leaderbordpunkte}</p>}
+              {error && <p className="error">{error}</p>} {/* Fehlermeldung anzeigen falls error != null */}
+              <button onClick={() => navigate('/duellhistorie')}>Duellhistorie ansehen</button>n
+          </div>
       </div>
     </>
   );
 }
+
 export default Profile;
