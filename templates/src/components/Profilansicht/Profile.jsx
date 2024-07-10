@@ -164,7 +164,7 @@ function Profile() {
               {role !== 'ADMIN' && <p><strong>SEP Coins:</strong> {sepCoins}</p>}
               {role !== 'ADMIN' && <p><strong>Leaderboard Punkte:</strong> {leaderbordpunkte}</p>}
               {error && <p className="error">{error}</p>} {/* Fehlermeldung anzeigen falls error != null */}
-              <button onClick={() => navigate('/duellhistorie')}>Duellhistorie ansehen</button>n
+              <button onClick={() => navigate('/duellhistorie')}>Duellhistorie ansehen</button>
           </div>
       </div>
     </>
