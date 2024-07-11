@@ -75,16 +75,12 @@ public class GameService {
 
     private void sendTimerUpdate(Game game) {
         int remainingTime = game.getRemaingTime();
-        if(game.getReady()){
-            for(UserAccount player : game.getUsers()) {
-                messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/timer", remainingTime);
-                System.out.println("irgendwas6");
-            }
-            if(!game.getViewers().isEmpty()){
-                for(UserAccount viewer : game.getViewers()) {
-                    messagingTemplate.convertAndSendToUser(viewer.getId().toString(), "/queue/timer", remainingTime);
-                    System.out.println("irgendwas7");
-                }
+        for(UserAccount player : game.getUsers()) {
+            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/timer", remainingTime);
+        }
+        if(!game.getViewers().isEmpty()){
+            for(UserAccount viewer : game.getViewers()) {
+                messagingTemplate.convertAndSendToUser(viewer.getId().toString(), "/queue/timer", remainingTime);
             }
         }
     }
