@@ -45,10 +45,12 @@ public class UserAccount implements UserDetails {
     private String duelStatus = "available"; // Neuer Status für Duell: available, in_duel, challenged
 
     @ManyToOne(fetch = FetchType.EAGER)
+    @JsonIgnore
     private Game watching;
 
     @ManyToOne                              //für Duell Herausforderung von
     @JoinColumn(name = "challenger_id")
+    @JsonIgnore
     private UserAccount challenger; // Der Benutzer, der diesen Benutzer herausgefordert hat
 
     @Enumerated(EnumType.STRING)
@@ -88,7 +90,7 @@ public class UserAccount implements UserDetails {
     @JsonIgnore
     private List<Bet> bets = new ArrayList<>();
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.EAGER,  cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     @JoinColumn(name = "player_state_id")
     private PlayerState playerState;
 

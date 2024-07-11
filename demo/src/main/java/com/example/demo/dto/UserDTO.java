@@ -18,7 +18,15 @@ public class UserDTO {
     private List<UserAccount> friends;
     private Integer leaderboardPoints;
     private String clanName;
+    private String status;
 
+
+    public UserDTO(Long id,String username,Integer leaderboardPoints,String status){
+        this.id=id;
+        this.username = username;
+        this.leaderboardPoints = leaderboardPoints;
+        this.status = status;
+    }
     // Konstruktoren, Getter und Setter
     public UserDTO( String username,long id,String firstName,String lastName) {
         this.username = username;

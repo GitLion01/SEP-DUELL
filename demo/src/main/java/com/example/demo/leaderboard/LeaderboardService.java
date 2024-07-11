@@ -1,5 +1,6 @@
 // src/main/java/com/example/demo/leaderboard/LeaderboardService.java
 package com.example.demo.leaderboard;
+import com.example.demo.dto.UserDTO;
 import com.example.demo.game.GameRepository;            //für duell Status
 import com.example.demo.user.UserAccount;
 import com.example.demo.user.UserAccountRepository;
@@ -8,6 +9,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,10 +20,15 @@ public class LeaderboardService {
     private final SimpMessagingTemplate messagingTemplate;
     private final GameRepository gameRepository;                    //für duell Status
 
-    public List<UserAccount> getLeaderboard() {
-        return userAccountRepository.findAll().stream()
-                .sorted((u1, u2) -> u2.getLeaderboardPoints().compareTo(u1.getLeaderboardPoints()))
-                .collect(Collectors.toList());
+    public List<UserDTO> getLeaderboard() {
+        return convertToUserDTO();
+    }
+
+    private List<UserDTO> convertToUserDTO() {
+        List<UserDTO> userDTOs = new ArrayList<>();
+        for(UserAccount user :userAccountRepository.findAll())
+            userDTOs.add(new UserDTO(user.getId(), user.getUsername(),user.getLeaderboardPoints(),user.getStatus()));
+        return userDTOs;
     }
 
     @Transactional

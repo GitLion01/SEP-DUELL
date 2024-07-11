@@ -1,6 +1,7 @@
 // src/main/java/com/example/demo/leaderboard/LeaderboardController.java
 package com.example.demo.leaderboard;
 
+import com.example.demo.dto.UserDTO;
 import com.example.demo.user.UserAccount;
 import com.example.demo.user.UserAccountRepository;
 import com.example.demo.user.UserAccountService;
@@ -22,7 +23,7 @@ public class LeaderboardController {
     private final UserAccountRepository userAccountRepository;
 
     @GetMapping("/leaderboard")
-    public List<UserAccount> getLeaderboard() {
+    public List<UserDTO> getLeaderboard() {
         return leaderboardService.getLeaderboard();
     }
 

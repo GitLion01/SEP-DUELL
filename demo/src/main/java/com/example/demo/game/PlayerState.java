@@ -29,8 +29,8 @@ public class PlayerState {
 
 
     @OneToOne(mappedBy = "playerState")
-    @JsonIgnore
     @JoinColumn(name = "user_id")
+    @JsonIgnore
     private UserAccount user;
 
     @OneToMany(fetch = FetchType.EAGER)

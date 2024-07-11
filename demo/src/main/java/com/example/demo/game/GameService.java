@@ -17,6 +17,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Transactional
@@ -40,13 +41,10 @@ public class GameService {
         List<Game> games = gameRepository.findAll();
         for (Game game : games) {
             game.decrementTimer();
-            System.out.println("irgendwas");
             if(game.getReady() && game.getRemaingTime() <= 0){
                 handleTimerExpiration(game);
-                System.out.println("irgendwas2");
             }
             sendTimerUpdate(game);
-            System.out.println("irgendwas3");
         }
     }
 
@@ -77,14 +75,16 @@ public class GameService {
 
     private void sendTimerUpdate(Game game) {
         int remainingTime = game.getRemaingTime();
-        for(UserAccount player : game.getUsers()) {
-            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/timer", remainingTime);
-            System.out.println("irgendwas6");
-        }
-        if(!game.getViewers().isEmpty()){
-            for(UserAccount viewer : game.getViewers()) {
-                messagingTemplate.convertAndSendToUser(viewer.getId().toString(), "/queue/timer", remainingTime);
-                System.out.println("irgendwas7");
+        if(game.getReady()){
+            for(UserAccount player : game.getUsers()) {
+                messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/timer", remainingTime);
+                System.out.println("irgendwas6");
+            }
+            if(!game.getViewers().isEmpty()){
+                for(UserAccount viewer : game.getViewers()) {
+                    messagingTemplate.convertAndSendToUser(viewer.getId().toString(), "/queue/timer", remainingTime);
+                    System.out.println("irgendwas7");
+                }
             }
         }
     }
@@ -152,14 +152,14 @@ public class GameService {
         if(optionalGame.isEmpty() || optionalDeck.isEmpty() || optionalUser.isEmpty()) {
             return;
         }
+
         Game game = optionalGame.get();
         Deck deck = optionalDeck.get();
         UserAccount user = optionalUser.get();
-        List<Card> cards = deck.getCards();
+
         Collections.shuffle(deck.getCards()); // mischt das Deck
-        List<PlayerCard> playerCards = new ArrayList<>();
-        // Klonen der Card ind PlayerCard
-        for(Card card : cards){
+        List<Card> cards = deck.getCards();
+        List<PlayerCard> playerCards = cards.stream().map(card -> {
             PlayerCard playerCard = new PlayerCard();
             playerCard.setName(card.getName());
             playerCard.setAttackPoints(card.getAttackPoints());
@@ -167,42 +167,25 @@ public class GameService {
             playerCard.setDescription(card.getDescription());
             playerCard.setImage(card.getImage());
             playerCard.setRarity(card.getRarity());
-            playerCard.setPlayerState(deck.getUser().getPlayerState());
-            playerCards.add(playerCard);
+            playerCard.setPlayerState(user.getPlayerState());
             playerCardRepository.save(playerCard);
-        }
-
+            return playerCard;
+        }).collect(Collectors.toList());
 
         user.getPlayerState().setDeck(deck);
         user.getPlayerState().setReady(true);
-        //Fortan wird mit diesem Deck Klon gearbeitet
         user.getPlayerState().setDeckClone(playerCards);
-        playerStateRepository.save(user.getPlayerState());
-        // setzt initial 5 Karten aus dem gemischten Deck auf die Hand
-        Iterator<PlayerCard> iterator = user.getPlayerState().getDeckClone().iterator();
-        int count = 0;
-        List<PlayerCard> cardsToRemove = new ArrayList<>();
-        while (iterator.hasNext() && count < 5) {
-            PlayerCard playerCard = iterator.next(); // Hohlt die nächste Karte aus dem Deck
-            user.getPlayerState().getHandCards().add(playerCard); // Fügt die Karte der Hand des Spielers hinzu
-            cardsToRemove.add(playerCard);
-            count++; // Inkrementiert den Zähler für die Anzahl der gezogenen Karten
-        }
 
+        List<PlayerCard> handCards = playerCards.stream().limit(5).toList();
+        user.getPlayerState().getHandCards().addAll(handCards);
+        user.getPlayerState().getDeckClone().removeAll(handCards);
 
-        user.getPlayerState().getDeckClone().removeAll(cardsToRemove);
         playerStateRepository.save(user.getPlayerState());
-        userAccountRepository.save(user);
-        // überprüft ob in beiden PlayerStates der Spieler ready auf true gesetzt ist
-        boolean allPlayersReady = true;
-        for (UserAccount userAccount : userAccountRepository.findAll()) {
-            if(game.getUsers().contains(userAccount)) {
-                if (!playerStateRepository.findById(userAccount.getPlayerState().getId()).get().getReady()) {
-                    allPlayersReady = false;
-                    break;
-                }
-            }
-        }
+        //userAccountRepository.save(user);
+
+        boolean allPlayersReady = game.getUsers().stream()
+                .allMatch(player -> playerStateRepository.findById(player.getPlayerState().getId()).get().getReady());
+
 
         if (allPlayersReady) {
             game.resetTimer();
@@ -210,16 +193,13 @@ public class GameService {
         }
 
 
-        playerStateRepository.save(user.getPlayerState());
-        userAccountRepository.save(user);
+        //playerStateRepository.save(user.getPlayerState());
+        //userAccountRepository.save(user);
 
-        System.out.println(" DeckSelection ------------------------- currentTurn: "+ game.getCurrentTurn().getUsername() + "; erster Spieler: " + game.getUsers().get(0).getUsername() + "; zweiter Spieler: " + game.getUsers().get(1).getUsername());
         gameRepository.save(game);
-        List<Long> userIds = gameRepository.findAllUsersByGameId(game.getId());
-        List<UserAccount> users = new ArrayList<>();
-        for (Long userId : userIds) {
-            users.add(userAccountRepository.findById(userId).get());
-        }
+        List<UserAccount> users = gameRepository.findAllUsersByGameId(game.getId()).stream()
+                .map(userId -> userAccountRepository.findById(userId).orElse(null))
+                .collect(Collectors.toList());
 
         if(game.getReady()) {
             for (UserAccount player : users) {
@@ -227,15 +207,14 @@ public class GameService {
             }
         }
 
-        System.out.println(" DeckSelection ------------------------- currentTurn: "+game.getCurrentTurn().getUsername() + "; erster Spieler: " + users.get(0).getUsername() + "; zweiter Spieler: " + users.get(1).getUsername());
-        System.out.println(" DeckSelection ------------------------- currentTurn: "+ game.getCurrentTurn().getUsername() + "; erster Spieler: " + users.get(0).getUsername() + "; zweiter Spieler: " + users.get(1).getUsername());
-
-
         if(game.getReady() && game.getStreamed()) {
-            Map<Long, List<String>> streamedGames = new HashMap<>();
-            for (Game stream : gameRepository.findAllStreams().get()) {
-                streamedGames.put(stream.getId(), List.of(stream.getUsers().get(0).getUsername(), stream.getUsers().get(1).getUsername()));
-            }
+            Map<Long, List<String>> streamedGames = gameRepository.findAllStreams().get().stream()
+                    .collect(Collectors.toMap(
+                            Game::getId,
+                            stream -> stream.getUsers().stream()
+                                    .map(UserAccount::getUsername)
+                                    .collect(Collectors.toList())
+                    ));
             messagingTemplate.convertAndSend("/queue/streams", streamedGames);
         }
 
@@ -1278,8 +1257,9 @@ public class GameService {
         newGame.setCurrentTurn(user);
         gameRepository.save(newGame);
 
-        List<Card> cards = deck.getCards();
+
         Collections.shuffle(deck.getCards()); // mischt das Deck
+        List<Card> cards = deck.getCards();
         List<PlayerCard> playerCards = new ArrayList<>();
         // Klonen der Card in PlayerCard
         for(Card card : cards){
