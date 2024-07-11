@@ -10,7 +10,6 @@ import com.example.demo.turnier.TurnierService;
 import com.example.demo.user.UserAccount;
 import com.example.demo.user.UserAccountRepository;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -1109,16 +1108,17 @@ public class GameService {
         }
         game.setCurrentTurn(null);
         if (game.getUsers().size() == 2) {
-            userAccountRepository.updatePlayerStateToNullByUserIds(userIds);
             UserAccount userAccount = userAccountRepository.findById(userIds.get(0)).get();
             userAccount.getPlayerState().setHandCards(null);
             userAccount.getPlayerState().setFieldCards(null);
             userAccount.getPlayerState().setCardsPlayed(null);
             userAccount.getPlayerState().setDeckClone(null);
             userAccount.getPlayerState().setDeck(null);
-            playerCardRepository.deleteByPlayerStateId(userAccount.getPlayerState().getId());
-            playerStateRepository.save(userAccount.getPlayerState());
-            playerStateRepository.delete(userAccount.getPlayerState());
+            PlayerState playerState = userAccount.getPlayerState();
+            userAccount.setPlayerState(null);
+            playerCardRepository.deleteByPlayerStateId(playerState.getId());
+            playerStateRepository.save(playerState);
+            playerStateRepository.delete(playerState);
 
             userAccount = userAccountRepository.findById(userIds.get(1)).get();
             userAccount.getPlayerState().setHandCards(null);
@@ -1126,22 +1126,25 @@ public class GameService {
             userAccount.getPlayerState().setCardsPlayed(null);
             userAccount.getPlayerState().setDeckClone(null);
             userAccount.getPlayerState().setDeck(null);
-            playerCardRepository.deleteByPlayerStateId(userAccount.getPlayerState().getId());
-            playerStateRepository.save(userAccount.getPlayerState());
-            playerStateRepository.delete(userAccount.getPlayerState());
+            playerState = userAccount.getPlayerState();
+            userAccount.setPlayerState(null);
+            playerCardRepository.deleteByPlayerStateId(playerState.getId());
+            playerStateRepository.save(playerState);
+            playerStateRepository.delete(playerState);
 
             gameRepository.deleteFromGameUsersByUserIds(userIds);
         }else{
-            userAccountRepository.updatePlayerStateToNullByUserIds(userIds);
             UserAccount userAccount = userAccountRepository.findById(userIds.get(0)).get();
             userAccount.getPlayerState().setHandCards(null);
             userAccount.getPlayerState().setFieldCards(null);
             userAccount.getPlayerState().setCardsPlayed(null);
             userAccount.getPlayerState().setDeckClone(null);
             userAccount.getPlayerState().setDeck(null);
-            playerCardRepository.deleteByPlayerStateId(userAccount.getPlayerState().getId());
-            playerStateRepository.save(userAccount.getPlayerState());
-            playerStateRepository.delete(userAccount.getPlayerState());
+            PlayerState playerState = userAccount.getPlayerState();
+            userAccount.setPlayerState(null);
+            playerCardRepository.deleteByPlayerStateId(playerState.getId());
+            playerStateRepository.save(playerState);
+            playerStateRepository.delete(playerState);
 
             PlayerState botPS = playerStateRepository.findById(userIds.get(1)).get();
             botPS.setHandCards(null);
@@ -1158,7 +1161,6 @@ public class GameService {
         }
         gameRepository.deleteById(gameId);
     }
-
 
 
     public Optional<List<Game>> getStreamedGames(){

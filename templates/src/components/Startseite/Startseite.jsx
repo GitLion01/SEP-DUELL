@@ -1,19 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import './Startseite.css';
 import { useNavigate } from 'react-router-dom';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { toast, ToastContainer } from 'react-toastify';
-import useCheckTurnier from '../Turnier/checkTurnier';
 
 const Startseite = () => {
   const [loggedIn, setLoggedIn] = useState(true);
   const navigate = useNavigate();
   const userId = localStorage.getItem('id');
   const clanId = localStorage.getItem('clanId');
-
-  const isTurnierReady = useCheckTurnier(clanId);
-
 
   const handleLogout = async () => {
     if (userId) {
@@ -31,7 +27,7 @@ const Startseite = () => {
       });
 
       stompClient.onConnect = () => {
-        const offline="offline";
+        const offline = "offline";
         stompClient.publish({
           destination: '/app/status',
           body: JSON.stringify(offline),
@@ -67,10 +63,34 @@ const Startseite = () => {
     }
   };
 
-  const handleTurnierClick = (event) => {
-    if (!isTurnierReady) {
+  const handleTurnierClick = async (event) => {
+    if (clanId) {
+      try {
+        const turnierResponse = await fetch(`http://localhost:8080/getTurnierId?clanId=${clanId}`);
+        const turnierId = await turnierResponse.json();
+
+        if (turnierId) {
+          const statusResponse = await fetch(`http://localhost:8080/checkTurnier?turnierId=${turnierId}`);
+          const isTurnierReady = await statusResponse.json();
+
+          if (!isTurnierReady) {
+            event.preventDefault();
+            toast.error('Das Turnier ist noch nicht bereit.');
+          } else {
+            navigate('/turnier');
+          }
+        } else {
+          event.preventDefault();
+          toast.error('Kein Turnier gefunden.');
+        }
+      } catch (error) {
+        event.preventDefault();
+        console.error('Error checking turnier:', error);
+        toast.error('Turnier ist noch nicht bereit');
+      }
+    } else {
       event.preventDefault();
-      toast.error('Das Turnier ist noch nicht bereit.');
+      toast.error('Kein Clan gefunden.');
     }
   };
 
@@ -80,7 +100,7 @@ const Startseite = () => {
 
   return (
       <div className="AppStart">
-          <ToastContainer />
+        <ToastContainer />
         <header>
           <h1>STARTSEITE</h1>
           <div className="logout-button">
@@ -99,7 +119,7 @@ const Startseite = () => {
               <a href="/decks"><h2>MEIN DECK</h2></a>
             </section>
             <section className="freundesliste">
-              <a href="/freundelist"> <h2>MEINE FREUNDESLISTE</h2></a>
+              <a href="/freundelist"><h2>MEINE FREUNDESLISTE</h2></a>
             </section>
             <section className="adminsteuerfeld">
               <a href="/admin" onClick={handleAdminClick}><h2>MEIN ADMINSTEUERFELD</h2></a>
@@ -110,18 +130,18 @@ const Startseite = () => {
             <section className="shop">
               <a href="/chat"><h2>CHAT</h2></a>
             </section>
-              <section>
-                  <a href="/clan"><h2>CLANS</h2></a>
-              </section>
-              <section>
-                  <a href="/turnier" onClick={handleTurnierClick}><h2>TURNIER</h2></a>
-              </section>
-              <section className="liveduelle">
-                  <a href="/streams"><h2>LIVE DUELLE</h2></a>
-              </section>
-              <section>
-                  <a href="/botdeckselect"><h2>BOT DUELL</h2></a>
-              </section>
+            <section>
+              <a href="/clan"><h2>CLANS</h2></a>
+            </section>
+            <section>
+              <a  onClick={handleTurnierClick}><h2>TURNIER</h2></a>
+            </section>
+            <section className="liveduelle">
+              <a href="/streams"><h2>LIVE DUELLE</h2></a>
+            </section>
+            <section>
+              <a href="/botdeckselect"><h2>BOT DUELL</h2></a>
+            </section>
           </div>
         </main>
       </div>
