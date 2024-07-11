@@ -25,7 +25,7 @@ public class PlayerState {
 
 
 
-    @OneToOne(fetch = FetchType.EAGER,mappedBy = "playerState")
+    @OneToOne(mappedBy = "playerState")
     @JoinColumn(name = "user_id")
     @JsonIgnore
     private UserAccount user;

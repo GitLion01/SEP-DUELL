@@ -197,13 +197,6 @@ export const WebSocketProvider = ({ children }) => {
                 destination: '/app/createGame',
                 body: JSON.stringify({userA: receiverId, userB: senderName}),
             });
-            client.publish({
-                destination: '/status/status',
-                body: JSON.stringify("im Duell"),
-                headers: {
-                    userId: userId.toString(),
-                },
-            });
             toast.success("Spiel wird gestartet");
             setActiveDuel(false);
             window.dispatchEvent(new CustomEvent('duelStarted'));

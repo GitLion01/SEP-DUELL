@@ -92,15 +92,6 @@ public class GameService {
         UserAccount userB = userAccountRepository.findByUsername(request.getUserB())
                 .orElseThrow(() -> new IllegalArgumentException("User B not found"));
 
-        if (gameRepository.existsByUsersContaining(userA)) {
-            System.out.println("User with id: " + userA.getId() + " already in a game");
-            return;
-        }
-
-        if (gameRepository.existsByUsersContaining(userB)) {
-            System.out.println("User with id: " + userA.getId() + " already in a game");
-            return;
-        }
 
         PlayerState playerStateA = new PlayerState();
         playerStateRepository.save(playerStateA);
@@ -140,7 +131,7 @@ public class GameService {
         System.out.println(" CreateGame ------------------------- currentTurn: "+ newGame.getCurrentTurn().getUsername() + "; erster Spieler: " + newGame.getUsers().get(0).getUsername() + "; zweiter Spieler: " + newGame.getUsers().get(1).getUsername());
     }
 
-    @Transactional
+
     public void selectDeck(DeckSelectionRequest request) {
         Optional<Game> optionalGame = gameRepository.findById(request.getGameId());
         Optional<Deck> optionalDeck = deckRepository.findByDeckIdAndUserId(request.getDeckId(), request.getUserId());
