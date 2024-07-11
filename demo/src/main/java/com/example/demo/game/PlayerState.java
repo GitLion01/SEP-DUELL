@@ -1,7 +1,4 @@
 package com.example.demo.game;
-
-import com.example.demo.cards.Card;
-import com.example.demo.cards.CardInstance;
 import com.example.demo.decks.Deck;
 import com.example.demo.user.UserAccount;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -28,25 +25,25 @@ public class PlayerState {
 
 
 
-    @OneToOne(mappedBy = "playerState")
+    @OneToOne(fetch = FetchType.EAGER,mappedBy = "playerState")
     @JoinColumn(name = "user_id")
     @JsonIgnore
     private UserAccount user;
 
-    @OneToMany(fetch = FetchType.EAGER)
+    @OneToMany
     private List<PlayerCard> cardsPlayed = new ArrayList<>();
 
-    @OneToMany(fetch = FetchType.EAGER)
+    @OneToMany
     private List<PlayerCard> handCards = new ArrayList<>();
 
-    @OneToMany(fetch = FetchType.EAGER)
+    @OneToMany
     private List<PlayerCard> fieldCards = new ArrayList<>();
 
-    @OneToMany(fetch = FetchType.EAGER)
+    @OneToMany
     private List<PlayerCard> deckClone = new ArrayList<>();
 
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.EAGER)
     @JsonIgnore
     @JoinColumn(name = "deck_id")
     private Deck deck;

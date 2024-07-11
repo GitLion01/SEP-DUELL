@@ -3,6 +3,7 @@ import com.example.demo.cards.Card;
 import com.example.demo.cards.Rarity;
 import com.example.demo.decks.Deck;
 import com.example.demo.decks.DeckRepository;
+import com.example.demo.dto.UserDTO;
 import com.example.demo.duellHerausforderung.Notification;
 import com.example.demo.game.requests.*;
 import com.example.demo.leaderboard.LeaderboardService;
@@ -145,6 +146,9 @@ public class GameService {
         Optional<Deck> optionalDeck = deckRepository.findByDeckIdAndUserId(request.getDeckId(), request.getUserId());
         Optional<UserAccount> optionalUser = userAccountRepository.findById(request.getUserId());
         if(optionalGame.isEmpty() || optionalDeck.isEmpty() || optionalUser.isEmpty()) {
+            System.out.println("in if"+ optionalGame.get().getId());
+            System.out.println("in if"+ optionalDeck.get().getId());
+            System.out.println("in if"+ optionalUser.get().getId());
             return;
         }
 
@@ -167,6 +171,7 @@ public class GameService {
             return playerCard;
         }).collect(Collectors.toList());
 
+        System.out.println("+++++++++ "+user.getPlayerState().getId());
         user.getPlayerState().setDeck(deck);
         user.getPlayerState().setReady(true);
         user.getPlayerState().setDeckClone(playerCards);
@@ -174,9 +179,12 @@ public class GameService {
         List<PlayerCard> handCards = playerCards.stream().limit(5).toList();
         user.getPlayerState().getHandCards().addAll(handCards);
         user.getPlayerState().getDeckClone().removeAll(handCards);
+        System.out.println("------------ "+ deck.getId() + "  " + user.getPlayerState().getReady());
 
         playerStateRepository.save(user.getPlayerState());
-        //userAccountRepository.save(user);
+        userAccountRepository.save(user);
+
+        System.out.println("------------ "+ playerStateRepository.findById(user.getPlayerState().getId()).get().getReady());
 
         boolean allPlayersReady = game.getUsers().stream()
                 .allMatch(player -> playerStateRepository.findById(player.getPlayerState().getId()).get().getReady());
@@ -196,6 +204,7 @@ public class GameService {
                 .map(userId -> userAccountRepository.findById(userId).orElse(null))
                 .collect(Collectors.toList());
 
+
         if(game.getReady()) {
             for (UserAccount player : users) {
                 messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/selectDeck", Arrays.asList(game, users));
@@ -213,6 +222,34 @@ public class GameService {
             messagingTemplate.convertAndSend("/queue/streams", streamedGames);
         }
 
+    }
+
+    private GameDTO convertTOGameDTO(Game game) {
+        GameDTO gameDTO = new GameDTO();
+
+        gameDTO.setId(game.getId());
+        gameDTO.setReady(game.getReady());
+        gameDTO.setFirstRound(game.getFirstRound());
+        gameDTO.setTimeLeft(game.getTimeLeft());
+        gameDTO.setCurrentTurn(game.getCurrentTurn());
+        gameDTO.setStreamed(game.getStreamed());
+        gameDTO.setMyTurn(game.getMyTurn());
+        try{
+            gameDTO.setBotDeckId(game.getBotDeckId());
+            gameDTO.setPlayerStateBot(game.getPlayerStateBot());
+        }catch (Exception e){
+            System.out.println("gegen human");
+        }
+
+        return gameDTO;
+    }
+
+    private List<UserDTO> convertToUserDTO(List<UserAccount> users) {
+        List<UserDTO> userDTOs = new ArrayList<>();
+        for (UserAccount user : users) {
+            userDTOs.add(new UserDTO(user.getId(),user.getUsername(),user.getPlayerState(),user.getDuelStatus()));
+        }
+        return userDTOs;
     }
 
     // erste Karte im Deck wird auf die Hand gelegt

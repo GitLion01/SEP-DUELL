@@ -57,11 +57,11 @@ public class UserAccount implements UserDetails {
     private UserRole role;
     private Boolean locked = false;
     private Boolean enabled = false;
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Deck> decks = new ArrayList<>();
     private Boolean privateFriendList =false;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.LAZY)
     /*to ignore the infinite loop occurring in the serialization ,when join the two tables
     /if a user accepted the friend request*/
     @JsonIgnore
@@ -71,7 +71,7 @@ public class UserAccount implements UserDetails {
             inverseJoinColumns = @JoinColumn(name = "friend_id"))
     private List<UserAccount> friends=new ArrayList<>();
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JsonIgnore
     @JoinTable(
             name = "friend_requests",
@@ -82,11 +82,11 @@ public class UserAccount implements UserDetails {
 
     // mappedBy : um das besitzende Seite der Verbindung zu definieren
     // es gibt immer eine besitzende Seite bei bidirektionalen Beziehung zwischen zwei Entitäten
-    @OneToMany(mappedBy = "userAccount", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "userAccount", fetch = FetchType.LAZY)
     private List<CardInstance> userCardInstance=new ArrayList<>();
 
     //Turnierwetten
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonIgnore
     private List<Bet> bets = new ArrayList<>();
 

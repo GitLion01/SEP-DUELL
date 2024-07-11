@@ -1,5 +1,6 @@
 package com.example.demo.dto;
 
+import com.example.demo.game.PlayerState;
 import com.example.demo.user.UserAccount;
 import lombok.Getter;
 import lombok.Setter;
@@ -54,5 +55,8 @@ public class UserDTO {
         this.lastName = lastName;
         this.friends = friends;
         this.leaderboardPoints = leaderboardPoints;
+    }
+
+    public UserDTO(Long id, String username, PlayerState playerState, String duelStatus) {
     }
 }
