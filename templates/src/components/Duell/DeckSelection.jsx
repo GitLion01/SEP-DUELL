@@ -63,9 +63,7 @@ const  DeckSelection = () => {
         console.log('users saved in State: ', response[1]);
         console.log('game saved in State: ', response[0]);
 
-        if (response[0].ready === true) {
-          navigate('/duel');
-        }
+        navigate('/duel');
       });
 
       return () => subscription.unsubscribe(); // Cleanup function
