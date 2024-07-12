@@ -1,6 +1,7 @@
 package com.example.demo.turnier;
 
 import com.example.demo.user.UserAccount;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,10 +19,12 @@ public class Bet {
 
     @ManyToOne
     @JoinColumn(name = "bettor_id")
+    @JsonIgnore
     private UserAccount bettor;
 
     @ManyToOne
     @JoinColumn(name = "bet_on_id")
+    @JsonIgnore
     private UserAccount betOn;
 
     private boolean isWinner;

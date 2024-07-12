@@ -31,6 +31,7 @@ public class Clan {
     private List<UserAccount> users =new ArrayList<>();
 
     @OneToOne(cascade = CascadeType.ALL)
+    @JsonIgnore
     private Group group = new Group(name);
 
     @OneToOne

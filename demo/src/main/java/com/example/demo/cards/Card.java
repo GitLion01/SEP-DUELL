@@ -1,5 +1,6 @@
 package com.example.demo.cards;
 import com.example.demo.decks.Deck;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -29,9 +30,11 @@ public class Card {
     //CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH und CascadeType.DETACH.
 
     @ManyToMany(mappedBy = "cards", cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @JsonIgnore
     private List<Deck> decks = new ArrayList<>();
 
     @OneToMany(mappedBy = "card", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<CardInstance> cardInstance=new ArrayList<>();
 
 

@@ -1,5 +1,6 @@
 package com.example.demo.chat;
 import com.example.demo.user.UserAccount;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import java.util.ArrayList;
@@ -17,9 +18,11 @@ public class Chat {
     private Long id;
 
     @ManyToMany(mappedBy = "userChat")
+    @JsonIgnore
     List<UserAccount> users = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JsonIgnore
     List<ChatMessage> messages = new ArrayList<>();
 
 }

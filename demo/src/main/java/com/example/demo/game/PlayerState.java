@@ -31,15 +31,19 @@ public class PlayerState {
     private UserAccount user;
 
     @OneToMany
+    @JsonIgnore
     private List<PlayerCard> cardsPlayed = new ArrayList<>();
 
     @OneToMany
+    @JsonIgnore
     private List<PlayerCard> handCards = new ArrayList<>();
 
     @OneToMany
+    @JsonIgnore
     private List<PlayerCard> fieldCards = new ArrayList<>();
 
     @OneToMany
+    @JsonIgnore
     private List<PlayerCard> deckClone = new ArrayList<>();
 
 

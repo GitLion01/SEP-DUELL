@@ -58,6 +58,7 @@ public class UserAccount implements UserDetails {
     private Boolean locked = false;
     private Boolean enabled = false;
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JsonIgnore
     private List<Deck> decks = new ArrayList<>();
     private Boolean privateFriendList =false;
 
@@ -83,6 +84,7 @@ public class UserAccount implements UserDetails {
     // mappedBy : um das besitzende Seite der Verbindung zu definieren
     // es gibt immer eine besitzende Seite bei bidirektionalen Beziehung zwischen zwei Entitäten
     @OneToMany(mappedBy = "userAccount")
+    @JsonIgnore
     private List<CardInstance> userCardInstance=new ArrayList<>();
 
     //Turnierwetten
@@ -92,6 +94,7 @@ public class UserAccount implements UserDetails {
 
     @OneToOne(fetch = FetchType.EAGER,  cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     @JoinColumn(name = "player_state_id")
+    @JsonIgnore
     private PlayerState playerState;
 
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
