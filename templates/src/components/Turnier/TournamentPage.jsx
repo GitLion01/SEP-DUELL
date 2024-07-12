@@ -181,6 +181,7 @@ const TournamentPage = () => {
         }
     };
 
+    //Damit Spieler nicht wieder gegeneinander spielen können
     const canStartGame = (player1, player2) => {
         return !winners.includes(player1) && !winners.includes(player2);
     };

@@ -28,7 +28,7 @@ const DuellHistorie = () => {
         <>
             <BackButton />
             <div className="duellhistorie-container">
-                <h2>Duellhistorie</h2>
+                <h2 className="h2dh">Duellhistorie</h2>
                 <table className="duellhistorie-table">
                     <thead>
                     <tr>
