@@ -94,7 +94,6 @@ public class UserAccount implements UserDetails {
 
     @OneToOne(fetch = FetchType.EAGER,  cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     @JoinColumn(name = "player_state_id")
-    @JsonIgnore
     private PlayerState playerState;
 
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)

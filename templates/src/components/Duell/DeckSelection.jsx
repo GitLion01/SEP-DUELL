@@ -59,7 +59,7 @@ const  DeckSelection = () => {
 
 
         console.log('Users in game: ', response[1]);
-        console.log('response from server: ', response);
+        console.log('response from server DECKSELECT: ', response);
         console.log('users saved in State: ', response[1]);
         console.log('game saved in State: ', response[0]);
 
