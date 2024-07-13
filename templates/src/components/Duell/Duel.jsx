@@ -25,7 +25,7 @@ const Duel = () => {
   const [selectedAttacker, setSelectedAttacker] = useState(null);
   const [selectedTarget, setSelectedTarget] = useState(null);
   const [currentTurn, setCurrentTurn] = useState(game?.currentTurn);
-  const [cardDrawn, setCardDrawn] = useState(false);
+  //const [cardDrawn, setCardDrawn] = useState(false);
   const [hasAttacked, setHasAttacked] = useState(false);
   const [selectedCards, setSelectedCards] = useState([]);
   const [selectedHandCard, setSelectedHandCard] = useState(null);
@@ -57,7 +57,6 @@ const Duel = () => {
         setOpponentState(opponentUser.playerState);
       }
       resetAttackMode();
-      setCardDrawn(false);
 
       console.log('playerState nach initial', playerState);
       console.log('opponent state nach intial: ', opponentState);
@@ -162,31 +161,32 @@ const Duel = () => {
       return;
     }
 
+    /*
+
     if (!cardDrawn && playerState.deckClone.length > 0) {
       toast.error("Ziehe zuerst eine Karte");
       return;
     }
+
+     */
 
     if (client) {
       client.publish({
         destination: '/app/endTurn',
         body: JSON.stringify({ gameID: gameId, userID: id }),
       });
+
+      /*
+
       if (cardDrawn) {
         setCardDrawn(false);
         console.log("cardDrawn: from end Turn ", cardDrawn);
       }
+
+       */
+
       resetAttackMode()
       setHasAttacked(false);
-    }
-  };
-
-  const handleTimeout = () => {
-    if (client) {
-      client.publish({
-        destination: '/app/timeout',
-        body: JSON.stringify({ userID: id, gameID: gameId }),
-      });
     }
   };
 
@@ -198,7 +198,7 @@ const Duel = () => {
       return;
     }
 
-    if(cardDrawn || playerState.deckClone.length === 0) {
+    if(/*cardDrawn || */ playerState.deckClone.length === 0) {
       if (opponentState.fieldCards.length === 0) {
         console.log("der sollte jetzt angreifen");
 
@@ -266,10 +266,14 @@ const Duel = () => {
       return;
     }
 
+    /*
+
     if (!cardDrawn && playerState.deckClone.length > 0) {
       toast.error("Ziehen Sie zuerst eine Karte");
       return;
     }
+
+     */
 
     if (hasAttacked) {
       toast.error("Sie haben schon angegriffen");
@@ -298,6 +302,7 @@ const Duel = () => {
     setSelectedTarget(null);
   };
 
+  /*
   //Karte ziehen
   const handleDrawCard = () => {
 
@@ -331,6 +336,8 @@ const Duel = () => {
     console.log("cardDrawn", cardDrawn);
   };
 
+   */
+
   const handleRareSwap = () => {
 
     if (currentTurn.id !== parseInt(id)) {
@@ -339,10 +346,13 @@ const Duel = () => {
       return;
     }
 
+    /*
     if (!cardDrawn && playerState.deckClone.length > 0) {
       toast.error("Ziehen Sie erst eine Karte");
       return;
     }
+
+     */
 
     if (hasAttacked) {
       toast.error("Sie dürfen nach einem Angriff keine Karte setzen");
@@ -378,11 +388,15 @@ const Duel = () => {
       return;
     }
 
+    /*
+
     if (!cardDrawn && playerState.deckClone.length > 0) {
       toast.error("Ziehen Sie erst eine Karte");
       resetAttackMode()
       return;
     }
+
+     */
 
     if (hasAttacked) {
       toast.error("Sie haben schon angegriffen");
@@ -491,7 +505,7 @@ const Duel = () => {
           ))}
         </div>
         <div className="player-actions">
-          <button onClick={() => handleDrawCard()}>Karte Ziehen</button>
+          {/*<button onClick={() => handleDrawCard()}>Karte Ziehen</button>*/}
           <button onClick={() => setIsSetCardMode(true)}>Karte einsetzen</button>
           <button onClick={() => handleAttack()}>Angreifen</button>
           <button onClick={() => setIsRareSwapMode(true)}>Rare Swap</button>
