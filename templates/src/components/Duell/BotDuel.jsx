@@ -200,41 +200,40 @@ const Duel = () => {
             return;
         }
 
-        //if(/* cardDrawn || */ playerState.deckClone.length === 0) {
-            if (opponentState.fieldCards.length === 0) {
-                console.log("der sollte jetzt angreifen");
+        if (opponentState.fieldCards.length === 0) {
+            console.log("der sollte jetzt angreifen");
 
-                console.log("angreifer wurde ausgewählt");
-                client.publish({
-                    destination: '/app/attackBot',
-                    body: JSON.stringify({
-                        gameId: gameId,
-                        attackerId: id,
-                        botPSId: opponentState.id,
-                        attackerCardId: selectedAttacker
-                    }),
-                });
-                console.log("Mein feld vor Angriff: ", playerState.fieldCards);
-                console.log("Gegner feld vor Angriff: ", opponentState.fieldCards);
-                setHasAttacked(true);
-            }
-            else {
-                console.log(id, selectedAttacker, selectedTarget);
-                //if (selectedTarget && selectedAttacker) {
-                console.log("gegnerkarte wird angegriffen");
-                client.publish({
-                    destination: '/app/attackBotCard',
-                    body: JSON.stringify({
-                        gameId: gameId,
-                        userIdAttacker: id,
-                        botPSId: opponentState.id,
-                        attackerId: selectedAttacker,
-                        targetId: selectedTarget
-                    }),
-                });
-                setHasAttacked(true);
-            }
-       // }
+            console.log("angreifer wurde ausgewählt");
+            client.publish({
+                destination: '/app/attackBot',
+                body: JSON.stringify({
+                    gameId: gameId,
+                    attackerId: id,
+                    botPSId: opponentState.id,
+                    attackerCardId: selectedAttacker
+                }),
+            });
+            console.log("Mein feld vor Angriff: ", playerState.fieldCards);
+            console.log("Gegner feld vor Angriff: ", opponentState.fieldCards);
+            setHasAttacked(true);
+        }
+        else {
+            console.log(id, selectedAttacker, selectedTarget);
+            //if (selectedTarget && selectedAttacker) {
+            console.log("gegnerkarte wird angegriffen");
+            client.publish({
+                destination: '/app/attackBotCard',
+                body: JSON.stringify({
+                    gameId: gameId,
+                    userIdAttacker: id,
+                    botPSId: opponentState.id,
+                    attackerId: selectedAttacker,
+                    targetId: selectedTarget
+                }),
+            });
+            setHasAttacked(true);
+        }
+
     }
 
     const selectAttackingCard = (Id) => {

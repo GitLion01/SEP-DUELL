@@ -32,7 +32,7 @@ const DuellHistorie = () => {
                 <table className="duellhistorie-table">
                     <thead>
                     <tr>
-                        <th>ID</th>
+                        <th>Duell</th>
                         <th>Spieler 1</th>
                         <th>Spieler 2</th>
                         <th>Punkte Spieler 1</th>
@@ -41,9 +41,9 @@ const DuellHistorie = () => {
                     </tr>
                     </thead>
                     <tbody>
-                    {duelle.map((duell, index) => (
+                    {duelle.slice().reverse().map((duell, index) => (
                         <tr key={index} className="duell-summary">
-                            <td>{duell.id}</td>
+                            <td>{duelle.length - index}</td>
                             <td>{duell.spieler1Name}</td>
                             <td>{duell.spieler2Name}</td>
                             <td>{duell.spieler1Punkte}</td>
