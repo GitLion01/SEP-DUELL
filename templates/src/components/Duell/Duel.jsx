@@ -198,7 +198,7 @@ const Duel = () => {
       return;
     }
 
-    if(/*cardDrawn || */ playerState.deckClone.length === 0) {
+    //if(/*cardDrawn || */ playerState.deckClone.length === 0) {
       if (opponentState.fieldCards.length === 0) {
         console.log("der sollte jetzt angreifen");
 
@@ -232,7 +232,7 @@ const Duel = () => {
         });
         setHasAttacked(true);
       }
-    }
+   // }
   };
 
   const selectAttackingCard = (Id) => {

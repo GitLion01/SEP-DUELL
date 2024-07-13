@@ -11,6 +11,7 @@ import com.example.demo.turnier.TurnierService;
 import com.example.demo.user.UserAccount;
 import com.example.demo.user.UserAccountRepository;
 import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -146,6 +147,7 @@ public class GameService {
         Game game = optionalGame.get();
         Deck deck = optionalDeck.get();
         UserAccount user = optionalUser.get();
+        UserAccount currentTurnUser = game.getCurrentTurn();
 
         Collections.shuffle(deck.getCards()); // mischt das Deck
         List<Card> cards = deck.getCards();
@@ -167,7 +169,15 @@ public class GameService {
         user.getPlayerState().setReady(true);
         user.getPlayerState().setDeckClone(playerCards);
 
-        List<PlayerCard> handCards = playerCards.stream().limit(5).toList();
+        // legt dem Spieler initial 5 Karten auf die Hand
+        List<PlayerCard> handCards = new ArrayList<>();
+        if(game.getCurrentTurn().equals(user)) {
+            handCards = playerCards.stream().limit(6).toList();
+        }else{
+            handCards = playerCards.stream().limit(5).toList();
+        }
+
+
         user.getPlayerState().getHandCards().addAll(handCards);
         user.getPlayerState().getDeckClone().removeAll(handCards);
         System.out.println("------------ "+ deck.getId() + "  " + user.getPlayerState().getReady());
@@ -253,9 +263,9 @@ public class GameService {
 
         Game game = optionalGame.get();
         UserAccount userAccount = optionalUserAccount.get();
-        if(!game.getCurrentTurn().equals(userAccount)){// prüft ob der User am zug ist
+        /*if(!game.getCurrentTurn().equals(userAccount)){// prüft ob der User am zug ist
             return;
-        }
+        }*/
         Deck deck = userAccount.getPlayerState().getDeck();
         List<PlayerCard> handCards = userAccount.getPlayerState().getHandCards();
 
@@ -333,6 +343,13 @@ public class GameService {
                 return;
             }
 
+            /*// dem Spieler wird automatisch eine Karte auf die Hand gelegt
+            DrawCardRequest drawCardRequest = new DrawCardRequest(request.getGameID(), request.getUserID().equals(game.getUsers().get(0).getId()) ? game.getUsers().get(1).getId() : game.getUsers().get(0).getId());
+            drawCard(drawCardRequest);*/
+
+            UserAccount notTurn = game.getCurrentTurn().equals(game.getUsers().get(0)) ? game.getUsers().get(1) : game.getUsers().get(0);
+            notTurn.getPlayerState().getHandCards().add(notTurn.getPlayerState().getDeckClone().remove(0));
+
             game.setCurrentTurn(game.getUsers().get(0).equals(userAccount) ? game.getUsers().get(1) : game.getUsers().get(0));
             game.resetTimer();
             if (game.getFirstRound()) {
@@ -346,6 +363,12 @@ public class GameService {
             gameRepository.save(game);
         } else {
             game.setMyTurn(false);
+
+            /*// dem Spieler wird automatisch eine Karte auf die Hand gelegt
+            DrawCardRequest drawCardRequest = new DrawCardRequest(request.getGameID(), request.getUserID());
+            drawCard(drawCardRequest);*/
+
+            userAccount.getPlayerState().getHandCards().add(userAccount.getPlayerState().getDeckClone().remove(0));
 
             //Aktionen des Bots
 
@@ -573,6 +596,7 @@ public class GameService {
         Optional<PlayerCard> optionalAttackerCard = playerCardRepository.findById(request.getAttackerId());
         Optional<PlayerCard> optionalTarget = playerCardRepository.findById(request.getTargetId());
         if(optionalGame.isEmpty() || optionalAttacker.isEmpty() || optionalDefender.isEmpty() || optionalAttackerCard.isEmpty() || optionalTarget.isEmpty()) {
+            System.out.println("Problem 1");
             return;
         }
         Game game = optionalGame.get();
@@ -581,11 +605,13 @@ public class GameService {
         PlayerCard attackerCard = optionalAttackerCard.get();
         PlayerCard target = optionalTarget.get();
         if(attackerCard.getHasAttacked()){
+            System.out.println("Karte hat bereits angegriffen");
             return;
         }
         if(!game.getCurrentTurn().equals(attacker) ||
                 defender.getPlayerState().getFieldCards().isEmpty() ||
                 attacker.getPlayerState().getFieldCards().contains(target)){
+            System.out.println("Spieler nicht am Zug");
             return;
         }
 
@@ -1085,14 +1111,18 @@ public class GameService {
         deleteUserGameData(userIds, game.getId());
 
         Map<Long, List<String>> streamedGames = new HashMap<>();
-        for(Game stream : gameRepository.findAllStreams().get()){
-            if(stream.getUsers().size() == 2) {
-                streamedGames.put(stream.getId(), List.of(stream.getUsers().get(0).getUsername(), stream.getUsers().get(1).getUsername()));
-            }else{
-                streamedGames.put(stream.getId(), List.of(stream.getUsers().get(0).getUsername(), "Bot"));
+        Optional<List<Game>> optionalStreams = gameRepository.findAllStreams();
+        if(optionalStreams.isPresent()) {
+            List<Game> streams = optionalStreams.get();
+            for (Game stream : streams) {
+                if (stream.getUsers().size() == 2) {
+                    streamedGames.put(stream.getId(), List.of(stream.getUsers().get(0).getUsername(), stream.getUsers().get(1).getUsername()));
+                } else {
+                    streamedGames.put(stream.getId(), List.of(stream.getUsers().get(0).getUsername(), "Bot"));
+                }
             }
+            messagingTemplate.convertAndSend("/queue/streams", streamedGames);
         }
-        messagingTemplate.convertAndSend("/queue/streams", streamedGames);
     }
 
 
@@ -1320,11 +1350,13 @@ public class GameService {
         playerStateRepository.save(playerStateBot);
         gameRepository.save(newGame);
 
+
+
         // setzt initial 5 Karten aus dem gemischten Deck auf die Hand
         Iterator<PlayerCard> iterator = user.getPlayerState().getDeckClone().iterator();
         int count = 0;
         List<PlayerCard> cardsToRemove = new ArrayList<>();
-        while (iterator.hasNext() && count < 5) {
+        while (iterator.hasNext() && count < 6) {
             PlayerCard playerCard = iterator.next(); // Holt die nächste Karte aus dem Deck
             user.getPlayerState().getHandCards().add(playerCard); // Fügt die Karte der Hand des Spielers hinzu
             cardsToRemove.add(playerCard);
