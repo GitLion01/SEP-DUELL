@@ -1396,7 +1396,7 @@ public class GameService {
         messagingTemplate.convertAndSendToUser(user.getId().toString(),"/queue/notifications",notification);
 
 
-        if(newGame.getReady() && newGame.getStreamed()) {
+        if(newGame.getReady() && newGame.getStreamed() && gameRepository.findAllStreams().isPresent()) {
             Map<Long,List<String>> streamedGames = new HashMap<>();
             for (Game stream : gameRepository.findAllStreams().get()) {
                 streamedGames.put(stream.getId(), List.of(stream.getUsers().get(0).getUsername(), "Bot"));
