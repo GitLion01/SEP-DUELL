@@ -484,7 +484,7 @@ public class GameService {
             }
         }else{
             messagingTemplate.convertAndSendToUser(users.get(0).getId().toString(), "/queue/game", Arrays.asList(game, users, game.getPlayerStateBot()));
-            messagingTemplate.convertAndSendToUser(users.get(0).getId().toString(), "/queue/newTurn", game.getCurrentTurn());
+            messagingTemplate.convertAndSendToUser(users.get(0).getId().toString(), "/queue/newTurn", "Neuer Zug");
         }
 
         if (!viewers.isEmpty()) {
