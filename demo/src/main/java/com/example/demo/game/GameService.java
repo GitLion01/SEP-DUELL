@@ -493,9 +493,11 @@ public class GameService {
         if(users.size() == 2) {
             for (UserAccount player : game.getUsers()) {
                 messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/game", Arrays.asList(game, users));
+                messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/newTurn", game.getCurrentTurn());
             }
         }else{
             messagingTemplate.convertAndSendToUser(users.get(0).getId().toString(), "/queue/game", Arrays.asList(game, users, game.getPlayerStateBot()));
+            messagingTemplate.convertAndSendToUser(users.get(0).getId().toString(), "/queue/newTurn", game.getCurrentTurn());
         }
 
         if (!viewers.isEmpty()) {
@@ -909,8 +911,6 @@ public class GameService {
         }
 
         Game game = optionalGame.get();
-
-
 
         List<PlayerCard> raresA ;
         List<PlayerCard> legendariesA;
