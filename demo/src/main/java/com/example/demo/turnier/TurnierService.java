@@ -13,9 +13,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @AllArgsConstructor
@@ -300,7 +298,25 @@ public class TurnierService {
 
 
 
+    public void getUserStatus(Long turnierID) {
+        Optional<Turnier> turnierCheck = turnierRepository.findById(turnierID);
+        if(turnierCheck.isPresent()){
+            Map<Long,List<String>> userStatus = new HashMap<>();
+            List<String> status = new ArrayList<>();
+            Turnier turnier = turnierCheck.get();
+            List<Match> matches = turnier.getRunde().get(turnier.getRunde().size()-1).getMatch();
+            for (Match match : matches) {
+                Optional<UserAccount> user1 = userAccountRepository.findById(match.getPlayer1());
+                user1.ifPresent(userAccount -> status.add(userAccount.getStatus()));
+                Optional<UserAccount> user2 = userAccountRepository.findById(match.getPlayer1());
+                user2.ifPresent(userAccount -> status.add(userAccount.getStatus()));
+                userStatus.put(match.getId(), status);
+            }
+            for(UserAccount user: turnier.getAkzeptierteUsers())
+                messagingTemplate.convertAndSendToUser(user.getId().toString(),"/status/turnier", userStatus);
+        }
 
+    }
 
 
 

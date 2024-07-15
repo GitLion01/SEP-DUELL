@@ -14,7 +14,7 @@ const TournamentPage = () => {
     const [clanMembers, setClanMembers] = useState([]);
     const [selectedMember, setSelectedMember] = useState(null);
     const userId = parseInt(localStorage.getItem('id'));
-    const { createGame, sendWinner } = useContext(WebSocketContext);
+    const { createGame } = useContext(WebSocketContext);
 
     useEffect(() => {
         fetchClanId();
@@ -126,6 +126,7 @@ const TournamentPage = () => {
 
         matches.forEach((match) => {
             if (match.player2 === null) {
+                console.log(match.player1)
                 sendWinner(match.player1);
                 if (match.player1 === userId) {
                     userMatchesArray.push(match);
@@ -142,6 +143,28 @@ const TournamentPage = () => {
         setUserMatches(userMatchesArray);
         setOtherMatches(otherMatchesArray);
     };
+
+    const sendWinner = async (winnerId) => {
+        try {
+            const response = await fetch(`http://localhost:8080/gewinnerSpeichern?userId=${winnerId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (response.ok) {
+                toast.success('Gewinner erfolgreich gespeichert');
+            } else {
+                const errorMessage = await response.text();
+                toast.error(`Fehler beim Speichern des Gewinners: ${errorMessage}`);
+            }
+        } catch (error) {
+            console.error('Error sending winner:', error);
+            toast.error('Fehler beim Speichern des Gewinners');
+        }
+    };
+
 
     const fetchClanId = async () => {
         try {

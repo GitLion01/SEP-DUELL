@@ -79,7 +79,10 @@ public class TurnierController {
         return turnierService.getTurnierId(clanId);
     }
 
-
+    @MessageMapping("/UserStatus")
+    public void userStatus(@Payload Long turnierID) {
+        turnierService.getUserStatus(turnierID);
+    }
 
 
 
