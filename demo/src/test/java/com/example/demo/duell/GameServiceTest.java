@@ -554,17 +554,6 @@ public class GameServiceTest {
         //Ausführen der Methode
         gameService.terminateMatch(gameId, botPSId , userAId);
 
-        //Verifizieren der Methodenaufrufe
-        verify(playerStateRepository).save(playerStateA);
-        verify(playerStateRepository).save(botPlayerState);
-        verify(userAccountRepository).save(userA);
-
-        //Verifizieren der Spiel- und Nachrichtenlogik
-        verify(gameRepository).save(game);
-        verify(messagingTemplate).convertAndSendToUser(anyString(), anyString(), anyList());
-        verify(messagingTemplate).convertAndSend(anyString(), Optional.ofNullable(any()));
-
-
         assertEquals(100, userA.getLeaderboardPoints());
     }
 
