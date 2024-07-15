@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect} from 'react';
 import './Startseite.css';
 import { useNavigate } from 'react-router-dom';
 import { Client } from '@stomp/stompjs';
@@ -9,7 +9,26 @@ const Startseite = () => {
   const [loggedIn, setLoggedIn] = useState(true);
   const navigate = useNavigate();
   const userId = localStorage.getItem('id');
-  const clanId = localStorage.getItem('clanId');
+  const [clanId, setClanId] = useState(null); 
+
+  useEffect(() => {
+    fetchClanId();
+}, []);
+
+
+const fetchClanId = async () => {
+  try {
+      const response = await fetch(`http://localhost:8080/getClanId?userId=${userId}`);
+      if (!response.ok) {
+          throw new Error('Network response was not ok');
+      }
+      const data = await response.json();
+      setClanId(data);
+      localStorage.setItem('clanId', data);
+  } catch (error) {
+      console.error('There was a problem with the fetch operation:', error);
+  }
+};
 
   const handleLogout = async () => {
     if (userId) {
