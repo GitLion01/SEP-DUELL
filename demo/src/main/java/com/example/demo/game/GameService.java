@@ -503,6 +503,7 @@ public class GameService {
         if (!viewers.isEmpty()) {
             for (UserAccount viewer : viewers) {
                 messagingTemplate.convertAndSendToUser(viewer.getId().toString(), "/queue/watch", Arrays.asList(game, users, game.getPlayerStateBot()));
+                messagingTemplate.convertAndSendToUser(viewer.getId().toString(), "/queue/newTurn", game.getCurrentTurn());
             }
         }
 
