@@ -275,7 +275,6 @@ const Duel = () => {
 
   //Angriffsmodus und Zustände zurücksetzen
   const resetAttackMode = () => {
-    setIsAttackMode(false);
     setSelectedAttacker(null);
     setSelectedTarget(null);
   };

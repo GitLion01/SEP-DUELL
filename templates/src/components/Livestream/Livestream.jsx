@@ -81,19 +81,6 @@ const Livestream = () => {
         else { console.log("kein Spiel oder verbindung", users, game);}
     }, [id]);
 
-    useEffect(() => {
-        if (client && connected && id) {
-            const subscription = client.subscribe(`/user/${id}/queue/timer`, (message) => {
-                const response = JSON.parse(message.body);
-                setTimer(response);
-            });
-
-            // Cleanup Subscription
-            return () => {
-                if (subscription) subscription.unsubscribe();
-            };
-        }
-    }, [client, connected, id]);
 
     useEffect(() => {
         if (client && connected && id) {
