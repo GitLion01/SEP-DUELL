@@ -36,19 +36,6 @@ public class GameService {
     private final TurnierService turnierService;
 
 
-    //TODO: DIESEN KOMMENTAR NICHT LÖSCHEN!!!!!
-    @Scheduled(fixedRate = 1000)
-    public void updateTimers(){
-        List<Game> games = gameRepository.findAll();
-        for (Game game : games) {
-            game.decrementTimer();
-            if(game.getReady() && game.getRemaingTime() <= 0){
-                handleTimerExpiration(game);
-            }
-            sendTimerUpdate(game);
-        }
-    }
-
     private void handleTimerExpiration(Game game) {
         try {
             if(game!=null) {

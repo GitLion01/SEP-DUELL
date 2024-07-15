@@ -9,7 +9,6 @@ const Livestream = () => {
     const navigate = useNavigate();
     const { client, game, setGame, users, setUsers, botPS, setBotPS, connected } = useContext(WebSocketContext);
     const [id, setId] = useState(null);
-    const [timer, setTimer] = useState(120);
     const [user1State, setUser1State] = useState(null);
     const [user2State, setUser2State] = useState(null);
     const [currentTurn, setCurrentTurn] = useState(game?.currentTurn);
@@ -20,6 +19,24 @@ const Livestream = () => {
     useEffect(() => {
         if (id === null) {
             setId(localStorage.getItem('id'));
+        }
+    }, [id]);
+
+    useEffect(() => {
+        if (client && connected && id) {
+            const subscription = client.subscribe(`/user/${id}/queue/newTurn`, (message) => {
+                const response = JSON.parse(message.body);
+
+                if (response) {
+                    setCurrentTurn(response);
+                }
+
+            });
+
+            // Cleanup Subscription
+            return () => {
+                if (subscription) subscription.unsubscribe();
+            };
         }
     }, [id]);
 
@@ -96,7 +113,6 @@ const Livestream = () => {
                     if (user2) {
                         setUser2State(user2.playerState);
                     }
-                    setCurrentTurn(response[0].currentTurn);
                 }
                 if (response.length === 3) {
                     const user1 = response[1];
@@ -158,9 +174,6 @@ const Livestream = () => {
     return (
         <div className="livestream-container">
             <div className="timer-and-turn">
-                <div className="timer">
-                    <h4>{timer} seconds</h4>
-                </div>
                 <div className="current-turn">
                     <h4>{currentTurn.username || "CPU"}</h4> {/* TODO teste ob aktueller Spieler korrekt anzeigt*/}
                 </div>

@@ -14,18 +14,14 @@ const Duel = () => {
     const [id, setId] = useState(null);
     const [gameId, setGameId]= useState(null);
     const [timer, setTimer] = useState(120);
-    //const currentUser = users.find(user => user.id === parseInt(id));
-    //const opponentUser = users.find(user => user.id !== parseInt(id));
     const [playerState, setPlayerState] = useState(null);
     const [opponentState, setOpponentState] = useState(null);
-    const [isAttackMode, setIsAttackMode] = useState(false);
     const [isSetCardMode, setIsSetCardMode] = useState(false);
     const [isRareSwapMode, setIsRareSwapMode] = useState(false);
     const [isLegendarySwapMode, setIsLegendarySwapMode] = useState(false);
     const [selectedAttacker, setSelectedAttacker] = useState(null);
     const [selectedTarget, setSelectedTarget] = useState(null);
     const [myTurn, setMyTurn] = useState(game?.myTurn);
-    //const [cardDrawn, setCardDrawn] = useState(false);
     const [hasAttacked, setHasAttacked] = useState(false);
     const [selectedCards, setSelectedCards] = useState([]);
     const [selectedHandCard, setSelectedHandCard] = useState(null);
@@ -42,6 +38,27 @@ const Duel = () => {
         }
     }, []);
 
+    useEffect(() => {
+        if (timer > 0) {
+
+            const interval = setInterval(() => {
+                setTimer((prev) => {
+                    if (prev === 11) {
+                        toast.warning('10 seconds remaining!');
+                    }
+                    if (prev === 1) {
+                        toast.warning('GAME OVER');
+                        handleConfirmSurrender()
+                        clearInterval(interval);
+                    }
+                    return prev - 1;
+                });
+            }, 1000);
+
+            return () => clearInterval(interval);
+        }
+    }, [timer, id]);
+
 
     // Initialisieren des Spielerzustands aus dem übergebenen Zustand
     useEffect(() => {
@@ -55,8 +72,6 @@ const Duel = () => {
             resetAttackMode();
             //setCardDrawn(false);
 
-
-
             console.log('playerState nach initial', playerState);
             console.log('opponent state nach intial: ', opponentState);
         }
@@ -64,24 +79,22 @@ const Duel = () => {
 
     useEffect(() => {
         if (client && connected && id) {
-            const subscription = client.subscribe(`/user/${id}/queue/timer`, (message) => {
-                const response =JSON.parse(message.body);
-                setTimer(response);
-                if (response === 119) {
-                    toast.warning("Neuer Zug beginnt");
+            const subscription = client.subscribe(`/user/${id}/queue/newTurn`, (message) => {
+                const response = JSON.parse(message.body);
+
+                if (response) {
+                    setTimer(120);
+                    toast.warning("Du bist am Zug!");
                 }
-                if (response === 10) {
-                    toast.warning("Noch 10 Sekunden übrig");
-                }
-            })
+
+            });
 
             // Cleanup Subscription
             return () => {
                 if (subscription) subscription.unsubscribe();
             };
         }
-    }, [id])
-
+    }, [id]);
 
     // Game Kanal
     useEffect(() => {
@@ -90,8 +103,6 @@ const Duel = () => {
                 const response = JSON.parse(message.body);
                 console.log("Response: ", response);
                 console.log("ResLength: ", response.length);
-
-
 
                 if (response.length === 3) {
 
@@ -140,31 +151,10 @@ const Duel = () => {
         }
     }, [client, connected, id]);
 
-
-    //nicht verwendet
-    const resetTimer = () => {
-        setTimer(120);
-    };
-
     // Zug beenden
     const handleEndTurn = () => {
 
         console.log("Karten im Deck: ", playerState.deckClone.length);
-
-        if (!myTurn) {
-            toast.warning("Du bist nicht am Zug");
-            resetAttackMode();
-            return;
-        }
-
-        /*
-
-        if (!cardDrawn && playerState.deckClone.length > 0) {
-            toast.error("Ziehe zuerst eine Karte");
-            return;
-        }
-
-         */
 
         if (client) {
             client.publish({
@@ -172,23 +162,8 @@ const Duel = () => {
                 body: JSON.stringify({ gameID: gameId, userID: id }),
             });
 
-            /*
-            if (cardDrawn) {
-                setCardDrawn(false);
-            }
-
-             */
             resetAttackMode()
             setHasAttacked(false);
-        }
-    };
-
-    const handleTimeout = () => {
-        if (client) {
-            client.publish({
-                destination: '/app/timeout',
-                body: JSON.stringify({ userID: id, gameID: gameId }),
-            });
         }
     };
 
@@ -267,15 +242,6 @@ const Duel = () => {
             return;
         }
 
-        /*
-
-        if (!cardDrawn && playerState.deckClone.length > 0) {
-            toast.error("Ziehen Sie zuerst eine Karte");
-            return;
-        }
-
-         */
-
         if (hasAttacked) {
             toast.error("Sie haben schon angegriffen");
             return;
@@ -303,46 +269,6 @@ const Duel = () => {
         setSelectedTarget(null);
     };
 
-    /*
-
-    //Karte ziehen
-    const handleDrawCard = () => {
-
-        // Ist Spieler am Zug?
-        if (!myTurn) {
-            toast.warning("Du bist nicht am Zug");
-            resetAttackMode();
-            return;
-        }
-
-        // Hat Spieler Karten?
-        if (playerState?.deckClone.length < 1) {
-            toast.error("Deck leer");
-            setCardDrawn(true);
-            return;
-        }
-
-        if (cardDrawn) {
-            toast.warning("Karte bereits gezogen");
-            return;
-        }
-
-        client.publish({
-            destination: '/app/drawCard',
-            body: JSON.stringify({
-                gameId: gameId,
-                userId: id
-            })
-        })
-        setCardDrawn(true);
-        console.log("gameId", gameId);
-        console.log("userId", id);
-
-        console.log("cardDrawn", cardDrawn);
-    }
-
-     */
-
     const handleRareSwap = () => {
 
         if (!myTurn) {
@@ -350,15 +276,6 @@ const Duel = () => {
             resetAttackMode();
             return;
         }
-
-        /*
-
-        if (!cardDrawn && playerState?.deckClone.length < 1) {
-            toast.error("Ziehen Sie erst eine Karte");
-            return;
-        }
-
-         */
 
         if (hasAttacked) {
             toast.error("Sie dürfen nach einem Angriff keine Karte setzen");
@@ -393,16 +310,6 @@ const Duel = () => {
             resetAttackMode();
             return;
         }
-
-        /*
-
-        if (!cardDrawn && playerState?.deckClone.length < 1) {
-            toast.error("Ziehen Sie erst eine Karte");
-            resetAttackMode()
-            return;
-        }
-
-         */
 
         if (hasAttacked) {
             toast.error("Sie haben schon angegriffen");
