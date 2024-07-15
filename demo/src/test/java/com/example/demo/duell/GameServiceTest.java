@@ -238,7 +238,7 @@ public class GameServiceTest {
 
     @Test
     void testTerminateMatch() {
-        // Mocking game, users, and player states
+
         Long gameId = 1L;
         Long userAId = 1L;
         Long userBId = 2L;
@@ -250,11 +250,11 @@ public class GameServiceTest {
 
         PlayerState playerStateA = new PlayerState();
         playerStateA.setId(1L);
-        playerStateA.setWinner(true); // userA is winner
-        playerStateA.setDamage(10); // example values
+        playerStateA.setWinner(true);
+        playerStateA.setDamage(10);
         PlayerState playerStateB = new PlayerState();
         playerStateB.setId(2L);
-        playerStateB.setDamage(5); // example values
+        playerStateB.setDamage(5);
 
         userA.setPlayerState(playerStateA);
         userB.setPlayerState(playerStateB);
@@ -272,10 +272,10 @@ public class GameServiceTest {
         gameService.terminateMatch(gameId, userAId, userBId);
 
         // Assertions for the updated values or other business logic applied
-        assertEquals(600, userA.getSepCoins()); // example expected value after match termination
-        assertEquals(500, userB.getSepCoins()); // example expected value after match termination
-        assertEquals(50, userA.getLeaderboardPoints()); // example expected value after match termination
-        assertEquals(-50, userB.getLeaderboardPoints()); // example expected value after match termination
+        assertEquals(600, userA.getSepCoins());
+        assertEquals(500, userB.getSepCoins());
+        assertEquals(50, userA.getLeaderboardPoints());
+        assertEquals(-50, userB.getLeaderboardPoints());
     }
 
 
@@ -365,14 +365,14 @@ public class GameServiceTest {
 
     @Test
     void testAttackBotCard() {
-        // Änderung: IDs für Testinstanzen initialisieren
+        // IDs für Testinstanzen initialisieren
         Long gameId = 1L;
         Long attackerId = 1L;
         Long botPSId = 2L;
         Long attackerCardId = 1L;
         Long targetCardId = 2L;
 
-        // Änderung: Request-Objekt initialisieren
+        //Request-Objekt initialisieren
         AttackBotCardRequest request = new AttackBotCardRequest();
         request.setGameId(gameId);
         request.setUserIdAttacker(attackerId);
@@ -380,17 +380,17 @@ public class GameServiceTest {
         request.setAttackerId(attackerCardId);
         request.setTargetId(targetCardId);
 
-        // Änderung: UserAccount und zugehörigen PlayerState initialisieren
+        // UserAccount und zugehörigen PlayerState initialisieren
         UserAccount attacker = new UserAccount();
         attacker.setId(attackerId);
         PlayerState attackerState = new PlayerState();
         attacker.setPlayerState(attackerState);
 
-        // Änderung: Bot PlayerState initialisieren
+        //Bot PlayerState initialisieren
         PlayerState botPS = new PlayerState();
         botPS.setId(botPSId);
 
-        // Änderung: Angreifende Karte initialisieren
+        //Angreifende Karte initialisieren
         PlayerCard attackerCard = new PlayerCard();
         attackerCard.setId(attackerCardId);
         attackerCard.setAttackPoints(10);
@@ -398,36 +398,36 @@ public class GameServiceTest {
         attackerCard.setHasAttacked(false);
         attackerState.getFieldCards().add(attackerCard);
 
-        // Änderung: Zielkarte initialisieren
+        // Zielkarte initialisieren
         PlayerCard targetCard = new PlayerCard();
         targetCard.setId(targetCardId);
         targetCard.setAttackPoints(5);
         targetCard.setDefensePoints(5);
         botPS.getFieldCards().add(targetCard);
 
-        // Änderung: Spielinitialisierung
+        // Spielinitialisierung
         Game game = new Game();
         game.setId(gameId);
         game.setUsers(List.of(attacker));
         game.setCurrentTurn(attacker);
 
-        // Änderung: Mocking der Repository-Methoden
+        //Mocking der Repository-Methoden
         when(gameRepository.findById(gameId)).thenReturn(Optional.of(game));
         when(userAccountRepository.findById(attackerId)).thenReturn(Optional.of(attacker));
         when(playerStateRepository.findById(botPSId)).thenReturn(Optional.of(botPS));
         when(playerCardRepository.findById(attackerCardId)).thenReturn(Optional.of(attackerCard));
         when(playerCardRepository.findById(targetCardId)).thenReturn(Optional.of(targetCard));
 
-        // Änderung: Ausführen der Methode
+        // Ausführen der Methode
         gameService.attackBotCard(request);
 
-        // Änderung: Verifizieren der Ergebnisse
+        // Verifizieren der Ergebnisse
         assertTrue(attackerCard.getHasAttacked());
         assertEquals(-1, targetCard.getDefensePoints());
         assertFalse(botPS.getFieldCards().contains(targetCard));
         assertEquals(6, attackerState.getDamage()); // Damage = targetCard defensePoints + 1 (5 + 1)
 
-        // Änderung: Verifizieren der Aufrufe der Mock-Methoden
+        //Verifizieren der Aufrufe der Mock-Methoden
         verify(playerCardRepository).save(attackerCard);
         verify(playerCardRepository).save(targetCard);
         verify(playerStateRepository).save(attackerState);
@@ -439,38 +439,38 @@ public class GameServiceTest {
 
     @Test
     void testAttackBot() {
-        // Änderung: IDs für Testinstanzen initialisieren
+        //IDs für Testinstanzen initialisieren
         Long gameId = 1L;
         Long attackerId = 1L;
         Long botPSId = 2L;
         Long attackerCardId = 1L;
 
-        // Änderung: Request-Objekt initialisieren
+        //Request-Objekt initialisieren
         AttackBotRequest request = new AttackBotRequest();
         request.setGameId(gameId);
         request.setAttackerId(attackerId);
         request.setBotPSId(botPSId);
         request.setAttackerCardId(attackerCardId);
 
-        // Änderung: UserAccount und zugehörigen PlayerState initialisieren
+        //UserAccount und zugehörigen PlayerState initialisieren
         UserAccount attacker = new UserAccount();
         attacker.setId(attackerId);
         PlayerState attackerState = new PlayerState();
         attacker.setPlayerState(attackerState);
 
-        // Änderung: Bot PlayerState initialisieren
+        //Bot PlayerState initialisieren
         PlayerState botPS = new PlayerState();
         botPS.setId(botPSId);
         botPS.setLifePoints(15);
 
-        // Änderung: Angreifende Karte initialisieren
+        //Angreifende Karte initialisieren
         PlayerCard attackerCard = new PlayerCard();
         attackerCard.setId(attackerCardId);
         attackerCard.setAttackPoints(10);
         attackerCard.setHasAttacked(false);
         attackerState.getFieldCards().add(attackerCard);
 
-        // Änderung: Spielinitialisierung
+        //Spielinitialisierung
         Game game = new Game();
         game.setId(gameId);
         game.setFirstRound(false);
@@ -478,21 +478,21 @@ public class GameServiceTest {
         game.setUsers(List.of(attacker));
         game.setPlayerStateBot(botPS);
 
-        // Änderung: Mocking der Repository-Methoden
+        //Mocking der Repository-Methoden
         when(gameRepository.findById(gameId)).thenReturn(Optional.of(game));
         when(userAccountRepository.findById(attackerId)).thenReturn(Optional.of(attacker));
         when(playerStateRepository.findById(botPSId)).thenReturn(Optional.of(botPS));
         when(playerCardRepository.findById(attackerCardId)).thenReturn(Optional.of(attackerCard));
 
-        // Änderung: Ausführen der Methode
+        //Ausführen der Methode
         gameService.attackBot(request);
 
-        // Änderung: Verifizieren der Ergebnisse
+        //Verifizieren der Ergebnisse
         assertTrue(attackerCard.getHasAttacked());
         assertEquals(5, botPS.getLifePoints()); // 15 - 10 = 5
         assertEquals(10, attackerState.getDamage()); // 10 Angriffspunkte hinzugefügt
 
-        // Änderung: Verifizieren der Aufrufe der Mock-Methoden
+        //Verifizieren der Aufrufe der Mock-Methoden
         verify(playerCardRepository).save(attackerCard);
         verify(playerStateRepository).save(attackerState);
         verify(playerStateRepository).save(botPS);
@@ -503,7 +503,7 @@ public class GameServiceTest {
 
     @Test
     void testTerminateMatchWithBot() {
-        // Änderung: IDs für Testinstanzen initialisieren
+        //IDs für Testinstanzen initialisieren
         Long gameId = 1L;
         Long userAId = 1L;
         Long botPSId = 2L;
@@ -513,13 +513,13 @@ public class GameServiceTest {
         game.setId(gameId);
 
 
-        // Änderung: Mocking der UserAccounts
+        //Mocking der UserAccounts
         UserAccount userA = new UserAccount();
         userA.setId(userAId);
         userA.setLeaderboardPoints(100);
         game.setUsers(List.of(userA));
 
-        // Änderung: Mocking der PlayerState für userA
+        //Mocking der PlayerState für userA
         PlayerState playerStateA = new PlayerState();
         playerStateA.setWinner(true); // Annahme: userA ist der Gewinner
         playerStateA.setDamage(10); // Beispielwert
@@ -531,7 +531,7 @@ public class GameServiceTest {
         playerStateA.setCardsPlayed(cardsPlayedByA);
         userA.setPlayerState(playerStateA);
 
-        // Änderung: Mocking der PlayerState für den Bot (game.getPlayerStateBot())
+        //Mocking der PlayerState für den Bot (game.getPlayerStateBot())
         PlayerState botPlayerState = new PlayerState();
         botPlayerState.setId(botPSId);
         botPlayerState.setDamage(5); // Beispielwert
@@ -543,23 +543,23 @@ public class GameServiceTest {
         botPlayerState.setCardsPlayed(cardsPlayedByBot);
 
 
-        // Änderung: Setzen des game.getPlayerStateBot auf den Bot-PlayerState
+        //Setzen des game.getPlayerStateBot auf den Bot-PlayerState
         game.setPlayerStateBot(botPlayerState);
 
-        // Änderung: Mocking der Optional-Rückgaben für die Repository-Aufrufe
+        //Mocking der Optional-Rückgaben für die Repository-Aufrufe
         when(gameRepository.findById(gameId)).thenReturn(Optional.of(game));
         when(userAccountRepository.findById(userAId)).thenReturn(Optional.of(userA));
         when(playerStateRepository.findById(botPSId)).thenReturn(Optional.of(botPlayerState));
 
-        // Änderung: Ausführen der Methode
+        //Ausführen der Methode
         gameService.terminateMatch(gameId, botPSId , userAId);
 
-        // Änderung: Verifizieren der Methodenaufrufe
+        //Verifizieren der Methodenaufrufe
         verify(playerStateRepository).save(playerStateA);
         verify(playerStateRepository).save(botPlayerState);
         verify(userAccountRepository).save(userA);
 
-        // Änderung: Verifizieren der Spiel- und Nachrichtenlogik
+        //Verifizieren der Spiel- und Nachrichtenlogik
         verify(gameRepository).save(game);
         verify(messagingTemplate).convertAndSendToUser(anyString(), anyString(), anyList());
         verify(messagingTemplate).convertAndSend(anyString(), Optional.ofNullable(any()));
@@ -584,6 +584,7 @@ public class GameServiceTest {
         Long viewerId = 1L;
         Long user1Id = 2L;
         Long user2Id = 3L;
+
         // Mocking von Request-Objekt
         WatchStreamRequest request = new WatchStreamRequest();
         request.setGameId(gameId);
@@ -644,7 +645,7 @@ public class GameServiceTest {
 
 
     @Test
-    void testCreateBotGameSuccess() {
+    void testCreateBotGame() {
         // Initialisierung der IDs für Testinstanzen
         Long userId = 1L;
         Long deckId = 1L;
