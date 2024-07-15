@@ -35,44 +35,6 @@ public class GameService {
     private final StatisticRepository statisticRepository;
     private final TurnierService turnierService;
 
-
-    private void handleTimerExpiration(Game game) {
-        try {
-            if(game!=null) {
-                if (game.getPlayerStateBot() == null) {
-                    System.out.println("irgendwas4");
-                    UserAccount currentTurnPlayer = game.getCurrentTurn();
-                    UserAccount otherPlayer = game.getUsers().get(0).equals(currentTurnPlayer) ? game.getUsers().get(1) : game.getUsers().get(0);
-                    currentTurnPlayer.getPlayerState().setLifePoints(-1);
-                    otherPlayer.getPlayerState().setWinner(true);
-                    terminateMatch(game.getId(), currentTurnPlayer.getId(), otherPlayer.getId());
-                }else{
-                    System.out.println("irgendwas5");
-                    UserAccount currentTurnPlayer = game.getCurrentTurn();
-                    PlayerState botPS = game.getPlayerStateBot();
-                    currentTurnPlayer.getPlayerState().setLifePoints(-1);
-                    botPS.setWinner(true);
-                    terminateMatch(game.getId(), botPS.getId(), currentTurnPlayer.getId());
-                }
-            }
-        }
-        catch (Exception e){
-            System.out.println(e+"------------------");
-        }
-    }
-
-    private void sendTimerUpdate(Game game) {
-        int remainingTime = game.getRemaingTime();
-        for(UserAccount player : game.getUsers()) {
-            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/timer", remainingTime);
-        }
-        if(!game.getViewers().isEmpty()){
-            for(UserAccount viewer : game.getViewers()) {
-                messagingTemplate.convertAndSendToUser(viewer.getId().toString(), "/queue/timer", remainingTime);
-            }
-        }
-    }
-
     public void createGame(CreateGameRequest request) {
         System.out.println("Creating game for users A:" + request.getUserA() + " and B:" + request.getUserB());
         UserAccount userA = userAccountRepository.findById(request.getUserA())
