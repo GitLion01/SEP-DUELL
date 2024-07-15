@@ -10,6 +10,7 @@ import com.example.demo.leaderboard.LeaderboardService;
 import com.example.demo.turnier.TurnierService;
 import com.example.demo.user.UserAccount;
 import com.example.demo.user.UserAccountRepository;
+import com.fasterxml.jackson.databind.util.JSONPObject;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.repository.Modifying;
@@ -446,7 +447,7 @@ public class GameService {
             }
         }else{
             messagingTemplate.convertAndSendToUser(users.get(0).getId().toString(), "/queue/game", Arrays.asList(game, users, game.getPlayerStateBot()));
-            messagingTemplate.convertAndSendToUser(users.get(0).getId().toString(), "/queue/newTurn", "Neuer Zug");
+            messagingTemplate.convertAndSendToUser(users.get(0).getId().toString(), "/queue/newTurn", new Notification("Neuer Zug"));
         }
 
         if (!viewers.isEmpty()) {
