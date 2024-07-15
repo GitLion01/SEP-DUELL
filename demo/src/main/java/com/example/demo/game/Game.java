@@ -24,7 +24,7 @@ public class Game {
     private Boolean streamed = false;
     private Long botDeckId;
 
-    @OneToMany(fetch = FetchType.LAZY)
+    @OneToMany
     @JoinTable(
             name = "game_users",
             joinColumns = @JoinColumn(name = "game_id"),
@@ -33,11 +33,11 @@ public class Game {
     @JsonIgnore
     private List<UserAccount> users = new ArrayList<>();
 
-    @OneToMany(fetch = FetchType.LAZY)
+    @OneToMany
     @JsonIgnore
     private List<UserAccount> viewers = new ArrayList<>();
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne
     private PlayerState playerStateBot;
 
     @OneToOne(fetch = FetchType.EAGER)
