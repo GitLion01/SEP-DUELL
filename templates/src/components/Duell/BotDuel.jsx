@@ -81,6 +81,7 @@ const Duel = () => {
         if (client && connected && id) {
             const subscription = client.subscribe(`/user/${id}/queue/newTurn`, (message) => {
                 const response = JSON.parse(message.body);
+                console.log("Response from newTurn: ", response);
 
                 if (response) {
                     setTimer(120);
@@ -116,10 +117,6 @@ const Duel = () => {
                     setOpponentState(response[2]);
                     setMyTurn(response[0].myTurn);
 
-                    // Speichern des Spiels und der Benutzer im Webspeicher
-                    sessionStorage.setItem('game', JSON.stringify(response[0]));
-                    sessionStorage.setItem('users', JSON.stringify(response[1]));
-                    sessionStorage.setItem('botPS', JSON.stringify(response[2]));
                 }
 
                 // Empfangene Daten beim Ende des Duells verarbeiten TODO Statistiken noch zu überprüfen!!!
