@@ -147,7 +147,6 @@ public class GameService {
         Game game = optionalGame.get();
         Deck deck = optionalDeck.get();
         UserAccount user = optionalUser.get();
-        UserAccount currentTurnUser = game.getCurrentTurn();
 
         Collections.shuffle(deck.getCards()); // mischt das Deck
         List<Card> cards = deck.getCards();
@@ -937,7 +936,6 @@ public class GameService {
         List<Integer> sacrificedB;
 
         if(game.getPlayerStateBot() == null) {
-            System.out.println("Problem2");
             UserAccount user2 = optionalUserB.get();
             UserAccount user1 = optionalUserA.get();
             normalsA = user1.getPlayerState().getCardsPlayed().stream().filter((x) -> x.getRarity() == Rarity.NORMAL).toList();
