@@ -30,7 +30,7 @@ public class Clan {
     @JsonIgnore
     private List<UserAccount> users =new ArrayList<>();
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JsonIgnore
     private Group group = new Group(name);
 

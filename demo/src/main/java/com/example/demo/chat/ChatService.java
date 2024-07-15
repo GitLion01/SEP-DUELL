@@ -1,6 +1,7 @@
 package com.example.demo.chat;
 
 import com.example.demo.clan.Clan;
+import com.example.demo.clan.ClanRepository;
 import com.example.demo.dto.UserDTO;
 import com.example.demo.user.UserAccount;
 import com.example.demo.user.UserAccountRepository;
@@ -23,6 +24,7 @@ public class ChatService {
     private final ChatMessageRepository chatMessageRepository;
     private final SimpMessagingTemplate messagingTemplate;
     private final GroupRepository groupRepository;
+    private final ClanRepository clanRepository;
 
 
     public ResponseEntity<Long> createChat(Long userId1,Long userId2) {
@@ -101,6 +103,13 @@ public class ChatService {
             chatMessageRepository.save(existingMessage);
             updateChatWithEditedMessage(existingMessage);
 
+            for(Clan clan : clanRepository.findAll()){
+                if(Objects.equals(clan.getGroup().getId(), chatMessage.getChat().getId()))
+                    for(UserAccount user : clan.getUsers()){
+                        messagingTemplate.convertAndSendToUser(user.getId().toString(), "/queue/messages", convertToChatMessageDTO(existingMessage));
+                    }
+            }
+
             for (UserAccount user : existingMessage.getChat().getUsers()) {
                 messagingTemplate.convertAndSendToUser(user.getId().toString(), "/queue/messages", convertToChatMessageDTO(existingMessage));
             }
@@ -123,6 +132,14 @@ public class ChatService {
                 //no need to use ChatMessageRepository because of Casecad.All
                 chat.getMessages().remove(message.get());
                 message.get().setMessage("");
+
+                for(Clan clan : clanRepository.findAll()){
+                    if(Objects.equals(clan.getGroup().getId(), chatMessage.getChat().getId()))
+                        for(UserAccount user : clan.getUsers()){
+                            messagingTemplate.convertAndSendToUser(user.getId().toString(), "/queue/messages", convertToChatMessageDTO(message.get()));
+                        }
+                }
+
                 for (UserAccount user : chat.getUsers()) {
                     messagingTemplate.convertAndSendToUser(user.getId().toString(), "/queue/messages", convertToChatMessageDTO(message.get()));
                 }

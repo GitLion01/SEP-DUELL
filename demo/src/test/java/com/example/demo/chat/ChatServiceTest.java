@@ -1,4 +1,5 @@
 package com.example.demo.chat;
+import com.example.demo.clan.ClanRepository;
 import com.example.demo.user.UserAccount;
 import com.example.demo.user.UserAccountRepository;
 import org.junit.jupiter.api.*;
@@ -26,13 +27,21 @@ class ChatServiceTest {
     private SimpMessagingTemplate messagingTemplate;
     @Mock
     private GroupRepository groupRepository;
+    @Mock
+    private ClanRepository clanRepository;
     private AutoCloseable autoCloseable;
     private ChatService underTest;
 
     @BeforeEach
     void setUp() {
         autoCloseable= MockitoAnnotations.openMocks(this); //initialize alle Mocks in this class
-        underTest = new ChatService(userAccountRepository,chatRepository,chatMessageRepository,messagingTemplate,groupRepository);
+        underTest = new ChatService(
+                userAccountRepository,
+                chatRepository,
+                chatMessageRepository,
+                messagingTemplate,
+                groupRepository,
+                clanRepository);
     }
 
     @AfterEach

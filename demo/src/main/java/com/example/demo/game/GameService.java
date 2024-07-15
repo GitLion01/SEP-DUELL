@@ -66,20 +66,15 @@ public class GameService {
             leaderboardService.updateUserStatus(userId,"im Duell");
             users.add(userAccountRepository.findById(userId).get());
         }
-        System.out.println(" DeckSelection ------------------------- currentTurn: " + newGame.getCurrentTurn().getUsername() + "; erster Spieler: " + users.get(0).getUsername() + "; zweiter Spieler: " + users.get(1).getUsername());
-
-
-
 
         for(UserAccount user : newGame.getUsers()) {
             messagingTemplate.convertAndSendToUser(user.getId().toString(), "/queue/create", Arrays.asList(newGame, users));
-            /*Notification notification = new Notification(user.getId(),0L,userAccountRepository.findById(user.getId()).get().getUsername(),"schon aktiviert");
-            messagingTemplate.convertAndSendToUser(user.getId().toString(),"/queue/notifications",notification);*/
-            Notification notification = new Notification(newGame.getUsers().get(0).getId(), newGame.getUsers().get(1).getId(), newGame.getUsers().get(0).getUsername(), "schon aktiviert");
+
+            Notification notification = new Notification(user.getId(),0L,userAccountRepository.findById(user.getId()).get().getUsername(),"schon aktiviert");
+            messagingTemplate.convertAndSendToUser(user.getId().toString(),"/queue/notifications",notification);
             messagingTemplate.convertAndSendToUser(user.getId().toString(),"/queue/notifications",notification);
         }
 
-        System.out.println(" CreateGame ------------------------- currentTurn: "+ newGame.getCurrentTurn().getUsername() + "; erster Spieler: " + newGame.getUsers().get(0).getUsername() + "; zweiter Spieler: " + newGame.getUsers().get(1).getUsername());
     }
 
 
@@ -174,34 +169,6 @@ public class GameService {
 
     }
 
-    private GameDTO convertTOGameDTO(Game game) {
-        GameDTO gameDTO = new GameDTO();
-
-        gameDTO.setId(game.getId());
-        gameDTO.setReady(game.getReady());
-        gameDTO.setFirstRound(game.getFirstRound());
-        gameDTO.setTimeLeft(game.getTimeLeft());
-        gameDTO.setCurrentTurn(game.getCurrentTurn());
-        gameDTO.setStreamed(game.getStreamed());
-        gameDTO.setMyTurn(game.getMyTurn());
-        try{
-            gameDTO.setBotDeckId(game.getBotDeckId());
-            gameDTO.setPlayerStateBot(game.getPlayerStateBot());
-        }catch (Exception e){
-            System.out.println("gegen human");
-        }
-
-        return gameDTO;
-    }
-
-    private List<UserDTO> convertToUserDTO(List<UserAccount> users) {
-        List<UserDTO> userDTOs = new ArrayList<>();
-        for (UserAccount user : users) {
-            userDTOs.add(new UserDTO(user.getId(),user.getUsername(),user.getPlayerState(),user.getDuelStatus()));
-        }
-        return userDTOs;
-    }
-
     // erste Karte im Deck wird auf die Hand gelegt
     public void drawCard(DrawCardRequest request) {
         Optional<Game> optionalGame = gameRepository.findById(request.getGameId());
@@ -212,9 +179,7 @@ public class GameService {
 
         Game game = optionalGame.get();
         UserAccount userAccount = optionalUserAccount.get();
-        /*if(!game.getCurrentTurn().equals(userAccount)){// prüft ob der User am zug ist
-            return;
-        }*/
+
         Deck deck = userAccount.getPlayerState().getDeck();
         List<PlayerCard> handCards = userAccount.getPlayerState().getHandCards();
 
@@ -292,10 +257,6 @@ public class GameService {
                 return;
             }
 
-            /*// dem Spieler wird automatisch eine Karte auf die Hand gelegt
-            DrawCardRequest drawCardRequest = new DrawCardRequest(request.getGameID(), request.getUserID().equals(game.getUsers().get(0).getId()) ? game.getUsers().get(1).getId() : game.getUsers().get(0).getId());
-            drawCard(drawCardRequest);*/
-
             UserAccount notTurn = game.getCurrentTurn().equals(game.getUsers().get(0)) ? game.getUsers().get(1) : game.getUsers().get(0);
             notTurn.getPlayerState().getHandCards().add(notTurn.getPlayerState().getDeckClone().remove(0));
 
@@ -312,10 +273,6 @@ public class GameService {
             gameRepository.save(game);
         } else {
             game.setMyTurn(false);
-
-            /*// dem Spieler wird automatisch eine Karte auf die Hand gelegt
-            DrawCardRequest drawCardRequest = new DrawCardRequest(request.getGameID(), request.getUserID());
-            drawCard(drawCardRequest);*/
 
             userAccount.getPlayerState().getHandCards().add(userAccount.getPlayerState().getDeckClone().remove(0));
 
@@ -1027,8 +984,6 @@ public class GameService {
                 messagingTemplate.convertAndSendToUser(viewer.getId().toString(), "/queue/watch", Arrays.asList(game, users, game.getPlayerStateBot(), sepCoins, leaderBoardPointsWinner, leaderBoardPointsLoser,damageWinner, damageLoser, cardsPlayedA, cardsPlayedB, sacrificedA, sacrificedB));
             }
         }
-
-
 
         List<Long> deepCopyIds = new ArrayList<>();
 
