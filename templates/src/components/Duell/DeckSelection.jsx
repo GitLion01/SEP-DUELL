@@ -126,11 +126,12 @@ const  DeckSelection = () => {
 
     if (client && connected) {
       client.publish({
-        destination: '/app/duels/setTrue',
+        destination: '/app/setTrue',
         body: JSON.stringify({
           gameId: gameId,
         })
       });
+      console.log("anfrage geschickt", gameId);
     }
   }
 
