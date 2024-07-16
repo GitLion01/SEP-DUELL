@@ -1459,9 +1459,6 @@ public class GameService {
 
         List<UserAccount> users = game.getUsers();
 
-
-
-
         for (UserAccount player : users) {
             messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/selectDeck", Arrays.asList(game, users));
         }
