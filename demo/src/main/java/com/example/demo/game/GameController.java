@@ -131,8 +131,9 @@ public class GameController {
     }
 
     @MessageMapping("/setTrue")
-    public void setGameTrue(Long gameId){
-        gameService.setGameTrue(gameId);
+    public void setGameTrue(@Payload SetGameTrueRequest request){
+        System.out.println("Butto in Controller");
+        gameService.setGameTrue(request);
     }
 
 

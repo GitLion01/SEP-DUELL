@@ -1311,13 +1311,16 @@ public class GameService {
     }
 
 
-    public void setGameTrue(Long gameId){
-        pickDeck(gameId);
-        Optional<Game> optionalGame = gameRepository.findById(gameId);
+    public void setGameTrue(SetGameTrueRequest request){
+        pickDeck(request.getGameId());
+        Optional<Game> optionalGame = gameRepository.findById(request.getGameId());
         if(optionalGame.isEmpty()){
             return;
         }
         Game game = optionalGame.get();
+        if(game.getReady()){
+            return;
+        }
         game.setReady(true);
         gameRepository.save(game);
 
@@ -1327,12 +1330,15 @@ public class GameService {
         }
     }
 
-    public void pickDeck(Long gameId){
+    /*public void pickDeck(Long gameId){
         Optional<Game> optionalGame = gameRepository.findById(gameId);
         if(optionalGame.isEmpty()){
             return;
         }
         Game game = optionalGame.get();
+        if(game.getReady()){
+            return;
+        }
         UserAccount user1 = game.getUsers().get(0);
         UserAccount user2 = game.getUsers().get(1);
         if(user1.getPlayerState().getDeck() != null && user2.getPlayerState().getDeck() != null){
@@ -1343,7 +1349,9 @@ public class GameService {
         userAccounts.add(user2);
         List<Deck> decks = deckRepository.findAll();
         user1.getPlayerState().setDeck(decks.get(0));
-        user2.getPlayerState().setDeck(decks.get(0));
+        user2.getPlayerState().setDeck(decks.get(1));
+        user1.getPlayerState().setReady(true);
+        user2.getPlayerState().setReady(true);
         playerStateRepository.save(user1.getPlayerState());
         playerStateRepository.save(user2.getPlayerState());
         userAccountRepository.save(user1);
@@ -1351,6 +1359,123 @@ public class GameService {
 
         for(UserAccount user : userAccounts){
             messagingTemplate.convertAndSendToUser(user.getId().toString(), "/queue/selectDeck", List.of(game, userAccounts));
+        }
+
+    }*/
+
+
+    public void pickDeck(Long gameId){
+        Optional<Game> optionalGame = gameRepository.findById(gameId);
+        if(optionalGame.isEmpty()) {
+            return;
+        }
+
+        Game game = optionalGame.get();
+        if(game.getReady()){
+            return;
+        }
+
+        UserAccount user1 = game.getUsers().get(0);
+        UserAccount user2 = game.getUsers().get(1);
+
+
+        Deck deck1 = deckRepository.findByUserId(user1.getId()).get(0);
+        Deck deck2 = deckRepository.findByUserId(user2.getId()).get(0);
+
+        System.out.println("deck1 " + deck1.getId());
+        System.out.println("deck2 " + deck2.getId());
+
+        Collections.shuffle(deck1.getCards()); // mischt das Deck
+        List<Card> cards1 = deck1.getCards();
+        List<PlayerCard> playerCards1 = cards1.stream().map(card -> {
+            PlayerCard playerCard = new PlayerCard();
+            playerCard.setName(card.getName());
+            playerCard.setAttackPoints(card.getAttackPoints());
+            playerCard.setDefensePoints(card.getDefensePoints());
+            playerCard.setDescription(card.getDescription());
+            playerCard.setImage(card.getImage());
+            playerCard.setRarity(card.getRarity());
+            playerCard.setPlayerState(user1.getPlayerState());
+            playerCardRepository.save(playerCard);
+            return playerCard;
+        }).collect(Collectors.toList());
+
+        user1.getPlayerState().setDeck(deck1);
+        user1.getPlayerState().setReady(true);
+        user1.getPlayerState().setDeckClone(playerCards1);
+
+        // legt dem Spieler initial 5 Karten auf die Hand
+        List<PlayerCard> handCards1 = new ArrayList<>();
+        if(game.getCurrentTurn().equals(user1)) {
+            handCards1 = playerCards1.stream().limit(6).toList();
+        }else{
+            handCards1 = playerCards1.stream().limit(5).toList();
+        }
+
+
+        user1.getPlayerState().getHandCards().addAll(handCards1);
+        user1.getPlayerState().getDeckClone().removeAll(handCards1);
+
+
+        playerStateRepository.save(user1.getPlayerState());
+        userAccountRepository.save(user1);
+
+
+        Collections.shuffle(deck2.getCards()); // mischt das Deck
+        List<Card> cards2 = deck2.getCards();
+        List<PlayerCard> playerCards2 = cards2.stream().map(card -> {
+            PlayerCard playerCard = new PlayerCard();
+            playerCard.setName(card.getName());
+            playerCard.setAttackPoints(card.getAttackPoints());
+            playerCard.setDefensePoints(card.getDefensePoints());
+            playerCard.setDescription(card.getDescription());
+            playerCard.setImage(card.getImage());
+            playerCard.setRarity(card.getRarity());
+            playerCard.setPlayerState(user2.getPlayerState());
+            playerCardRepository.save(playerCard);
+            return playerCard;
+        }).collect(Collectors.toList());
+
+        user2.getPlayerState().setDeck(deck2);
+        user2.getPlayerState().setReady(true);
+        user2.getPlayerState().setDeckClone(playerCards2);
+
+        // legt dem Spieler initial 5 Karten auf die Hand
+        List<PlayerCard> handCards2 = new ArrayList<>();
+        if(game.getCurrentTurn().equals(user2)) {
+            handCards2 = playerCards2.stream().limit(6).toList();
+        }else{
+            handCards2 = playerCards2.stream().limit(5).toList();
+        }
+
+
+        user2.getPlayerState().getHandCards().addAll(handCards2);
+        user2.getPlayerState().getDeckClone().removeAll(handCards2);
+
+
+        playerStateRepository.save(user2.getPlayerState());
+        userAccountRepository.save(user2);
+        gameRepository.save(game);
+
+        List<UserAccount> users = game.getUsers();
+
+
+
+
+        for (UserAccount player : users) {
+            messagingTemplate.convertAndSendToUser(player.getId().toString(), "/queue/selectDeck", Arrays.asList(game, users));
+        }
+
+
+        if(game.getStreamed()) {
+            Map<Long, List<String>> streamedGames = gameRepository.findAllStreams().get().stream()
+                    .collect(Collectors.toMap(
+                            Game::getId,
+                            stream -> stream.getUsers().stream()
+                                    .map(UserAccount::getUsername)
+                                    .collect(Collectors.toList())
+                    ));
+            messagingTemplate.convertAndSend("/queue/streams", streamedGames);
         }
 
     }
