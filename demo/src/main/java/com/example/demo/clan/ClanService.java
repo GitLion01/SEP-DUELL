@@ -62,7 +62,7 @@ public class ClanService {
         List<UserDTO> userDTOList = new ArrayList<>();
         for(UserAccount user : clan.getUsers())
         {
-            userDTOList.add(new UserDTO(user.getUsername(), user.getId(), user.getFirstName(),user.getLastName()));
+            userDTOList.add(new UserDTO(user.getUsername(), user.getId(), user.getFirstName(),user.getLastName(), user.getStatus()));
         }
         return userDTOList;
     }

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { toast } from 'react-toastify';
+import { toast, ToastContainer } from 'react-toastify';
 import { WebSocketContext } from '../../WebSocketProvider';
 import './TournamentPage.css';
 import BackButton from '../BackButton';
@@ -193,16 +193,35 @@ const TournamentPage = () => {
 
     const handleGameCreation = async (opponentId, opponentName) => {
         try {
-            await Promise.all([
-                setUserInTurnier(userId),
-                setUserInTurnier(opponentId)
-            ]);
+            // Aktualisiere ClanMembers und erhalte die aktualisierten Daten
+            const response = await fetch(`http://localhost:8080/getClanMitglieder?clanId=${clanId}`);
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            const updatedClanMembers = await response.json();
+            console.log('Aktualisierte Clanmitglieder:', updatedClanMembers);
 
-            createGame(userId, opponentName);
+            const opponent = updatedClanMembers.find(member => member.id === opponentId);
+            const currentUser = updatedClanMembers.find(member => member.id === userId);
+
+            if (opponent && currentUser && opponent.status === 'online' && currentUser.status === 'online') {
+                await Promise.all([
+                    setUserInTurnier(userId),
+                    setUserInTurnier(opponentId)
+                ]);
+                createGame(userId, opponentName);
+                toast.success('Spiel kann gestartet werden');
+            } else {
+                console.log('einer nicht on');
+                toast.error('Dein Gegner ist nicht online oder befindet sich schon in einem Duell. Versuche es später erneut');
+            }
         } catch (error) {
             console.error('Error during game creation:', error);
+            toast.error('Fehler beim Starten des Spiels');
         }
     };
+
+
 
     //Damit Spieler nicht wieder gegeneinander spielen können
     const canStartGame = (player1, player2) => {
@@ -249,6 +268,7 @@ const TournamentPage = () => {
     return (
         <div className="container">
             <BackButton />
+            <ToastContainer/>
             <h1 className="tournament-title">Turnier Seite</h1>
             {showBetModal ? (
                 <div className="bet-modal">

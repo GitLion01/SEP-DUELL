@@ -1310,5 +1310,50 @@ public class GameService {
 
     }
 
+
+    public void setGameTrue(Long gameId){
+        pickDeck(gameId);
+        Optional<Game> optionalGame = gameRepository.findById(gameId);
+        if(optionalGame.isEmpty()){
+            return;
+        }
+        Game game = optionalGame.get();
+        game.setReady(true);
+        gameRepository.save(game);
+
+        List<UserAccount> users = game.getUsers();
+        for(UserAccount user : game.getUsers()){
+            messagingTemplate.convertAndSendToUser(user.getId().toString(), "/queue/selectDeck", List.of(game, users));
+        }
+    }
+
+    public void pickDeck(Long gameId){
+        Optional<Game> optionalGame = gameRepository.findById(gameId);
+        if(optionalGame.isEmpty()){
+            return;
+        }
+        Game game = optionalGame.get();
+        UserAccount user1 = game.getUsers().get(0);
+        UserAccount user2 = game.getUsers().get(1);
+        if(user1.getPlayerState().getDeck() != null && user2.getPlayerState().getDeck() != null){
+            return;
+        }
+        List<UserAccount> userAccounts = new ArrayList<>();
+        userAccounts.add(user1);
+        userAccounts.add(user2);
+        List<Deck> decks = deckRepository.findAll();
+        user1.getPlayerState().setDeck(decks.get(0));
+        user2.getPlayerState().setDeck(decks.get(0));
+        playerStateRepository.save(user1.getPlayerState());
+        playerStateRepository.save(user2.getPlayerState());
+        userAccountRepository.save(user1);
+        userAccountRepository.save(user2);
+
+        for(UserAccount user : userAccounts){
+            messagingTemplate.convertAndSendToUser(user.getId().toString(), "/queue/selectDeck", List.of(game, userAccounts));
+        }
+
+    }
+
 }
  

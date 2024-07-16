@@ -130,6 +130,11 @@ public class GameController {
         gameService.surrender(request);
     }
 
+    @MessageMapping("/setTrue")
+    public void setGameTrue(Long gameId){
+        gameService.setGameTrue(gameId);
+    }
+
 
 
 // BOT-MATCHES ---------------------------------------------------------

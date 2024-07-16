@@ -36,6 +36,14 @@ public class UserDTO {
         this.lastName = lastName;
     }
 
+    public UserDTO( String username,long id,String firstName,String lastName, String status) {
+        this.username = username;
+        this.id = id;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.status = status;
+    }
+
     public UserDTO(String username, String image, long id, String firstName, String lastName, List<UserAccount> friends,Integer leaderboardPoints, String clanName) {
         this.username = username;
         this.image = image;
