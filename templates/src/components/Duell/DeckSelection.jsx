@@ -11,6 +11,7 @@ const  DeckSelection = () => {
   const [id, setId] = useState(null);
   const [gameId, setGameId] = useState('');
   const [isChecked, setIsChecked] = useState(false); // Zustand für Checkbox
+  const [showStartButton, setShowStartButton] = useState(false); // Zustand für Button-Sichtbarkeit
   const navigate = useNavigate(); // Use navigate to redirect
 
   useEffect(() => {
@@ -112,6 +113,27 @@ const  DeckSelection = () => {
     })
   }
 
+  // Timer zum Anzeigen des Buttons nach 15 Sekunden
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowStartButton(true);
+    }, 15000); // 15000ms = 15 Sekunden
+
+    return () => clearTimeout(timer); // Cleanup function
+  }, []);
+
+  function handleStartDuel() {
+
+    if (client && connected) {
+      client.publish({
+        destination: '/app/duels/setTrue',
+        body: JSON.stringify({
+          gameId: gameId,
+        })
+      });
+    }
+  }
+
   return (
       <div>
         <h2 className={"ub1"}>Select Your Deck</h2>
@@ -139,6 +161,7 @@ const  DeckSelection = () => {
           </label>
         </div>
         {selectedDeck && <p className={"p1"}>Waiting for opponent...</p>}
+        {showStartButton && <button onClick={handleStartDuel}>Starte das Duell</button>}
       </div>
   );
 };
