@@ -10,10 +10,10 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
-@NoArgsConstructor
+@NoArgsConstructor  // von JPA benötigt, um Entitätsobjekte beim Laden aus der Datenbank zu erstellen
 public class Bet {
 
-    @Id
+    @Id // Primärschlüssel
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
@@ -27,14 +27,14 @@ public class Bet {
     @JsonIgnore
     private UserAccount betOn;
 
-    private boolean isWinner;
 
-    private boolean completed; // Neues Feld
+    private boolean isWinner;   // Gibt an, ob die Wette gewonnen wurde.
+    private boolean completed;  // Gibt an, ob die Wette abgeschlossen ist.
 
     public Bet(UserAccount bettor, UserAccount betOn) {
         this.bettor = bettor;
         this.betOn = betOn;
         this.isWinner = false;
-        this.completed = false; // Standardmäßig nicht abgeschlossen
+        this.completed = false;
     }
 }
