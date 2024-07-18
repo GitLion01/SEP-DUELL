@@ -22,6 +22,7 @@ const Livestream = () => {
         }
     }, [id]);
 
+    // Channel für neuen Zug
     useEffect(() => {
         if (client && connected && id) {
             const subscription = client.subscribe(`/user/${id}/queue/newTurn`, (message) => {
@@ -82,11 +83,14 @@ const Livestream = () => {
     }, [id]);
 
 
+    // Channel für Spielerzüge
     useEffect(() => {
         if (client && connected && id) {
             const subscription = client.subscribe(`/user/${id}/queue/watch`, (message) => {
                 const response = JSON.parse(message.body);
                 console.log("Response Stream: ", response);
+
+                // Echtes Duell
                 if (response[1].length === 2) {
                     const user1 = response[1][0];
                     const user2 = response[1][1];
@@ -101,6 +105,8 @@ const Livestream = () => {
                         setUser2State(user2.playerState);
                     }
                 }
+
+                // BOT Duell
                 if (response.length === 3) {
                     const user1 = response[1];
                     const botPlayerState = response[2];
@@ -118,6 +124,7 @@ const Livestream = () => {
 
                 }
 
+                //Statistiken
                 if (response.length > 5) {
                     const [_, __, ___, sepCoins, leaderBoardPointsWinner, leaderBoardPointsLoser, damageWinner, damageLoser, cardsPlayedA, cardsPlayedB, sacrificedA, sacrificedB] = response;
                     setStats({

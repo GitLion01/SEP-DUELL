@@ -50,7 +50,7 @@ const TournamentPage = () => {
         };
     }, []);
 
-    const checkIfUserCanBet = async () => {
+    const checkIfUserCanBet = async () => {         //checkt ob ein User Wetten kann 
         const turnierId = localStorage.getItem('turnierId');
         console.log('Stored turnierId:', turnierId);
         console.log('Current turnierId:', currentTurnierId);
@@ -120,20 +120,20 @@ const TournamentPage = () => {
         }
     };
 
-    const sortMatches = (matches) => {
+    const sortMatches = (matches) => {  //sortiert die Turnier Matches 
         const userMatchesArray = [];
         const otherMatchesArray = [];
 
         matches.forEach((match) => {
-            if (match.player2 === null) {
+            if (match.player2 === null) { //checkt wegen Freilos 
                 console.log(match.player1)
                 sendWinner(match.player1);
-                if (match.player1 === userId) {
+                if (match.player1 === userId) {  //checkt ob der Freilos für den jetzigen User ist 
                     userMatchesArray.push(match);
                 } else {
                     otherMatchesArray.push(match);
                 }
-            } else if (match.player1 === userId || match.player2 === userId) {
+            } else if (match.player1 === userId || match.player2 === userId) { //checkt ob das Match für den jetzigen Spieler ist 
                 userMatchesArray.push(match);
             } else {
                 otherMatchesArray.push(match);
@@ -149,7 +149,7 @@ const TournamentPage = () => {
             const response = await fetch(`http://localhost:8080/gewinnerSpeichern?userId=${winnerId}`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'application/json',  //Welcher von Inhalt in der Anfrage gesendet wird 
                 },
             });
 
@@ -204,7 +204,7 @@ const TournamentPage = () => {
             const opponent = updatedClanMembers.find(member => member.id === opponentId);
             const currentUser = updatedClanMembers.find(member => member.id === userId);
 
-            if (opponent && currentUser && opponent.status === 'online' && currentUser.status === 'online') {
+            if (opponent && currentUser && opponent.status === 'online' && currentUser.status === 'online') { //überprüft ob die User online sind 
                 await Promise.all([
                     setUserInTurnier(userId),
                     setUserInTurnier(opponentId)
@@ -227,6 +227,7 @@ const TournamentPage = () => {
     const canStartGame = (player1, player2) => {
         return !winners.includes(player1) && !winners.includes(player2);
     };
+
 
     const handleBetSubmission = async () => {
         if (selectedMember) {

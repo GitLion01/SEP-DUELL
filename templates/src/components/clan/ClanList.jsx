@@ -29,7 +29,7 @@ function Clan() {
         }
     }, [userClanId]);
 
-    const fetchClans = async () => {
+    const fetchClans = async () => { //Aufrufen von Clans 
         try {
             const response = await fetch('http://localhost:8080/getClans');
             if (!response.ok) {
@@ -42,7 +42,7 @@ function Clan() {
         }
     };
 
-    const fetchClanId = async () => {
+    const fetchClanId = async () => { //Aufrufen der ClanId
         try {
             const response = await fetch(`http://localhost:8080/getClanId?userId=${userId}`);
             if (!response.ok) {
@@ -56,7 +56,7 @@ function Clan() {
         }
     };
 
-    const fetchTurnierId = async (clanId) => {
+    const fetchTurnierId = async (clanId) => { //Aufrufen der TurnierId 
         try {
             const response = await fetch(`http://localhost:8080/getTurnierId?clanId=${clanId}`);
             if (!response.ok) {
@@ -70,7 +70,7 @@ function Clan() {
         }
     };
 
-    const checkTurnierStatus = async (turnierId) => {
+    const checkTurnierStatus = async (turnierId) => { //checkt ob ein Turnier gestartet hat 
         try {
             const response = await fetch(`http://localhost:8080/checkTurnier?turnierId=${turnierId}`);
             const isTurnierReady = await response.json();
@@ -82,7 +82,7 @@ function Clan() {
         }
     };
 
-    const checkAcceptedStatus = async (turnierId) => {
+    const checkAcceptedStatus = async (turnierId) => { //checkt ob der jeweilige User das Turnier akzeptiert hat 
         try {
             console.log('Check turnier');
             const response = await fetch(`http://localhost:8080/checkAccepted?turnierId=${turnierId}&userId=${userId}`);
@@ -98,20 +98,20 @@ function Clan() {
         }
     };
 
-    const createClan = async () => {
+    const createClan = async () => { //Clan erstellen 
         if (newClanName.trim() === '') {
             toast.error('Bitte einen Namen eingeben');
             return;
         }
 
-        const existingClan = clans.find(clan => clan.name.toLowerCase() === newClanName.toLowerCase());
+        const existingClan = clans.find(clan => clan.name.toLowerCase() === newClanName.toLowerCase()); //Überprüft, ob es diesen Clannamen schon gibt 
         if (existingClan) {
             toast.error('Dieser Clan-Name existiert bereits');
             return;
         }
 
         try {
-            const response = await fetch(`http://localhost:8080/createClan?ClanName=${encodeURIComponent(newClanName)}`, {
+            const response = await fetch(`http://localhost:8080/createClan?ClanName=${encodeURIComponent(newClanName)}`, { //Clan Name korrekt als Teil der URL geschickt
                 method: 'POST',
             });
 

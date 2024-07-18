@@ -38,6 +38,7 @@ const Duel = () => {
         }
     }, []);
 
+    //Timer
     useEffect(() => {
         if (timer > 0) {
 
@@ -77,6 +78,7 @@ const Duel = () => {
         }
     }, [id, connected]);
 
+    // Channel für Timer reset
     useEffect(() => {
         if (client && connected && id) {
             const subscription = client.subscribe(`/user/${id}/queue/newTurn`, (message) => {
@@ -164,6 +166,7 @@ const Duel = () => {
         }
     };
 
+    // Angriff
     const handleAttack = () => {
 
         if (!myTurn) {
