@@ -89,8 +89,8 @@ public class UserAccount implements UserDetails {
 
     //Turnierwetten
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnore
-    private List<Bet> bets = new ArrayList<>();
+    @JsonIgnore //@JsonIgnore verhindert, dass die bets Liste in das JSON-Format konvertiert wird, um Endlosschleifen und große Datenmengen zu vermeiden
+    private List<Bet> bets = new ArrayList<>(); //add, remove, clear
 
     @OneToOne(fetch = FetchType.EAGER,  cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     @JoinColumn(name = "player_state_id")

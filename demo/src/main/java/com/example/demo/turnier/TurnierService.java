@@ -8,12 +8,12 @@ import com.example.demo.user.UserAccount;
 import com.example.demo.user.UserAccountRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.ResponseEntity; // Importiert die Klasse ResponseEntity
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.*; // Importiert die Klasse Optional
 
 @Service
 @AllArgsConstructor
@@ -241,8 +241,8 @@ public class TurnierService {
 
 
     public ResponseEntity<String> placeBet(Long bettorId, Long betOnId) {
-        Optional<UserAccount> bettorOpt = userAccountRepository.findById(bettorId);
-        Optional<UserAccount> betOnOpt = userAccountRepository.findById(betOnId);
+        Optional<UserAccount> bettorOpt = userAccountRepository.findById(bettorId); // Sucht den Benutzer, der die Wette platziert.
+        Optional<UserAccount> betOnOpt = userAccountRepository.findById(betOnId);   // Sucht den Benutzer, auf den gewettet wird.
 
         if (bettorOpt.isPresent() && betOnOpt.isPresent()) {
             UserAccount bettor = bettorOpt.get();
@@ -259,7 +259,7 @@ public class TurnierService {
             }
 
             bettor.setSepCoins(bettor.getSepCoins() - 50);
-            Bet bet = new Bet(bettor, betOn);
+            Bet bet = new Bet(bettor, betOn);   // Erstellt eine neue Wette.
             bettor.getBets().add(bet);
             betRepository.save(bet);
             userAccountRepository.save(bettor);
@@ -277,16 +277,15 @@ public class TurnierService {
         for (Bet bet : bets) {
             UserAccount bettor = bet.getBettor();
             bettor.setSepCoins(bettor.getSepCoins() + 300); //Lootbox plus Einsatz 250 + 50 SEP Coins
-            //Logik für Lootbox
-            bet.setWinner(true);
-            bet.setCompleted(true); // Markiere Wette als abgeschlossen
+            bet.setWinner(true);    // Markiert Wette als gewonnen
+            bet.setCompleted(true);
             userAccountRepository.save(bettor);
-            betRepository.save(bet); // Speichere die aktualisierte Wette
+            betRepository.save(bet);
         }
     }
 
         private void deleteBetsForClan(Clan clan){
-            for (UserAccount user : clan.getUsers()) {
+            for (UserAccount user : clan.getUsers()) {  //liste aus clan
                 for (Bet bet : user.getBets()) {
                     betRepository.delete(bet);
                 }
@@ -295,7 +294,7 @@ public class TurnierService {
             }
         }
 
-
+//Inkonsistenzen Vorsicht!!!
 
 
     public void getUserStatus(Long turnierID) {
