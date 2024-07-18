@@ -140,10 +140,6 @@ public class GameService {
             game.setReady(true);
         }
 
-
-        //playerStateRepository.save(user.getPlayerState());
-        //userAccountRepository.save(user);
-
         gameRepository.save(game);
         List<UserAccount> users = gameRepository.findAllUsersByGameId(game.getId()).stream()
                 .map(userId -> userAccountRepository.findById(userId).orElse(null))
@@ -252,11 +248,13 @@ public class GameService {
         UserAccount userAccount = optionalUserAccount.get();
 
         int remainingLifePoints = 0;
+        // Game gegen anderen Spieler
         if (game.getPlayerStateBot() == null) {
             if (!game.getCurrentTurn().equals(userAccount)) {
                 return;
             }
 
+            //Spieler der als nächstes am Zug ist wird eine Karte auf die Hand gelegt
             UserAccount notTurn = game.getCurrentTurn().equals(game.getUsers().get(0)) ? game.getUsers().get(1) : game.getUsers().get(0);
             notTurn.getPlayerState().getHandCards().add(notTurn.getPlayerState().getDeckClone().remove(0));
 
@@ -265,15 +263,20 @@ public class GameService {
             if (game.getFirstRound()) {
                 game.setFirstRound(false);
             }
+            //Status hasAttacked wird für alle Karten auf der Hand auf false gesetzt
             List<PlayerCard> cards = userAccount.getPlayerState().getFieldCards();
             for (PlayerCard card : cards) {
                 card.setHasAttacked(false);
                 playerCardRepository.save(card);
             }
             gameRepository.save(game);
+
         } else {
+
+            //Game gegen Computer
             game.setMyTurn(false);
 
+            //Spieler wird automatisch eine Karte auf die Hand gelegt
             userAccount.getPlayerState().getHandCards().add(userAccount.getPlayerState().getDeckClone().remove(0));
 
             //Aktionen des Bots
@@ -293,8 +296,10 @@ public class GameService {
                 }
             }
             game.getPlayerStateBot().getHandCards().removeAll(cardsToRemove);
+
             // 3: Mit allen Karten auf dem Feld angreifen
 
+            //Gegner hat keine Karten auf Feld
             if (userAccount.getPlayerState().getFieldCards().isEmpty()) {
                 List<PlayerCard> botCards = new ArrayList<>(game.getPlayerStateBot().getFieldCards());
                 Iterator<PlayerCard> iterator = botCards.iterator();
@@ -321,13 +326,15 @@ public class GameService {
                 }
 
             } else {
+
+                // Gegner hat Karten auf dem Feld
                 // Greife die Karten des Gegners an, wenn Karten auf dem eigenen Feld sind
-                List<PlayerCard> opponentCards = new ArrayList<>(userAccount.getPlayerState().getFieldCards()); // Kopie der Liste erstellen
-                List<PlayerCard> botFieldCards = new ArrayList<>(game.getPlayerStateBot().getFieldCards()); // Kopie der Liste erstellen
+                List<PlayerCard> opponentCards = new ArrayList<>(userAccount.getPlayerState().getFieldCards());
+                List<PlayerCard> botFieldCards = new ArrayList<>(game.getPlayerStateBot().getFieldCards());
 
                 // Iteriere durch jede Karte auf dem Feld des Bots
                 for (Iterator<PlayerCard> botFieldCardIterator = botFieldCards.iterator(); botFieldCardIterator.hasNext();) {
-                    // Überprüfe jede Karte auf dem Feld des Gegners
+                    // Überprüfe jede Karte auf dem Feld des Gegners (Spieler)
                     PlayerCard botFieldCard = botFieldCardIterator.next();
 
                     for (Iterator<PlayerCard> opponentCardIterator = opponentCards.iterator(); opponentCardIterator.hasNext();) {
@@ -379,8 +386,9 @@ public class GameService {
                 }
 
                 // Entferne zerstörte Karten aus den Feldern des Gegners und des Bots
-                userAccount.getPlayerState().getFieldCards().clear(); // Nur noch nicht zerstörte Karten bleiben
-                userAccount.getPlayerState().getFieldCards().addAll(opponentCards);
+                userAccount.getPlayerState().getFieldCards().clear();
+                userAccount.getPlayerState().getFieldCards().addAll(opponentCards); // Nur noch nicht zerstörte Karten bleiben
+
                 game.getPlayerStateBot().getFieldCards().clear();
                 game.getPlayerStateBot().getFieldCards().addAll(botFieldCards); // Nur noch nicht zerstörte Karten bleiben
             }
@@ -418,6 +426,7 @@ public class GameService {
         if (remainingLifePoints < 0) {
             terminateMatch(request.getGameID(), game.getPlayerStateBot().getId(), userAccount.getId());
         }
+
     }
 
     public void attackBotCard(AttackBotCardRequest request) {
@@ -426,6 +435,7 @@ public class GameService {
         Optional<PlayerState> optionalBotPS = playerStateRepository.findById(request.getBotPSId());
         Optional<PlayerCard> optionalAttackerCard = playerCardRepository.findById(request.getAttackerId());
         Optional<PlayerCard> optionalTarget = playerCardRepository.findById(request.getTargetId());
+
         if(optionalGame.isEmpty() || optionalAttacker.isEmpty() || optionalBotPS.isEmpty() || optionalAttackerCard.isEmpty() || optionalTarget.isEmpty()) {
             return;
         }
@@ -438,9 +448,7 @@ public class GameService {
         if(attackerCard.getHasAttacked()){
             return;
         }
-        if(!game.getCurrentTurn().equals(attacker) ||
-                botPS.getFieldCards().isEmpty() ||
-                attacker.getPlayerState().getFieldCards().contains(target)){
+        if(!game.getCurrentTurn().equals(attacker) || botPS.getFieldCards().isEmpty() || attacker.getPlayerState().getFieldCards().contains(target)){
             return;
         }
 
@@ -1329,39 +1337,6 @@ public class GameService {
             messagingTemplate.convertAndSendToUser(user.getId().toString(), "/queue/selectDeck", List.of(game, users));
         }
     }
-
-    /*public void pickDeck(Long gameId){
-        Optional<Game> optionalGame = gameRepository.findById(gameId);
-        if(optionalGame.isEmpty()){
-            return;
-        }
-        Game game = optionalGame.get();
-        if(game.getReady()){
-            return;
-        }
-        UserAccount user1 = game.getUsers().get(0);
-        UserAccount user2 = game.getUsers().get(1);
-        if(user1.getPlayerState().getDeck() != null && user2.getPlayerState().getDeck() != null){
-            return;
-        }
-        List<UserAccount> userAccounts = new ArrayList<>();
-        userAccounts.add(user1);
-        userAccounts.add(user2);
-        List<Deck> decks = deckRepository.findAll();
-        user1.getPlayerState().setDeck(decks.get(0));
-        user2.getPlayerState().setDeck(decks.get(1));
-        user1.getPlayerState().setReady(true);
-        user2.getPlayerState().setReady(true);
-        playerStateRepository.save(user1.getPlayerState());
-        playerStateRepository.save(user2.getPlayerState());
-        userAccountRepository.save(user1);
-        userAccountRepository.save(user2);
-
-        for(UserAccount user : userAccounts){
-            messagingTemplate.convertAndSendToUser(user.getId().toString(), "/queue/selectDeck", List.of(game, userAccounts));
-        }
-
-    }*/
 
 
     public void pickDeck(Long gameId){
