@@ -93,6 +93,11 @@ public class TurnierController {
         return turnierService.placeBet(request.getBettorId(), request.getBetOnId());
     }
 
+
+
+
+
+
     @GetMapping("/getGewinner")
     public List<Long> getGewinner(@RequestParam Long clanId) {
         return turnierService.getGewinner(clanId);
