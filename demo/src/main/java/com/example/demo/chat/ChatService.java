@@ -1,5 +1,7 @@
 package com.example.demo.chat;
 
+import com.example.demo.clan.Clan;
+import com.example.demo.clan.ClanRepository;
 import com.example.demo.dto.UserDTO;
 import com.example.demo.user.UserAccount;
 import com.example.demo.user.UserAccountRepository;
@@ -22,6 +24,7 @@ public class ChatService {
     private final ChatMessageRepository chatMessageRepository;
     private final SimpMessagingTemplate messagingTemplate;
     private final GroupRepository groupRepository;
+    private final ClanRepository clanRepository;
 
 
     public ResponseEntity<Long> createChat(Long userId1,Long userId2) {
@@ -77,7 +80,10 @@ public class ChatService {
                         chatMessage.setRead(true);
                     chatMessage.getSender().setUsername(userAccountRepository.findById(chatMessage.getSender().getId()).get().getUsername());
                     chatMessageRepository.save(chatMessage);
+                    System.out.println("sent message");
+                    System.out.println(convertToChatMessageDTO(chatMessage));
                     messagingTemplate.convertAndSendToUser(userId.toString(),"/queue/messages", convertToChatMessageDTO(chatMessage));
+                    System.out.println("sent message 2");
                     break;
                 }
             }
@@ -96,6 +102,13 @@ public class ChatService {
             existingMessage.setMessage(chatMessage.getMessage());
             chatMessageRepository.save(existingMessage);
             updateChatWithEditedMessage(existingMessage);
+
+            for(Clan clan : clanRepository.findAll()){
+                if(Objects.equals(clan.getGroup().getId(), chatMessage.getChat().getId()))
+                    for(UserAccount user : clan.getUsers()){
+                        messagingTemplate.convertAndSendToUser(user.getId().toString(), "/queue/messages", convertToChatMessageDTO(existingMessage));
+                    }
+            }
 
             for (UserAccount user : existingMessage.getChat().getUsers()) {
                 messagingTemplate.convertAndSendToUser(user.getId().toString(), "/queue/messages", convertToChatMessageDTO(existingMessage));
@@ -119,6 +132,14 @@ public class ChatService {
                 //no need to use ChatMessageRepository because of Casecad.All
                 chat.getMessages().remove(message.get());
                 message.get().setMessage("");
+
+                for(Clan clan : clanRepository.findAll()){
+                    if(Objects.equals(clan.getGroup().getId(), chatMessage.getChat().getId()))
+                        for(UserAccount user : clan.getUsers()){
+                            messagingTemplate.convertAndSendToUser(user.getId().toString(), "/queue/messages", convertToChatMessageDTO(message.get()));
+                        }
+                }
+
                 for (UserAccount user : chat.getUsers()) {
                     messagingTemplate.convertAndSendToUser(user.getId().toString(), "/queue/messages", convertToChatMessageDTO(message.get()));
                 }
@@ -194,6 +215,7 @@ public class ChatService {
 
     public void checkOnline(ChatMessage chatMessage) {
         Chat chat = chatRepository.findById(chatMessage.getChat().getId()).get();
+        System.out.println("chat id is"+chat.getId());
 
         if(!chat.getMessages().contains(chatMessage)) {
             chat.getMessages().add(chatMessage);
@@ -203,6 +225,16 @@ public class ChatService {
             //or chatMessage = chatRepository.findeById(chatRepository.save(chat).getId()).get()
         }
         List<UserAccount> users =chat.getUsers();
+
+        //der Fall dass es ein Clan Nachricht
+        if(users.isEmpty()){
+            try {
+                UserAccount user = userAccountRepository.findById(chatMessage.getSender().getId()).get();
+                Clan clan = user.getClan();
+                users = clan.getUsers();
+            }catch(Exception e) {}
+        }
+
         for(UserAccount user : users) {
             if(user.getId().equals(chatMessage.getSender().getId()))
                 continue;
@@ -224,4 +256,10 @@ public class ChatService {
         return dto;
     }
 
+    public ResponseEntity<GroupDTO> getClanChat(Long userId) {
+        UserAccount userAccount = userAccountRepository.findById(userId).get();
+        if(userAccount.getClan()!=null)
+            return ResponseEntity.ok(convertToGroupDTO(userAccount.getClan().getGroup()));
+        return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
+    }
 }

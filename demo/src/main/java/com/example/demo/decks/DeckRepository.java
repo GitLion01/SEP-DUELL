@@ -38,6 +38,11 @@ public interface DeckRepository extends JpaRepository<Deck, Long> {
     Optional<Deck> findByNameAndUserId(String deckName, Long userId);
 
     List<Deck> findByCardsContaining(Card card);
+
+    @Modifying
+    @Transactional
+    @Query(value = "DELETE FROM deck_card where deck_id = ?1", nativeQuery = true)
+    void deleteDeckCardsByDeckId(@Param("deckID") Long deckID);
 }
 
 

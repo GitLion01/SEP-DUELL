@@ -22,8 +22,9 @@ const LeaderboardPage = () => {
         fetch('http://localhost:8080/leaderboard')
             .then(response => response.json())
             .then(data => {
-                setLeaderboard(data);
-                const userData = data.find(user => user.id === userId);
+                const sortedData = data.sort((a, b) => b.leaderboardPoints - a.leaderboardPoints);
+                setLeaderboard(sortedData);
+                const userData = sortedData.find(user => user.id === userId);
                 setCurrentUserData(userData);
                 console.log(userData);
             });
@@ -36,9 +37,10 @@ const LeaderboardPage = () => {
                     if (index !== -1) {
                         const updatedLeaderboard = [...prev];
                         updatedLeaderboard[index] = updatedUser;
-                        return updatedLeaderboard;
+                        return updatedLeaderboard.sort((a, b) => b.leaderboardPoints - a.leaderboardPoints);
                     } else {
-                        return [...prev, updatedUser];
+                        const newLeaderboard = [...prev, updatedUser];
+                        return newLeaderboard.sort((a, b) => b.leaderboardPoints - a.leaderboardPoints);
                     }
                 });
             });

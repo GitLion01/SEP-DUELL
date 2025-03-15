@@ -93,25 +93,28 @@ public class CardService {
 
 
     public void deleteCard(String name) {
+        // prüft ob die Karte bereits existiert
         Optional<Card> optionalCard = cardRepository.findByName(name);
         if (optionalCard.isEmpty()) {
             return;
         }
+        // Karte hier nicht mehr vom Typ Optional
         Card card = optionalCard.get();
 
-        // Find all decks containing the card
+        // findet alle Decks in der die Karte enthalten ist
         List<Deck> decksContainingCard = deckRepository.findByCardsContaining(card);
 
-        // Extract card IDs
+        // extrahiert die IDs der Karte
         List<Long> cardIds = new ArrayList<>();
         cardIds.add(card.getId());
 
-        // Iterate over each deck containing the card and remove the card from it using deleteDeckCardsByDeckIdAndCardIds method
+
+        // iteriert über jedes Deck, was die Karte enthält und löscht die Karteninstanzen
         for (Deck deck : decksContainingCard) {
             deckRepository.deleteDeckCardsByDeckIdAndCardIds(deck.getId(), cardIds);
         }
 
-        // Finally, delete the card itself, which will cascade the delete to CardInstance entries
+        // löscht die Karte aus dem Spiel (es mussten zuerst alle Karten aus den anderen tabellen gelöscht werden wegen Fremdschlüsselverweis)
         cardRepository.delete(card);
     }
 
@@ -126,17 +129,21 @@ public class CardService {
         return "Cards deleted";
     }
 
-    public List<CardRequest> parseCSV(MultipartFile file) throws IOException {
+
+
+    public List<CardRequest> parseCSV(MultipartFile file) throws IOException, NumberFormatException {
         List<CardRequest> cardRequests = new ArrayList<>();
-        try (InputStream is = file.getInputStream();
-             BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
+        try (InputStream is = file.getInputStream(); // erschafft ein Input Stream von einer Datei (hier zuerst byte-Stream
+             // bietet Methoden für leseoperationen
+             BufferedReader reader = new BufferedReader(
+                     new InputStreamReader(is, StandardCharsets.UTF_8))) { //StandardCharsets.UTF_8 wandelt bytes in unicode-Zeichen um
 
             String line;
             while ((line = reader.readLine()) != null) {
-                String[] parts = line.split(",");
-                if (parts.length == 6) {
+                String[] parts = line.split(","); // Zeile wird in Teile durch Komma zerlegt
+                if (parts.length == 6) { // es dürfen max 6 Teile entstehen
                     String name = parts[0].trim();
-                    int attackPoints = parts[2].equalsIgnoreCase("unlimited") ? Integer.MAX_VALUE : Integer.parseInt(parts[2].trim());
+                    int attackPoints = parts[2].equalsIgnoreCase("unlimited") ? Integer.MAX_VALUE : Integer.parseInt(parts[2].trim()); // keine Kommazahl möglich
                     int defensePoints = parts[3].equalsIgnoreCase("unlimited") ? Integer.MAX_VALUE : Integer.parseInt(parts[3].trim());
                     String description = parts[4].trim();
                     if (description.length() > 200) {
@@ -148,6 +155,7 @@ public class CardService {
                     /*String image = loadImageAndEncodeToBase64(parts[5].trim());*/
                     Rarity rarity = Rarity.valueOf(parts[1].trim().toUpperCase());
 
+                    // erstellt Reqeusts aus den Daten und fügt sie einer Liste hinzu. Sie werdne für die Erstellung der Karteninstanzen benötigt
                     CardRequest cardRequest = new CardRequest(name, attackPoints, defensePoints, description, image, rarity);
                     cardRequests.add(cardRequest);
                 } else {
@@ -158,6 +166,7 @@ public class CardService {
         return cardRequests;
     }
 
+    // extrahiert das Bild aus der angegebenen Datei
     private byte[] loadImageFromFile(String filePath) throws IOException {
         Path path = Paths.get(filePath);
         return Files.readAllBytes(path);

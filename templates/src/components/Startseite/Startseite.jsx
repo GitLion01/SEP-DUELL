@@ -1,33 +1,54 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect} from 'react';
 import './Startseite.css';
 import { useNavigate } from 'react-router-dom';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
+import { toast, ToastContainer } from 'react-toastify';
 
 const Startseite = () => {
   const [loggedIn, setLoggedIn] = useState(true);
   const navigate = useNavigate();
+  const userId = localStorage.getItem('id');
+  const [clanId, setClanId] = useState(null); 
+
+  useEffect(() => {
+    fetchClanId();
+}, []);
+
+
+const fetchClanId = async () => {
+  try {
+      const response = await fetch(`http://localhost:8080/getClanId?userId=${userId}`);
+      if (!response.ok) {
+          throw new Error('Network response was not ok');
+      }
+      const data = await response.json();
+      setClanId(data);
+      localStorage.setItem('clanId', data);
+  } catch (error) {
+      console.error('There was a problem with the fetch operation:', error);
+  }
+};
 
   const handleLogout = async () => {
-    const userId = localStorage.getItem('id');
     if (userId) {
-      await fetch(`http://localhost:8080/login/logout/${userId}`, { // Benutzer-ID im Pfad
+      await fetch(`http://localhost:8080/login/logout/${userId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
       });
 
-      const socket = new SockJS('http://localhost:8080/game-websocket'); // WebSocket-Verbindung erstellen
+      const socket = new SockJS('http://localhost:8080/game-websocket');
       const stompClient = new Client({
         webSocketFactory: () => socket,
         reconnectDelay: 5000,
       });
 
       stompClient.onConnect = () => {
-        const offline="offline";
+        const offline = "offline";
         stompClient.publish({
-          destination: '/status/status',
+          destination: '/app/status',
           body: JSON.stringify(offline),
           headers: {
             userId: userId.toString(),
@@ -48,6 +69,8 @@ const Startseite = () => {
     setLoggedIn(false);
     localStorage.removeItem('id');
     localStorage.removeItem('userRole');
+    localStorage.removeItem('clanId');
+    localStorage.removeItem('hasBeenRedirectedToTurnier');
     navigate('/');
   };
 
@@ -55,7 +78,38 @@ const Startseite = () => {
     const userRole = localStorage.getItem('userRole');
     if (userRole !== 'ADMIN') {
       event.preventDefault();
-      alert('Zugriff verweigert! Nur Admins können auf das Adminsteuerfeld zugreifen.');
+      toast.error('Zugriff verweigert! Nur Admins können auf das Adminsteuerfeld zugreifen.');
+    }
+  };
+
+  const handleTurnierClick = async (event) => {
+    if (clanId) {
+      try {
+        const turnierResponse = await fetch(`http://localhost:8080/getTurnierId?clanId=${clanId}`);
+        const turnierId = await turnierResponse.json();
+
+        if (turnierId) {
+          const statusResponse = await fetch(`http://localhost:8080/checkTurnier?turnierId=${turnierId}`);
+          const isTurnierReady = await statusResponse.json();
+
+          if (!isTurnierReady) {
+            event.preventDefault();
+            toast.error('Das Turnier ist noch nicht bereit.');
+          } else {
+            navigate('/turnier');
+          }
+        } else {
+          event.preventDefault();
+          toast.error('Kein Turnier gefunden.');
+        }
+      } catch (error) {
+        event.preventDefault();
+        console.error('Error checking turnier:', error);
+        toast.error('Turnier ist noch nicht bereit');
+      }
+    } else {
+      event.preventDefault();
+      toast.error('Kein Clan gefunden.');
     }
   };
 
@@ -65,6 +119,7 @@ const Startseite = () => {
 
   return (
       <div className="AppStart">
+        <ToastContainer />
         <header>
           <h1>STARTSEITE</h1>
           <div className="logout-button">
@@ -83,7 +138,7 @@ const Startseite = () => {
               <a href="/decks"><h2>MEIN DECK</h2></a>
             </section>
             <section className="freundesliste">
-              <a href="/freundelist"> <h2>MEINE FREUNDESLISTE</h2></a>
+              <a href="/freundelist"><h2>MEINE FREUNDESLISTE</h2></a>
             </section>
             <section className="adminsteuerfeld">
               <a href="/admin" onClick={handleAdminClick}><h2>MEIN ADMINSTEUERFELD</h2></a>
@@ -93,6 +148,18 @@ const Startseite = () => {
             </section>
             <section className="shop">
               <a href="/chat"><h2>CHAT</h2></a>
+            </section>
+            <section>
+              <a href="/clan"><h2>CLANS</h2></a>
+            </section>
+            <section>
+              <a  onClick={handleTurnierClick}><h2>TURNIER</h2></a>
+            </section>
+            <section className="liveduelle">
+              <a href="/streams"><h2>LIVE DUELLE</h2></a>
+            </section>
+            <section>
+              <a href="/botdeckselect"><h2>BOT DUELL</h2></a>
             </section>
           </div>
         </main>

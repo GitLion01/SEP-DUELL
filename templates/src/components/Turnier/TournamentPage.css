@@ -1,0 +1,78 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #000; /* Schwarzer Hintergrund */
+    color: #fff; /* Weiße Schriftfarbe für Lesbarkeit */
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+}
+
+.tournament-title {
+    font-size: 2.5em;
+    margin-bottom: 20px;
+    color: #ffcc00; /* Goldene Farbe für den Titel */
+    text-align: center;
+}
+
+.no-matches {
+    font-size: 1.2em;
+    margin-bottom: 20px;
+}
+
+.matches-container {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto; /* Horizontale Zentrierung */
+}
+
+.section-title {
+    font-size: 2em;
+    margin: 20px 0;
+    color: #ffcc00; /* Goldene Farbe für die Abschnittstitel */
+    text-align: center;
+}
+
+.matches-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+.match {
+    background-color: #333; /* Dunkler Hintergrund für Match-Elemente */
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 10px;
+    font-size: 1.2em;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.match .player-name {
+    color: #ffcc00; /* Goldene Farbe für Spielernamen */
+    margin: 0 10px; /* Abstand zwischen den Elementen */
+}
+
+.match .vs {
+    margin: 0 10px; /* Abstand zwischen den Elementen */
+}
+
+.start-game-button {
+    margin-left: 10px;
+    padding: 5px 10px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.start-game-button:hover {
+    background-color: #218838;
+}

@@ -1,0 +1,57 @@
+/* LiveTabelle.css */
+
+/*
+body {
+    background-color: #f0f2f5;
+    font-family: 'Arial', sans-serif;
+}
+
+ */
+
+.Ueberschrift {
+    text-align: center;
+    color: #d3b6b6;
+    margin-top: 20px;
+}
+
+.live-games-list {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+}
+
+.live-game-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 600px; /* Maximale Breite der Spielanzeige */
+    margin-bottom: 10px;
+    padding: 10px 20px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #fff; /* Weißer Hintergrund für jedes Spiel */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Leichter Schatten für Tiefe */
+}
+
+.live-game-item span {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+}
+
+.live-game-item button {
+    background-color: #007bff; /* Blau für den Button */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-left: 10px;
+}
+
+.live-game-item button:hover {
+    background-color: #0056b3; /* Dunkleres Blau beim Hover */
+}

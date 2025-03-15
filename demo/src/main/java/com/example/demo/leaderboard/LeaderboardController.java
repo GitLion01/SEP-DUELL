@@ -1,6 +1,7 @@
 // src/main/java/com/example/demo/leaderboard/LeaderboardController.java
 package com.example.demo.leaderboard;
 
+import com.example.demo.dto.UserDTO;
 import com.example.demo.user.UserAccount;
 import com.example.demo.user.UserAccountRepository;
 import com.example.demo.user.UserAccountService;
@@ -9,6 +10,8 @@ import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -20,7 +23,7 @@ public class LeaderboardController {
     private final UserAccountRepository userAccountRepository;
 
     @GetMapping("/leaderboard")
-    public List<UserAccount> getLeaderboard() {
+    public List<UserDTO> getLeaderboard() {
         return leaderboardService.getLeaderboard();
     }
 
@@ -41,7 +44,11 @@ public class LeaderboardController {
             System.out.println("from the if");
             userId=userAccountRepository.findByUsername(userIdHeader).get().getId();
         }
-        System.out.println("aufgerufen");
         leaderboardService.updateUserStatus(userId, status);
+    }
+
+    @GetMapping("/getId/{senderName}")
+    public Long getId(@PathVariable("senderName") String senderName) {
+        return userAccountRepository.findByUsername(senderName).get().getId();
     }
 }

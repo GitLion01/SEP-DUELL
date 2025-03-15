@@ -12,9 +12,10 @@
     background: linear-gradient(to bottom, #1e3c72, #2a5298);
 }
 
-h2 {
+.ub1 {
     margin-bottom: 20px;
     font-size: 2em;
+    color: #ffffff;
 }
 
 .deck-list {
@@ -51,7 +52,13 @@ h2 {
     color: #000;
 }
 
-p {
+.form-check-label {
+    color: #ffffff;
+}
+
+.p1 {
+    color: #ffffff;
     margin-top: 20px;
     font-size: 1.2em;
 }
+

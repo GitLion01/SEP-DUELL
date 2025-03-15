@@ -21,8 +21,10 @@ public class Game {
     private Boolean ready = false;
     private Boolean firstRound = true;
     private Integer timeLeft = 120;
+    private Boolean streamed = false;
+    private Long botDeckId;
 
-    @OneToMany(fetch = FetchType.EAGER)
+    @OneToMany
     @JoinTable(
             name = "game_users",
             joinColumns = @JoinColumn(name = "game_id"),
@@ -31,7 +33,17 @@ public class Game {
     @JsonIgnore
     private List<UserAccount> users = new ArrayList<>();
 
-    private Integer currentTurn = 0;
+    @OneToMany
+    @JsonIgnore
+    private List<UserAccount> viewers = new ArrayList<>();
+
+    @OneToOne
+    private PlayerState playerStateBot;
+
+    @OneToOne(fetch = FetchType.EAGER)
+    private UserAccount currentTurn;
+
+    private Boolean myTurn = true;
 
     public void resetTimer(){
         this.timeLeft = 120;
@@ -46,5 +58,4 @@ public class Game {
             timeLeft--;
         }
     }
-
 }

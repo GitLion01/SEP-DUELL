@@ -13,34 +13,51 @@ function Decks() {
     const [deckName, setDeckName] = useState('');
     const [originalDeckName, setCurrentDeckName] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
+    const [deckCards, setDeckCards] = useState([]);
     const [isEditing, setIsEditing] = useState(false);  // Zustand zum Überwachen, ob Änderungen gemacht wurden
 
 
     //Lädt die userID aus dem LocalStorage beim ersten Render der Komponente
     useEffect(() => {
-        const loadedId = localStorage.getItem('id');
-        if (loadedId) {
-            setId(loadedId);
-        }
-        else {
-            console.error('Keine userID im LocalStorage gefunden');
-        }
+        const loadId = async () => {
+            const loadedId = localStorage.getItem('id');
+            if (loadedId) {
+                console.log('Geladene ID aus LocalStorage:', loadedId);  // Debugging
+                setId(loadedId);
+            } else {
+                console.error('Keine userID im LocalStorage gefunden');
+            }
+        };
+        loadId();
     }, []);
 
     // Karten und Decks von der Datenbank abrufen
     useEffect(() => {
+        const loadData = async () => {
+            if (id !== null) {
+                try {
+                    const cardsResponse = await axios.get(`http://localhost:8080/decks/cards/${id}`);
+                    setMyCards(cardsResponse.data);
+                } catch (error) {
+                    console.error('Fehler beim Abrufen der Karten:', error);
+                }
 
-        // Abrufen der Karten des Spielers
-        axios.get(`http://localhost:8080/decks/cards/${id}`)
-            .then(response => setMyCards(response.data))
-            .catch(error => console.error('Fehler beim Abrufen der Karten:', error));
-
-        // Abrufen der Decks
-        axios.get(`http://localhost:8080/decks/getUserDecks/${localStorage.getItem('id')}`)
-            .then(response => setDecks(response.data))
-            .catch(error => console.error('Fehler beim Abrufen der Decks:', error));
-
+                try {
+                    const decksResponse = await axios.get(`http://localhost:8080/decks/getUserDecks/${id}`);
+                    setDecks(decksResponse.data);
+                } catch (error) {
+                    console.error('Fehler beim Abrufen der Decks:', error);
+                }
+            }
+        };
+        loadData();
     }, [id]);
+
+    useEffect(() => {
+        if (activeDeck !== null) {
+            loadDeckCards(decks[activeDeck]?.name);
+        }
+    }, [decks, activeDeck]);
 
     const loadDecks = async () => {
         try {
@@ -57,6 +74,25 @@ function Decks() {
             setMyCards(response.data);
         } catch (error) {
             console.error('Fehler beim Abrufen der Karten:', error);
+        }
+    };
+    useEffect(() => {
+        if (id) {
+            loadDecks();
+            loadCards();
+        }
+    }, [id]);
+
+    useEffect(() => {
+        console.log('Updated decks:', decks);
+    }, [decks]);
+
+    const loadDeckCards = async (deckName) => {
+        try {
+            const response = await axios.get(`http://localhost:8080/decks/cards/${deckName}/${id}`);
+            setDeckCards(response.data);
+        } catch (error) {
+            console.error('Fehler beim Abrufen der Deckkarten:', error);
         }
     };
 
@@ -139,7 +175,7 @@ function Decks() {
             return;
         }
 
-        const cardCountInDeck = deckToUpdate.cards.filter(c => c.name === card.name).length;
+        const cardCountInDeck = deckCards.filter(c => c.name === card.name).length;
         const cardCountInMyCards = myCards.filter(c => c.name === card.name).length;
 
         if (cardCountInDeck >= cardCountInMyCards) {
@@ -162,11 +198,14 @@ function Decks() {
                 }
             });
 
+            console.log('Response after adding card:', response.data);  // Log the response
+
             // Laden der Decks und Karten nach erfolgreichem Hinzufügen
             await loadDecks();
             await loadCards();
 
             console.log("Karte erfolgreich hinzugefügt", response.data);
+            console.log(decks[activeDeck]);
 
         }
         catch (error) {
@@ -258,6 +297,7 @@ function Decks() {
 
             await loadDecks();
             await loadCards();
+            await loadDeckCards(deckName);
 
             console.log("Deck erfolgreich gelöscht", response.data);
 
@@ -294,6 +334,9 @@ function Decks() {
 
             await loadDecks();
             await loadCards();
+
+            await loadDeckCards(deckName);
+
 
             console.log("Karte erfolgreich entfernt", response.data);
 
@@ -335,25 +378,35 @@ function Decks() {
                     <div className="cards-left">
                         <h2>Verfügbare Karten</h2>
                         <div className="card-list">
+                            {myCards.reduce((acc, card) => {
+                                const existingCard = acc.find(c => c.name === card.name);
+                                if (existingCard) {
+                                    existingCard.count += 1;
+                                } else {
+                                    acc.push({...card, count: 1});
+                                }
+                                return acc;
+                            }, []).map(card => {
+                                let availableCount = myCards.filter(c => c.name === card.name).length;
+                                if (activeDeck !== null && deckCards) {
+                                    const cardCountInDeck = deckCards.filter(c => c.name === card.name).length;
+                                    availableCount -= cardCountInDeck;
+                                }
 
-                            {myCards.map(card => (
-
-                                <div
-                                    key={card.id}
-                                    className="card">
-
-                                    <Card card={card} onCardClick={() => {
-                                        if (activeDeck != null) {
-                                            handleAddCardToDeck(card);
-                                        }
-                                    }} />
-
-                                </div>
-
-                            ))}
-
+                                return (
+                                    <div key={card.id} className="card">
+                                        <Card card={card} onCardClick={() => {
+                                            if (activeDeck != null) {
+                                                handleAddCardToDeck(card);
+                                            }
+                                        }}/>
+                                        <span>Verfügbar: {availableCount}</span>
+                                    </div>
+                                );
+                            })}
                         </div>
                     </div>
+
                     {activeDeck !== null && (
 
                         <div className="active-deck-container">
@@ -362,10 +415,12 @@ function Decks() {
                             <div className="button-container">
                                 <button onClick={handleFinishEditing}>Fertig</button>
                                 <button onClick={handleDeleteDeck}>Deck Löschen</button>
-                                <button onClick={handleSaveDeckName} disabled={!deckName.trim() || deckName === originalDeckName}>Name speichern</button>
+                                <button onClick={handleSaveDeckName}
+                                        disabled={!deckName.trim() || deckName === originalDeckName}>Name speichern
+                                </button>
                             </div>
                             <div className="card-container">
-                                {decks[activeDeck].cards && decks[activeDeck].cards.map((card, index) => (
+                                {deckCards.map((card, index) => (
                                     <div key={index} className="card">
                                         <Card card={card} onCardClick={() => handleRemoveCardFromDeck(card.name)}/>
                                     </div>

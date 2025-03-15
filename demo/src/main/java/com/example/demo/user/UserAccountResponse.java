@@ -27,4 +27,5 @@ public class UserAccountResponse {
     private Boolean locked = false;
     private Boolean enabled = false;
     private List<Deck> decks = new ArrayList<>();
+    private String clanName;
 }

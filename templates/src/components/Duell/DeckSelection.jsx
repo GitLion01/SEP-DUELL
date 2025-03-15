@@ -10,6 +10,8 @@ const  DeckSelection = () => {
   const [selectedDeck, setSelectedDeck] = useState(null);
   const [id, setId] = useState(null);
   const [gameId, setGameId] = useState('');
+  const [isChecked, setIsChecked] = useState(false); // Zustand für Checkbox
+  const [showStartButton, setShowStartButton] = useState(false); // Zustand für Button-Sichtbarkeit
   const navigate = useNavigate(); // Use navigate to redirect
 
   useEffect(() => {
@@ -43,6 +45,7 @@ const  DeckSelection = () => {
     if (client && connected) {
       const subscription = client.subscribe(`/user/${id}/queue/selectDeck`, (message) => {
         const response = JSON.parse(message.body);
+        console.log("users after deckSelect: ", response[1]);
         /*
           const user1 = users[0].deck = response[0];
           const user2 = users[1].deck = response[1];
@@ -57,13 +60,11 @@ const  DeckSelection = () => {
 
 
         console.log('Users in game: ', response[1]);
-        console.log('response from server: ', response);
+        console.log('response from server DECKSELECT: ', response);
         console.log('users saved in State: ', response[1]);
         console.log('game saved in State: ', response[0]);
 
-        if (response[0].ready === true) {
-          navigate('/duel');
-        }
+        navigate('/duel');
       });
 
       return () => subscription.unsubscribe(); // Cleanup function
@@ -89,6 +90,22 @@ const  DeckSelection = () => {
     }
   };
 
+  //TODO Checkbox für das aktivieren vom streamen
+  const handleRadioChanged = (event) => {
+
+    const newIsChecked = event.target.checked;
+    setIsChecked(newIsChecked); // Setzt den neuen Zustand der Checkbox
+    if (client) {
+      client.publish({
+        destination: '/app/streamGame',
+        body: JSON.stringify({gameId: gameId}),
+      });
+      console.log("aktiviere Stream");
+    }
+
+  }
+
+
 
   const terminateGame = () => {
     client.publish({
@@ -96,21 +113,56 @@ const  DeckSelection = () => {
     })
   }
 
+  // Timer zum Anzeigen des Buttons nach 15 Sekunden
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowStartButton(true);
+    }, 15000); // 15000ms = 15 Sekunden
+
+    return () => clearTimeout(timer); // Cleanup function
+  }, []);
+
+  function handleStartDuel() {
+
+    if (client && connected) {
+      client.publish({
+        destination: '/app/setTrue',
+        body: JSON.stringify({
+          gameId: gameId,
+        })
+      });
+      console.log("anfrage geschickt", gameId);
+    }
+  }
+
   return (
       <div>
-        <h2>Select Your Deck</h2>
+        <h2 className={"ub1"}>Select Your Deck</h2>
         <div className="deck-list">
           {decks.map((deck) => (
 
               <div key={deck.id}
                    className="deck" onClick={() => handleSelectDeck(deck.id)}
-                   >
+              >
                 {deck.name}
               </div>
 
           ))}
         </div>
-        {selectedDeck && <p>Waiting for opponent...</p>}
+        <div className="form-check form-radio">
+          <input
+              className="form-check-input"
+              type="radio"
+              id="flexRadioCheckDefault"
+              onChange={handleRadioChanged}
+              checked={isChecked}
+          />
+          <label className="form-check-label" htmlFor="flexRadioCheckDefault">
+            Stream
+          </label>
+        </div>
+        {selectedDeck && <p className={"p1"}>Waiting for opponent...</p>}
+        {showStartButton && <button onClick={handleStartDuel}>Starte das Duell</button>}
       </div>
   );
 };

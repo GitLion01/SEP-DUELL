@@ -3,6 +3,7 @@ package com.example.demo.game;
 import com.example.demo.cards.CardInstance;
 import com.example.demo.cards.Rarity;
 import com.example.demo.decks.Deck;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -39,6 +40,7 @@ public class PlayerCard {
     private List<CardInstance> cardInstance=new ArrayList<>();*/
 
     @ManyToOne
+    @JsonIgnore
     private PlayerState playerState;
     private Boolean hasAttacked = false;
     private Boolean sacrificed = false;

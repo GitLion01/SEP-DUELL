@@ -2,6 +2,8 @@ package com.example.demo.profile;
 
 
 import com.example.demo.decks.Deck;
+import com.example.demo.game.GameService;
+import com.example.demo.game.Statistic;
 import com.example.demo.user.UserAccount;
 import com.example.demo.user.UserAccountResponse;
 import lombok.AllArgsConstructor;
@@ -26,7 +28,9 @@ public class ProfileController {
         Optional<UserAccount> profileOptional = profileService.getProfile(id);
         if (profileOptional.isPresent()) {
             UserAccount profile = profileOptional.get();
-
+            String clanName="";
+            if(profile.getClan()!=null)
+                clanName = profile.getClan().getName();
             // Konvertiert das Bild in einen Base64-String
             byte[] image = profile.getImage();
             String imageBase64 = null;
@@ -49,7 +53,8 @@ public class ProfileController {
                     profile.getRole(),
                     profile.getLocked(),
                     profile.getEnabled(),
-                    decks
+                    decks,
+                    clanName
             );
             return ResponseEntity.ok(profileResponse);
         } else {
@@ -62,5 +67,10 @@ public class ProfileController {
         String result = profileService.updateSEPCoins(sepCoins,id);
         HttpStatus status = result.startsWith("fail") ? HttpStatus.BAD_REQUEST : HttpStatus.OK;
         return new ResponseEntity<>(result, status);
+    }
+
+    @GetMapping(path = "/history/{id}")
+    public List<Statistic> getHistory(@PathVariable Long id) {
+        return profileService.getHistory(id);
     }
 }
